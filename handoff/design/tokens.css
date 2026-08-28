@@ -1,0 +1,58 @@
+/* Couple Battle — design tokens (single source of truth for the pixel look).
+   Matches the asset pack palette and the wireframes. The game commits to ONE
+   theme (cream arcade) — no dark mode at MVP, but keep colors as tokens. */
+
+:root {
+  /* palette (same as pack/README.md) */
+  --cb-ink: #1a1c2c;
+  --cb-cream: #fff1d6;
+  --cb-paper: #f7e8c8;
+  --cb-white: #f8f5f2;
+  --cb-red: #ef476f;
+  --cb-red-dark: #c2264a;
+  --cb-pink: #ff8fab;
+  --cb-gold: #ffd166;
+  --cb-orange: #f9844a;
+  --cb-green: #3ec86e;
+  --cb-blue: #35a7ff;
+  --cb-purple: #9b5de5;
+  --cb-dim: #4a4358;
+
+  /* semantic */
+  --cb-bg: var(--cb-cream);
+  --cb-text: var(--cb-ink);
+  --cb-text-muted: var(--cb-dim);
+  --cb-cta: var(--cb-gold);
+  --cb-positive: var(--cb-green);
+  --cb-negative: var(--cb-pink);
+
+  /* type — display face is the pixel font, self-hosted woff2 (OFL) */
+  --cb-font-display: 'Press Start 2P', 'Courier New', monospace;
+  --cb-font-body: 'IBM Plex Mono', ui-monospace, monospace;
+  --cb-fs-title: clamp(15px, 4.4vw, 22px);
+  --cb-fs-heading: 13px;   /* display face — keep small, it's a chunky font */
+  --cb-fs-question: 19px;  /* min size readable across a table */
+  --cb-fs-body: 14px;
+  --cb-fs-small: 11px;
+
+  /* pixel chrome */
+  --cb-border: 3px solid var(--cb-ink);
+  --cb-shadow: 4px 4px 0 var(--cb-ink);          /* buttons/panels */
+  --cb-shadow-press: 0 0 0 var(--cb-ink);        /* :active translate(4px,4px) */
+  --cb-radius: 0;                                 /* pixels have corners */
+
+  /* spacing scale */
+  --cb-s1: 4px; --cb-s2: 8px; --cb-s3: 12px; --cb-s4: 16px;
+  --cb-s5: 24px; --cb-s6: 32px; --cb-s7: 48px;
+
+  /* motion */
+  --cb-tick: 120ms steps(2, end);
+  --cb-pop: 260ms cubic-bezier(.2, 1.6, .4, 1);
+}
+
+/* sprites must always scale crisp */
+img.px, .px img { image-rendering: pixelated; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --cb-pop: 0ms; --cb-tick: 0ms; }
+}
