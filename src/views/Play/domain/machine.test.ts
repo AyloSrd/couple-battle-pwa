@@ -49,7 +49,7 @@ describe('Dilemma machine', () => {
   });
 
   it('scoreboardAt is the halfway point', () => {
-    expect(scoreboardAt(10)).toBe(5);
+    expect(scoreboardAt('dilemma', 10)).toBe(5);
   });
 
   it('question → countdown on ready (and ignores other events)', () => {
@@ -189,9 +189,9 @@ function playCoupleOpen(start: TGameState, answers: string[], verdicts: TVerdict
 describe('Flash machine', () => {
   it('helpers: deck index, size, role swap', () => {
     expect(flashDeckSize(2)).toBe(12);
-    expect(flashDeckIndex(2, 0, 0, 0)).toBe(0);
-    expect(flashDeckIndex(2, 0, 1, 2)).toBe(5);
-    expect(flashDeckIndex(2, 1, 0, 0)).toBe(6);
+    expect(flashDeckIndex(2, 3, 0, 0, 0)).toBe(0);
+    expect(flashDeckIndex(2, 3, 0, 1, 2)).toBe(5);
+    expect(flashDeckIndex(2, 3, 1, 0, 0)).toBe(6);
     expect(answererIndex(0)).toBe(0);
     expect(answererIndex(1)).toBe(1);
   });
@@ -267,5 +267,106 @@ describe('Flash machine', () => {
     expect(fromSnapshot(toSnapshot(guess))).toEqual(guess);
     const judge = reduce(guess, { type: 'reveal' });
     expect(fromSnapshot(toSnapshot(judge))).toEqual(judge);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Ultime (composition)
+// ---------------------------------------------------------------------------
+
+function ultimeConfig(): TGameConfig {
+  const size = 2 * 2 * 2 + 5 + 5 * 2; // flash 4N + dilemma 5 + rapid 5N, N=2 → 23
+  const deck: TQuestion[] = Array.from({ length: size }, (_, i) => ({
+    id: i + 1,
+    theme: 'childhood' as const,
+    difficulty: 'easy' as const,
+    type: 'open' as const,
+    text: `q${i + 1}`,
+  }));
+  return { roster: flashRoster, mode: 'ultime', difficulty: 'mix', themes: [], deck };
+}
+
+function ultimeFlashCouple(start: TGameState, verdicts: TVerdict[]): TGameState {
+  let s = reduce(start, { type: 'passConfirm' });
+  for (let i = 0; i < verdicts.length; i++) s = reduce(s, { type: 'lockAnswer', answer: 'a' });
+  s = reduce(s, { type: 'passConfirm' });
+  for (const v of verdicts) {
+    s = reduce(s, { type: 'reveal' });
+    s = reduce(s, { type: 'judge', verdict: v });
+  }
+  return s;
+}
+function ultimeDilemmaQ(start: TGameState, results: TResult[]): TGameState {
+  let s = reduce(start, { type: 'ready' });
+  s = reduce(s, { type: 'countdownDone' });
+  for (const r of results) s = reduce(s, { type: 'confirm', result: r });
+  return s;
+}
+function ultimeRapidCouple(start: TGameState, synchros: boolean[]): TGameState {
+  let s = reduce(start, { type: 'next' }); // rapidTurn → rapidQuestion
+  for (const syn of synchros) {
+    s = reduce(s, { type: 'ready' });
+    s = reduce(s, { type: 'countdownDone' });
+    s = reduce(s, { type: 'rapidJudge', synchro: syn });
+  }
+  return s;
+}
+
+describe('Ultime machine (composition)', () => {
+  it('opens on the flash segment (2 q/partner)', () => {
+    const s = initGame(ultimeConfig());
+    expect(s.kind).toBe('passSecret');
+    if (s.kind === 'passSecret') expect(s.round).toBe(0);
+  });
+
+  it('plays flash rounds → dilemma → rapid-fire → final with scoreboards between', () => {
+    let s: TGameState = initGame(ultimeConfig());
+
+    // Flash round 0 (2 questions each)
+    s = ultimeFlashCouple(s, ['exact', 'exact']); // t1 +4
+    expect(s.kind).toBe('passSecret');
+    s = ultimeFlashCouple(s, ['miss', 'miss']); // t2 +0 → round 0 done
+    expect(s.kind).toBe('scoreboard');
+    if (s.kind === 'scoreboard') expect(s.round).toBe(0);
+
+    s = reduce(s, { type: 'next' }); // → flash round 1
+    expect(s.kind).toBe('passSecret');
+    if (s.kind === 'passSecret') expect(s.round).toBe(1);
+    s = ultimeFlashCouple(s, ['exact', 'exact']); // t1 +4
+    s = ultimeFlashCouple(s, ['exact', 'exact']); // t2 +4 → round 1 done
+    expect(s.kind).toBe('scoreboard');
+
+    s = reduce(s, { type: 'next' }); // → dilemma segment
+    expect(s.kind).toBe('question');
+    for (let i = 0; i < 5; i++) s = ultimeDilemmaQ(s, ['match', 'miss']); // t1 +5, t2 +0
+    expect(s.kind).toBe('scoreboard'); // after the 5 dilemma questions
+
+    s = reduce(s, { type: 'next' }); // → rapid-fire
+    expect(s.kind).toBe('rapidIntro');
+    s = reduce(s, { type: 'next' }); // → rapidTurn couple 0
+    expect(s.kind).toBe('rapidTurn');
+    s = ultimeRapidCouple(s, [true, true, true, true, true]); // t1 +10
+    expect(s.kind).toBe('rapidTurn'); // couple 1's turn
+    s = ultimeRapidCouple(s, [true, false, true, false, true]); // t2 +6 → final
+    expect(s.kind).toBe('final');
+
+    expect(s.scores).toEqual({ t1: 4 + 4 + 5 + 10, t2: 0 + 4 + 0 + 6 });
+  });
+
+  it('round-trips rapid-fire phases through a snapshot', () => {
+    const base = initGame(ultimeConfig());
+    const rapidTurn: TGameState = {
+      kind: 'rapidTurn',
+      coupleIdx: 1,
+      roster: base.roster,
+      mode: base.mode,
+      difficulty: base.difficulty,
+      themes: base.themes,
+      deck: base.deck,
+      scores: base.scores,
+    };
+    expect(fromSnapshot(toSnapshot(rapidTurn))).toEqual(rapidTurn);
+    const rq = reduce(rapidTurn, { type: 'next' });
+    expect(fromSnapshot(toSnapshot(rq))).toEqual(rq);
   });
 });
