@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Sprite, ProgressDots } from '@/shared/Chrome';
-import { flashQuestion, FLASH_SET, type TGameState } from '../domain/machine';
+import { flashQuestion, flashSetSize, type TGameState } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'guess' }>;
@@ -24,7 +24,7 @@ export const GuessReveal: FC<TProps> = ({ state, guesserName, partnerName, onRev
   return (
     <div style={{ flex: 1, display: 'grid', gap: 'var(--cb-s4)', alignContent: 'start' }}>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <ProgressDots total={FLASH_SET} current={state.questionIdx} />
+        <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
       </div>
       <p className="cb-heading" style={{ textAlign: 'center', margin: 0 }}>
         {t('guess.turn', { name: guesserName, partner: partnerName })}

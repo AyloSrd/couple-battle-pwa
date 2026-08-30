@@ -27,6 +27,7 @@ import { PassPhone } from './components/PassPhone';
 import { SecretAnswers } from './components/SecretAnswers';
 import { GuessReveal } from './components/GuessReveal';
 import { Judge } from './components/Judge';
+import { RapidFire } from './components/RapidFire';
 
 export const PlayView: FC = () => {
   const t = useT();
@@ -65,6 +66,14 @@ export const PlayView: FC = () => {
       void wakeLock.release();
     };
   }, [wakeLock]);
+
+  // Tense loop during the rapid-fire finale; silent otherwise.
+  const kind = game?.kind;
+  useEffect(() => {
+    if (kind && kind.startsWith('rapid')) sound.music('mus.final');
+    else sound.music(null);
+    return () => sound.music(null);
+  }, [kind, sound]);
 
   const commitFinal = (final: Extract<TGameState, { kind: 'final' }>) => {
     const ids = final.deck.map((q) => q.id);
@@ -129,6 +138,20 @@ export const PlayView: FC = () => {
     dispatch({ type: 'judge', verdict });
   };
 
+  // --- Rapid-fire handlers ---
+  const handleRapidNext = () => {
+    sound.play('sfx.tap');
+    dispatch({ type: 'next' });
+  };
+  const handleRapidReady = () => {
+    sound.play('sfx.tap');
+    dispatch({ type: 'ready' });
+  };
+  const handleRapidJudge = (synchro: boolean) => {
+    sound.play(synchro ? 'sfx.synchro' : 'sfx.mismatch');
+    dispatch({ type: 'rapidJudge', synchro });
+  };
+
   const handlePause = () => {
     sound.play('sfx.tap');
     sound.duck(true);
@@ -172,8 +195,9 @@ export const PlayView: FC = () => {
 
   if (snapshotQuery.isPending || !game) return null;
 
-  // The countdown owns the whole ink-dark screen.
+  // The countdown owns the whole ink-dark screen (3 ticks Dilemma, 2 rapid-fire).
   if (game.kind === 'countdown') return <Countdown onDone={handleCountdownDone} />;
+  if (game.kind === 'rapidCountdown') return <Countdown ticks={2} onDone={handleCountdownDone} />;
 
   const showPause = game.kind !== 'final';
 
@@ -248,6 +272,18 @@ export const PlayView: FC = () => {
           state={game}
           answererName={namesFor(game.round, game.coupleIdx).answererName}
           onJudge={handleJudge}
+        />
+      )}
+
+      {(game.kind === 'rapidIntro' ||
+        game.kind === 'rapidTurn' ||
+        game.kind === 'rapidQuestion' ||
+        game.kind === 'rapidJudge') && (
+        <RapidFire
+          state={game}
+          onNext={handleRapidNext}
+          onReady={handleRapidReady}
+          onJudge={handleRapidJudge}
         />
       )}
 

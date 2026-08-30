@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
-import type { TGameState, TResult } from '../domain/machine';
+import { dilemmaQuestion, type TGameState, type TResult } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'resolve' }>;
@@ -12,7 +12,7 @@ type TProps = {
 export const DilemmaResolve: FC<TProps> = ({ state, onConfirm }) => {
   const t = useT();
   const active = state.roster[state.coupleIdx];
-  const question = state.deck[state.questionIdx];
+  const question = dilemmaQuestion(state);
   const confirmedTeams = state.roster.slice(0, state.coupleIdx);
 
   const handleMatch = () => onConfirm('match');

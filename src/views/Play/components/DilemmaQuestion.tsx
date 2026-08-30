@@ -2,7 +2,7 @@ import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
-import type { TGameState } from '../domain/machine';
+import { dilemmaQuestion, dilemmaTotal, type TGameState } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'question' }>;
@@ -13,7 +13,8 @@ type TProps = {
 export const DilemmaQuestion: FC<TProps> = ({ state, onReady }) => {
   const t = useT();
   const sound = useSoundApi();
-  const question = state.deck[state.questionIdx];
+  const question = dilemmaQuestion(state);
+  const total = dilemmaTotal(state.mode, state.deck.length);
 
   useEffect(() => {
     sound.play('sfx.whoosh');
@@ -24,7 +25,7 @@ export const DilemmaQuestion: FC<TProps> = ({ state, onReady }) => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--cb-s2)' }}>
         <Sprite name="mode-dilemma" size={20} />
         <span className="cb-muted" style={{ fontSize: 'var(--cb-fs-small)' }}>
-          {t('common.question', { n: state.questionIdx + 1, total: state.deck.length })}
+          {t('common.question', { n: state.questionIdx + 1, total })}
         </span>
       </div>
 
