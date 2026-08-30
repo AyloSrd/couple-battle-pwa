@@ -112,6 +112,8 @@ export const fr = {
   "resolve.title": "Alors, {team} ?",
   "results.newgame": "Nouvelle partie",
   "results.rematch": "REVANCHE !",
+  "results.solo.newBest": "Nouveau record : {points} pts !",
+  "results.solo.notBest": "{points} pts — votre record reste {best}.",
   "results.stat.synchro": "Meilleure synchro : {team}",
   "results.winner": "👑 {team} remporte la bataille !",
   "results.winner.sub": "{name1} & {name2}, duo légendaire.",

@@ -4,14 +4,18 @@ import { useSoundApi } from '@/shared/sound';
 import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
 import { rankTeams, type TGameState } from '../domain/machine';
 
+/** Solo record outcome (only for a 1-couple game). */
+export type TSoloResult = { isBest: boolean; points: number; best: number };
+
 type TFinalScreenProps = {
   state: Extract<TGameState, { kind: 'final' }>;
   onRematch: () => void;
   onNewGame: () => void;
+  solo?: TSoloResult | undefined;
 };
 
 /** Crown finale. Plays the fanfare + confetti once on mount. */
-export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame }) => {
+export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame, solo }) => {
   const t = useT();
   const sound = useSoundApi();
   const ranked = rankTeams(state);
@@ -26,18 +30,26 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
     <>
       <div style={{ textAlign: 'center', display: 'grid', gap: 'var(--cb-s3)', justifyItems: 'center' }}>
         <Sprite name="ui-crown" size={48} />
-        {winner && (
-          <>
-            <h1 className="cb-title">
-              {t('results.winner', { team: t(`team.${winner.team.avatarId}` as TStringKey) })}
-            </h1>
-            <p className="cb-muted" style={{ margin: 0 }}>
-              {t('results.winner.sub', {
-                name1: winner.team.players[0],
-                name2: winner.team.players[1],
-              })}
-            </p>
-          </>
+        {solo ? (
+          <h1 className="cb-title">
+            {solo.isBest
+              ? t('results.solo.newBest', { points: solo.points })
+              : t('results.solo.notBest', { points: solo.points, best: solo.best })}
+          </h1>
+        ) : (
+          winner && (
+            <>
+              <h1 className="cb-title">
+                {t('results.winner', { team: t(`team.${winner.team.avatarId}` as TStringKey) })}
+              </h1>
+              <p className="cb-muted" style={{ margin: 0 }}>
+                {t('results.winner.sub', {
+                  name1: winner.team.players[0],
+                  name2: winner.team.players[1],
+                })}
+              </p>
+            </>
+          )
         )}
       </div>
 
