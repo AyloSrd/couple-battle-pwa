@@ -19,7 +19,7 @@ import { Sprite } from '@/shared/Chrome';
 const BASE = import.meta.env.BASE_URL;
 const STEPS = 12;
 const STEP_MS = 200; // ~2.4s minimum retro fill
-const FANFARE_MS = 2600; // how long the surprise music plays before "tap to start"
+const BIRTHDAY_MS = 9200; // mus.birthday runs ~9s; "tap to start" appears when it ends
 const PRELOAD_TIMEOUT_MS = 6000;
 
 // Critical assets to have ready before revealing the app (the SW precaches the
@@ -196,13 +196,13 @@ export const Intro: FC<{ onDone: () => void }> = ({ onDone }) => {
   // Surprise music has a finite length → reveal "tap to start" when it ends.
   useEffect(() => {
     if (stage !== 'reveal') return;
-    const id = setTimeout(() => setStage('ready'), FANFARE_MS);
+    const id = setTimeout(() => setStage('ready'), BIRTHDAY_MS);
     return () => clearTimeout(id);
   }, [stage]);
 
   const handleStartSurprise = () => {
     sound.unlock(); // first gesture — unlocks audio for the rest of the app
-    sound.play('mus.fanfare');
+    sound.play('mus.birthday');
     setStage('reveal');
   };
 
