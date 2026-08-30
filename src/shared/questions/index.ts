@@ -10,5 +10,10 @@ export {
   type TQuestionDifficulty,
   type TQuestionFilter,
 } from './domain/types';
-export { filterQuestions } from './domain/services';
+export {
+  filterQuestions,
+  drawDeck,
+  modeQuestionTypes,
+  type TDrawDeckOptions,
+} from './domain/services';
 export type { TQuestionsApi } from './api';

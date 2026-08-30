@@ -57,6 +57,25 @@ one-question game through the real machine shell → FinalResults. No real mode 
 sound toggle works (tap blip); settings survive a reload; `createContainer('memory')` boots the
 app in tests; all checks green.
 
+### Phase 1.b — Ninou Games intro (the gift wrapping)
+A boot sequence shown on EVERY cold start of the PWA, before V-Home. Two screens:
+1. **Studio splash** — `handoff/design/splash/ninou-penguins.png` centered (crisp rendering,
+   ~70% viewport width max) on the ink-dark ground, "NINOU GAMES" (`splash.studio`) beneath it in
+   the display font, and a chunky pixel **loading bar** (ink border, gold fill) that fills in
+   fake stepped increments over ~2.5–3 s — retro steps, not a smooth tween. Silent (audio is not
+   unlocked yet).
+2. **Birthday card** — ink-dark screen: "Bon anniversaire mon amour 💘" (`splash.birthday`)
+   centered in the display font with pixel hearts (`ui-heart.svg`), plus a small `splash.tap`
+   hint. On tap: **`sound.unlock()`** (it is the app's first user gesture), then play
+   **`mus.birthday`** — the Happy Birthday chiptune in `handoff/lib/sounds.js` (~9 s) — while
+   hearts drift on screen; auto-advance to V-Home when the tune ends (a second tap skips).
+Notes: implement as the app boot flow ahead of the router (the existing V-Splash logo moment can
+merge into screen 1); precache the PNG; the birthday line shows on every launch — it is the gift.
+The three new string keys (`splash.studio`, `splash.birthday`, `splash.tap`) were added to
+`handoff/data/strings.*.ts` — sync them into the `src/data` copies.
+**Gate:** cold start on a phone (and offline) shows penguins → bar → birthday card; tapping lands
+on Home with audio unlocked (the next tap blips).
+
 ### Phase 2 — Vertical slice: DILEMMA
 Smallest real mode, proves the whole game loop. Machine states + views per spec §5
 (V-DilemmaQuestion, V-Countdown with the 3-2-1 ticks/haptics on the ink-dark screen,

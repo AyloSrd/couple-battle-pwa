@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterQuestions } from './services';
+import { drawDeck, filterQuestions, modeQuestionTypes } from './services';
 import type { TQuestion } from './types';
 
 const Q: TQuestion[] = [
@@ -38,5 +38,36 @@ describe('filterQuestions', () => {
   it('combines constraints (AND)', () => {
     const r = filterQuestions(Q, { themes: ['childhood'], types: ['open'] });
     expect(r.map((q) => q.id)).toEqual([1]);
+  });
+});
+
+describe('modeQuestionTypes', () => {
+  it('dilemma draws only who_of_two', () => {
+    expect(modeQuestionTypes('dilemma')).toEqual(['who_of_two']);
+  });
+  it('flash and ultime draw the open/this_or_that/yes_no set', () => {
+    expect(modeQuestionTypes('flash')).toEqual(['open', 'this_or_that', 'yes_no']);
+    expect(modeQuestionTypes('ultime')).toEqual(['open', 'this_or_that', 'yes_no']);
+  });
+});
+
+describe('drawDeck', () => {
+  // Deterministic rng: always 0 → Fisher-Yates leaves order effectively stable.
+  const rng0 = () => 0;
+
+  it('draws only mode-compatible types and respects size', () => {
+    const deck = drawDeck(Q, { mode: 'dilemma', difficulty: 'mix', themes: [], seenIds: [], size: 5 }, rng0);
+    expect(deck.every((q) => q.type === 'who_of_two')).toBe(true);
+    expect(deck).toHaveLength(1); // only one who_of_two in the fixture
+  });
+
+  it('excludes seen ids', () => {
+    const deck = drawDeck(Q, { mode: 'flash', difficulty: 'mix', themes: [], seenIds: [1], size: 10 }, rng0);
+    expect(deck.some((q) => q.id === 1)).toBe(false);
+  });
+
+  it('caps at the requested size', () => {
+    const deck = drawDeck(Q, { mode: 'flash', difficulty: 'mix', themes: [], seenIds: [], size: 1 }, rng0);
+    expect(deck).toHaveLength(1);
   });
 });

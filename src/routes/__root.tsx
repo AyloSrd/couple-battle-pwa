@@ -7,6 +7,7 @@ import { SaveApiProvider, useGetSave, usePutSave } from '@/shared/save';
 import { SoundApiProvider, useSoundApi } from '@/shared/sound';
 import { WakeLockApiProvider } from '@/shared/wakeLock';
 import { LangProvider, type TLang } from '@/shared/i18n';
+import { DraftGameProvider } from '@/shared/session';
 
 /** Router context: the DI container plus the query client. */
 export type TRouterContext = TContainer & { queryClient: QueryClient };
@@ -48,7 +49,9 @@ const RootLayout: FC = () => {
         <SoundApiProvider api={soundApi}>
           <WakeLockApiProvider api={wakeLockApi}>
             <LangGate>
-              <Outlet />
+              <DraftGameProvider>
+                <Outlet />
+              </DraftGameProvider>
             </LangGate>
           </WakeLockApiProvider>
         </SoundApiProvider>
