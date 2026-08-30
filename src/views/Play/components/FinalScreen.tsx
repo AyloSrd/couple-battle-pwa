@@ -1,8 +1,33 @@
-import { useEffect, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
 import { rankTeams, type TGameState } from '../domain/machine';
+
+type TConfetto = { left: number; delay: number; shape: number };
+
+const Confetti: FC = () => {
+  const [pieces] = useState<TConfetto[]>(() =>
+    Array.from({ length: 14 }, (_, i) => ({
+      left: Math.round(Math.random() * 100),
+      delay: Math.round(Math.random() * 1200),
+      shape: (i % 4) + 1,
+    })),
+  );
+  return (
+    <div aria-hidden="true">
+      {pieces.map((p, i) => (
+        <span
+          key={i}
+          className="cb-confetti"
+          style={{ left: `${p.left}%`, animationDelay: `${p.delay}ms` }}
+        >
+          <Sprite name={`ui-confetti-${p.shape}`} size={12} />
+        </span>
+      ))}
+    </div>
+  );
+};
 
 /** Solo record outcome (only for a 1-couple game). */
 export type TSoloResult = { isBest: boolean; points: number; best: number };
@@ -28,6 +53,7 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
 
   return (
     <>
+      <Confetti />
       <div style={{ textAlign: 'center', display: 'grid', gap: 'var(--cb-s3)', justifyItems: 'center' }}>
         <Sprite name="ui-crown" size={48} />
         {solo ? (

@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   type FC,
   type PropsWithChildren,
@@ -37,6 +38,11 @@ export const LangProvider: FC<TLangProviderProps> = ({
   children,
 }) => {
   const [lang, setLangState] = useState<TLang>(initialLang);
+
+  // Keep <html lang> in sync for screen readers / correct hyphenation.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const setLang = (next: TLang) => {
     setLangState(next);
