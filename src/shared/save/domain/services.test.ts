@@ -8,10 +8,15 @@ const roster: TRoster = [
 ];
 
 describe('newGameSnapshot', () => {
-  it('starts on the first question with everyone at zero', () => {
-    const snap = newGameSnapshot({ roster, mode: 'flash', difficulty: 'mix', themes: [], deck: [] });
+  it('opens dilemma on the first question with everyone at zero', () => {
+    const snap = newGameSnapshot({ roster, mode: 'dilemma', difficulty: 'mix', themes: [], deck: [] });
     expect(snap.cursor).toEqual({ phase: 'question', round: 0, coupleIdx: 0, questionIdx: 0 });
     expect(snap.scores).toEqual({ t1: 0, t2: 0 });
     expect(snap.secretAnswers).toEqual({});
+  });
+
+  it('opens flash at the pass-phone step', () => {
+    const snap = newGameSnapshot({ roster, mode: 'flash', difficulty: 'mix', themes: [], deck: [] });
+    expect(snap.cursor.phase).toBe('passSecret');
   });
 });
