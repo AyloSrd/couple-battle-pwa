@@ -45,6 +45,10 @@ export default tseslint.config(
         { type: 'app', pattern: 'src/app' },
         { type: 'routes', pattern: 'src/routes' },
         { type: 'domain', pattern: 'src/*/*/domain', capture: ['group', 'slice'] },
+        // Whole api/ folder = the port (api/index) plus its adapters. Components
+        // may never import it; the port type reaches provider/application/index
+        // per ARCHITECTURE's worked examples. "Adapters built only in
+        // app/container" stays a reviewed convention (golden rule 2).
         { type: 'api', pattern: 'src/*/*/api', capture: ['group', 'slice'] },
         {
           type: 'application',
@@ -76,6 +80,16 @@ export default tseslint.config(
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+          caughtErrors: 'none',
+        },
+      ],
 
       'boundaries/no-unknown': 'off',
       'boundaries/no-unknown-files': 'off',
@@ -114,14 +128,19 @@ export default tseslint.config(
 
             // routes mount providers with adapters taken from context; they
             // compose view/shared public surfaces only — never construct backends.
+            // `app` is allowed for the container TYPE only (root route context).
             {
               from: { element: { type: 'routes' } },
               allow: [
-                { to: { element: { types: { anyOf: ['routes', 'index', 'provider'] } } } },
+                {
+                  to: {
+                    element: { types: { anyOf: ['routes', 'index', 'provider', 'app'] } },
+                  },
+                },
               ],
             },
 
-            // provider.tsx: DI seam — api port type + its own ctx/domain (same slice).
+            // provider.tsx: DI seam — api PORT type + its own ctx/domain (same slice).
             {
               from: { element: { type: 'provider' } },
               allow: [
@@ -137,15 +156,15 @@ export default tseslint.config(
               ],
             },
 
-            // application: domain + own provider (use[View]Api) + shared surface.
-            // Never api adapters.
+            // application: domain + own provider (use[View]Api) + the api PORT
+            // type (for query-option factories) + shared surface. Never adapters.
             {
               from: { element: { type: 'application' } },
               allow: [
                 {
                   to: {
                     element: {
-                      types: { anyOf: ['application', 'domain', 'provider'] },
+                      types: { anyOf: ['application', 'domain', 'provider', 'api'] },
                       captured: sameSlice,
                     },
                   },
@@ -170,11 +189,14 @@ export default tseslint.config(
               ],
             },
 
-            // api adapters implement domain types — nothing else (same slice).
+            // api (port + adapters) references only its own domain, and the
+            // adapters may import the port (same slice).
             {
               from: { element: { type: 'api' } },
               allow: [
-                { to: { element: { type: 'domain', captured: sameSlice } } },
+                {
+                  to: { element: { types: { anyOf: ['domain', 'api'] }, captured: sameSlice } },
+                },
               ],
             },
 
@@ -195,7 +217,9 @@ export default tseslint.config(
                 {
                   to: {
                     element: {
-                      types: { anyOf: ['components', 'application', 'domain', 'provider'] },
+                      types: {
+                        anyOf: ['components', 'application', 'domain', 'provider', 'api'],
+                      },
                       captured: sameSlice,
                     },
                   },

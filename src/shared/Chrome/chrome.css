@@ -1,0 +1,66 @@
+/* Pixel-arcade chrome, styled entirely from --cb-* tokens. */
+
+.cb-btn {
+  display: inline-block;
+  font-family: var(--cb-font-display);
+  font-size: var(--cb-fs-heading);
+  line-height: 1.5;
+  color: var(--cb-ink);
+  background: var(--cb-white);
+  border: var(--cb-border);
+  box-shadow: var(--cb-shadow);
+  border-radius: var(--cb-radius);
+  padding: var(--cb-s3) var(--cb-s4);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  transition:
+    transform var(--cb-tick),
+    box-shadow var(--cb-tick);
+}
+
+.cb-btn:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: var(--cb-shadow-press);
+}
+
+.cb-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cb-btn--primary {
+  background: var(--cb-cta);
+}
+.cb-btn--positive {
+  background: var(--cb-green);
+}
+.cb-btn--gold {
+  background: var(--cb-gold);
+}
+.cb-btn--negative {
+  background: var(--cb-pink);
+}
+.cb-btn--ghost {
+  background: transparent;
+  box-shadow: none;
+  border-width: 2px;
+}
+.cb-btn--block {
+  display: block;
+  width: 100%;
+}
+
+.cb-panel {
+  background: var(--cb-white);
+  border: var(--cb-border);
+  box-shadow: var(--cb-shadow);
+  border-radius: var(--cb-radius);
+  padding: var(--cb-s4);
+}
+
+.cb-dots {
+  display: inline-flex;
+  gap: var(--cb-s2);
+  align-items: center;
+}
