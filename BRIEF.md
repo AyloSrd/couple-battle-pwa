@@ -29,7 +29,7 @@ not "enterprise product".
 | `handoff/design/pwa-icons/` | Manifest icons (512/192), apple-touch-icon, favicon |
 | `handoff/lib/sounds.js` | The finished sound engine. Port to TS as the sound adapter behind a `TSoundApi` port — keep the synthesis code byte-for-byte, it is tuned and approved |
 | `handoff/docs/wireframes/*.png` | Per-view layout reference (mid-fi; tokens.css defines the final look) |
-| Fonts | Download **Press Start 2P** and **IBM Plex Mono** (latin, woff2) from Google Fonts and self-host in `public/fonts/` with the OFL license file — no runtime Google Fonts requests (offline requirement) |
+| Fonts | Download **Press Start 2P** and **Ubuntu Mono** (latin, woff2) from Google Fonts and self-host in `public/fonts/` with the license file (OFL for Press Start 2P, UFL for Ubuntu Mono) — no runtime Google Fonts requests (offline requirement) |
 
 ## Phases
 

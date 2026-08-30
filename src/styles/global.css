@@ -1,0 +1,41 @@
+/* Global stylesheet. Imports design tokens first, then a minimal pixel-arcade
+   base. Fonts are self-hosted (see fonts.css) — no runtime Google Fonts. */
+@import './fonts.css';
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--cb-bg);
+  color: var(--cb-text);
+  font-family: var(--cb-font-body);
+  font-size: var(--cb-fs-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: none;
+  /* pixel fonts stay crisp; disable text size auto-inflation on mobile */
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* One-handed party game: never rubber-band or accidental-select the UI. */
+body {
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  image-rendering: pixelated;
+}
