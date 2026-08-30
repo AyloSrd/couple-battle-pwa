@@ -2,6 +2,7 @@
    base. Fonts are self-hosted (see fonts.css) — no runtime Google Fonts. */
 @import './fonts.css';
 @import './tokens.css';
+@import './anim.css';
 
 *,
 *::before,
@@ -38,4 +39,22 @@ body {
 
 img {
   image-rendering: pixelated;
+}
+
+/* Respect reduced-motion everywhere: near-instant, no loops. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus for a11y (pixel outline). */
+:focus-visible {
+  outline: 3px solid var(--cb-blue);
+  outline-offset: 2px;
 }
