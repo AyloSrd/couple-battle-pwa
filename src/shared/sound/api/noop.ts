@@ -5,6 +5,7 @@ export function createSoundNoopApi(): TSoundApi {
   return {
     unlock() {},
     setEnabled() {},
+    setVolume() {},
     duck() {},
     play() {},
     music() {},

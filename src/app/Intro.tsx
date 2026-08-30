@@ -21,6 +21,8 @@ const STEPS = 12;
 const STEP_MS = 200; // ~2.4s minimum retro fill
 const BIRTHDAY_MS = 9200; // mus.birthday runs ~9s; "tap to start" appears when it ends
 const PRELOAD_TIMEOUT_MS = 6000;
+const BIRTHDAY_VOLUME = 0.9; // louder for the surprise
+const NORMAL_VOLUME = 0.55; // engine default, restored after the tune
 
 // Critical assets to have ready before revealing the app (the SW precaches the
 // rest for offline; this just avoids first-paint flashes).
@@ -193,15 +195,20 @@ export const Intro: FC<{ onDone: () => void }> = ({ onDone }) => {
     if (stage === 'loading' && step >= STEPS && assetsReady) setStage('prompt');
   }, [stage, step, assetsReady]);
 
-  // Surprise music has a finite length → reveal "tap to start" when it ends.
+  // Surprise music has a finite length → reveal "tap to start" and drop the
+  // volume back to normal when it ends.
   useEffect(() => {
     if (stage !== 'reveal') return;
-    const id = setTimeout(() => setStage('ready'), BIRTHDAY_MS);
+    const id = setTimeout(() => {
+      sound.setVolume(NORMAL_VOLUME);
+      setStage('ready');
+    }, BIRTHDAY_MS);
     return () => clearTimeout(id);
-  }, [stage]);
+  }, [stage, sound]);
 
   const handleStartSurprise = () => {
     sound.unlock(); // first gesture — unlocks audio for the rest of the app
+    sound.setVolume(BIRTHDAY_VOLUME); // crank it up for the surprise
     sound.play('mus.birthday');
     setStage('reveal');
   };

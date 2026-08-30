@@ -33,6 +33,7 @@ class Engine {
   ctx: AudioContext | null = null;
   master: GainNode | null = null;
   enabled = true;
+  baseVolume = 0.55; // master volume when enabled (adjustable via setVolume)
   musicTimer: ReturnType<typeof setInterval> | null = null;
   musicGain: GainNode | null = null;
   currentMusic: TMusicId | null = null;
@@ -45,7 +46,7 @@ class Engine {
           .webkitAudioContext;
       this.ctx = new AC();
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.55;
+      this.master.gain.value = this.baseVolume;
       this.master.connect(this.ctx.destination);
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
@@ -54,7 +55,12 @@ class Engine {
   setEnabled(on: boolean) {
     this.enabled = on;
     if (!on) this.music(null);
-    if (this.master) this.master.gain.value = on ? 0.55 : 0;
+    if (this.master) this.master.gain.value = on ? this.baseVolume : 0;
+  }
+
+  setVolume(level: number) {
+    this.baseVolume = level;
+    if (this.master && this.enabled) this.master.gain.value = level;
   }
 
   /** Duck music volume (e.g. pause sheet open) */
@@ -238,6 +244,7 @@ export function createSoundWebAudioApi(): TSoundApi {
   return {
     unlock: () => engine.unlock(),
     setEnabled: (on) => engine.setEnabled(on),
+    setVolume: (level) => engine.setVolume(level),
     duck: (on) => engine.duck(on),
     play: (id, opt) => engine.play(id, opt),
     music: (id) => engine.music(id),
