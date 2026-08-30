@@ -37,13 +37,15 @@ export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
         </PixelPanel>
       ))}
 
-      <p className="cb-muted" style={{ textAlign: 'center', margin: 0, fontSize: 'var(--cb-fs-small)' }}>
-        {allTied
-          ? t('score.tied')
-          : leader
-            ? t('score.leader', { team: t(`team.${leader.team.avatarId}` as TStringKey) })
-            : ''}
-      </p>
+      {state.roster.length > 1 && (
+        <p className="cb-muted" style={{ textAlign: 'center', margin: 0, fontSize: 'var(--cb-fs-small)' }}>
+          {allTied
+            ? t('score.tied')
+            : leader
+              ? t('score.leader', { team: t(`team.${leader.team.avatarId}` as TStringKey) })
+              : ''}
+        </p>
+      )}
 
       <PixelButton variant="gold" block onClick={onNext}>
         {t('score.next')}

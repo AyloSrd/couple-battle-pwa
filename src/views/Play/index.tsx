@@ -18,7 +18,7 @@ import { DilemmaQuestion } from './components/DilemmaQuestion';
 import { Countdown } from './components/Countdown';
 import { DilemmaResolve } from './components/DilemmaResolve';
 import { Scoreboard } from './components/Scoreboard';
-import { FinalScreen } from './components/FinalScreen';
+import { FinalScreen, type TSoloResult } from './components/FinalScreen';
 import { PauseSheet } from './components/PauseSheet';
 
 export const PlayView: FC = () => {
@@ -37,6 +37,7 @@ export const PlayView: FC = () => {
 
   const [game, setGame] = useState<TGameState | null>(null);
   const [paused, setPaused] = useState(false);
+  const [soloResult, setSoloResult] = useState<TSoloResult | null>(null);
 
   // Initialize the machine from the snapshot once it loads (resume or new game).
   useEffect(() => {
@@ -68,7 +69,9 @@ export const PlayView: FC = () => {
       const team = final.roster[0];
       const solo = soloBestQuery.data ?? { flash: 0, dilemma: 0, ultime: 0 };
       const score = team ? (final.scores[team.teamId] ?? 0) : 0;
-      if (score > solo[final.mode]) putSolo.mutate({ ...solo, [final.mode]: score });
+      const prevBest = solo[final.mode];
+      setSoloResult({ isBest: score > prevBest, points: score, best: Math.max(prevBest, score) });
+      if (score > prevBest) putSolo.mutate({ ...solo, [final.mode]: score });
     }
   };
 
@@ -161,7 +164,12 @@ export const PlayView: FC = () => {
       {game.kind === 'resolve' && <DilemmaResolve state={game} onConfirm={handleConfirm} />}
       {game.kind === 'scoreboard' && <Scoreboard state={game} onNext={handleNext} />}
       {game.kind === 'final' && (
-        <FinalScreen state={game} onRematch={handleRematch} onNewGame={handleNewGame} />
+        <FinalScreen
+          state={game}
+          onRematch={handleRematch}
+          onNewGame={handleNewGame}
+          solo={soloResult ?? undefined}
+        />
       )}
 
       {paused && (
