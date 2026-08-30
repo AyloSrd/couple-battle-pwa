@@ -140,6 +140,24 @@ class Engine {
         this.noise({ dur: 0.15, vol: 0.4, hp: 1000 });
         [523, 659, 1046].forEach((f, i) => this.tone({ freq: f, t: 0.1 + i * 0.08, dur: 0.12 }));
       },
+      'mus.birthday':  () => {
+        // Happy Birthday, chiptune one-shot (~9 s). Square lead + triangle an octave below.
+        const bpm = 180, beat = 60 / bpm;
+        const G4 = 392, A4 = 440, B4 = 493.88, C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99;
+        const seq: [number, number][] = [
+          [G4, .75], [G4, .25], [A4, 1], [G4, 1], [C5, 1], [B4, 2],
+          [G4, .75], [G4, .25], [A4, 1], [G4, 1], [D5, 1], [C5, 2],
+          [G4, .75], [G4, .25], [G5, 1], [E5, 1], [C5, 1], [B4, 1], [A4, 2],
+          [F5, .75], [F5, .25], [E5, 1], [C5, 1], [D5, 1], [C5, 3],
+        ];
+        let b = 0;
+        for (const [f, d] of seq) {
+          this.tone({ freq: f, t: b * beat, dur: d * beat * 0.9, vol: 0.32 });
+          this.tone({ freq: f / 2, t: b * beat, dur: d * beat * 0.9, type: 'triangle', vol: 0.18 });
+          b += d;
+        }
+        for (let i = 0; i < 5; i++) this.noise({ t: b * beat + i * 0.06, dur: 0.05, vol: 0.18, hp: 2500 });
+      },
       'mus.fanfare':   () => {
         const seq: [number, number, number][] = [[523, 0, .12], [523, .14, .12], [523, .28, .12], [659, .42, .3], [523, .76, .12], [659, .9, .5]];
         seq.forEach(([f, t, d]) => { this.tone({ freq: f, t, dur: d, vol: 0.35 }); this.tone({ freq: f / 2, t, dur: d, type: 'triangle', vol: 0.3 }); });

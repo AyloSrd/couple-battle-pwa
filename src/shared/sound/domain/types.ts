@@ -20,6 +20,7 @@ export type TSoundId =
   | 'sfx.mismatch'
   | 'sfx.confetti'
   | 'sfx.splash.clash'
+  | 'mus.birthday'
   | 'mus.fanfare';
 
 /** Looping music, driven by `music()`. */
