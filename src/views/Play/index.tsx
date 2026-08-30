@@ -1,6 +1,6 @@
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useT } from '@/shared/i18n';
+import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { useWakeLockApi } from '@/shared/wakeLock';
 import { useGetSave, usePutSave } from '@/shared/save';
@@ -11,8 +11,11 @@ import {
   toSnapshot,
   fromSnapshot,
   initGame,
+  flashQuestion,
+  answererIndex,
   type TGameState,
   type TResult,
+  type TVerdict,
 } from './domain/machine';
 import { DilemmaQuestion } from './components/DilemmaQuestion';
 import { Countdown } from './components/Countdown';
@@ -20,6 +23,10 @@ import { DilemmaResolve } from './components/DilemmaResolve';
 import { Scoreboard } from './components/Scoreboard';
 import { FinalScreen, type TSoloResult } from './components/FinalScreen';
 import { PauseSheet } from './components/PauseSheet';
+import { PassPhone } from './components/PassPhone';
+import { SecretAnswers } from './components/SecretAnswers';
+import { GuessReveal } from './components/GuessReveal';
+import { Judge } from './components/Judge';
 
 export const PlayView: FC = () => {
   const t = useT();
@@ -97,6 +104,31 @@ export const PlayView: FC = () => {
     dispatch({ type: 'next' });
   };
 
+  // --- Flash handlers ---
+  const handlePassConfirm = () => {
+    sound.play('sfx.tap');
+    dispatch({ type: 'passConfirm' });
+  };
+  const handleLock = (answer: string) => {
+    sound.play('sfx.lock');
+    dispatch({ type: 'lockAnswer', answer });
+  };
+  const handleReveal = () => {
+    sound.play('sfx.tap');
+    dispatch({ type: 'reveal' }); // the riser plays on the Judge (flip) mount
+  };
+  const handleAutoGuess = (guess: string) => {
+    if (game?.kind !== 'guess') return;
+    const q = flashQuestion(game);
+    const truth = q ? game.secretAnswers[String(q.id)] : undefined;
+    sound.play(truth !== undefined && guess === truth ? 'sfx.point.exact' : 'sfx.point.miss');
+    dispatch({ type: 'autoGuess', guess });
+  };
+  const handleJudge = (verdict: TVerdict) => {
+    sound.play(verdict === 'exact' ? 'sfx.point.exact' : verdict === 'close' ? 'sfx.point.close' : 'sfx.point.miss');
+    dispatch({ type: 'judge', verdict });
+  };
+
   const handlePause = () => {
     sound.play('sfx.tap');
     sound.duck(true);
@@ -145,6 +177,18 @@ export const PlayView: FC = () => {
 
   const showPause = game.kind !== 'final';
 
+  /** Names for the couple currently in the Flash spotlight. */
+  const namesFor = (round: number, coupleIdx: number) => {
+    const team = game.roster[coupleIdx];
+    const aIdx = answererIndex(round);
+    return {
+      avatarId: team?.avatarId ?? 'penguins',
+      teamName: team ? t(`team.${team.avatarId}` as TStringKey) : '',
+      answererName: team?.players[aIdx] ?? '',
+      guesserName: team?.players[1 - aIdx] ?? '',
+    };
+  };
+
   return (
     <Screen>
       {showPause && (
@@ -162,6 +206,51 @@ export const PlayView: FC = () => {
 
       {game.kind === 'question' && <DilemmaQuestion state={game} onReady={handleReady} />}
       {game.kind === 'resolve' && <DilemmaResolve state={game} onConfirm={handleConfirm} />}
+
+      {game.kind === 'passSecret' &&
+        (() => {
+          const n = namesFor(game.round, game.coupleIdx);
+          return (
+            <PassPhone
+              variant="secret"
+              avatarId={n.avatarId}
+              name={n.answererName}
+              teamName={n.teamName}
+              onConfirm={handlePassConfirm}
+            />
+          );
+        })()}
+      {game.kind === 'secretInput' && (
+        <SecretAnswers key={game.questionIdx} state={game} onLock={handleLock} />
+      )}
+      {game.kind === 'passBack' && (
+        <PassPhone
+          variant="back"
+          avatarId={namesFor(game.round, game.coupleIdx).avatarId}
+          onConfirm={handlePassConfirm}
+        />
+      )}
+      {game.kind === 'guess' &&
+        (() => {
+          const n = namesFor(game.round, game.coupleIdx);
+          return (
+            <GuessReveal
+              state={game}
+              guesserName={n.guesserName}
+              partnerName={n.answererName}
+              onReveal={handleReveal}
+              onAutoGuess={handleAutoGuess}
+            />
+          );
+        })()}
+      {game.kind === 'judge' && (
+        <Judge
+          state={game}
+          answererName={namesFor(game.round, game.coupleIdx).answererName}
+          onJudge={handleJudge}
+        />
+      )}
+
       {game.kind === 'scoreboard' && <Scoreboard state={game} onNext={handleNext} />}
       {game.kind === 'final' && (
         <FinalScreen

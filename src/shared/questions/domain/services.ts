@@ -36,6 +36,18 @@ export function modeQuestionTypes(mode: TMode): TQuestionType[] {
   return [QuestionType.Open, QuestionType.ThisOrThat, QuestionType.YesNo];
 }
 
+/**
+ * Deck size to draw at game start.
+ * - dilemma: 10 shared questions
+ * - flash: 3 questions × 2 rounds × each couple (= couples × 6)
+ * - ultime: placeholder until Phase 4
+ */
+export function deckSizeFor(mode: TMode, coupleCount: number): number {
+  if (mode === Mode.Flash) return coupleCount * 6;
+  if (mode === Mode.Ultime) return coupleCount * 6;
+  return 10;
+}
+
 export type TDrawDeckOptions = {
   mode: TMode;
   difficulty: TGameDifficulty;

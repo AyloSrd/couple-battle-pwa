@@ -18,13 +18,15 @@ export type TNewGameConfig = {
 export function newGameSnapshot(config: TNewGameConfig): TGameSnapshot {
   const scores: Record<string, number> = {};
   for (const team of config.roster) scores[team.teamId] = 0;
+  // Opening phase per mode (must match the machine's initGame).
+  const phase = config.mode === 'flash' ? 'passSecret' : 'question';
   return {
     roster: config.roster,
     mode: config.mode,
     difficulty: config.difficulty,
     themes: config.themes,
     deck: config.deck,
-    cursor: { phase: 'question', round: 0, coupleIdx: 0, questionIdx: 0 },
+    cursor: { phase, round: 0, coupleIdx: 0, questionIdx: 0 },
     scores,
     secretAnswers: {},
     confirmed: {},

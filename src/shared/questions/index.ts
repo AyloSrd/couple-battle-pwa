@@ -14,6 +14,7 @@ export {
   filterQuestions,
   drawDeck,
   modeQuestionTypes,
+  deckSizeFor,
   type TDrawDeckOptions,
 } from './domain/services';
 export type { TQuestionsApi } from './api';

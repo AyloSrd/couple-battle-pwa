@@ -10,14 +10,10 @@ import {
   type TThemeId,
 } from '@/shared/game';
 import { useQueryClient } from '@tanstack/react-query';
-import { useListQuestions, drawDeck } from '@/shared/questions';
+import { useListQuestions, drawDeck, deckSizeFor } from '@/shared/questions';
 import { useGetSave, usePutSave, newGameSnapshot, saveKeys } from '@/shared/save';
 import { Screen, PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
 
-// Deck size per mode. Dilemma is the real Phase 2 slice (10 who_of_two).
-// Flash/Ultime still route through the Dilemma machine as placeholders until
-// Phases 3–4 give them their own states.
-const DECK_SIZE = 10;
 
 const DIFFS: { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey; sprite: string }[] = [
   { id: GameDifficulty.Mix, nameKey: 'diff.mix.name', descKey: 'diff.mix.desc', sprite: 'diff-mix' },
@@ -89,7 +85,13 @@ export const DifficultyView: FC = () => {
   };
 
   const startWith = (seenIds: number[]) => {
-    const deck = drawDeck(allQuestions.data ?? [], { mode, difficulty, themes, seenIds, size: DECK_SIZE });
+    const deck = drawDeck(allQuestions.data ?? [], {
+      mode,
+      difficulty,
+      themes,
+      seenIds,
+      size: deckSizeFor(mode, coupleCount),
+    });
     if (deck.length === 0) {
       setDeckEmpty(true);
       return;
