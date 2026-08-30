@@ -1,7 +1,8 @@
-import { useEffect, type FC, type PropsWithChildren } from 'react';
+import { useEffect, useState, type FC, type PropsWithChildren } from 'react';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { TContainer } from '../app/container';
+import { Intro } from '../app/Intro';
 import { QuestionsApiProvider } from '@/shared/questions/provider';
 import { SaveApiProvider, useGetSave, usePutSave } from '@/shared/save';
 import { SoundApiProvider, useSoundApi } from '@/shared/sound';
@@ -41,6 +42,17 @@ const LangGate: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
+/**
+ * Shows the Ninou Games intro on every cold start, then reveals the app. State
+ * is per-mount, so it plays once per launch (client navigations don't remount).
+ */
+const IntroGate: FC<PropsWithChildren> = ({ children }) => {
+  const [done, setDone] = useState(false);
+  const handleDone = () => setDone(true);
+  if (!done) return <Intro onDone={handleDone} />;
+  return <>{children}</>;
+};
+
 const RootLayout: FC = () => {
   const { questionsApi, saveApi, soundApi, wakeLockApi } = Route.useRouteContext();
   return (
@@ -50,7 +62,9 @@ const RootLayout: FC = () => {
           <WakeLockApiProvider api={wakeLockApi}>
             <LangGate>
               <DraftGameProvider>
-                <Outlet />
+                <IntroGate>
+                  <Outlet />
+                </IntroGate>
               </DraftGameProvider>
             </LangGate>
           </WakeLockApiProvider>
