@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useState, type FC, type PropsWithChildren } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   RouterProvider,
@@ -6,7 +6,10 @@ import {
   createHashHistory,
 } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SoundApiProvider } from '@/shared/sound';
+import { LangProvider } from '@/shared/i18n';
 import { createContainer } from './container';
+import { Intro } from './Intro';
 import { routeTree } from '../routeTree.gen';
 import type { TRouterContext } from '../routes/__root';
 import '../styles/global.css';
@@ -28,9 +31,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+/**
+ * The Ninou Games intro runs AHEAD of the router (BRIEF Phase 1.b) — it is the
+ * app's boot flow, so it plays once on every cold start before any route mounts.
+ */
+const Boot: FC<PropsWithChildren> = ({ children }) => {
+  const [done, setDone] = useState(false);
+  const handleDone = () => setDone(true);
+  if (!done) return <Intro onDone={handleDone} />;
+  return <>{children}</>;
+};
+
 async function bootstrap() {
   const queryClient = new QueryClient();
   const container = await createContainer();
+  // Seed the intro's language from persisted settings (FR fallback baked in).
+  const settings = await container.saveApi.get('settings');
   const router = createAppRouter({ ...container, queryClient });
 
   const rootEl = document.getElementById('root');
@@ -39,7 +55,13 @@ async function bootstrap() {
   createRoot(rootEl).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <SoundApiProvider api={container.soundApi}>
+          <LangProvider initialLang={settings.lang}>
+            <Boot>
+              <RouterProvider router={router} />
+            </Boot>
+          </LangProvider>
+        </SoundApiProvider>
       </QueryClientProvider>
     </StrictMode>,
   );

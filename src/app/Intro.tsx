@@ -128,6 +128,7 @@ export const Intro: FC<{ onDone: () => void }> = ({ onDone }) => {
 
   const handleTap = () => {
     sound.unlock(); // first user gesture — unlock audio for the rest of the app
+    sound.play('mus.fanfare'); // the birthday payoff (audio is now unlocked)
     onDone();
   };
 

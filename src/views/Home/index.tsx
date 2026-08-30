@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useEffect, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT, useLang } from '@/shared/i18n';
 import { useGetSave, usePutSave } from '@/shared/save';
@@ -13,8 +13,16 @@ export const HomeView: FC = () => {
   const navigate = useNavigate();
   const { reset } = useDraftGame();
   const snapshotQuery = useGetSave('gameSnapshot');
+  const settingsQuery = useGetSave('settings');
   const putSnapshot = usePutSave('gameSnapshot');
   const hasResume = Boolean(snapshotQuery.data);
+
+  // Menu music while on Home (only once audio is on); stops when leaving.
+  const soundOn = settingsQuery.data?.sound ?? false;
+  useEffect(() => {
+    if (soundOn) sound.music('mus.menu');
+    return () => sound.music(null);
+  }, [sound, soundOn]);
 
   const handleToggleLang = () => {
     sound.unlock();

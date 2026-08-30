@@ -64,7 +64,12 @@ export const SetupView: FC = () => {
   };
 
   const handleConfirmCouple = () => {
-    if (!avatar || !name1.trim() || !name2.trim()) {
+    if (!avatar) {
+      sound.play('sfx.error');
+      setError(t('setup.team.pick', { n: coupleIdx + 1 }));
+      return;
+    }
+    if (!name1.trim() || !name2.trim()) {
       sound.play('sfx.error');
       setError(t('setup.names.required'));
       return;
