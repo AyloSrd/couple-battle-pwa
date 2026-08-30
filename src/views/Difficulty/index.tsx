@@ -14,7 +14,10 @@ import { useListQuestions, drawDeck } from '@/shared/questions';
 import { useGetSave, usePutSave, newGameSnapshot, saveKeys } from '@/shared/save';
 import { Screen, PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
 
-const DECK_SIZE = 1; // PHASE 1: fake one-question game. Real sizes arrive per mode.
+// Deck size per mode. Dilemma is the real Phase 2 slice (10 who_of_two).
+// Flash/Ultime still route through the Dilemma machine as placeholders until
+// Phases 3–4 give them their own states.
+const DECK_SIZE = 10;
 
 const DIFFS: { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey; sprite: string }[] = [
   { id: GameDifficulty.Mix, nameKey: 'diff.mix.name', descKey: 'diff.mix.desc', sprite: 'diff-mix' },

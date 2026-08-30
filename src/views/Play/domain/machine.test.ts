@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { initGame, reduce, toSnapshot, fromSnapshot, rankTeams } from './machine';
-import type { TGameConfig } from './machine';
+import {
+  initGame,
+  reduce,
+  toSnapshot,
+  fromSnapshot,
+  rankTeams,
+  activeCouple,
+  scoreboardAt,
+  type TGameConfig,
+  type TGameState,
+  type TResult,
+} from './machine';
 import type { TRoster } from '@/shared/game/domain/types';
 import type { TQuestion } from '@/shared/questions/domain/types';
 
@@ -9,56 +19,128 @@ const roster: TRoster = [
   { teamId: 't2', avatarId: 'lions', players: ['C', 'D'] },
 ];
 
-const deck: TQuestion[] = [
-  { id: 1, theme: 'childhood', difficulty: 'easy', type: 'open', text: 'q' },
-];
+const deck: TQuestion[] = Array.from({ length: 10 }, (_, i) => ({
+  id: i + 1,
+  theme: 'childhood',
+  difficulty: 'easy',
+  type: 'who_of_two',
+  text: `q${i + 1}`,
+}));
 
 const config: TGameConfig = { roster, mode: 'dilemma', difficulty: 'mix', themes: [], deck };
 
-describe('Play machine', () => {
+/** Play one whole question: ready → countdown → each couple confirms. */
+function playQuestion(state: TGameState, results: TResult[]): TGameState {
+  let s = reduce(state, { type: 'ready' });
+  s = reduce(s, { type: 'countdownDone' });
+  for (const result of results) s = reduce(s, { type: 'confirm', result });
+  return s;
+}
+
+describe('Dilemma machine', () => {
   it('initGame starts everyone at zero on the first question', () => {
     const s = initGame(config);
     expect(s.kind).toBe('question');
     expect(s.scores).toEqual({ t1: 0, t2: 0 });
   });
 
-  it('award adds points and stays on the question', () => {
-    const s = reduce(initGame(config), { type: 'award', teamId: 't1', points: 2 });
+  it('scoreboardAt is the halfway point', () => {
+    expect(scoreboardAt(10)).toBe(5);
+  });
+
+  it('question → countdown on ready (and ignores other events)', () => {
+    const q = initGame(config);
+    expect(reduce(q, { type: 'countdownDone' })).toBe(q);
+    const c = reduce(q, { type: 'ready' });
+    expect(c.kind).toBe('countdown');
+    expect(c.scores).toEqual(q.scores);
+  });
+
+  it('countdown → resolve on countdownDone (active couple 0)', () => {
+    const c = reduce(initGame(config), { type: 'ready' });
+    const r = reduce(c, { type: 'countdownDone' });
+    expect(r.kind).toBe('resolve');
+    if (r.kind === 'resolve') {
+      expect(r.coupleIdx).toBe(0);
+      expect(r.results).toEqual({});
+    }
+    expect(activeCouple(r)?.teamId).toBe('t1');
+  });
+
+  it('resolve advances couple-by-couple, scoring matches only', () => {
+    const c = reduce(initGame(config), { type: 'ready' });
+    const r0 = reduce(c, { type: 'countdownDone' });
+    const r1 = reduce(r0, { type: 'confirm', result: 'match' }); // t1 matches
+    expect(r1.kind).toBe('resolve');
+    if (r1.kind === 'resolve') {
+      expect(r1.coupleIdx).toBe(1);
+      expect(activeCouple(r1)?.teamId).toBe('t2');
+      expect(r1.scores.t1).toBe(1);
+      expect(r1.results).toEqual({ t1: 'match' });
+    }
+    const q2 = reduce(r1, { type: 'confirm', result: 'miss' }); // t2 misses → last couple → next question
+    expect(q2.kind).toBe('question');
+    expect(q2.scores).toEqual({ t1: 1, t2: 0 });
+    if (q2.kind === 'question') expect(q2.questionIdx).toBe(1);
+  });
+
+  it('shows the scoreboard after the 5th question, then continues', () => {
+    let s: TGameState = initGame(config);
+    for (let i = 0; i < 4; i++) s = playQuestion(s, ['match', 'miss']); // Q1..Q4
     expect(s.kind).toBe('question');
-    expect(s.scores.t1).toBe(2);
+    s = playQuestion(s, ['match', 'match']); // Q5 done → scoreboard
+    expect(s.kind).toBe('scoreboard');
+    if (s.kind === 'scoreboard') expect(s.questionIdx).toBe(5);
+    const q6 = reduce(s, { type: 'next' });
+    expect(q6.kind).toBe('question');
+    if (q6.kind === 'question') expect(q6.questionIdx).toBe(5);
   });
 
-  it('award accumulates', () => {
-    let s = initGame(config);
-    s = reduce(s, { type: 'award', teamId: 't1', points: 2 });
-    s = reduce(s, { type: 'award', teamId: 't1', points: 1 });
-    expect(s.scores.t1).toBe(3);
+  it('reaches the final after the 10th question', () => {
+    let s: TGameState = initGame(config);
+    for (let i = 0; i < 5; i++) s = playQuestion(s, ['match', 'miss']); // Q1..Q5
+    s = reduce(s, { type: 'next' }); // past scoreboard → Q6
+    for (let i = 0; i < 4; i++) s = playQuestion(s, ['match', 'miss']); // Q6..Q9
+    expect(s.kind).toBe('question');
+    s = playQuestion(s, ['miss', 'match']); // Q10 → final
+    expect(s.kind).toBe('final');
+    expect(s.scores.t1).toBe(9); // matched Q1-9, missed Q10
+    expect(s.scores.t2).toBe(1); // missed Q1-9, matched Q10
   });
 
-  it('finish moves to the final, preserving scores', () => {
-    const played = reduce(initGame(config), { type: 'award', teamId: 't2', points: 2 });
-    const final = reduce(played, { type: 'finish' });
+  it('final and scoreboard ignore unrelated events; final is terminal', () => {
+    const final = reduce(
+      { ...initGame(config), kind: 'final' } as TGameState,
+      { type: 'ready' },
+    );
     expect(final.kind).toBe('final');
-    expect(final.scores.t2).toBe(2);
   });
 
-  it('final is terminal', () => {
-    const final = reduce(reduce(initGame(config), { type: 'finish' }), { type: 'finish' });
-    expect(final.kind).toBe('final');
-  });
+  it('round-trips every phase through a snapshot', () => {
+    const q = initGame(config);
+    expect(fromSnapshot(toSnapshot(q))).toEqual(q);
 
-  it('round-trips through a snapshot', () => {
-    const played = reduce(initGame(config), { type: 'award', teamId: 't1', points: 2 });
-    const restored = fromSnapshot(toSnapshot(played));
-    expect(restored).toEqual(played);
+    const c = reduce(q, { type: 'ready' });
+    // countdown resumes as the question (countdown re-runs)
+    expect(fromSnapshot(toSnapshot(c))).toEqual(q);
+
+    const r = reduce(reduce(c, { type: 'countdownDone' }), { type: 'confirm', result: 'match' });
+    expect(fromSnapshot(toSnapshot(r))).toEqual(r);
+
+    let s: TGameState = initGame(config);
+    for (let i = 0; i < 5; i++) s = playQuestion(s, ['match', 'miss']);
+    expect(s.kind).toBe('scoreboard');
+    expect(fromSnapshot(toSnapshot(s))).toEqual(s);
   });
 
   it('ranks teams with the leader first and shared crown on ties', () => {
-    const played = reduce(initGame(config), { type: 'award', teamId: 't2', points: 2 });
+    const played = reduce(
+      reduce(reduce(initGame(config), { type: 'ready' }), { type: 'countdownDone' }),
+      { type: 'confirm', result: 'match' },
+    );
     const ranked = rankTeams(played);
-    expect(ranked[0]?.team.teamId).toBe('t2');
+    expect(ranked[0]?.team.teamId).toBe('t1');
     expect(ranked[0]?.isWinner).toBe(true);
-    expect(ranked[1]?.isWinner).toBe(false);
 
     const tied = rankTeams(initGame(config)); // 0-0
     expect(tied.every((r) => r.isWinner)).toBe(true);

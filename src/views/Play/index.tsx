@@ -12,8 +12,12 @@ import {
   fromSnapshot,
   initGame,
   type TGameState,
+  type TResult,
 } from './domain/machine';
-import { QuestionScreen } from './components/QuestionScreen';
+import { DilemmaQuestion } from './components/DilemmaQuestion';
+import { Countdown } from './components/Countdown';
+import { DilemmaResolve } from './components/DilemmaResolve';
+import { Scoreboard } from './components/Scoreboard';
 import { FinalScreen } from './components/FinalScreen';
 import { PauseSheet } from './components/PauseSheet';
 
@@ -39,17 +43,9 @@ export const PlayView: FC = () => {
     if (game === null && snapshotQuery.data) setGame(fromSnapshot(snapshotQuery.data));
   }, [game, snapshotQuery.data]);
 
-  // No game to play → back to Home. Only redirect once the query has genuinely
-  // settled (fetched, not currently refetching) with no snapshot — otherwise a
-  // background refetch that momentarily serves the stale `null` would bounce us
-  // out right after a game starts.
+  // No game to play → back to Home (only once the query has genuinely settled).
   useEffect(() => {
-    if (
-      game === null &&
-      snapshotQuery.isSuccess &&
-      !snapshotQuery.isFetching &&
-      !snapshotQuery.data
-    ) {
+    if (game === null && snapshotQuery.isSuccess && !snapshotQuery.isFetching && !snapshotQuery.data) {
       navigate({ to: '/' });
     }
   }, [game, snapshotQuery.isSuccess, snapshotQuery.isFetching, snapshotQuery.data, navigate]);
@@ -72,9 +68,7 @@ export const PlayView: FC = () => {
       const team = final.roster[0];
       const solo = soloBestQuery.data ?? { flash: 0, dilemma: 0, ultime: 0 };
       const score = team ? (final.scores[team.teamId] ?? 0) : 0;
-      if (score > solo[final.mode]) {
-        putSolo.mutate({ ...solo, [final.mode]: score });
-      }
+      if (score > solo[final.mode]) putSolo.mutate({ ...solo, [final.mode]: score });
     }
   };
 
@@ -86,13 +80,18 @@ export const PlayView: FC = () => {
     else putSnapshot.mutate(toSnapshot(next));
   };
 
-  const handleAward = (teamId: string) => {
-    sound.play('sfx.point.exact');
-    dispatch({ type: 'award', teamId, points: 1 });
+  const handleReady = () => {
+    sound.play('sfx.tap');
+    dispatch({ type: 'ready' });
   };
-  const handleFinish = () => {
-    sound.play('sfx.whoosh');
-    dispatch({ type: 'finish' });
+  const handleCountdownDone = () => dispatch({ type: 'countdownDone' });
+  const handleConfirm = (result: TResult) => {
+    sound.play(result === 'match' ? 'sfx.point.exact' : 'sfx.point.miss');
+    dispatch({ type: 'confirm', result });
+  };
+  const handleNext = () => {
+    sound.play('sfx.select');
+    dispatch({ type: 'next' });
   };
 
   const handlePause = () => {
@@ -138,10 +137,15 @@ export const PlayView: FC = () => {
 
   if (snapshotQuery.isPending || !game) return null;
 
+  // The countdown owns the whole ink-dark screen.
+  if (game.kind === 'countdown') return <Countdown onDone={handleCountdownDone} />;
+
+  const showPause = game.kind !== 'final';
+
   return (
     <Screen>
-      {game.kind === 'question' && (
-        <div style={{ position: 'absolute', top: 'var(--cb-s3)', right: 'var(--cb-s3)' }}>
+      {showPause && (
+        <div style={{ position: 'fixed', top: 'var(--cb-s3)', right: 'var(--cb-s3)', zIndex: 20 }}>
           <PixelButton
             variant="ghost"
             onClick={handlePause}
@@ -153,9 +157,10 @@ export const PlayView: FC = () => {
         </div>
       )}
 
-      {game.kind === 'question' ? (
-        <QuestionScreen state={game} onAward={handleAward} onFinish={handleFinish} />
-      ) : (
+      {game.kind === 'question' && <DilemmaQuestion state={game} onReady={handleReady} />}
+      {game.kind === 'resolve' && <DilemmaResolve state={game} onConfirm={handleConfirm} />}
+      {game.kind === 'scoreboard' && <Scoreboard state={game} onNext={handleNext} />}
+      {game.kind === 'final' && (
         <FinalScreen state={game} onRematch={handleRematch} onNewGame={handleNewGame} />
       )}
 

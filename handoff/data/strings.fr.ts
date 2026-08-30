@@ -105,6 +105,7 @@ export const fr = {
   "pause.resume": "Reprendre",
   "pause.title": "Pause",
   "resolve.confirmed": "Duos déjà passés :",
+  "resolve.liarStrip": "(mentir, c'est un point de karma en moins)",
   "resolve.match": "💥 MATCH ! +1",
   "resolve.miss": "❌ Raté",
   "resolve.question": "Vous avez pointé la même personne ?",
