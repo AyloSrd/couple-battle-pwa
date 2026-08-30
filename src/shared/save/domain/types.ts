@@ -61,6 +61,9 @@ export const ZGameSnapshotSchema = z.object({
   cursor: ZCursorSchema,
   scores: z.record(z.string(), z.number().int()),
   secretAnswers: z.record(z.string(), z.string()),
+  // Dilemma resolve: per-couple match/miss for the current question (so a
+  // mid-resolve refresh restores the confirmed couples' badges).
+  confirmed: z.record(z.string(), z.enum(['match', 'miss'])).default({}),
 });
 export type TGameSnapshot = z.infer<typeof ZGameSnapshotSchema>;
 

@@ -27,5 +27,6 @@ export function newGameSnapshot(config: TNewGameConfig): TGameSnapshot {
     cursor: { phase: 'question', round: 0, coupleIdx: 0, questionIdx: 0 },
     scores,
     secretAnswers: {},
+    confirmed: {},
   };
 }

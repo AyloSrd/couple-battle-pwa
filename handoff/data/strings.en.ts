@@ -105,6 +105,7 @@ export const en = {
   "pause.resume": "Resume",
   "pause.title": "Paused",
   "resolve.confirmed": "Already confirmed:",
+  "resolve.liarStrip": "(lying costs you karma points)",
   "resolve.match": "💥 MATCH! +1",
   "resolve.miss": "❌ Missed",
   "resolve.question": "Did you point at the same person?",
