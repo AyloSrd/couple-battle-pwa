@@ -34,13 +34,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const INTRO_KEY = 'cb-intro-seen';
+
+function readIntroSeen(): boolean {
+  try {
+    return sessionStorage.getItem(INTRO_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 /**
- * The Ninou Games intro runs AHEAD of the router (BRIEF Phase 1.b) — it is the
- * app's boot flow, so it plays once on every cold start before any route mounts.
+ * The Ninou Games intro runs AHEAD of the router (BRIEF Phase 1.b) — the gift.
+ * Gated to once PER SESSION: it plays on a genuine launch (new tab / installed
+ * PWA icon) but a reload or tab-restore within the same session skips straight
+ * to Home, so an accidental refresh doesn't replay the penguins + birthday.
  */
 const Boot: FC<PropsWithChildren> = ({ children }) => {
-  const [done, setDone] = useState(false);
-  const handleDone = () => setDone(true);
+  const [done, setDone] = useState(readIntroSeen);
+  const handleDone = () => {
+    try {
+      sessionStorage.setItem(INTRO_KEY, '1');
+    } catch {
+      // storage unavailable — intro just replays on reload, no harm.
+    }
+    setDone(true);
+  };
   if (!done) return <Intro onDone={handleDone} />;
   return <>{children}</>;
 };
