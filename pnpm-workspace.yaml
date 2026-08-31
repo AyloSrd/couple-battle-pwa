@@ -1,5 +1,6 @@
-# Approve the native build scripts pnpm blocks by default (pnpm 11 `allowBuilds`).
-# esbuild: Vite's transformer. unrs-resolver: backs eslint-import-resolver-typescript.
+# Do NOT run these packages' postinstall build scripts (supply-chain safety).
+# They ship prebuilt platform binaries, so `false` = keep them blocked without
+# pnpm erroring on the ignored scripts. esbuild (Vite) / unrs-resolver (import lint).
 allowBuilds:
-  esbuild: true
-  unrs-resolver: true
+  esbuild: false
+  unrs-resolver: false
