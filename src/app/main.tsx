@@ -12,6 +12,9 @@ import { createContainer } from './container';
 import { Intro } from './Intro';
 import { routeTree } from '../routeTree.gen';
 import type { TRouterContext } from '../routes/__root';
+// Register the beforeinstallprompt listener at boot — it fires early (before the
+// intro finishes and Home mounts), so it must be captured here or it's missed.
+import '@/shared/pwa/installPrompt';
 import '../styles/global.css';
 
 // GitHub Pages has no SPA rewrites — hash history keeps every route reachable.
