@@ -1,5 +1,5 @@
-# Approve native build scripts for these deps (pnpm blocks them by default).
+# Approve the native build scripts pnpm blocks by default (pnpm 11 `allowBuilds`).
 # esbuild: Vite's transformer. unrs-resolver: backs eslint-import-resolver-typescript.
-onlyBuiltDependencies:
-  - esbuild
-  - unrs-resolver
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
