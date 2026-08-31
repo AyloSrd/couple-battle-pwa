@@ -154,7 +154,7 @@ export const en = {
   "splash.loading": "Loading…",
   "splash.start": "Tap to start",
   "splash.studio": "NINOU GAMES",
-  "splash.birthday": "Happy birthday my love 💘",
+  "splash.birthday": "Happy birthday bb 💘",
   "splash.surprise": "Tap to hear the surprise 🎁",
   "splash.tap": "Tap to continue",
   "spr.avatar.cats": "Team Chats — one asleep, obviously",
