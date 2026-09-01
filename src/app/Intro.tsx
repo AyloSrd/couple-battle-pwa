@@ -138,7 +138,7 @@ const BirthdayCard: FC<{
         </div>
 
         {stage === 'prompt' ? (
-          <p style={{ color: 'var(--cb-gold)', fontSize: 'var(--cb-fs-heading)', fontFamily: 'var(--cb-font-display)', lineHeight: 1.7, margin: 0 }}>
+          <p style={{ color: 'var(--cb-gold)', fontSize: 'var(--cb-fs-title)', fontFamily: 'var(--cb-font-display)', lineHeight: 1.7, margin: 0 }}>
             {surpriseHint}
           </p>
         ) : (
@@ -156,7 +156,7 @@ const BirthdayCard: FC<{
         )}
 
         {stage === 'ready' && (
-          <p style={{ color: 'var(--cb-gold)', fontSize: 'var(--cb-fs-small)', margin: 0 }}>
+          <p style={{ color: 'var(--cb-gold)', fontSize: 'var(--cb-fs-title)', fontFamily: 'var(--cb-font-display)', lineHeight: 1.7, margin: 0 }}>
             {startHint}
           </p>
         )}
