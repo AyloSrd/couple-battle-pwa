@@ -15,6 +15,9 @@ import type { TRouterContext } from '../routes/__root';
 // Register the beforeinstallprompt listener at boot — it fires early (before the
 // intro finishes and Home mounts), so it must be captured here or it's missed.
 import '@/shared/pwa/installPrompt';
+// Auto-reload open tabs when a new deploy's service worker takes over (kills
+// stale-version tabs). Guarded so it never fires on the first visit.
+import '@/shared/pwa/swUpdate';
 import '../styles/global.css';
 
 // GitHub Pages has no SPA rewrites — hash history keeps every route reachable.
