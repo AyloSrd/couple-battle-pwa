@@ -95,10 +95,13 @@ export const HomeView: FC = () => {
   return (
     <>
       <div className="cb-bg-hearts" aria-hidden="true" />
-      <Sprite className="cb-peek cb-peek--left" name={`avatar-${peek[0]}`} size={40} />
-      <Sprite className="cb-peek cb-peek--right" name={`avatar-${peek[1]}`} size={40} />
 
-      <Screen center>
+      <Screen center style={{ position: 'relative', overflow: 'hidden' }}>
+        {/* Floating mascots — first in the DOM so everything after paints above
+            them (no z-index needed); they bob at the bottom corners. */}
+        <Sprite className="cb-peek cb-peek--left" name={`avatar-${peek[0]}`} size={56} />
+        <Sprite className="cb-peek cb-peek--right" name={`avatar-${peek[1]}`} size={56} />
+
         <div style={{ position: 'absolute', top: 'var(--cb-s4)', right: 'var(--cb-s4)' }}>
           <PixelButton variant="ghost" onClick={handleToggleLang} aria-label="language">
             <Sprite name={lang === 'fr' ? 'ui-flag-fr' : 'ui-flag-en'} width={24} height={18} />

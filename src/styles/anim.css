@@ -34,28 +34,28 @@
   animation: cb-drift 12s linear infinite;
 }
 
+/* Mascots that sit in the bottom corners and gently bob ("hover"). Absolute so
+   they anchor to the Home screen container and stay fully visible. */
 @keyframes cb-peek {
   0%,
-  20%,
   100% {
-    transform: translateY(100%);
+    transform: translateY(0);
   }
-  40%,
-  80% {
-    transform: translateY(35%);
+  50% {
+    transform: translateY(-8px);
   }
 }
 .cb-peek {
-  position: fixed;
-  bottom: 0;
-  animation: cb-peek 7s steps(3, end) infinite;
+  position: absolute;
+  bottom: var(--cb-s2);
+  animation: cb-peek 2.6s ease-in-out infinite;
 }
 .cb-peek--left {
   left: var(--cb-s3);
 }
 .cb-peek--right {
   right: var(--cb-s3);
-  animation-delay: 3.5s;
+  animation-delay: 1.3s;
 }
 
 @keyframes cb-confetti {
