@@ -8,7 +8,6 @@ import {
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { AVATAR_IDS } from '@/shared/game';
-import { Sprite } from '@/shared/Chrome';
 
 /**
  * The Ninou Games boot flow (BRIEF Phase 1.b), ahead of the router:
@@ -74,6 +73,15 @@ const fullScreen: CSSProperties = {
   boxSizing: 'border-box',
 };
 
+const bigEmoji: CSSProperties = { fontSize: '72px', lineHeight: 1 };
+const bigText: CSSProperties = {
+  fontFamily: 'var(--cb-font-display)',
+  fontSize: 'var(--cb-fs-title)',
+  lineHeight: 1.7,
+  margin: 0,
+};
+const bigGold: CSSProperties = { ...bigText, color: 'var(--cb-gold)' };
+
 const StudioSplash: FC<{ progress: number; label: string }> = ({ progress, label }) => (
   <div style={fullScreen}>
     <div
@@ -131,33 +139,25 @@ const BirthdayCard: FC<{
       tabIndex={interactive ? 0 : undefined}
     >
       <div style={{ display: 'grid', gap: 'var(--cb-s5)', justifyItems: 'center' }}>
-        <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-          <Sprite name="ui-heart" size={20} />
-          <Sprite name="ui-heart" size={28} />
-          <Sprite name="ui-heart" size={20} />
-        </div>
-
         {stage === 'prompt' ? (
-          <p style={{ color: 'var(--cb-gold)', fontSize: 'var(--cb-fs-title)', fontFamily: 'var(--cb-font-display)', lineHeight: 1.7, margin: 0 }}>
-            {surpriseHint}
-          </p>
+          <>
+            <span style={bigEmoji} aria-hidden="true">
+              🎁
+            </span>
+            <p style={bigGold}>{surpriseHint}</p>
+          </>
         ) : (
-          <h1
-            style={{
-              fontFamily: 'var(--cb-font-display)',
-              color: 'var(--cb-cream)',
-              fontSize: 'var(--cb-fs-title)',
-              lineHeight: 1.7,
-              margin: 0,
-            }}
-          >
-            {message}
-          </h1>
+          <>
+            <span style={bigEmoji} aria-hidden="true">
+              🎂
+            </span>
+            <h1 style={{ ...bigText, color: 'var(--cb-cream)' }}>{message}</h1>
+          </>
         )}
 
         {stage === 'ready' && (
-          <p style={{ color: 'var(--cb-gold)', fontSize: 'var(--cb-fs-title)', fontFamily: 'var(--cb-font-display)', lineHeight: 1.7, margin: 0 }}>
-            {startHint}
+          <p style={bigGold}>
+            <span aria-hidden="true">➡️</span> {startHint}
           </p>
         )}
       </div>
