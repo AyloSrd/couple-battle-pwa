@@ -10,6 +10,7 @@ import {
   flashDeckIndex,
   flashDeckSize,
   answererIndex,
+  questionText,
   type TGameConfig,
   type TGameState,
   type TResult,
@@ -28,7 +29,9 @@ const deck: TQuestion[] = Array.from({ length: 10 }, (_, i) => ({
   theme: 'childhood',
   difficulty: 'easy',
   type: 'who_of_two',
-  text: `q${i + 1}`,
+  // who_of_two: identical group phrasings, no placeholder.
+  you: `q${i + 1}`,
+  name: `q${i + 1}`,
 }));
 
 const config: TGameConfig = { roster, mode: 'dilemma', difficulty: 'mix', themes: [], deck };
@@ -40,6 +43,46 @@ function playQuestion(state: TGameState, results: TResult[]): TGameState {
   for (const result of results) s = reduce(s, { type: 'confirm', result });
   return s;
 }
+
+describe('questionText — addressee variant per screen', () => {
+  const q: TQuestion = {
+    id: 1,
+    theme: 'foodDrinks',
+    difficulty: 'easy',
+    type: 'open',
+    you: "C'est quoi ton petit-déj classique ?",
+    name: "C'est quoi le petit-déj classique de {name} ?",
+  };
+  const whoOfTwo: TQuestion = {
+    id: 2,
+    theme: 'random',
+    difficulty: 'easy',
+    type: 'who_of_two',
+    you: 'Qui de vous deux ronfle le plus ?',
+    name: 'Qui de vous deux ronfle le plus ?',
+  };
+
+  it('secret screen renders the "you" variant verbatim', () => {
+    expect(questionText(q, 'you')).toBe("C'est quoi ton petit-déj classique ?");
+  });
+
+  it('guess/judge render the "name" variant with the answerer interpolated', () => {
+    expect(questionText(q, 'name', 'Morgane')).toBe("C'est quoi le petit-déj classique de Morgane ?");
+  });
+
+  it('leaves no {name} slot once interpolated', () => {
+    expect(questionText(q, 'name', 'Luca')).not.toContain('{name}');
+  });
+
+  it('who_of_two: both variants are the identical group phrasing', () => {
+    expect(questionText(whoOfTwo, 'you')).toBe(questionText(whoOfTwo, 'name', 'Anyone'));
+  });
+
+  it('missing question renders empty (never crashes a screen)', () => {
+    expect(questionText(undefined, 'you')).toBe('');
+    expect(questionText(undefined, 'name', 'X')).toBe('');
+  });
+});
 
 describe('Dilemma machine', () => {
   it('initGame starts everyone at zero on the first question', () => {
@@ -166,7 +209,8 @@ function flashDeck(type: TQuestionType): TQuestion[] {
     theme: 'childhood' as const,
     difficulty: 'easy' as const,
     type,
-    text: `q${i + 1}`,
+    you: `q${i + 1}`,
+    name: `q${i + 1} de {name}`,
   }));
 }
 
@@ -281,7 +325,8 @@ function ultimeConfig(): TGameConfig {
     theme: 'childhood' as const,
     difficulty: 'easy' as const,
     type: 'open' as const,
-    text: `q${i + 1}`,
+    you: `q${i + 1}`,
+    name: `q${i + 1} de {name}`,
   }));
   return { roster: flashRoster, mode: 'ultime', difficulty: 'mix', themes: [], deck };
 }

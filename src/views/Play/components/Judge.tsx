@@ -2,7 +2,7 @@ import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelPanel, PixelButton } from '@/shared/Chrome';
-import { flashQuestion, type TGameState, type TVerdict } from '../domain/machine';
+import { flashQuestion, questionText, type TGameState, type TVerdict } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'judge' }>;
@@ -26,6 +26,9 @@ export const Judge: FC<TProps> = ({ state, answererName, onJudge }) => {
 
   return (
     <div style={{ flex: 1, display: 'grid', gap: 'var(--cb-s4)', alignContent: 'start' }}>
+      <p className="cb-question" style={{ textAlign: 'center', margin: 0 }}>
+        {questionText(question, 'name', answererName) || '—'}
+      </p>
       <p className="cb-muted" style={{ textAlign: 'center', margin: 0, fontSize: 'var(--cb-fs-small)' }}>
         {t('guess.answerWas', { name: answererName })}
       </p>

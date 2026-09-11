@@ -7,6 +7,7 @@ import type {
 } from '@/shared/game/domain/types';
 import type { TQuestion } from '@/shared/questions/domain/types';
 import type { TGameSnapshot } from '@/shared/save/domain/types';
+import { interpolate } from '@/shared/i18n/domain/services';
 
 /**
  * The in-game state machine (ARCHITECTURE's one sanctioned deviation from
@@ -141,6 +142,27 @@ export function dilemmaQuestion(state: TGameState): TQuestion | undefined {
 export function rapidQuestionOf(state: TGameState): TQuestion | undefined {
   if (state.kind !== 'rapidQuestion' && state.kind !== 'rapidCountdown' && state.kind !== 'rapidJudge') return undefined;
   return state.deck[rapidOffset(state.roster.length) + state.coupleIdx * ULTIME_RAPID_PER_COUPLE + state.questionIdx];
+}
+
+/**
+ * Which addressee variant a screen renders:
+ *  - `you`  — the person answering about themselves (V-SecretAnswers).
+ *  - `name` — the partner/table guessing about the answerer (V-GuessReveal,
+ *    V-Judge, rapid-fire), with `{name}` filled from the roster.
+ * `who_of_two` prompts are identical group phrasings, so either variant works.
+ */
+export type TAddressee = 'you' | 'name';
+
+/** Render a question for a screen role. Uses the i18n interpolation helper so
+ *  `{name}` is filled exactly as string templates are. */
+export function questionText(
+  question: TQuestion | undefined,
+  addressee: TAddressee,
+  answererName = '',
+): string {
+  if (!question) return '';
+  if (addressee === 'you') return question.you;
+  return interpolate(question.name, { name: answererName });
 }
 
 function contextOf(state: TGameState): TGameContext {

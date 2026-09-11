@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
-import { dilemmaQuestion, type TGameState, type TResult } from '../domain/machine';
+import { dilemmaQuestion, questionText, type TGameState, type TResult } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'resolve' }>;
@@ -42,7 +42,7 @@ export const DilemmaResolve: FC<TProps> = ({ state, onConfirm }) => {
           <h2 className="cb-title" style={{ margin: 0 }}>
             {t('resolve.title', { team: t(`team.${active.avatarId}` as TStringKey) })}
           </h2>
-          <p style={{ margin: 0, fontSize: 'var(--cb-fs-small)' }}>{question?.text}</p>
+          <p style={{ margin: 0, fontSize: 'var(--cb-fs-small)' }}>{questionText(question, 'you')}</p>
           <p className="cb-heading">{t('resolve.question')}</p>
           <div style={{ display: 'flex', gap: 'var(--cb-s2)', width: '100%' }}>
             <PixelButton variant="positive" block onClick={handleMatch}>
