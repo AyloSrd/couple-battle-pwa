@@ -3,6 +3,7 @@ import { useT, type TStringKey } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
 import {
   rapidQuestionOf,
+  questionText,
   ULTIME_RAPID_PER_COUPLE,
   type TGameState,
 } from '../domain/machine';
@@ -24,6 +25,13 @@ function teamNameOf(state: TGameState, t: ReturnType<typeof useT>): string {
     const team = state.roster[state.coupleIdx];
     if (team) return t(`team.${team.avatarId}` as TStringKey);
   }
+  return '';
+}
+
+/** The couple both answer at once; `{name}` in the prompt points at the first
+ *  partner (roster order) as the reference answerer. */
+function answererNameOf(state: TGameState): string {
+  if ('coupleIdx' in state) return state.roster[state.coupleIdx]?.players[0] ?? '';
   return '';
 }
 
@@ -72,7 +80,7 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
         </p>
         <PixelPanel style={{ flex: 1, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
           <p className="cb-question" style={{ margin: 0 }}>
-            {question?.text ?? '—'}
+            {questionText(question, 'name', answererNameOf(state)) || '—'}
           </p>
         </PixelPanel>
         <PixelButton variant="gold" block onClick={onReady} style={{ fontSize: 'var(--cb-fs-title)' }}>
@@ -88,7 +96,7 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
     <>
       <PixelPanel style={{ flex: 1, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
         <p className="cb-question" style={{ margin: 0 }}>
-          {question?.text ?? '—'}
+          {questionText(question, 'name', answererNameOf(state)) || '—'}
         </p>
       </PixelPanel>
       <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>

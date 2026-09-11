@@ -8,6 +8,17 @@ import { Screen, PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
 
 const COUNTS = [1, 2, 3, 4] as const;
 
+/** True if `names` holds a repeat once trimmed and compared case-insensitively. */
+function hasDuplicateName(names: string[]): boolean {
+  const seen = new Set<string>();
+  for (const raw of names) {
+    const key = raw.trim().toLocaleLowerCase();
+    if (seen.has(key)) return true;
+    seen.add(key);
+  }
+  return false;
+}
+
 const inputStyle: CSSProperties = {
   fontFamily: 'var(--cb-font-body)',
   fontSize: 'var(--cb-fs-body)',
@@ -72,6 +83,14 @@ export const SetupView: FC = () => {
     if (!name1.trim() || !name2.trim()) {
       sound.play('sfx.error');
       setError(t('setup.names.required'));
+      return;
+    }
+    // Names must be unique across the WHOLE roster (trim + case-insensitive) so
+    // "{name}" prompts never point at two people at once.
+    const rosterNames = teams.flatMap((team) => team.players).concat(name1, name2);
+    if (hasDuplicateName(rosterNames)) {
+      sound.play('sfx.error');
+      setError(t('setup.names.duplicate'));
       return;
     }
     const team: TTeam = {

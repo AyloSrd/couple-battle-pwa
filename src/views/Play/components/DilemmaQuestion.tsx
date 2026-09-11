@@ -2,7 +2,7 @@ import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
-import { dilemmaQuestion, dilemmaTotal, type TGameState } from '../domain/machine';
+import { dilemmaQuestion, dilemmaTotal, questionText, type TGameState } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'question' }>;
@@ -31,7 +31,7 @@ export const DilemmaQuestion: FC<TProps> = ({ state, onReady }) => {
 
       <PixelPanel style={{ flex: 1, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
         <p className="cb-question" style={{ margin: 0 }}>
-          {question?.text ?? '—'}
+          {questionText(question, 'you') || '—'}
         </p>
       </PixelPanel>
 

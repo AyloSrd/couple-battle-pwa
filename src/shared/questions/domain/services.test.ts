@@ -3,10 +3,10 @@ import { drawDeck, filterQuestions, modeQuestionTypes } from './services';
 import type { TQuestion } from './types';
 
 const Q: TQuestion[] = [
-  { id: 1, theme: 'childhood', difficulty: 'easy', type: 'open', text: 'a' },
-  { id: 2, theme: 'money', difficulty: 'hard', type: 'who_of_two', text: 'b' },
-  { id: 3, theme: 'travel', difficulty: 'medium', type: 'yes_no', text: 'c' },
-  { id: 4, theme: 'childhood', difficulty: 'easy', type: 'this_or_that', text: 'd' },
+  { id: 1, theme: 'childhood', difficulty: 'easy', type: 'open', you: 'a', name: 'a of {name}' },
+  { id: 2, theme: 'money', difficulty: 'hard', type: 'who_of_two', you: 'b', name: 'b' },
+  { id: 3, theme: 'travel', difficulty: 'medium', type: 'yes_no', you: 'c', name: 'c of {name}' },
+  { id: 4, theme: 'childhood', difficulty: 'easy', type: 'this_or_that', you: 'd', name: 'd of {name}' },
 ];
 
 describe('filterQuestions', () => {

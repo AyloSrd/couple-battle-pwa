@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type CSSProperties, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Sprite, ProgressDots } from '@/shared/Chrome';
-import { flashQuestion, flashSetSize, type TGameState } from '../domain/machine';
+import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'secretInput' }>;
@@ -24,6 +24,8 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
   const [text, setText] = useState('');
   const question = flashQuestion(state);
   const isYesNo = question?.type === 'yes_no';
+  // who_of_two answers are one of the couple's two names (roster order).
+  const twoNames = question?.type === 'who_of_two' ? state.roster[state.coupleIdx]?.players : undefined;
 
   const lock = (answer: string) => {
     setText('');
@@ -58,11 +60,20 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
 
       <PixelPanel style={{ textAlign: 'center' }}>
         <p className="cb-question" style={{ margin: 0 }}>
-          {question?.text ?? '—'}
+          {questionText(question, 'you') || '—'}
         </p>
       </PixelPanel>
 
-      {isYesNo ? (
+      {twoNames ? (
+        <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
+          <PixelButton variant="primary" block onClick={() => lock(twoNames[0])}>
+            {twoNames[0]}
+          </PixelButton>
+          <PixelButton variant="primary" block onClick={() => lock(twoNames[1])}>
+            {twoNames[1]}
+          </PixelButton>
+        </div>
+      ) : isYesNo ? (
         <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
           <PixelButton variant="positive" block onClick={handleYes}>
             {t('common.yes')}
