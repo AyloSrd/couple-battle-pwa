@@ -1,27 +1,17 @@
-import {
-  useEffect,
-  useState,
-  type CSSProperties,
-  type FC,
-  type KeyboardEvent,
-} from 'react';
+import { useEffect, useState, type CSSProperties, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
 import { AVATAR_IDS } from '@/shared/game';
 
 /**
- * The Ninou Games boot flow (BRIEF Phase 1.b), ahead of the router:
- *   loading (downloads assets) → birthday "tap to hear the surprise"
- *   → music + "Bon anniversaire mon amour" → music ends → "tap to start" → app.
+ * The boot loader, ahead of the router. A short studio splash that preloads the
+ * critical assets (so the first real screen doesn't flash), then hands off to
+ * the app. Gated once per session by the caller.
  */
 
 const BASE = import.meta.env.BASE_URL;
 const STEPS = 12;
 const STEP_MS = 200; // ~2.4s minimum retro fill
-const BIRTHDAY_MS = 9200; // mus.birthday runs ~9s; "tap to start" appears when it ends
 const PRELOAD_TIMEOUT_MS = 6000;
-const BIRTHDAY_VOLUME = 0.9; // louder for the surprise
-const NORMAL_VOLUME = 0.55; // engine default, restored after the tune
 
 // Critical assets to have ready before revealing the app (the SW precaches the
 // rest for offline; this just avoids first-paint flashes).
@@ -73,15 +63,6 @@ const fullScreen: CSSProperties = {
   boxSizing: 'border-box',
 };
 
-const bigEmoji: CSSProperties = { fontSize: '72px', lineHeight: 1 };
-const bigText: CSSProperties = {
-  fontFamily: 'var(--cb-font-display)',
-  fontSize: 'var(--cb-fs-title)',
-  lineHeight: 1.7,
-  margin: 0,
-};
-const bigGold: CSSProperties = { ...bigText, color: 'var(--cb-gold)' };
-
 const StudioSplash: FC<{ progress: number; label: string }> = ({ progress, label }) => (
   <div style={fullScreen}>
     <div
@@ -117,62 +98,12 @@ const StudioSplash: FC<{ progress: number; label: string }> = ({ progress, label
   </div>
 );
 
-type TBirthdayStage = 'prompt' | 'reveal' | 'ready';
-
-const BirthdayCard: FC<{
-  stage: TBirthdayStage;
-  message: string;
-  surpriseHint: string;
-  startHint: string;
-  onActivate?: (() => void) | undefined;
-}> = ({ stage, message, surpriseHint, startHint, onActivate }) => {
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (onActivate && (e.key === 'Enter' || e.key === ' ')) onActivate();
-  };
-  const interactive = Boolean(onActivate);
-  return (
-    <div
-      style={{ ...fullScreen, cursor: interactive ? 'pointer' : 'default', textAlign: 'center' }}
-      onClick={onActivate}
-      onKeyDown={handleKeyDown}
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-    >
-      <div style={{ display: 'grid', gap: 'var(--cb-s5)', justifyItems: 'center' }}>
-        {stage === 'prompt' ? (
-          <>
-            <span style={bigEmoji} aria-hidden="true">
-              🎁
-            </span>
-            <p style={bigGold}>{surpriseHint}</p>
-          </>
-        ) : (
-          <>
-            <span style={bigEmoji} aria-hidden="true">
-              🎂
-            </span>
-            <h1 style={{ ...bigText, color: 'var(--cb-cream)' }}>{message}</h1>
-          </>
-        )}
-
-        {stage === 'ready' && (
-          <p style={bigGold}>
-            <span aria-hidden="true">➡️</span> {startHint}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-};
-
 export const Intro: FC<{ onDone: () => void }> = ({ onDone }) => {
   const t = useT();
-  const sound = useSoundApi();
-  const [stage, setStage] = useState<'loading' | TBirthdayStage>('loading');
   const [step, setStep] = useState(0);
   const [assetsReady, setAssetsReady] = useState(false);
 
-  // Download assets during the loading view.
+  // Download critical assets during the splash.
   useEffect(() => {
     let cancelled = false;
     void preloadAssets().then(() => {
@@ -183,48 +114,17 @@ export const Intro: FC<{ onDone: () => void }> = ({ onDone }) => {
     };
   }, []);
 
-  // Stepped loading bar.
+  // Stepped retro loading bar.
   useEffect(() => {
-    if (stage !== 'loading') return;
     const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS)), STEP_MS);
     return () => clearInterval(id);
-  }, [stage]);
+  }, []);
 
-  // Advance to the birthday once the bar is full AND assets are ready.
+  // Bar full AND assets ready → into the app.
   useEffect(() => {
-    if (stage === 'loading' && step >= STEPS && assetsReady) setStage('prompt');
-  }, [stage, step, assetsReady]);
+    if (step >= STEPS && assetsReady) onDone();
+  }, [step, assetsReady, onDone]);
 
-  // Surprise music has a finite length → reveal "tap to start" and drop the
-  // volume back to normal when it ends.
-  useEffect(() => {
-    if (stage !== 'reveal') return;
-    const id = setTimeout(() => {
-      sound.setVolume(NORMAL_VOLUME);
-      setStage('ready');
-    }, BIRTHDAY_MS);
-    return () => clearTimeout(id);
-  }, [stage, sound]);
-
-  const handleStartSurprise = () => {
-    sound.unlock(); // first gesture — unlocks audio for the rest of the app
-    sound.setVolume(BIRTHDAY_VOLUME); // crank it up for the surprise
-    sound.play('mus.birthday');
-    setStage('reveal');
-  };
-
-  if (stage === 'loading') {
-    const progress = assetsReady ? step / STEPS : Math.min(step / STEPS, 0.9);
-    return <StudioSplash progress={progress} label={t('splash.studio')} />;
-  }
-
-  return (
-    <BirthdayCard
-      stage={stage}
-      message={t('splash.birthday')}
-      surpriseHint={t('splash.surprise')}
-      startHint={t('splash.start')}
-      onActivate={stage === 'prompt' ? handleStartSurprise : stage === 'ready' ? onDone : undefined}
-    />
-  );
+  const progress = assetsReady ? step / STEPS : Math.min(step / STEPS, 0.9);
+  return <StudioSplash progress={progress} label={t('splash.studio')} />;
 };
