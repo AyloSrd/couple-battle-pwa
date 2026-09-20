@@ -53,7 +53,7 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
         }}
       >
         <Sprite name="ui-lock" size={14} />
-        <span>{t('flash.side.answerers.title')}</span>
+        <span>{t('flash.side.chip.answerers')}</span>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
