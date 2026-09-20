@@ -133,6 +133,8 @@ export const fr = {
   "setup.names.p2": "Prénom joueur·euse 2",
   "setup.names.required": "Il nous faut vos deux prénoms !",
   "setup.names.duplicate": "Deux joueur·euses ont le même prénom ! Ajoute un surnom pour les différencier.",
+  "setup.pass.title": "Passez le téléphone au duo suivant !",
+  "setup.pass.confirm": "C'est nous !",
   "setup.names.title": "Qui joue chez {team} ?",
   "setup.ready": "Tout le monde est là !",
   "setup.team.pick": "Duo {n} : choisissez votre équipe !",

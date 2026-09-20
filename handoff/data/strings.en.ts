@@ -133,6 +133,8 @@ export const en = {
   "setup.names.p2": "Player 2 first name",
   "setup.names.required": "We need both your first names!",
   "setup.names.duplicate": "Two players have the same name! Add a nickname to tell them apart.",
+  "setup.pass.title": "Pass the phone to the next duo!",
+  "setup.pass.confirm": "That's us!",
   "setup.names.title": "Who's playing for {team}?",
   "setup.ready": "Everyone's in!",
   "setup.team.pick": "Duo {n}: pick your team!",

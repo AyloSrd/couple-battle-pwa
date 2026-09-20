@@ -1,224 +1,104 @@
-import { useEffect, useState, type ChangeEvent, type CSSProperties, type FC } from 'react';
+import { useEffect, useReducer, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { useDraftGame } from '@/shared/session';
-import { AVATAR_IDS, type TAvatarId, type TTeam, type TRoster } from '@/shared/game';
-import { Screen, PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
+import { type TAvatarId, type TRoster } from '@/shared/game';
+import { Screen, PixelButton } from '@/shared/Chrome';
+import { initSetup, reduceSetup } from './domain/machine';
+import { TeamPick } from './components/TeamPick';
+import { NameEntry } from './components/NameEntry';
+import { SetupPass } from './components/SetupPass';
 
 const COUNTS = [1, 2, 3, 4] as const;
 
-/** True if `names` holds a repeat once trimmed and compared case-insensitively. */
-function hasDuplicateName(names: string[]): boolean {
-  const seen = new Set<string>();
-  for (const raw of names) {
-    const key = raw.trim().toLocaleLowerCase();
-    if (seen.has(key)) return true;
-    seen.add(key);
-  }
-  return false;
-}
-
-const inputStyle: CSSProperties = {
-  fontFamily: 'var(--cb-font-body)',
-  fontSize: 'var(--cb-fs-body)',
-  padding: 'var(--cb-s2) var(--cb-s3)',
-  border: 'var(--cb-border)',
-  background: 'var(--cb-white)',
-  width: '100%',
-  boxSizing: 'border-box',
-};
-
+/**
+ * V-Setup — the roster-building wizard. One route, one view; a pure sub-machine
+ * (domain/machine) drives the steps: count → per couple [TEAM → NAMES → (PASS
+ * between couples)] → mode select. Back moves one step and never loses another
+ * couple's entry.
+ */
 export const SetupView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
   const sound = useSoundApi();
   const { setRoster } = useDraftGame();
 
-  const [count, setCount] = useState<number | null>(null);
-  const [teams, setTeams] = useState<TTeam[]>([]);
-  const [avatar, setAvatar] = useState<TAvatarId | null>(null);
-  const [name1, setName1] = useState('');
-  const [name2, setName2] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [taken, setTaken] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(reduceSetup, undefined, initSetup);
 
+  // Final couple locked in → seed the draft roster and head to mode select.
   useEffect(() => {
-    if (!taken) return;
-    const id = setTimeout(() => setTaken(null), 1600);
-    return () => clearTimeout(id);
-  }, [taken]);
-
-  const takenAvatars = new Set(teams.map((team) => team.avatarId));
-  const coupleIdx = teams.length;
-
-  const resetCoupleForm = () => {
-    setAvatar(null);
-    setName1('');
-    setName2('');
-    setError(null);
-  };
-
-  const makePickCount = (n: number) => () => {
-    sound.play('sfx.select');
-    setCount(n);
-  };
-
-  const makeSelectAvatar = (id: TAvatarId) => () => {
-    if (takenAvatars.has(id)) {
-      sound.play('sfx.error');
-      setTaken(t('setup.team.taken'));
-      return;
-    }
-    sound.play('sfx.select');
-    setAvatar(id);
-  };
-
-  const handleConfirmCouple = () => {
-    if (!avatar) {
-      sound.play('sfx.error');
-      setError(t('setup.team.pick', { n: coupleIdx + 1 }));
-      return;
-    }
-    if (!name1.trim() || !name2.trim()) {
-      sound.play('sfx.error');
-      setError(t('setup.names.required'));
-      return;
-    }
-    // Names must be unique across the WHOLE roster (trim + case-insensitive) so
-    // "{name}" prompts never point at two people at once.
-    const rosterNames = teams.flatMap((team) => team.players).concat(name1, name2);
-    if (hasDuplicateName(rosterNames)) {
-      sound.play('sfx.error');
-      setError(t('setup.names.duplicate'));
-      return;
-    }
-    const team: TTeam = {
-      teamId: `t${coupleIdx + 1}`,
-      avatarId: avatar,
-      players: [name1.trim(), name2.trim()],
-    };
-    const nextTeams = [...teams, team];
-    sound.play('sfx.select');
-
-    if (count !== null && nextTeams.length >= count) {
-      setRoster(nextTeams as TRoster);
+    if (state.step === 'done') {
+      setRoster(state.teams as TRoster);
       navigate({ to: '/mode' });
-      return;
     }
-    setTeams(nextTeams);
-    resetCoupleForm();
-  };
+  }, [state.step, state.teams, setRoster, navigate]);
 
   const handleBack = () => {
     sound.play('sfx.back');
-    if (count === null) {
+    if (state.step === 'count') {
       navigate({ to: '/' });
-    } else if (coupleIdx === 0) {
-      setCount(null);
-    } else {
-      const prev = teams[teams.length - 1]!;
-      setTeams(teams.slice(0, -1));
-      setAvatar(prev.avatarId);
-      setName1(prev.players[0]);
-      setName2(prev.players[1]);
+      return;
     }
+    dispatch({ type: 'back' });
   };
 
-  const handleName1 = (e: ChangeEvent<HTMLInputElement>) => setName1(e.target.value);
-  const handleName2 = (e: ChangeEvent<HTMLInputElement>) => setName2(e.target.value);
+  const handlePickCount = (n: number) => () => {
+    sound.play('sfx.select');
+    dispatch({ type: 'pickCount', count: n });
+  };
+  const handleSelectAvatar = (id: TAvatarId) => dispatch({ type: 'selectAvatar', avatarId: id });
+  const handleTeamNext = () => {
+    sound.play('sfx.select');
+    dispatch({ type: 'confirmTeam' });
+  };
+  const handleChangeName = (which: 1 | 2, value: string) => dispatch({ type: 'setName', which, value });
+  const handleNamesConfirm = () => {
+    // Pure preview so the sound matches the outcome (advance vs. validation error).
+    const next = reduceSetup(state, { type: 'confirmNames' });
+    sound.play(next.error ? 'sfx.error' : 'sfx.select');
+    dispatch({ type: 'confirmNames' });
+  };
+  const handlePassConfirm = () => {
+    sound.play('sfx.tap');
+    dispatch({ type: 'confirmPass' });
+  };
+
+  if (state.step === 'done') return null;
 
   return (
     <Screen>
-      <PixelButton variant="ghost" onClick={handleBack}>
+      <PixelButton variant="ghost" onClick={handleBack} style={{ alignSelf: 'flex-start' }}>
         ← {t('common.back')}
       </PixelButton>
 
-      {count === null ? (
+      {state.step === 'count' && (
         <>
           <h1 className="cb-title">{t('setup.title')}</h1>
           <p className="cb-heading">{t('setup.couples.count')}</p>
           <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
             {COUNTS.map((n) => (
-              <PixelButton key={n} variant="primary" block onClick={makePickCount(n)}>
+              <PixelButton key={n} variant="primary" block onClick={handlePickCount(n)}>
                 {n}
               </PixelButton>
             ))}
           </div>
+          <p className="cb-muted" style={{ margin: 0, fontSize: 'var(--cb-fs-small)' }}>
+            {t('setup.couples.solo.hint')}
+          </p>
         </>
-      ) : (
-        <>
-          <h1 className="cb-title">{t('setup.team.pick', { n: coupleIdx + 1 })}</h1>
+      )}
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(5, 1fr)',
-              gap: 'var(--cb-s2)',
-            }}
-          >
-            {AVATAR_IDS.map((id) => {
-              const isTaken = takenAvatars.has(id);
-              const isSelected = avatar === id;
-              return (
-                <PixelButton
-                  key={id}
-                  variant={isSelected ? 'primary' : 'ghost'}
-                  onClick={makeSelectAvatar(id)}
-                  aria-label={id}
-                  style={{ padding: 'var(--cb-s1)', position: 'relative' }}
-                >
-                  <Sprite
-                    name={`avatar-${id}`}
-                    size={32}
-                    style={isTaken ? { filter: 'grayscale(1)', opacity: 0.5 } : {}}
-                  />
-                  {isTaken && (
-                    <Sprite
-                      name="ui-lock"
-                      size={12}
-                      style={{ position: 'absolute', top: 2, right: 2 }}
-                    />
-                  )}
-                </PixelButton>
-              );
-            })}
-          </div>
+      {state.step === 'team' && (
+        <TeamPick state={state} onSelect={handleSelectAvatar} onNext={handleTeamNext} />
+      )}
 
-          {taken && (
-            <p style={{ margin: 0, color: 'var(--cb-red)', fontSize: 'var(--cb-fs-small)' }}>
-              {taken}
-            </p>
-          )}
+      {state.step === 'names' && (
+        <NameEntry state={state} onChangeName={handleChangeName} onConfirm={handleNamesConfirm} />
+      )}
 
-          <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s3)' }}>
-            <input
-              style={inputStyle}
-              placeholder={t('setup.names.p1')}
-              value={name1}
-              onChange={handleName1}
-              autoFocus
-              maxLength={16}
-            />
-            <input
-              style={inputStyle}
-              placeholder={t('setup.names.p2')}
-              value={name2}
-              onChange={handleName2}
-              maxLength={16}
-            />
-          </PixelPanel>
-
-          {error && (
-            <p style={{ margin: 0, color: 'var(--cb-red)', fontSize: 'var(--cb-fs-small)' }}>
-              {error}
-            </p>
-          )}
-
-          <PixelButton variant="gold" block onClick={handleConfirmCouple}>
-            {count !== null && coupleIdx + 1 >= count ? t('setup.ready') : t('common.next')}
-          </PixelButton>
-        </>
+      {state.step === 'pass' && (
+        <SetupPass nextCoupleNumber={state.coupleIdx + 1} onConfirm={handlePassConfirm} />
       )}
     </Screen>
   );
