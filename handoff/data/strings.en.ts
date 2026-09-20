@@ -23,6 +23,7 @@ export const en = {
   "count.2": "2",
   "count.3": "3",
   "count.go": "POINT!",
+  "count.go.answer": "ANSWER!",
   "diff.easy.desc": "Chill: everyday basics.",
   "diff.easy.name": "Love Starter",
   "diff.hard.desc": "Red zone: secrets and unspoken truths.",
