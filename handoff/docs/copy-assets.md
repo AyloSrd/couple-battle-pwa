@@ -49,16 +49,18 @@
 |---|---|---|
 | `spr.logo` | 96×32 | Pixel wordmark "COUPLE BATTLE" — two hearts clashing like fighters, tiny VS spark between them |
 | `spr.logo.icon` | 32×32 | Icon-only version (the two clashing hearts) → also source of PWA icons (192/512 maskable) & favicon |
-| `spr.avatar.penguins` | 32×32 | Team Manchots — two penguins side by side, one with a tiny bow |
-| `spr.avatar.otters` | 32×32 | Team Loutres — two otters holding hands (they do that for real) |
-| `spr.avatar.lions` | 32×32 | Team Lions — lion + lioness, smug faces |
-| `spr.avatar.pandas` | 32×32 | Team Pandas — one upside down |
-| `spr.avatar.frogs` | 32×32 | Team Grenouilles — one mid-jump |
-| `spr.avatar.foxes` | 32×32 | Team Renards — sly grins |
-| `spr.avatar.ducks` | 32×32 | Team Coin-Coin — rubber-duck yellow |
-| `spr.avatar.cats` | 32×32 | Team Chats — one asleep, obviously |
-| `spr.avatar.pizzas` | 32×32 | Team Pizzas — two slices, pepperoni hearts |
-| `spr.avatar.cocktails` | 32×32 | Team Cocktails — two clinking martinis, one cherry |
+| `spr.avatar.penguins` | 32×32 | Team Pingouins — two penguins, big white eye patches, orange beaks |
+| `spr.avatar.otters` | 32×32 | Team Loutres — two otters with lighter muzzles (they hold hands for real) |
+| `spr.avatar.lions` | 32×32 | Team Lions — spiky manes, smug tan faces |
+| `spr.avatar.pandas` | 32×32 | Team Pandas — black ears and eye patches |
+| `spr.avatar.foxes` | 32×32 | Team Renards — dark-tipped ears, sly grins |
+| `spr.avatar.squirrels` | 32×32 | Team Écureuils — tufted ears, tan muzzles |
+| `spr.avatar.rabbits` | 32×32 | Team Lapins — tall pink-lined ears, blush cheeks |
+| `spr.avatar.bears` | 32×32 | Team Ours — dark brown, round ears, light muzzle |
+| `spr.avatar.raccoons` | 32×32 | Team Ratons Laveurs — black bandit eye masks |
+| `spr.avatar.mice` | 32×32 | Team Souris — big round pink-lined ears |
+| `spr.avatar.ermines` | 32×32 | Team Hermines — sleek white, blush cheeks |
+| `spr.avatar.owls` | 32×32 | Team Chouettes — ear tufts, big white eye discs, gold beak |
 | `spr.ui.btn` | 9-slice | Chunky pixel button (normal / pressed / disabled states) |
 | `spr.ui.panel` | 9-slice | Dialog/card frame with pixel border |
 | `spr.ui.dots` | 8×8 ×3 | Progress dots (empty / current / done) |
@@ -73,7 +75,7 @@
 | `spr.ui.flag.fr` / `spr.ui.flag.en` | 16×12 | Language toggle flags |
 | `spr.ui.confetti` | 8×8 ×4 | Confetti particles (4 shapes, tinted in code) |
 
-Team names (also strings): `team.penguins` Les Manchots / The Penguins · `team.otters` Les Loutres / The Otters · `team.lions` Les Lions / The Lions · `team.pandas` Les Pandas / The Pandas · `team.frogs` Les Grenouilles / The Frogs · `team.foxes` Les Renards / The Foxes · `team.ducks` Les Coin-Coin / The Quack-Quacks · `team.cats` Les Chats / The Cats · `team.pizzas` Les Pizzas / The Pizzas · `team.cocktails` Les Cocktails / The Cocktails
+Team names (also strings): `team.penguins` Les Pingouins / The Penguins · `team.otters` Les Loutres / The Otters · `team.lions` Les Lions / The Lions · `team.pandas` Les Pandas / The Pandas · `team.foxes` Les Renards / The Foxes · `team.squirrels` Les Écureuils / The Squirrels · `team.rabbits` Les Lapins / The Rabbits · `team.bears` Les Ours / The Bears · `team.raccoons` Les Ratons Laveurs / The Raccoons · `team.mice` Les Souris / The Mice · `team.ermines` Les Hermines / The Ermines · `team.owls` Les Chouettes / The Owls
 
 ### Global sounds (Web Audio synth)
 
@@ -195,7 +197,7 @@ Team names (also strings): `team.penguins` Les Manchots / The Penguins · `team.
 
 ### Assets
 
-- The 8 `spr.avatar.*` in a picker grid; selected = `anim.avatar.selected` (bounce + spark), taken = grayscale + `spr.ui.lock`.
+- The 12 `spr.avatar.*` in a picker grid; selected = `anim.avatar.selected` (bounce + spark), taken = grayscale + `spr.ui.lock`.
 - `anim.avatar.hello`: on selection, the avatar does a 2-frame wave.
 - `sfx.select`: rising square arpeggio (2 notes); `sfx.error` when picking a taken avatar.
 
@@ -503,7 +505,7 @@ Team names (also strings): `team.penguins` Les Manchots / The Penguins · `team.
 
 | Priority | Assets |
 |---|---|
-| P0 (blocks everything) | `spr.logo`, `spr.logo.icon` (+ PWA icon exports), 8 × `spr.avatar.*`, `spr.ui.btn`, `spr.ui.panel` |
+| P0 (blocks everything) | `spr.logo`, `spr.logo.icon` (+ PWA icon exports), 12 × `spr.avatar.*`, `spr.ui.btn`, `spr.ui.panel` |
 | P1 (core game feel) | `spr.card.back/front`, `spr.count.*` digits, `spr.ui.crown`, `spr.ui.heart`, `spr.ui.skull`, `spr.ui.spark`, `spr.ui.lock`, `spr.ui.dots` |
 | P2 (polish) | `spr.mode.*`, `spr.diff.*`, 12 × `spr.theme.*`, `spr.ui.eye.no`, `spr.ui.gear`, `spr.ui.pause`, `spr.ui.toggle`, `spr.ui.flag.*`, `spr.ui.confetti`, `spr.demo.phone`, `spr.demo.bubble`, `spr.bg.hearts` |
 

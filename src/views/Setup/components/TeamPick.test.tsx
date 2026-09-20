@@ -48,4 +48,19 @@ describe('V-Setup Step A — team grid', () => {
     expect(screen.queryByText('Les Manchots')).toBeNull();
     expect(screen.getByText('Les Pingouins')).toBeInTheDocument();
   });
+
+  it('team-name labels use the BODY font and keep their accents intact (É, not a shrunken pixel glyph)', () => {
+    mountGrid();
+    for (const id of AVATAR_IDS) {
+      const tile = screen.getByRole('button', { name: id });
+      const label = [...tile.querySelectorAll('span')].find((s) => s.textContent === fr[`team.${id}`]);
+      expect(label, `label for ${id}`).toBeDefined();
+      // explicit body font on the label — the surrounding .cb-btn is the pixel display font
+      expect(label!.style.fontFamily).toBe('var(--cb-font-body)');
+    }
+    // the accented names come through exactly as in the string data
+    expect(screen.getByText('Les Écureuils')).toBeInTheDocument();
+    expect(screen.getByText('Les Ratons Laveurs')).toBeInTheDocument();
+    expect(screen.getByText('Les Hermines')).toBeInTheDocument();
+  });
 });
