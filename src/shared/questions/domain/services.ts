@@ -36,15 +36,20 @@ export function modeQuestionTypes(mode: TMode): TQuestionType[] {
   return [QuestionType.Open, QuestionType.ThisOrThat, QuestionType.YesNo];
 }
 
+/** Flash draws 2 questions per round, SHARED by every couple, over 2 rounds. */
+const FLASH_SHARED = 2 * 2;
+const ULTIME_DILEMMA = 5;
+const ULTIME_RAPID_PER_COUPLE = 5;
+
 /**
- * Deck size to draw at game start.
+ * Deck size to draw at game start (mirrors the Play machine's layout).
  * - dilemma: 10 shared questions
- * - flash: 3 questions × 2 rounds × each couple (= couples × 6)
- * - ultime: placeholder until Phase 4
+ * - flash: the shared block — 2 questions × 2 rounds, whatever the couple count
+ * - ultime: shared Flash block + 5 Dilemma + 5 rapid-fire per couple
  */
 export function deckSizeFor(mode: TMode, coupleCount: number): number {
-  if (mode === Mode.Flash) return coupleCount * 6;
-  if (mode === Mode.Ultime) return coupleCount * 6;
+  if (mode === Mode.Flash) return FLASH_SHARED;
+  if (mode === Mode.Ultime) return FLASH_SHARED + ULTIME_DILEMMA + ULTIME_RAPID_PER_COUPLE * coupleCount;
   return 10;
 }
 

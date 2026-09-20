@@ -15,8 +15,13 @@ describe('newGameSnapshot', () => {
     expect(snap.secretAnswers).toEqual({});
   });
 
-  it('opens flash at the pass-phone step', () => {
+  it('opens flash on the answerers group gate', () => {
     const snap = newGameSnapshot({ roster, mode: 'flash', difficulty: 'mix', themes: [], deck: [] });
-    expect(snap.cursor.phase).toBe('passSecret');
+    expect(snap.cursor.phase).toBe('sideAnswerers');
+  });
+
+  it('opens ultime on its flash segment too (not the dilemma slice)', () => {
+    const snap = newGameSnapshot({ roster, mode: 'ultime', difficulty: 'mix', themes: [], deck: [] });
+    expect(snap.cursor.phase).toBe('sideAnswerers');
   });
 });

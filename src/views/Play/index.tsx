@@ -11,7 +11,7 @@ import {
   toSnapshot,
   fromSnapshot,
   initGame,
-  flashQuestion,
+  flashTruth,
   answererIndex,
   type TGameState,
   type TResult,
@@ -24,6 +24,8 @@ import { Scoreboard } from './components/Scoreboard';
 import { FinalScreen, type TSoloResult } from './components/FinalScreen';
 import { PauseSheet } from './components/PauseSheet';
 import { PassPhone } from './components/PassPhone';
+import { SideGate } from './components/SideGate';
+import { Handoff } from './components/Handoff';
 import { SecretAnswers } from './components/SecretAnswers';
 import { GuessReveal } from './components/GuessReveal';
 import { Judge } from './components/Judge';
@@ -128,8 +130,7 @@ export const PlayView: FC = () => {
   };
   const handleAutoGuess = (guess: string) => {
     if (game?.kind !== 'guess') return;
-    const q = flashQuestion(game);
-    const truth = q ? game.secretAnswers[String(q.id)] : undefined;
+    const truth = flashTruth(game);
     sound.play(truth !== undefined && guess === truth ? 'sfx.point.exact' : 'sfx.point.miss');
     dispatch({ type: 'autoGuess', guess });
   };
@@ -200,6 +201,7 @@ export const PlayView: FC = () => {
   if (game.kind === 'rapidCountdown') return <Countdown ticks={2} onDone={handleCountdownDone} />;
 
   const showPause = game.kind !== 'final';
+  const solo = game.roster.length === 1;
 
   /** Names for the couple currently in the Flash spotlight. */
   const namesFor = (round: number, coupleIdx: number) => {
@@ -231,29 +233,43 @@ export const PlayView: FC = () => {
       {game.kind === 'question' && <DilemmaQuestion state={game} onReady={handleReady} />}
       {game.kind === 'resolve' && <DilemmaResolve state={game} onConfirm={handleConfirm} />}
 
-      {game.kind === 'passSecret' &&
+      {/* Flash "sofa sides": group gates for ≥2 couples; solo has no group to
+          share with, so its gates are the strict no-peek pass-phone screens. */}
+      {game.kind === 'sideAnswerers' &&
+        (solo ? (
+          (() => {
+            const n = namesFor(game.round, 0);
+            return (
+              <PassPhone
+                variant="secret"
+                avatarId={n.avatarId}
+                name={n.answererName}
+                teamName={n.teamName}
+                onConfirm={handlePassConfirm}
+              />
+            );
+          })()
+        ) : (
+          <SideGate side="answerers" onConfirm={handlePassConfirm} />
+        ))}
+      {game.kind === 'handoff' &&
         (() => {
           const n = namesFor(game.round, game.coupleIdx);
-          return (
-            <PassPhone
-              variant="secret"
-              avatarId={n.avatarId}
-              name={n.answererName}
-              teamName={n.teamName}
-              onConfirm={handlePassConfirm}
-            />
-          );
+          return <Handoff avatarId={n.avatarId} name={n.answererName} onConfirm={handlePassConfirm} />;
         })()}
       {game.kind === 'secretInput' && (
-        <SecretAnswers key={game.questionIdx} state={game} onLock={handleLock} />
+        <SecretAnswers key={`${game.questionIdx}-${game.coupleIdx}`} state={game} onLock={handleLock} />
       )}
-      {game.kind === 'passBack' && (
-        <PassPhone
-          variant="back"
-          avatarId={namesFor(game.round, game.coupleIdx).avatarId}
-          onConfirm={handlePassConfirm}
-        />
-      )}
+      {game.kind === 'sideGuessers' &&
+        (solo ? (
+          <PassPhone
+            variant="back"
+            avatarId={namesFor(game.round, 0).avatarId}
+            onConfirm={handlePassConfirm}
+          />
+        ) : (
+          <SideGate side="guessers" onConfirm={handlePassConfirm} />
+        ))}
       {game.kind === 'guess' &&
         (() => {
           const n = namesFor(game.round, game.coupleIdx);

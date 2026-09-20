@@ -15,8 +15,13 @@ import { interpolate } from '@/shared/i18n/domain/services';
  * resumes exactly.
  *
  *  DILEMMA: question → countdown → resolve → … → final (scoreboard at halfway).
- *  FLASH: per couple/round — passSecret → secretInput ×N → passBack →
- *    guess/judge ×N; roles swap each round; scoreboard between rounds; final.
+ *  FLASH ("sofa sides", à la Les Z'amours): per round, 2 questions SHARED by
+ *    every couple. Answerers (player 1 of each couple) sit on one side and the
+ *    phone circulates among them, interleaved by question (Q1 for every couple,
+ *    then Q2) — sideAnswerers gate → [handoff → secretInput] per slot. Then the
+ *    phone crosses to the guessers' side — sideGuessers gate → [guess → judge]
+ *    per slot, same interleaving so the table compares answers to one question
+ *    back-to-back. Roles swap each round; scoreboard between rounds; final.
  *  ULTIME: a COMPOSITION that reuses the Flash and Dilemma flows as segments,
  *    driven by a single `round` counter, then a rapid-fire finale:
  *      round 0 = Flash r0 (2 q/partner) → round 1 = Flash r1 → round 2 =
@@ -35,10 +40,15 @@ export const FLASH_CLOSE_POINTS = 1;
 export const RAPID_SYNCHRO_POINTS = 2;
 export const FLASH_ROUNDS = 2;
 
-// Ultime layout (per couple): Flash 2 q/partner × 2 rounds, Dilemma 5 shared,
+// Flash ("sofa sides"): each round draws FLASH_SET questions SHARED by every
+// couple. Answerers of all couples answer them on one side of the sofa, then
+// the phone crosses and guessers guess them back-to-back per question.
+export const FLASH_SET = 2;
+/** Shared flash block size — independent of the couple count. */
+export const FLASH_SHARED_DECK = FLASH_SET * FLASH_ROUNDS;
+
+// Ultime layout: the shared Flash block, then Dilemma 5 shared, then
 // Rapid-fire 5 per couple.
-export const ULTIME_FLASH_SET = 2;
-export const FLASH_SET_STANDALONE = 3;
 export const ULTIME_DILEMMA_COUNT = 5;
 export const ULTIME_RAPID_PER_COUPLE = 5;
 
@@ -63,12 +73,16 @@ export type TGameState =
   | ({ kind: 'question'; questionIdx: number } & TGameContext)
   | ({ kind: 'countdown'; questionIdx: number } & TGameContext)
   | ({ kind: 'resolve'; questionIdx: number; coupleIdx: number; results: TResolveResults } & TGameContext)
-  // Flash (also the Ultime flash segment)
-  | ({ kind: 'passSecret'; round: number; coupleIdx: number } & TGameContext)
-  | ({ kind: 'secretInput'; round: number; coupleIdx: number; questionIdx: number; secretAnswers: TSecretAnswers } & TGameContext)
-  | ({ kind: 'passBack'; round: number; coupleIdx: number; secretAnswers: TSecretAnswers } & TGameContext)
-  | ({ kind: 'guess'; round: number; coupleIdx: number; questionIdx: number; secretAnswers: TSecretAnswers } & TGameContext)
-  | ({ kind: 'judge'; round: number; coupleIdx: number; questionIdx: number; secretAnswers: TSecretAnswers } & TGameContext)
+  // Flash "sofa sides" (also the Ultime flash segment). Cursor = {round, phase,
+  // questionIdx, coupleIdx}; slots iterate coupleIdx fastest, then questionIdx.
+  //   collect: sideAnswerers (group gate) → [handoff → secretInput] per slot
+  //   guess:   sideGuessers  (group gate) → [guess → judge]        per slot
+  | ({ kind: 'sideAnswerers'; round: number } & TGameContext)
+  | ({ kind: 'handoff'; round: number; questionIdx: number; coupleIdx: number; secretAnswers: TSecretAnswers } & TGameContext)
+  | ({ kind: 'secretInput'; round: number; questionIdx: number; coupleIdx: number; secretAnswers: TSecretAnswers } & TGameContext)
+  | ({ kind: 'sideGuessers'; round: number; secretAnswers: TSecretAnswers } & TGameContext)
+  | ({ kind: 'guess'; round: number; questionIdx: number; coupleIdx: number; secretAnswers: TSecretAnswers } & TGameContext)
+  | ({ kind: 'judge'; round: number; questionIdx: number; coupleIdx: number; secretAnswers: TSecretAnswers } & TGameContext)
   // Rapid-fire (Ultime finale)
   | ({ kind: 'rapidIntro' } & TGameContext)
   | ({ kind: 'rapidTurn'; coupleIdx: number } & TGameContext)
@@ -101,47 +115,81 @@ export type TGameConfig = {
 
 // ---- Parameters ------------------------------------------------------------
 
-export function flashSetSize(mode: TMode): number {
-  return mode === 'ultime' ? ULTIME_FLASH_SET : FLASH_SET_STANDALONE;
+/** Questions per partner per round — the same for standalone Flash and Ultime. */
+export function flashSetSize(_mode: TMode): number {
+  return FLASH_SET;
 }
-export function dilemmaOffset(mode: TMode, numCouples: number): number {
-  return mode === 'ultime' ? ULTIME_FLASH_SET * FLASH_ROUNDS * numCouples : 0;
+/** Ultime's Dilemma slice starts right after the shared Flash block. */
+export function dilemmaOffset(mode: TMode): number {
+  return mode === 'ultime' ? FLASH_SHARED_DECK : 0;
 }
 export function dilemmaTotal(mode: TMode, deckLength: number): number {
   return mode === 'ultime' ? ULTIME_DILEMMA_COUNT : deckLength;
 }
-export function rapidOffset(numCouples: number): number {
-  return ULTIME_FLASH_SET * FLASH_ROUNDS * numCouples + ULTIME_DILEMMA_COUNT;
+export function rapidOffset(): number {
+  return FLASH_SHARED_DECK + ULTIME_DILEMMA_COUNT;
 }
 /** Dilemma scoreboard is only mid-game for standalone Dilemma (not Ultime). */
 export function scoreboardAt(mode: TMode, deckLength: number): number {
   return mode === 'ultime' ? -1 : Math.floor(deckLength / 2);
 }
 
-export function flashDeckIndex(numCouples: number, set: number, round: number, coupleIdx: number, questionIdx: number): number {
-  return (round * numCouples + coupleIdx) * set + questionIdx;
+/** Deck index of a round's shared question — identical for every couple. */
+export function flashSharedIndex(round: number, questionIdx: number): number {
+  return round * FLASH_SET + questionIdx;
 }
-export function flashDeckSize(numCouples: number): number {
-  return numCouples * FLASH_ROUNDS * FLASH_SET_STANDALONE;
+/** Size of the shared Flash block (both modes). */
+export function flashDeckSize(): number {
+  return FLASH_SHARED_DECK;
 }
 export function answererIndex(round: number): 0 | 1 {
   return (round % 2) as 0 | 1;
 }
 
+/** Key for a couple's locked answer to a question; every couple's answers for
+ *  the round coexist until the guessing phase completes. */
+export function answerKey(teamId: string, questionId: number): string {
+  return `${teamId}|${questionId}`;
+}
+
+/** The slot after (questionIdx, coupleIdx), coupleIdx fastest. `null` = phase done. */
+export function nextFlashSlot(
+  numCouples: number,
+  questionIdx: number,
+  coupleIdx: number,
+): { questionIdx: number; coupleIdx: number } | null {
+  if (coupleIdx + 1 < numCouples) return { questionIdx, coupleIdx: coupleIdx + 1 };
+  if (questionIdx + 1 < FLASH_SET) return { questionIdx: questionIdx + 1, coupleIdx: 0 };
+  return null;
+}
+
 // ---- Question accessors (mode + offset aware) ------------------------------
 
+type TFlashSlotState = Extract<TGameState, { kind: 'handoff' | 'secretInput' | 'guess' | 'judge' }>;
+
+function isFlashSlot(state: TGameState): state is TFlashSlotState {
+  return state.kind === 'handoff' || state.kind === 'secretInput' || state.kind === 'guess' || state.kind === 'judge';
+}
+
 export function flashQuestion(state: TGameState): TQuestion | undefined {
-  if (state.kind !== 'secretInput' && state.kind !== 'guess' && state.kind !== 'judge') return undefined;
-  const idx = flashDeckIndex(state.roster.length, flashSetSize(state.mode), state.round, state.coupleIdx, state.questionIdx);
-  return state.deck[idx];
+  if (!isFlashSlot(state)) return undefined;
+  return state.deck[flashSharedIndex(state.round, state.questionIdx)];
+}
+/** The current slot's answerer-locked answer (what the guesser is judged against). */
+export function flashTruth(state: TGameState): string | undefined {
+  if (!isFlashSlot(state)) return undefined;
+  const team = state.roster[state.coupleIdx];
+  const q = flashQuestion(state);
+  if (!team || !q) return undefined;
+  return state.secretAnswers[answerKey(team.teamId, q.id)];
 }
 export function dilemmaQuestion(state: TGameState): TQuestion | undefined {
   if (state.kind !== 'question' && state.kind !== 'resolve') return undefined;
-  return state.deck[dilemmaOffset(state.mode, state.roster.length) + state.questionIdx];
+  return state.deck[dilemmaOffset(state.mode) + state.questionIdx];
 }
 export function rapidQuestionOf(state: TGameState): TQuestion | undefined {
   if (state.kind !== 'rapidQuestion' && state.kind !== 'rapidCountdown' && state.kind !== 'rapidJudge') return undefined;
-  return state.deck[rapidOffset(state.roster.length) + state.coupleIdx * ULTIME_RAPID_PER_COUPLE + state.questionIdx];
+  return state.deck[rapidOffset() + state.coupleIdx * ULTIME_RAPID_PER_COUPLE + state.questionIdx];
 }
 
 /**
@@ -181,7 +229,7 @@ export function initGame(config: TGameConfig): TGameState {
   for (const team of config.roster) scores[team.teamId] = 0;
   const ctx = { ...config, scores };
   if (config.mode === 'flash' || config.mode === 'ultime') {
-    return { kind: 'passSecret', round: 0, coupleIdx: 0, ...ctx };
+    return { kind: 'sideAnswerers', round: 0, ...ctx };
   }
   return { kind: 'question', questionIdx: 0, ...ctx };
 }
@@ -190,7 +238,7 @@ export function initGame(config: TGameConfig): TGameState {
 
 /** Where Ultime goes after finishing `completedRound` (called from a scoreboard). */
 function ultimeNextAfterRound(ctx: TGameContext, completedRound: number): TGameState {
-  if (completedRound === ULTIME_ROUND_FLASH_0) return { kind: 'passSecret', round: 1, coupleIdx: 0, ...ctx };
+  if (completedRound === ULTIME_ROUND_FLASH_0) return { kind: 'sideAnswerers', round: 1, ...ctx };
   if (completedRound === ULTIME_ROUND_FLASH_1) return { kind: 'question', questionIdx: 0, ...ctx };
   return { kind: 'rapidIntro', ...ctx }; // after dilemma
 }
@@ -212,29 +260,39 @@ function afterResolve(ctx: TGameContext, questionIdx: number): TGameState {
 
 // ---- Flash helpers ---------------------------------------------------------
 
+/**
+ * The answering slot for (questionIdx, coupleIdx). With several couples the
+ * phone circulates within the answerers' group, so a LIGHT handoff names who's
+ * next; solo has nobody to hand to and goes straight to the input.
+ */
+function collectSlot(
+  ctx: TGameContext,
+  round: number,
+  slot: { questionIdx: number; coupleIdx: number },
+  secretAnswers: TSecretAnswers,
+): TGameState {
+  const kind = ctx.roster.length > 1 ? 'handoff' : 'secretInput';
+  return { kind, round, questionIdx: slot.questionIdx, coupleIdx: slot.coupleIdx, secretAnswers, ...ctx };
+}
+
 function scoreAndAdvanceGuess(
   ctx: TGameContext,
   round: number,
-  coupleIdx: number,
   questionIdx: number,
+  coupleIdx: number,
   secretAnswers: TSecretAnswers,
   points: number,
 ): TGameState {
   const team = ctx.roster[coupleIdx];
   const next = addScore(ctx, team?.teamId, points);
-  const nextQ = questionIdx + 1;
-  if (nextQ < flashSetSize(ctx.mode)) {
-    return { kind: 'guess', round, coupleIdx, questionIdx: nextQ, secretAnswers, ...next };
-  }
-  return advanceFlashCouple(next, round, coupleIdx);
+  const slot = nextFlashSlot(ctx.roster.length, questionIdx, coupleIdx);
+  if (slot) return { kind: 'guess', round, questionIdx: slot.questionIdx, coupleIdx: slot.coupleIdx, secretAnswers, ...next };
+  return finishFlashRound(next, round);
 }
 
-function advanceFlashCouple(ctx: TGameContext, round: number, coupleIdx: number): TGameState {
-  const nextCouple = coupleIdx + 1;
-  if (nextCouple < ctx.roster.length) {
-    return { kind: 'passSecret', round, coupleIdx: nextCouple, ...ctx };
-  }
-  // round complete → scoreboard between rounds (both modes)…
+/** Guessing phase done: the round's locked answers are dropped here. */
+function finishFlashRound(ctx: TGameContext, round: number): TGameState {
+  // scoreboard between rounds (both modes)…
   if (round + 1 < FLASH_ROUNDS || ctx.mode === 'ultime') {
     return { kind: 'scoreboard', round, questionIdx: 0, ...ctx };
   }
@@ -278,39 +336,47 @@ export function reduce(state: TGameState, event: TGameEvent): TGameState {
       return afterResolve(ctx, state.questionIdx);
     }
 
-    case 'passSecret':
+    // ---- Flash: collect phase (answerers' side holds the phone) ----
+    case 'sideAnswerers':
       if (event.type === 'passConfirm') {
-        return { kind: 'secretInput', round: state.round, coupleIdx: state.coupleIdx, questionIdx: 0, secretAnswers: {}, ...contextOf(state) };
+        return collectSlot(contextOf(state), state.round, { questionIdx: 0, coupleIdx: 0 }, {});
+      }
+      return state;
+
+    case 'handoff':
+      if (event.type === 'passConfirm') {
+        return { ...state, kind: 'secretInput' };
       }
       return state;
 
     case 'secretInput': {
       if (event.type !== 'lockAnswer') return state;
       const q = flashQuestion(state);
-      const secretAnswers: TSecretAnswers = q ? { ...state.secretAnswers, [String(q.id)]: event.answer } : state.secretAnswers;
-      const nextQ = state.questionIdx + 1;
-      if (nextQ < flashSetSize(state.mode)) {
-        return { kind: 'secretInput', round: state.round, coupleIdx: state.coupleIdx, questionIdx: nextQ, secretAnswers, ...contextOf(state) };
-      }
-      return { kind: 'passBack', round: state.round, coupleIdx: state.coupleIdx, secretAnswers, ...contextOf(state) };
+      const team = state.roster[state.coupleIdx];
+      const secretAnswers: TSecretAnswers =
+        q && team ? { ...state.secretAnswers, [answerKey(team.teamId, q.id)]: event.answer } : state.secretAnswers;
+      const slot = nextFlashSlot(state.roster.length, state.questionIdx, state.coupleIdx);
+      if (slot) return collectSlot(contextOf(state), state.round, slot, secretAnswers);
+      // every answerer has answered every shared question → phone crosses the sofa
+      return { kind: 'sideGuessers', round: state.round, secretAnswers, ...contextOf(state) };
     }
 
-    case 'passBack':
+    // ---- Flash: guess phase (phone on the table, everyone watching) ----
+    case 'sideGuessers':
       if (event.type === 'passConfirm') {
-        return { kind: 'guess', round: state.round, coupleIdx: state.coupleIdx, questionIdx: 0, secretAnswers: state.secretAnswers, ...contextOf(state) };
+        return { kind: 'guess', round: state.round, questionIdx: 0, coupleIdx: 0, secretAnswers: state.secretAnswers, ...contextOf(state) };
       }
       return state;
 
     case 'guess': {
       const ctx = contextOf(state);
       if (event.type === 'reveal') {
-        return { kind: 'judge', round: state.round, coupleIdx: state.coupleIdx, questionIdx: state.questionIdx, secretAnswers: state.secretAnswers, ...ctx };
+        return { ...state, kind: 'judge' };
       }
       if (event.type === 'autoGuess') {
-        const q = flashQuestion(state);
-        const truth = q ? state.secretAnswers[String(q.id)] : undefined;
+        const truth = flashTruth(state);
         const points = truth !== undefined && event.guess === truth ? FLASH_EXACT_POINTS : 0;
-        return scoreAndAdvanceGuess(ctx, state.round, state.coupleIdx, state.questionIdx, state.secretAnswers, points);
+        return scoreAndAdvanceGuess(ctx, state.round, state.questionIdx, state.coupleIdx, state.secretAnswers, points);
       }
       return state;
     }
@@ -318,7 +384,7 @@ export function reduce(state: TGameState, event: TGameEvent): TGameState {
     case 'judge': {
       if (event.type !== 'judge') return state;
       const points = event.verdict === 'exact' ? FLASH_EXACT_POINTS : event.verdict === 'close' ? FLASH_CLOSE_POINTS : 0;
-      return scoreAndAdvanceGuess(contextOf(state), state.round, state.coupleIdx, state.questionIdx, state.secretAnswers, points);
+      return scoreAndAdvanceGuess(contextOf(state), state.round, state.questionIdx, state.coupleIdx, state.secretAnswers, points);
     }
 
     case 'rapidIntro':
@@ -348,7 +414,7 @@ export function reduce(state: TGameState, event: TGameEvent): TGameState {
       if (event.type === 'next') {
         const ctx = contextOf(state);
         if (state.mode === 'ultime') return ultimeNextAfterRound(ctx, state.round);
-        if (state.mode === 'flash') return { kind: 'passSecret', round: state.round + 1, coupleIdx: 0, ...ctx };
+        if (state.mode === 'flash') return { kind: 'sideAnswerers', round: state.round + 1, ...ctx };
         return { kind: 'question', questionIdx: state.questionIdx, ...ctx };
       }
       return state;
@@ -405,16 +471,18 @@ export function fromSnapshot(snapshot: TGameSnapshot): TGameState {
     case 'countdown':
     case 'question':
       return { kind: 'question', questionIdx, ...ctx };
-    case 'passSecret':
-      return { kind: 'passSecret', round, coupleIdx, ...ctx };
+    case 'sideAnswerers':
+      return { kind: 'sideAnswerers', round, ...ctx };
+    case 'handoff':
+      return { kind: 'handoff', round, questionIdx, coupleIdx, secretAnswers, ...ctx };
     case 'secretInput':
-      return { kind: 'secretInput', round, coupleIdx, questionIdx, secretAnswers, ...ctx };
-    case 'passBack':
-      return { kind: 'passBack', round, coupleIdx, secretAnswers, ...ctx };
+      return { kind: 'secretInput', round, questionIdx, coupleIdx, secretAnswers, ...ctx };
+    case 'sideGuessers':
+      return { kind: 'sideGuessers', round, secretAnswers, ...ctx };
     case 'guess':
-      return { kind: 'guess', round, coupleIdx, questionIdx, secretAnswers, ...ctx };
+      return { kind: 'guess', round, questionIdx, coupleIdx, secretAnswers, ...ctx };
     case 'judge':
-      return { kind: 'judge', round, coupleIdx, questionIdx, secretAnswers, ...ctx };
+      return { kind: 'judge', round, questionIdx, coupleIdx, secretAnswers, ...ctx };
     case 'rapidIntro':
       return { kind: 'rapidIntro', ...ctx };
     case 'rapidTurn':

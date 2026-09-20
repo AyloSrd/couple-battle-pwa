@@ -39,20 +39,21 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
 
   return (
-    <div
-      style={{
-        flex: 1,
-        display: 'grid',
-        gap: 'var(--cb-s4)',
-        alignContent: 'start',
-        // subtle "secret" vignette
-        boxShadow: 'inset 0 0 60px rgba(26,28,44,0.25)',
-        padding: 'var(--cb-s3)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--cb-s2)', justifyContent: 'center' }}>
-        <Sprite name="ui-lock" size={16} />
-        <span className="cb-heading">{t('secret.title')}</span>
+    <div style={{ flex: 1, display: 'grid', gap: 'var(--cb-s4)', alignContent: 'start' }}>
+      {/* "Answerers' side" indicator — the questions are shared within this group,
+          so no dimmed "secret" vignette; only the OTHER side must not look. */}
+      <div
+        className="cb-muted"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--cb-s2)',
+          justifyContent: 'center',
+          fontSize: 'var(--cb-fs-small)',
+        }}
+      >
+        <Sprite name="ui-lock" size={14} />
+        <span>{t('flash.side.answerers.title')}</span>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />

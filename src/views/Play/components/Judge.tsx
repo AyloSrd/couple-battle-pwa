@@ -2,7 +2,7 @@ import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelPanel, PixelButton } from '@/shared/Chrome';
-import { flashQuestion, questionText, type TGameState, type TVerdict } from '../domain/machine';
+import { flashQuestion, flashTruth, questionText, type TGameState, type TVerdict } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'judge' }>;
@@ -15,7 +15,7 @@ export const Judge: FC<TProps> = ({ state, answererName, onJudge }) => {
   const t = useT();
   const sound = useSoundApi();
   const question = flashQuestion(state);
-  const answer = question ? state.secretAnswers[String(question.id)] : undefined;
+  const answer = flashTruth(state);
 
   // The reveal / card-flip moment.
   useEffect(() => {
