@@ -18,8 +18,9 @@ export type TNewGameConfig = {
 export function newGameSnapshot(config: TNewGameConfig): TGameSnapshot {
   const scores: Record<string, number> = {};
   for (const team of config.roster) scores[team.teamId] = 0;
-  // Opening phase per mode (must match the machine's initGame).
-  const phase = config.mode === 'flash' ? 'passSecret' : 'question';
+  // Opening phase per mode (must match the machine's initGame): Flash AND
+  // Ultime both open on the shared-Flash answerers' gate.
+  const phase = config.mode === 'dilemma' ? 'question' : 'sideAnswerers';
   return {
     roster: config.roster,
     mode: config.mode,

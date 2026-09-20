@@ -7,10 +7,19 @@ import {
   rankTeams,
   activeCouple,
   scoreboardAt,
-  flashDeckIndex,
+  flashSharedIndex,
   flashDeckSize,
   answererIndex,
+  nextFlashSlot,
+  answerKey,
+  flashQuestion,
+  flashTruth,
+  dilemmaQuestion,
+  rapidQuestionOf,
+  dilemmaOffset,
+  rapidOffset,
   questionText,
+  FLASH_SET,
   type TGameConfig,
   type TGameState,
   type TResult,
@@ -195,16 +204,18 @@ describe('Dilemma machine', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Flash
+// Flash — "sofa sides" (shared questions, interleaved by question)
 // ---------------------------------------------------------------------------
 
 const flashRoster: TRoster = [
   { teamId: 't1', avatarId: 'otters', players: ['A1', 'A2'] },
   { teamId: 't2', avatarId: 'lions', players: ['B1', 'B2'] },
 ];
+const soloRoster: TRoster = [{ teamId: 't1', avatarId: 'otters', players: ['A1', 'A2'] }];
 
+/** The shared block: 2 questions × 2 rounds, whatever the couple count. */
 function flashDeck(type: TQuestionType): TQuestion[] {
-  return Array.from({ length: flashDeckSize(2) }, (_, i) => ({
+  return Array.from({ length: flashDeckSize() }, (_, i) => ({
     id: i + 1,
     theme: 'childhood' as const,
     difficulty: 'easy' as const,
@@ -214,103 +225,237 @@ function flashDeck(type: TQuestionType): TQuestion[] {
   }));
 }
 
-function flashConfig(type: TQuestionType): TGameConfig {
-  return { roster: flashRoster, mode: 'flash', difficulty: 'mix', themes: [], deck: flashDeck(type) };
+function flashConfig(type: TQuestionType, roster: TRoster = flashRoster): TGameConfig {
+  return { roster, mode: 'flash', difficulty: 'mix', themes: [], deck: flashDeck(type) };
 }
 
-/** Play a couple's full open-question sequence: pass → 3 answers → pass → 3 judged guesses. */
-function playCoupleOpen(start: TGameState, answers: string[], verdicts: TVerdict[]): TGameState {
-  let s = reduce(start, { type: 'passConfirm' }); // → secretInput
-  for (const a of answers) s = reduce(s, { type: 'lockAnswer', answer: a }); // → passBack
-  s = reduce(s, { type: 'passConfirm' }); // → guess
-  for (const v of verdicts) {
-    s = reduce(s, { type: 'reveal' });
-    s = reduce(s, { type: 'judge', verdict: v });
+type TSlotFn<T> = (questionIdx: number, coupleIdx: number) => T;
+
+/** A slot's (questionIdx, coupleIdx) for assertions. */
+function slotOf(s: TGameState): [number, number] | null {
+  return 'questionIdx' in s && 'coupleIdx' in s ? [s.questionIdx, s.coupleIdx] : null;
+}
+
+/**
+ * Drive the COLLECT phase from a `sideAnswerers` gate: gate → per slot
+ * [(handoff if ≥2 couples) → secretInput → lock] → `sideGuessers`.
+ * Asserts the iteration order (coupleIdx fastest, then questionIdx).
+ */
+function collectRound(start: TGameState, answerAt: TSlotFn<string>): TGameState {
+  expect(start.kind).toBe('sideAnswerers');
+  const n = start.roster.length;
+  let s = reduce(start, { type: 'passConfirm' });
+  for (let q = 0; q < FLASH_SET; q++) {
+    for (let c = 0; c < n; c++) {
+      if (n > 1) {
+        expect(s.kind).toBe('handoff');
+        expect(slotOf(s)).toEqual([q, c]);
+        s = reduce(s, { type: 'passConfirm' });
+      }
+      expect(s.kind).toBe('secretInput');
+      expect(slotOf(s)).toEqual([q, c]);
+      s = reduce(s, { type: 'lockAnswer', answer: answerAt(q, c) });
+    }
+  }
+  expect(s.kind).toBe('sideGuessers');
+  return s;
+}
+
+/** Drive the GUESS phase from a `sideGuessers` gate with judged verdicts. */
+function guessRound(start: TGameState, verdictAt: TSlotFn<TVerdict>): TGameState {
+  expect(start.kind).toBe('sideGuessers');
+  const n = start.roster.length;
+  let s = reduce(start, { type: 'passConfirm' });
+  for (let q = 0; q < FLASH_SET; q++) {
+    for (let c = 0; c < n; c++) {
+      expect(s.kind).toBe('guess');
+      expect(slotOf(s)).toEqual([q, c]);
+      s = reduce(s, { type: 'reveal' });
+      expect(s.kind).toBe('judge');
+      s = reduce(s, { type: 'judge', verdict: verdictAt(q, c) });
+    }
   }
   return s;
 }
 
-describe('Flash machine', () => {
-  it('helpers: deck index, size, role swap', () => {
-    expect(flashDeckSize(2)).toBe(12);
-    expect(flashDeckIndex(2, 3, 0, 0, 0)).toBe(0);
-    expect(flashDeckIndex(2, 3, 0, 1, 2)).toBe(5);
-    expect(flashDeckIndex(2, 3, 1, 0, 0)).toBe(6);
+function playRound(start: TGameState, answerAt: TSlotFn<string>, verdictAt: TSlotFn<TVerdict>): TGameState {
+  return guessRound(collectRound(start, answerAt), verdictAt);
+}
+
+const always =
+  <T,>(v: T): TSlotFn<T> =>
+  () =>
+    v;
+
+describe('Flash machine — sofa sides', () => {
+  it('helpers: shared deck, slot order, role swap, offsets', () => {
+    expect(flashDeckSize()).toBe(4); // 2 shared × 2 rounds, regardless of couples
+    expect(flashSharedIndex(0, 0)).toBe(0);
+    expect(flashSharedIndex(0, 1)).toBe(1);
+    expect(flashSharedIndex(1, 0)).toBe(2);
+    expect(flashSharedIndex(1, 1)).toBe(3);
     expect(answererIndex(0)).toBe(0);
     expect(answererIndex(1)).toBe(1);
+    // coupleIdx fastest, then questionIdx, then the phase is done
+    expect(nextFlashSlot(2, 0, 0)).toEqual({ questionIdx: 0, coupleIdx: 1 });
+    expect(nextFlashSlot(2, 0, 1)).toEqual({ questionIdx: 1, coupleIdx: 0 });
+    expect(nextFlashSlot(2, 1, 1)).toBeNull();
+    expect(nextFlashSlot(1, 0, 0)).toEqual({ questionIdx: 1, coupleIdx: 0 });
+    expect(nextFlashSlot(1, 1, 0)).toBeNull();
+    expect(answerKey('t1', 7)).toBe('t1|7');
+    expect(dilemmaOffset('flash')).toBe(0);
+    expect(dilemmaOffset('ultime')).toBe(4);
+    expect(rapidOffset()).toBe(9);
   });
 
-  it('starts at passSecret for round 0, couple 0', () => {
+  it('opens on the answerers group gate, round 0, everyone at zero', () => {
     const s = initGame(flashConfig('open'));
-    expect(s.kind).toBe('passSecret');
+    expect(s.kind).toBe('sideAnswerers');
+    if (s.kind === 'sideAnswerers') expect(s.round).toBe(0);
     expect(s.scores).toEqual({ t1: 0, t2: 0 });
   });
 
-  it('passSecret → secretInput → (3 locks) → passBack → guess', () => {
-    let s: TGameState = initGame(flashConfig('open'));
-    s = reduce(s, { type: 'passConfirm' });
-    expect(s.kind).toBe('secretInput');
-    s = reduce(s, { type: 'lockAnswer', answer: 'x' });
-    s = reduce(s, { type: 'lockAnswer', answer: 'y' });
-    expect(s.kind).toBe('secretInput');
-    s = reduce(s, { type: 'lockAnswer', answer: 'z' });
-    expect(s.kind).toBe('passBack');
-    if (s.kind === 'passBack') expect(s.secretAnswers).toEqual({ '1': 'x', '2': 'y', '3': 'z' });
-    s = reduce(s, { type: 'passConfirm' });
-    expect(s.kind).toBe('guess');
+  it('collect phase: gate → light handoff → input, interleaved by question (Q1 all couples, then Q2)', () => {
+    const order: string[] = [];
+    let s = reduce(initGame(flashConfig('open')), { type: 'passConfirm' });
+    while (s.kind === 'handoff' || s.kind === 'secretInput') {
+      order.push(`${s.kind}:${s.questionIdx}${s.coupleIdx}`);
+      s = s.kind === 'handoff' ? reduce(s, { type: 'passConfirm' }) : reduce(s, { type: 'lockAnswer', answer: 'a' });
+    }
+    expect(order).toEqual([
+      'handoff:00', 'secretInput:00',
+      'handoff:01', 'secretInput:01',
+      'handoff:10', 'secretInput:10',
+      'handoff:11', 'secretInput:11',
+    ]);
+    expect(s.kind).toBe('sideGuessers'); // the phone crosses the sofa
   });
 
-  it('open guess: reveal → judge scores +2 / +1 / 0 and advances', () => {
-    const g0 = playCoupleOpen(initGame(flashConfig('open')), ['x', 'y', 'z'], ['exact', 'close', 'miss']);
-    // couple 0 done its guess set (3 questions) → next couple's passSecret
-    expect(g0.kind).toBe('passSecret');
-    expect(g0.scores.t1).toBe(3); // 2 + 1 + 0
+  it('the two questions are SHARED: every couple sees the same ids in a round', () => {
+    let s = reduce(initGame(flashConfig('open')), { type: 'passConfirm' });
+    s = reduce(s, { type: 'passConfirm' }); // → secretInput (0,0)
+    const q00 = flashQuestion(s)?.id;
+    s = reduce(reduce(s, { type: 'lockAnswer', answer: 'a' }), { type: 'passConfirm' }); // → (0,1)
+    expect(flashQuestion(s)?.id).toBe(q00);
+    s = reduce(reduce(s, { type: 'lockAnswer', answer: 'a' }), { type: 'passConfirm' }); // → (1,0)
+    const q10 = flashQuestion(s)?.id;
+    expect(q10).not.toBe(q00);
+    s = reduce(reduce(s, { type: 'lockAnswer', answer: 'a' }), { type: 'passConfirm' }); // → (1,1)
+    expect(flashQuestion(s)?.id).toBe(q10);
   });
 
-  it('this_or_that auto-guess: match +2, mismatch 0', () => {
-    let s: TGameState = initGame(flashConfig('this_or_that'));
-    s = reduce(s, { type: 'passConfirm' });
-    s = reduce(s, { type: 'lockAnswer', answer: 'Left' });
-    s = reduce(s, { type: 'lockAnswer', answer: 'Right' });
-    s = reduce(s, { type: 'lockAnswer', answer: 'Left' });
-    s = reduce(s, { type: 'passConfirm' }); // → guess q0
-    s = reduce(s, { type: 'autoGuess', guess: 'Left' }); // matches → +2
-    s = reduce(s, { type: 'autoGuess', guess: 'Left' }); // truth Right → 0
-    expect(s.kind).toBe('guess');
-    s = reduce(s, { type: 'autoGuess', guess: 'Left' }); // matches → +2 → set done
-    expect(s.kind).toBe('passSecret');
-    expect(s.scores.t1).toBe(4); // 2 + 0 + 2
+  it('answers are keyed per (couple, question) and all coexist for the round', () => {
+    const s = collectRound(initGame(flashConfig('open')), (q, c) => `c${c}q${q}`);
+    if (s.kind === 'sideGuessers') {
+      expect(s.secretAnswers).toEqual({
+        't1|1': 'c0q0',
+        't2|1': 'c1q0',
+        't1|2': 'c0q1',
+        't2|2': 'c1q1',
+      });
+    }
   });
 
-  it('plays a full 2-couple game: round 0 → scoreboard → round 1 → final', () => {
-    let s: TGameState = initGame(flashConfig('open'));
-    s = playCoupleOpen(s, ['a', 'b', 'c'], ['exact', 'exact', 'exact']); // t1 +6
-    expect(s.kind).toBe('passSecret'); // couple 1, round 0
-    s = playCoupleOpen(s, ['a', 'b', 'c'], ['miss', 'miss', 'miss']); // t2 +0 → round 0 done
+  it('guess phase: gate → guess/judge interleaved by question, then scoreboard; scores per couple', () => {
+    const collected = collectRound(initGame(flashConfig('open')), always('a'));
+    // t1: exact, close → 3 · t2: miss, exact → 2
+    const s = guessRound(collected, (q, c) => (c === 0 ? (q === 0 ? 'exact' : 'close') : q === 0 ? 'miss' : 'exact'));
     expect(s.kind).toBe('scoreboard');
-    s = reduce(s, { type: 'next' }); // → round 1 couple 0
-    expect(s.kind).toBe('passSecret');
-    if (s.kind === 'passSecret') expect(s.round).toBe(1);
-    s = playCoupleOpen(s, ['a', 'b', 'c'], ['close', 'close', 'close']); // t1 +3
-    s = playCoupleOpen(s, ['a', 'b', 'c'], ['exact', 'exact', 'exact']); // t2 +6 → final
-    expect(s.kind).toBe('final');
-    expect(s.scores).toEqual({ t1: 9, t2: 6 });
+    if (s.kind === 'scoreboard') expect(s.round).toBe(0);
+    expect(s.scores).toEqual({ t1: 3, t2: 2 });
   });
 
-  it('round-trips every Flash phase through a snapshot', () => {
-    const pass = initGame(flashConfig('open'));
-    expect(fromSnapshot(toSnapshot(pass))).toEqual(pass);
+  it('judge sees the RIGHT couple\'s locked answer for the slot', () => {
+    let s = reduce(collectRound(initGame(flashConfig('open')), (q, c) => `c${c}q${q}`), { type: 'passConfirm' });
+    expect(flashTruth(s)).toBe('c0q0'); // guess (0,0) → couple 0's Q1
+    s = reduce(reduce(s, { type: 'reveal' }), { type: 'judge', verdict: 'miss' });
+    expect(flashTruth(s)).toBe('c1q0'); // (0,1) → couple 1's Q1
+    s = reduce(reduce(s, { type: 'reveal' }), { type: 'judge', verdict: 'miss' });
+    expect(flashTruth(s)).toBe('c0q1'); // (1,0) → couple 0's Q2
+  });
 
-    const secret = reduce(reduce(pass, { type: 'passConfirm' }), { type: 'lockAnswer', answer: 'x' });
-    expect(fromSnapshot(toSnapshot(secret))).toEqual(secret);
+  it('auto-guess (this_or_that) compares against the slot couple\'s own answer', () => {
+    // t1 answered Left to both, t2 answered Right to both
+    const collected = collectRound(initGame(flashConfig('this_or_that')), (_q, c) => (c === 0 ? 'Left' : 'Right'));
+    let s = reduce(collected, { type: 'passConfirm' });
+    s = reduce(s, { type: 'autoGuess', guess: 'Left' }); // (0,0) t1 truth Left → +2
+    s = reduce(s, { type: 'autoGuess', guess: 'Left' }); // (0,1) t2 truth Right → 0
+    s = reduce(s, { type: 'autoGuess', guess: 'Right' }); // (1,0) t1 truth Left → 0
+    s = reduce(s, { type: 'autoGuess', guess: 'Right' }); // (1,1) t2 truth Right → +2
+    expect(s.kind).toBe('scoreboard');
+    expect(s.scores).toEqual({ t1: 2, t2: 2 });
+  });
 
-    let s: TGameState = reduce(secret, { type: 'lockAnswer', answer: 'y' });
-    s = reduce(s, { type: 'lockAnswer', answer: 'z' }); // passBack
+  it('plays a full 2-couple game: round 0 → scoreboard → round 1 (roles swapped) → final', () => {
+    let s: TGameState = initGame(flashConfig('open'));
+    s = playRound(s, always('a'), (_q, c) => (c === 0 ? 'exact' : 'miss')); // t1 +4
+    expect(s.kind).toBe('scoreboard');
+    s = reduce(s, { type: 'next' });
+    expect(s.kind).toBe('sideAnswerers');
+    if (s.kind === 'sideAnswerers') expect(s.round).toBe(1);
+    s = playRound(s, always('a'), (_q, c) => (c === 0 ? 'close' : 'exact')); // t1 +2, t2 +4
+    expect(s.kind).toBe('final');
+    expect(s.scores).toEqual({ t1: 6, t2: 4 });
+  });
+
+  it('a new round starts with the previous round\'s answers cleared', () => {
+    let s: TGameState = initGame(flashConfig('open'));
+    s = reduce(playRound(s, always('a'), always('exact')), { type: 'next' }); // → round 1 gate
+    s = reduce(reduce(s, { type: 'passConfirm' }), { type: 'passConfirm' }); // handoff → secretInput (0,0)
+    expect(s.kind).toBe('secretInput');
+    if (s.kind === 'secretInput') expect(s.secretAnswers).toEqual({});
+  });
+
+  it('round 1 draws the second shared pair', () => {
+    let s: TGameState = initGame(flashConfig('open'));
+    s = reduce(playRound(s, always('a'), always('exact')), { type: 'next' });
+    s = reduce(reduce(s, { type: 'passConfirm' }), { type: 'passConfirm' }); // secretInput (0,0) round 1
+    expect(flashQuestion(s)?.id).toBe(3); // ids 1,2 were round 0
+  });
+
+  it('solo (1 couple) degenerates: no handoff, gates are the strict pass screens, Q1 Q2 → guess Q1 Q2', () => {
+    let s: TGameState = initGame(flashConfig('open', soloRoster));
+    expect(s.kind).toBe('sideAnswerers');
+    s = reduce(s, { type: 'passConfirm' });
+    expect(s.kind).toBe('secretInput'); // straight in — nobody to hand the phone to
+    expect(slotOf(s)).toEqual([0, 0]);
+    s = reduce(s, { type: 'lockAnswer', answer: 'x' });
+    expect(s.kind).toBe('secretInput');
+    expect(slotOf(s)).toEqual([1, 0]);
+    s = reduce(s, { type: 'lockAnswer', answer: 'y' });
+    expect(s.kind).toBe('sideGuessers');
+    s = guessRound(s, always('exact')); // +4
+    expect(s.kind).toBe('scoreboard');
+    s = reduce(s, { type: 'next' });
+    s = collectRound(s, always('z'));
+    s = guessRound(s, always('close')); // +2
+    expect(s.kind).toBe('final');
+    expect(s.scores).toEqual({ t1: 6 });
+  });
+
+  it('mid-phase resume: every Flash state round-trips through a snapshot with locked answers intact', () => {
+    const gate = initGame(flashConfig('open'));
+    expect(fromSnapshot(toSnapshot(gate))).toEqual(gate);
+
+    let s = reduce(gate, { type: 'passConfirm' }); // handoff (0,0)
     expect(fromSnapshot(toSnapshot(s))).toEqual(s);
+    s = reduce(s, { type: 'passConfirm' }); // secretInput (0,0)
+    s = reduce(s, { type: 'lockAnswer', answer: 'a' }); // handoff (0,1) with 1 locked
+    expect(fromSnapshot(toSnapshot(s))).toEqual(s);
+    s = reduce(reduce(s, { type: 'passConfirm' }), { type: 'lockAnswer', answer: 'b' }); // handoff (1,0), 2 locked
+    s = reduce(s, { type: 'passConfirm' }); // secretInput (1,0)
+    expect(fromSnapshot(toSnapshot(s))).toEqual(s);
+    if (s.kind === 'secretInput') expect(Object.keys(s.secretAnswers)).toHaveLength(2);
+
+    s = reduce(reduce(reduce(s, { type: 'lockAnswer', answer: 'c' }), { type: 'passConfirm' }), { type: 'lockAnswer', answer: 'd' });
+    expect(s.kind).toBe('sideGuessers');
+    expect(fromSnapshot(toSnapshot(s))).toEqual(s);
+
     const guess = reduce(s, { type: 'passConfirm' });
     expect(fromSnapshot(toSnapshot(guess))).toEqual(guess);
     const judge = reduce(guess, { type: 'reveal' });
     expect(fromSnapshot(toSnapshot(judge))).toEqual(judge);
+    if (judge.kind === 'judge') expect(Object.keys(judge.secretAnswers)).toHaveLength(4);
   });
 });
 
@@ -319,7 +464,7 @@ describe('Flash machine', () => {
 // ---------------------------------------------------------------------------
 
 function ultimeConfig(): TGameConfig {
-  const size = 2 * 2 * 2 + 5 + 5 * 2; // flash 4N + dilemma 5 + rapid 5N, N=2 → 23
+  const size = 4 + 5 + 5 * 2; // shared flash 4 + dilemma 5 + rapid 5N, N=2 → 19
   const deck: TQuestion[] = Array.from({ length: size }, (_, i) => ({
     id: i + 1,
     theme: 'childhood' as const,
@@ -331,16 +476,6 @@ function ultimeConfig(): TGameConfig {
   return { roster: flashRoster, mode: 'ultime', difficulty: 'mix', themes: [], deck };
 }
 
-function ultimeFlashCouple(start: TGameState, verdicts: TVerdict[]): TGameState {
-  let s = reduce(start, { type: 'passConfirm' });
-  for (let i = 0; i < verdicts.length; i++) s = reduce(s, { type: 'lockAnswer', answer: 'a' });
-  s = reduce(s, { type: 'passConfirm' });
-  for (const v of verdicts) {
-    s = reduce(s, { type: 'reveal' });
-    s = reduce(s, { type: 'judge', verdict: v });
-  }
-  return s;
-}
 function ultimeDilemmaQ(start: TGameState, results: TResult[]): TGameState {
   let s = reduce(start, { type: 'ready' });
   s = reduce(s, { type: 'countdownDone' });
@@ -358,40 +493,40 @@ function ultimeRapidCouple(start: TGameState, synchros: boolean[]): TGameState {
 }
 
 describe('Ultime machine (composition)', () => {
-  it('opens on the flash segment (2 q/partner)', () => {
+  it('opens on the shared-Flash answerers gate', () => {
     const s = initGame(ultimeConfig());
-    expect(s.kind).toBe('passSecret');
-    if (s.kind === 'passSecret') expect(s.round).toBe(0);
+    expect(s.kind).toBe('sideAnswerers');
+    if (s.kind === 'sideAnswerers') expect(s.round).toBe(0);
   });
 
-  it('plays flash rounds → dilemma → rapid-fire → final with scoreboards between', () => {
+  it('plays sofa-side flash rounds → dilemma → rapid-fire → final with scoreboards between', () => {
     let s: TGameState = initGame(ultimeConfig());
 
-    // Flash round 0 (2 questions each)
-    s = ultimeFlashCouple(s, ['exact', 'exact']); // t1 +4
-    expect(s.kind).toBe('passSecret');
-    s = ultimeFlashCouple(s, ['miss', 'miss']); // t2 +0 → round 0 done
+    // Flash round 0 (2 shared questions): t1 exact ×2 = 4, t2 miss = 0
+    s = playRound(s, always('a'), (_q, c) => (c === 0 ? 'exact' : 'miss'));
     expect(s.kind).toBe('scoreboard');
     if (s.kind === 'scoreboard') expect(s.round).toBe(0);
 
     s = reduce(s, { type: 'next' }); // → flash round 1
-    expect(s.kind).toBe('passSecret');
-    if (s.kind === 'passSecret') expect(s.round).toBe(1);
-    s = ultimeFlashCouple(s, ['exact', 'exact']); // t1 +4
-    s = ultimeFlashCouple(s, ['exact', 'exact']); // t2 +4 → round 1 done
+    expect(s.kind).toBe('sideAnswerers');
+    if (s.kind === 'sideAnswerers') expect(s.round).toBe(1);
+    s = playRound(s, always('a'), always('exact')); // +4 each
     expect(s.kind).toBe('scoreboard');
 
-    s = reduce(s, { type: 'next' }); // → dilemma segment
+    s = reduce(s, { type: 'next' }); // → dilemma segment, right after the shared block
     expect(s.kind).toBe('question');
-    for (let i = 0; i < 5; i++) s = ultimeDilemmaQ(s, ['match', 'miss']); // t1 +5, t2 +0
-    expect(s.kind).toBe('scoreboard'); // after the 5 dilemma questions
+    expect(dilemmaQuestion(s)?.id).toBe(5);
+    for (let i = 0; i < 5; i++) s = ultimeDilemmaQ(s, ['match', 'miss']); // t1 +5
+    expect(s.kind).toBe('scoreboard');
 
     s = reduce(s, { type: 'next' }); // → rapid-fire
     expect(s.kind).toBe('rapidIntro');
-    s = reduce(s, { type: 'next' }); // → rapidTurn couple 0
+    s = reduce(s, { type: 'next' });
     expect(s.kind).toBe('rapidTurn');
+    const rq = reduce(s, { type: 'next' });
+    expect(rapidQuestionOf(rq)?.id).toBe(10); // after flash 4 + dilemma 5
     s = ultimeRapidCouple(s, [true, true, true, true, true]); // t1 +10
-    expect(s.kind).toBe('rapidTurn'); // couple 1's turn
+    expect(s.kind).toBe('rapidTurn');
     s = ultimeRapidCouple(s, [true, false, true, false, true]); // t2 +6 → final
     expect(s.kind).toBe('final');
 
