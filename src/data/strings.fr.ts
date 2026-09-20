@@ -23,6 +23,7 @@ export const fr = {
   "count.2": "2",
   "count.3": "3",
   "count.go": "POINTEZ !",
+  "count.go.answer": "RÉPONDEZ !",
   "diff.easy.desc": "Tranquille : les basiques du quotidien.",
   "diff.easy.name": "Love Starter",
   "diff.hard.desc": "Zone rouge : secrets et vérités jamais dites.",

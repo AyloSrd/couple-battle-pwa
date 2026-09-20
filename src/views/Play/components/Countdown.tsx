@@ -1,5 +1,5 @@
 import { useEffect, useState, type FC } from 'react';
-import { useT } from '@/shared/i18n';
+import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { Sprite } from '@/shared/Chrome';
 
@@ -14,13 +14,27 @@ function stepOf(digit: string): 3 | 2 | 1 {
   return digit === '3' ? 3 : digit === '2' ? 2 : 1;
 }
 
+/** What the GO beat shouts — the mechanic differs per context. */
+export type TCountdownGo = 'point' | 'answer';
+
+const GO_KEY = {
+  point: 'count.go', // Dilemma: everyone points at someone → "POINTEZ !"
+  answer: 'count.go.answer', // rapid-fire: partners answer out loud → "RÉPONDEZ !"
+} as const satisfies Record<TCountdownGo, TStringKey>;
+
 /**
  * V-Countdown — the game's signature beat. Full ink-dark screen, digits slam in
- * with rising ticks + haptics, then a burst + "POINTEZ !". Auto-advances
+ * with rising ticks + haptics, then a burst + the GO word. Auto-advances
  * (dispatches countdownDone) ~1.5s after GO. `ticks` = 3 (Dilemma) or 2
- * (rapid-fire). Runs once on mount.
+ * (rapid-fire); `go` picks the GO word for the mechanic (default: point).
+ * Ticks, burst, haptics and timing are identical in every context. Runs once
+ * on mount.
  */
-export const Countdown: FC<{ onDone: () => void; ticks?: number }> = ({ onDone, ticks = 3 }) => {
+export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdownGo }> = ({
+  onDone,
+  ticks = 3,
+  go = 'point',
+}) => {
   const t = useT();
   const sound = useSoundApi();
   const digits = ticks === 2 ? ['2', '1'] : ['3', '2', '1'];
@@ -64,7 +78,7 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number }> = ({ onDone, 
         <div style={{ display: 'grid', gap: 'var(--cb-s5)', justifyItems: 'center' }}>
           <Sprite name="count-burst" width={140} height={140} />
           <div style={{ fontFamily: 'var(--cb-font-display)', color: 'var(--cb-gold)', fontSize: 'var(--cb-fs-title)' }}>
-            {t('count.go')}
+            {t(GO_KEY[go])}
           </div>
         </div>
       ) : (

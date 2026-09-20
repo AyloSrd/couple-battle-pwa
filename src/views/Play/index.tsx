@@ -195,9 +195,10 @@ export const PlayView: FC = () => {
 
   if (snapshotQuery.isPending || !game) return null;
 
-  // The countdown owns the whole ink-dark screen (3 ticks Dilemma, 2 rapid-fire).
+  // The countdown owns the whole ink-dark screen: 3 ticks → "POINTEZ !" for
+  // Dilemma; 2 ticks → "RÉPONDEZ !" for the rapid-fire (nobody points there).
   if (game.kind === 'countdown') return <Countdown onDone={handleCountdownDone} />;
-  if (game.kind === 'rapidCountdown') return <Countdown ticks={2} onDone={handleCountdownDone} />;
+  if (game.kind === 'rapidCountdown') return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
 
   const showPause = game.kind !== 'final';
 
