@@ -5,6 +5,7 @@ import { useSoundApi } from '@/shared/sound';
 import { useWakeLockApi } from '@/shared/wakeLock';
 import { useGetSave, usePutSave } from '@/shared/save';
 import { useDraftGame } from '@/shared/session';
+import { AVATAR_IDS } from '@/shared/game';
 import { Screen, PixelButton, Sprite } from '@/shared/Chrome';
 import {
   reduce,
@@ -209,7 +210,7 @@ export const PlayView: FC = () => {
     const team = game.roster[coupleIdx];
     const aIdx = answererIndex(round);
     return {
-      avatarId: team?.avatarId ?? 'penguins',
+      avatarId: team?.avatarId ?? AVATAR_IDS[0],
       teamName: team ? t(`team.${team.avatarId}` as TStringKey) : '',
       answererName: team?.players[aIdx] ?? '',
       guesserName: team?.players[1 - aIdx] ?? '',

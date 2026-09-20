@@ -90,7 +90,7 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
           }}
         >
           <Sprite name={`avatar-${row.team.avatarId}`} size={32} />
-          <span style={{ flex: 1, fontSize: 'var(--cb-fs-small)' }}>
+          <span style={{ flex: 1, fontSize: 'var(--cb-fs-small)', fontFamily: 'var(--cb-font-body)' }}>
             {t(`team.${row.team.avatarId}` as TStringKey)}
           </span>
           {row.isWinner && <Sprite name="ui-crown" size={16} />}

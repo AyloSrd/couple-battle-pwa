@@ -38,7 +38,7 @@ export const HomeView: FC = () => {
   // Two random avatars peeking from the bottom corners (pure charm).
   const [peek] = useState<[string, string]>(() => {
     const shuffled = [...AVATAR_IDS].sort(() => Math.random() - 0.5);
-    return [shuffled[0] ?? 'penguins', shuffled[1] ?? 'otters'];
+    return [shuffled[0] ?? AVATAR_IDS[0], shuffled[1] ?? AVATAR_IDS[1]];
   });
 
   // Menu music while on Home (only once audio is on); stops when leaving.

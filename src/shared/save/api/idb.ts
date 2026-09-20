@@ -17,7 +17,14 @@ export function openSaveDb(): Promise<IDBPDatabase> {
   });
 }
 
-/** Save port backed by IndexedDB. Zod parses on the way in and out. */
+/**
+ * Save port backed by IndexedDB. Zod parses on the way in and out.
+ *
+ * A stored value that no longer fits its schema (e.g. an in-progress game
+ * saved with a team that has since been retired) must never take the app
+ * down: `get` falls back to the key's default and drops the stale record, so
+ * a corrupt/outdated save degrades to "never written" instead of throwing.
+ */
 export function createSaveIdbApi(db: IDBPDatabase): TSaveApi {
   return {
     async get(key) {
@@ -25,7 +32,12 @@ export function createSaveIdbApi(db: IDBPDatabase): TSaveApi {
       if (raw === undefined) {
         return structuredClone(SAVE_DEFAULTS[key]);
       }
-      return SAVE_SCHEMAS[key].parse(raw) as TSaveShape[typeof key];
+      const result = SAVE_SCHEMAS[key].safeParse(raw);
+      if (!result.success) {
+        await db.delete(STORE, key); // self-heal: don't keep failing on every load
+        return structuredClone(SAVE_DEFAULTS[key]);
+      }
+      return result.data as TSaveShape[typeof key];
     },
     async put(key, value) {
       const parsed = SAVE_SCHEMAS[key].parse(value) as TSaveShape[typeof key];

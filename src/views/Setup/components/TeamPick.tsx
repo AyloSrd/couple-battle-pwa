@@ -84,7 +84,9 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
                   ...(isTaken ? { filter: 'grayscale(1)', opacity: 0.5 } : {}),
                 }}
               />
-              <span style={{ fontSize: 'var(--cb-fs-small)' }}>
+              {/* Team-name labels render in the BODY font: the pixel display font
+                  draws accented capitals (É, È, Ê…) shrunken by design. */}
+              <span style={{ fontSize: 'var(--cb-fs-small)', fontFamily: 'var(--cb-font-body)' }}>
                 {t(`team.${id}` as TStringKey)}
               </span>
               {isTaken && (

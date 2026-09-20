@@ -33,18 +33,21 @@ export const THEME_IDS = [
 export type TThemeId = (typeof THEME_IDS)[number];
 export const ZThemeIdSchema = z.enum(THEME_IDS);
 
-/** The 10 team avatars. Left partner wears the bow (design note). */
+/** The canonical 12 team avatars (single registry — every team list derives
+ *  from this). Left partner wears the bow (design note). */
 export const AVATAR_IDS = [
   'penguins',
   'otters',
   'lions',
   'pandas',
-  'frogs',
   'foxes',
-  'ducks',
-  'cats',
-  'pizzas',
-  'cocktails',
+  'squirrels',
+  'rabbits',
+  'bears',
+  'raccoons',
+  'mice',
+  'ermines',
+  'owls',
 ] as const;
 export type TAvatarId = (typeof AVATAR_IDS)[number];
 export const ZAvatarIdSchema = z.enum(AVATAR_IDS);
