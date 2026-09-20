@@ -144,6 +144,8 @@ export const en = {
   "setup.names.required": "We need both your first names!",
   "setup.names.duplicate": "Two players have the same name! Add a nickname to tell them apart.",
   "setup.names.title": "Who's playing for {team}?",
+  "setup.pass.confirm": "That's us!",
+  "setup.pass.title": "Pass the phone to the next duo!",
   "setup.ready": "Everyone's in!",
   "setup.team.pick": "Duo {n}: pick your team!",
   "setup.team.taken": "Already taken!",
