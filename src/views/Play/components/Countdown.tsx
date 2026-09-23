@@ -1,7 +1,7 @@
 import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { Sprite } from '@/shared/Chrome';
+import { Screen } from '@/shared/Chrome';
 
 function vibrate(pattern: number | number[]) {
   navigator.vibrate?.(pattern);
@@ -23,12 +23,11 @@ const GO_KEY = {
 } as const satisfies Record<TCountdownGo, TStringKey>;
 
 /**
- * V-Countdown — the game's signature beat. Full ink-dark screen, digits slam in
- * with rising ticks + haptics, then a burst + the GO word. Auto-advances
- * (dispatches countdownDone) ~1.5s after GO. `ticks` = 3 (Dilemma) or 2
- * (rapid-fire); `go` picks the GO word for the mechanic (default: point).
- * Ticks, burst, haptics and timing are identical in every context. Runs once
- * on mount.
+ * V-Countdown — the game's signature beat, on the Spotlight stage. Numerals slam
+ * in with rising ticks + haptics, then the GO word. Auto-advances (dispatches
+ * countdownDone) ~1.5s after GO. `ticks` = 3 (Dilemma) or 2 (rapid-fire); `go`
+ * picks the GO word for the mechanic (default: point). Ticks, haptics and
+ * timing are identical in every context. Runs once on mount.
  */
 export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdownGo }> = ({
   onDone,
@@ -73,17 +72,23 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
   const digit = digits[phase] ?? '1';
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'var(--cb-ink)', display: 'grid', placeItems: 'center' }}>
+    <Screen stage center>
+      <div className="cb-glow" aria-hidden="true" />
       {isGo ? (
-        <div style={{ display: 'grid', gap: 'var(--cb-s5)', justifyItems: 'center' }}>
-          <Sprite name="count-burst" width={140} height={140} />
-          <div style={{ fontFamily: 'var(--cb-font-display)', color: 'var(--cb-gold)', fontSize: 'var(--cb-fs-title)' }}>
-            {t(GO_KEY[go])}
-          </div>
+        <div className="cb-go cb-reveal-in" role="status">
+          {t(GO_KEY[go])}
         </div>
       ) : (
-        <Sprite name={`count-${digit}`} width={120} height={160} />
+        <>
+          {/* key re-mounts the numeral so the slam replays per tick */}
+          <div key={digit} className="cb-numeral is-in" aria-live="assertive">
+            {digit}
+          </div>
+          <p className="cb-muted" style={{ marginTop: 'var(--cb-s6)', fontSize: 'var(--cb-fs-label)' }}>
+            {t('dilemma.getready')}
+          </p>
+        </>
       )}
-    </div>
+    </Screen>
   );
 };

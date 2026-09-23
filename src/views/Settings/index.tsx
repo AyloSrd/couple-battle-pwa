@@ -12,9 +12,10 @@ const Row: FC<{ label: string; children: ReactNode }> = ({ label, children }) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 'var(--cb-s3)',
+      padding: 'var(--cb-s4) var(--cb-s5)',
     }}
   >
-    <span className="cb-heading">{label}</span>
+    <span className="cb-label">{label}</span>
     <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>{children}</div>
   </PixelPanel>
 );
@@ -77,61 +78,51 @@ export const SettingsView: FC = () => {
 
   return (
     <Screen>
-      <PixelButton variant="ghost" onClick={handleBack}>
-        ← {t('common.back')}
-      </PixelButton>
+      <div className="cb-topbar">
+        <PixelButton variant="ghost" block={false} onClick={handleBack}>
+          ← {t('common.back')}
+        </PixelButton>
+      </div>
       <h1 className="cb-title">{t('settings.title')}</h1>
 
       <Row label={t('settings.language')}>
-        <PixelButton variant={lang === 'fr' ? 'primary' : 'ghost'} onClick={makeSetLang('fr')}>
+        <PixelButton variant={lang === 'fr' ? 'primary' : 'secondary'} block={false} onClick={makeSetLang('fr')} aria-pressed={lang === 'fr'}>
           FR
         </PixelButton>
-        <PixelButton variant={lang === 'en' ? 'primary' : 'ghost'} onClick={makeSetLang('en')}>
+        <PixelButton variant={lang === 'en' ? 'primary' : 'secondary'} block={false} onClick={makeSetLang('en')} aria-pressed={lang === 'en'}>
           EN
         </PixelButton>
       </Row>
 
       <Row label={t('settings.sound')}>
-        <PixelButton
-          variant={settings?.sound ? 'positive' : 'ghost'}
-          onClick={handleToggleSound}
-        >
+        <PixelButton variant={settings?.sound ? 'positive' : 'secondary'} block={false} onClick={handleToggleSound} aria-pressed={Boolean(settings?.sound)}>
           {settings?.sound ? t('settings.sound.on') : t('settings.sound.off')}
         </PixelButton>
       </Row>
 
-      <PixelButton variant="ghost" block onClick={handleOpenReset}>
+      <PixelButton variant="secondary" onClick={handleOpenReset}>
         {t('settings.resetSeen')}
       </PixelButton>
 
-      <PixelButton variant="ghost" block onClick={handleLegal}>
+      <PixelButton variant="ghost" onClick={handleLegal}>
         {t('settings.legal')}
       </PixelButton>
 
       {toast && (
-        <PixelPanel style={{ textAlign: 'center', background: 'var(--cb-green)' }}>
+        <div className="cb-toast" role="status">
           {toast}
-        </PixelPanel>
+        </div>
       )}
 
       {confirmReset && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(26,28,44,0.7)',
-            display: 'grid',
-            placeItems: 'center',
-            padding: 'var(--cb-s4)',
-          }}
-        >
-          <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s4)', maxWidth: 340 }}>
-            <p style={{ margin: 0, lineHeight: 1.6 }}>{t('settings.resetSeen.confirm')}</p>
-            <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-              <PixelButton variant="ghost" block onClick={handleCancelReset}>
+        <div className="cb-overlay" role="dialog" aria-modal="true">
+          <PixelPanel className="cb-sheet">
+            <p className="cb-body-lg">{t('settings.resetSeen.confirm')}</p>
+            <div className="cb-row-2">
+              <PixelButton variant="secondary" onClick={handleCancelReset}>
                 {t('common.cancel')}
               </PixelButton>
-              <PixelButton variant="negative" block onClick={handleConfirmReset}>
+              <PixelButton variant="negative" onClick={handleConfirmReset}>
                 {t('common.confirm')}
               </PixelButton>
             </div>

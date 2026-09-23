@@ -25,43 +25,30 @@ export const Judge: FC<TProps> = ({ state, answererName, onJudge }) => {
   const makeVerdict = (verdict: TVerdict) => () => onJudge(verdict);
 
   return (
-    <div style={{ flex: 1, display: 'grid', gap: 'var(--cb-s4)', alignContent: 'start' }}>
-      <p className="cb-question" style={{ textAlign: 'center', margin: 0 }}>
-        {questionText(question, 'name', answererName) || '—'}
-      </p>
-      <p className="cb-muted" style={{ textAlign: 'center', margin: 0, fontSize: 'var(--cb-fs-small)' }}>
+    <>
+      <h2 className="cb-h2">{questionText(question, 'name', answererName) || '—'}</h2>
+      <p className="cb-muted" style={{ margin: 0 }}>
         {t('guess.answerWas', { name: answererName })}
       </p>
 
-      {/* card-front reveal */}
-      <PixelPanel
-        style={{
-          background: 'var(--cb-white)',
-          textAlign: 'center',
-          padding: 'var(--cb-s6) var(--cb-s4)',
-          animation: 'var(--cb-pop)',
-        }}
-      >
-        <p className="cb-question" style={{ margin: 0 }}>
-          {answer ?? '—'}
-        </p>
+      {/* the reveal card */}
+      <PixelPanel className="cb-reveal-in cb-center" style={{ padding: 'var(--cb-s7) var(--cb-s5)' }}>
+        <p className="cb-question">{answer ?? '—'}</p>
       </PixelPanel>
 
-      <h2 className="cb-heading" style={{ textAlign: 'center', margin: 0 }}>
-        {t('judge.title')}
-      </h2>
-
-      <div style={{ display: 'grid', gap: 'var(--cb-s2)' }}>
-        <PixelButton variant="positive" block onClick={makeVerdict('exact')}>
+      <div className="cb-grow" />
+      <p className="cb-label cb-center">{t('judge.title')}</p>
+      <div className="cb-stack" style={{ gap: 'var(--cb-s2)' }}>
+        <PixelButton variant="positive" onClick={makeVerdict('exact')}>
           {t('judge.exact')}
         </PixelButton>
-        <PixelButton variant="gold" block onClick={makeVerdict('close')}>
+        <PixelButton variant="win" onClick={makeVerdict('close')}>
           {t('judge.close')}
         </PixelButton>
-        <PixelButton variant="negative" block onClick={makeVerdict('miss')}>
+        <PixelButton variant="negative" onClick={makeVerdict('miss')}>
           {t('judge.miss')}
         </PixelButton>
       </div>
-    </div>
+    </>
   );
 };

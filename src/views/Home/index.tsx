@@ -1,12 +1,12 @@
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useT, useLang } from '@/shared/i18n';
+import { useT, useLang, type TStringKey } from '@/shared/i18n';
 import { useGetSave, usePutSave } from '@/shared/save';
 import { useSoundApi } from '@/shared/sound';
 import { useDraftGame } from '@/shared/session';
 import { useInstallPrompt } from '@/shared/pwa';
 import { AVATAR_IDS } from '@/shared/game';
-import { Screen, PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, ChipButton, Logo, TeamArt, teamsWithArt } from '@/shared/Chrome';
 
 const IOS_HINT_KEY = 'cb-ios-hint-seen';
 
@@ -16,6 +16,12 @@ function readIosHintSeen(): boolean {
   } catch {
     return false;
   }
+}
+
+/** A team that has character art, for the Home hero (first delivered = otters). */
+function pickHeroTeam(): string | null {
+  const withArt = teamsWithArt().filter((id) => (AVATAR_IDS as readonly string[]).includes(id));
+  return withArt[Math.floor(Math.random() * withArt.length)] ?? null;
 }
 
 export const HomeView: FC = () => {
@@ -35,11 +41,7 @@ export const HomeView: FC = () => {
   const showAndroidInstall = platform === 'android' && !installDismissed;
   const showIosInstall = platform === 'ios' && !installDismissed && !iosHintSeen;
 
-  // Two random avatars peeking from the bottom corners (pure charm).
-  const [peek] = useState<[string, string]>(() => {
-    const shuffled = [...AVATAR_IDS].sort(() => Math.random() - 0.5);
-    return [shuffled[0] ?? AVATAR_IDS[0], shuffled[1] ?? AVATAR_IDS[1]];
-  });
+  const [hero] = useState(pickHeroTeam);
 
   // Menu music while on Home (only once audio is on); stops when leaving.
   const soundOn = settingsQuery.data?.sound ?? false;
@@ -93,68 +95,63 @@ export const HomeView: FC = () => {
   };
 
   return (
-    <>
-      <div className="cb-bg-hearts" aria-hidden="true" />
+    <Screen>
+      <div className="cb-topbar">
+        <span />
+        <ChipButton onClick={handleToggleLang} aria-label={t('settings.language')}>
+          {lang.toUpperCase()}
+        </ChipButton>
+      </div>
 
-      <Screen center style={{ position: 'relative', overflow: 'hidden' }}>
-        {/* Floating mascots — first in the DOM so everything after paints above
-            them (no z-index needed); they bob at the bottom corners. */}
-        <Sprite className="cb-peek cb-peek--left" name={`avatar-${peek[0]}`} size={56} />
-        <Sprite className="cb-peek cb-peek--right" name={`avatar-${peek[1]}`} size={56} />
-
-        <div style={{ position: 'absolute', top: 'var(--cb-s4)', right: 'var(--cb-s4)' }}>
-          <PixelButton variant="ghost" onClick={handleToggleLang} aria-label="language">
-            <Sprite name={lang === 'fr' ? 'ui-flag-fr' : 'ui-flag-en'} width={24} height={18} />
-          </PixelButton>
-        </div>
-
-        <Sprite className="cb-anim-bounce" name="logo" width={240} height={80} alt={t('app.name')} />
-        <p className="cb-muted" style={{ margin: 0 }}>
+      <div className="cb-grow" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18 }}>
+        <Logo alt={t('app.name')} />
+        <p className="cb-muted cb-center" style={{ margin: 0 }}>
           {t('app.tagline')}
         </p>
-
-        {hasResume && (
-          <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s3)', width: '100%' }}>
-            <strong className="cb-heading">{t('common.resume.title')}</strong>
-            <p style={{ margin: 0 }}>{t('common.resume.body')}</p>
-            <PixelButton variant="primary" block onClick={handleResume}>
-              {t('common.resume.yes')}
-            </PixelButton>
-            <PixelButton variant="ghost" block onClick={handleDiscard}>
-              {t('common.resume.no')}
-            </PixelButton>
-          </PixelPanel>
+        {hero && (
+          <TeamArt teamId={hero} label={t(`team.${hero}` as TStringKey)} variant="hero" className="cb-home-hero" />
         )}
+      </div>
 
-        <PixelButton variant="gold" block onClick={handlePlay} style={{ fontSize: 'var(--cb-fs-title)' }}>
-          {t('home.play')}
-        </PixelButton>
-        <PixelButton variant="ghost" block onClick={handleHowto}>
-          {t('home.howto')}
-        </PixelButton>
-        <PixelButton variant="ghost" block onClick={handleSettings}>
-          {t('home.settings')}
-        </PixelButton>
+      {hasResume && (
+        <PixelPanel className="cb-stack">
+          <strong className="cb-h2">{t('common.resume.title')}</strong>
+          <p style={{ margin: 0 }}>{t('common.resume.body')}</p>
+          <PixelButton onClick={handleResume}>{t('common.resume.yes')}</PixelButton>
+          <PixelButton variant="ghost" onClick={handleDiscard}>
+            {t('common.resume.no')}
+          </PixelButton>
+        </PixelPanel>
+      )}
 
-        {showAndroidInstall && (
-          <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s2)', width: '100%' }}>
-            <PixelButton variant="primary" block onClick={handleInstall}>
-              {t('home.install.android')}
-            </PixelButton>
-            <PixelButton variant="ghost" block onClick={handleDismissInstall}>
-              {t('home.install.dismiss')}
-            </PixelButton>
-          </PixelPanel>
-        )}
-        {showIosInstall && (
-          <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s2)', width: '100%' }}>
-            <p style={{ margin: 0, fontSize: 'var(--cb-fs-small)' }}>{t('home.install.ios')}</p>
-            <PixelButton variant="ghost" block onClick={handleDismissInstall}>
-              {t('home.install.dismiss')}
-            </PixelButton>
-          </PixelPanel>
-        )}
-      </Screen>
-    </>
+      <PixelButton onClick={handlePlay}>{t('home.play')}</PixelButton>
+      <PixelButton variant="ghost" onClick={handleHowto}>
+        {t('home.howto')}
+      </PixelButton>
+      <PixelButton variant="ghost" onClick={handleSettings}>
+        {t('home.settings')}
+      </PixelButton>
+
+      {showAndroidInstall && (
+        <PixelPanel className="cb-stack">
+          <PixelButton variant="secondary" onClick={handleInstall}>
+            {t('home.install.android')}
+          </PixelButton>
+          <PixelButton variant="ghost" onClick={handleDismissInstall}>
+            {t('home.install.dismiss')}
+          </PixelButton>
+        </PixelPanel>
+      )}
+      {showIosInstall && (
+        <PixelPanel className="cb-stack">
+          <p className="cb-muted" style={{ margin: 0 }}>
+            {t('home.install.ios')}
+          </p>
+          <PixelButton variant="ghost" onClick={handleDismissInstall}>
+            {t('home.install.dismiss')}
+          </PixelButton>
+        </PixelPanel>
+      )}
+    </Screen>
   );
 };

@@ -12,29 +12,29 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useListQuestions, drawDeck, deckSizeFor } from '@/shared/questions';
 import { useGetSave, usePutSave, newGameSnapshot, saveKeys } from '@/shared/save';
-import { Screen, PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, ProgressDots } from '@/shared/Chrome';
 
-
-const DIFFS: { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey; sprite: string }[] = [
-  { id: GameDifficulty.Mix, nameKey: 'diff.mix.name', descKey: 'diff.mix.desc', sprite: 'diff-mix' },
-  { id: GameDifficulty.Easy, nameKey: 'diff.easy.name', descKey: 'diff.easy.desc', sprite: 'diff-easy' },
-  { id: GameDifficulty.Medium, nameKey: 'diff.medium.name', descKey: 'diff.medium.desc', sprite: 'diff-medium' },
-  { id: GameDifficulty.Hard, nameKey: 'diff.hard.name', descKey: 'diff.hard.desc', sprite: 'diff-hard' },
+// Text-only for now: difficulty and theme icons aren't produced yet (v2 §3).
+const DIFFS: { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey }[] = [
+  { id: GameDifficulty.Mix, nameKey: 'diff.mix.name', descKey: 'diff.mix.desc' },
+  { id: GameDifficulty.Easy, nameKey: 'diff.easy.name', descKey: 'diff.easy.desc' },
+  { id: GameDifficulty.Medium, nameKey: 'diff.medium.name', descKey: 'diff.medium.desc' },
+  { id: GameDifficulty.Hard, nameKey: 'diff.hard.name', descKey: 'diff.hard.desc' },
 ];
 
-const THEME_META: Record<TThemeId, { key: TStringKey; sprite: string }> = {
-  homeDaily: { key: 'theme.homeDaily', sprite: 'theme-home' },
-  foodDrinks: { key: 'theme.foodDrinks', sprite: 'theme-food' },
-  travel: { key: 'theme.travel', sprite: 'theme-travel' },
-  workAmbition: { key: 'theme.workAmbition', sprite: 'theme-work' },
-  hobbies: { key: 'theme.hobbies', sprite: 'theme-hobbies' },
-  goingOut: { key: 'theme.goingOut', sprite: 'theme-goingout' },
-  money: { key: 'theme.money', sprite: 'theme-money' },
-  childhood: { key: 'theme.childhood', sprite: 'theme-childhood' },
-  personality: { key: 'theme.personality', sprite: 'theme-personality' },
-  dreams: { key: 'theme.dreams', sprite: 'theme-dreams' },
-  loveIntimacy: { key: 'theme.loveIntimacy', sprite: 'theme-intimacy' },
-  random: { key: 'theme.random', sprite: 'theme-random' },
+const THEME_KEY: Record<TThemeId, TStringKey> = {
+  homeDaily: 'theme.homeDaily',
+  foodDrinks: 'theme.foodDrinks',
+  travel: 'theme.travel',
+  workAmbition: 'theme.workAmbition',
+  hobbies: 'theme.hobbies',
+  goingOut: 'theme.goingOut',
+  money: 'theme.money',
+  childhood: 'theme.childhood',
+  personality: 'theme.personality',
+  dreams: 'theme.dreams',
+  loveIntimacy: 'theme.loveIntimacy',
+  random: 'theme.random',
 };
 
 /** All themes on; Love & Intimacy off by default in a group (>1 couple). */
@@ -120,87 +120,75 @@ export const DifficultyView: FC = () => {
 
   return (
     <Screen>
-      <PixelButton variant="ghost" onClick={handleBack}>
-        ← {t('common.back')}
-      </PixelButton>
-      <h1 className="cb-title">{t('diff.title')}</h1>
+      <div className="cb-topbar">
+        <PixelButton variant="ghost" block={false} onClick={handleBack}>
+          ← {t('common.back')}
+        </PixelButton>
+        <ProgressDots total={3} current={2} />
+      </div>
+      <h1 className="cb-title" style={{ marginBottom: 'var(--cb-s2)' }}>
+        {t('diff.title')}
+      </h1>
 
-      {DIFFS.map((d) => (
-        <PixelPanel
-          key={d.id}
-          onClick={makePickDifficulty(d.id)}
-          role="button"
-          tabIndex={0}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--cb-s3)',
-            cursor: 'pointer',
-            background: difficulty === d.id ? 'var(--cb-gold)' : undefined,
-          }}
-        >
-          <Sprite name={d.sprite} size={24} />
-          <div style={{ display: 'grid', gap: 'var(--cb-s1)' }}>
-            <strong className="cb-heading">{t(d.nameKey)}</strong>
-            <span style={{ fontSize: 'var(--cb-fs-small)' }}>{t(d.descKey)}</span>
-          </div>
-        </PixelPanel>
-      ))}
+      <div className="cb-stack" role="radiogroup" aria-label={t('diff.title')}>
+        {DIFFS.map((d) => (
+          <button
+            key={d.id}
+            type="button"
+            className="cb-mode"
+            role="radio"
+            aria-checked={difficulty === d.id}
+            aria-pressed={difficulty === d.id}
+            onClick={makePickDifficulty(d.id)}
+          >
+            <div>
+              <h3>{t(d.nameKey)}</h3>
+              <p>{t(d.descKey)}</p>
+            </div>
+          </button>
+        ))}
+      </div>
 
-      <PixelButton variant="ghost" block onClick={handleToggleThemes}>
+      <PixelButton variant="ghost" onClick={handleToggleThemes} aria-expanded={themesOpen}>
         {t('themes.title')} {themesOpen ? '▲' : '▼'}
       </PixelButton>
 
       {themesOpen && (
-        <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s2)' }}>
-          <p className="cb-muted" style={{ margin: 0, fontSize: 'var(--cb-fs-small)' }}>
+        <PixelPanel className="cb-stack">
+          <p className="cb-muted" style={{ margin: 0 }}>
             {t('themes.hint')}
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--cb-s2)' }}>
             {THEME_IDS.map((id) => (
               <PixelButton
                 key={id}
-                variant={themes.includes(id) ? 'primary' : 'ghost'}
+                variant={themes.includes(id) ? 'primary' : 'secondary'}
+                aria-pressed={themes.includes(id)}
                 onClick={makeToggleTheme(id)}
-                style={{ display: 'flex', alignItems: 'center', gap: 'var(--cb-s2)', fontSize: 'var(--cb-fs-small)' }}
+                style={{ minHeight: 'var(--cb-h-btn-sec)', fontSize: 'var(--cb-fs-caption)' }}
               >
-                <Sprite name={THEME_META[id].sprite} size={16} />
-                {t(THEME_META[id].key)}
+                {t(THEME_KEY[id])}
               </PixelButton>
             ))}
           </div>
-          {intimacyWarn && (
-            <p style={{ margin: 0, fontSize: 'var(--cb-fs-small)', color: 'var(--cb-red)' }}>
-              {t('themes.intimacy.groupWarn')}
-            </p>
-          )}
+          {intimacyWarn && <p className="cb-field-error">{t('themes.intimacy.groupWarn')}</p>}
         </PixelPanel>
       )}
 
-      <PixelButton variant="gold" block onClick={handleStart} disabled={!allQuestions.data}>
+      <div className="cb-grow" />
+      <PixelButton onClick={handleStart} disabled={!allQuestions.data}>
         {t('common.start')}
       </PixelButton>
 
       {deckEmpty && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(26,28,44,0.7)',
-            display: 'grid',
-            placeItems: 'center',
-            padding: 'var(--cb-s4)',
-          }}
-        >
-          <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s4)', maxWidth: 340 }}>
-            <p style={{ margin: 0, lineHeight: 1.6 }}>{t('error.deckEmpty')}</p>
-            <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-              <PixelButton variant="ghost" block onClick={handleCloseDeckEmpty}>
+        <div className="cb-overlay" role="dialog" aria-modal="true">
+          <PixelPanel className="cb-sheet">
+            <p className="cb-body-lg">{t('error.deckEmpty')}</p>
+            <div className="cb-row-2">
+              <PixelButton variant="secondary" onClick={handleCloseDeckEmpty}>
                 {t('common.cancel')}
               </PixelButton>
-              <PixelButton variant="primary" block onClick={handleReshuffle}>
-                {t('common.confirm')}
-              </PixelButton>
+              <PixelButton onClick={handleReshuffle}>{t('common.confirm')}</PixelButton>
             </div>
           </PixelPanel>
         </div>

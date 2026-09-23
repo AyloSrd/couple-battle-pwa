@@ -4,13 +4,19 @@ import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { useDraftGame } from '@/shared/session';
 import { type TAvatarId, type TRoster } from '@/shared/game';
-import { Screen, PixelButton } from '@/shared/Chrome';
+import { Screen, PixelButton, Chip, ProgressDots } from '@/shared/Chrome';
 import { initSetup, reduceSetup } from './domain/machine';
 import { TeamPick } from './components/TeamPick';
 import { NameEntry } from './components/NameEntry';
 import { SetupPass } from './components/SetupPass';
 
 const COUNTS = [1, 2, 3, 4] as const;
+
+/** "Duo {n}" — the localized team-pick line up to its colon ("Duo 2 : choisissez…"). */
+export function duoLabel(full: string): string {
+  const head = full.split(':')[0]?.trim();
+  return head && head !== full ? head : full;
+}
 
 /**
  * V-Setup — the roster-building wizard. One route, one view; a pure sub-machine
@@ -66,24 +72,36 @@ export const SetupView: FC = () => {
 
   if (state.step === 'done') return null;
 
+  const inWizard = state.step !== 'count';
+  // Chip: which couple we're building (the pass interstitial already points at the next one).
+  const chipCouple = state.coupleIdx + 1;
+
   return (
     <Screen>
-      <PixelButton variant="ghost" onClick={handleBack} style={{ alignSelf: 'flex-start' }}>
-        ← {t('common.back')}
-      </PixelButton>
+      <div className="cb-topbar">
+        <PixelButton variant="ghost" block={false} onClick={handleBack}>
+          ← {t('common.back')}
+        </PixelButton>
+        {inWizard && state.count !== null && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--cb-s3)' }}>
+            <Chip>{duoLabel(t('setup.team.pick', { n: chipCouple }))}</Chip>
+            <ProgressDots total={state.count} current={state.coupleIdx} />
+          </span>
+        )}
+      </div>
 
       {state.step === 'count' && (
         <>
           <h1 className="cb-title">{t('setup.title')}</h1>
-          <p className="cb-heading">{t('setup.couples.count')}</p>
-          <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
+          <p className="cb-body-lg">{t('setup.couples.count')}</p>
+          <div className="cb-row-2">
             {COUNTS.map((n) => (
-              <PixelButton key={n} variant="primary" block onClick={handlePickCount(n)}>
+              <PixelButton key={n} variant="secondary" onClick={handlePickCount(n)} style={{ minHeight: 'var(--cb-h-answer)', fontSize: 'var(--cb-fs-h2)', fontFamily: 'var(--cb-font-display)' }}>
                 {n}
               </PixelButton>
             ))}
           </div>
-          <p className="cb-muted" style={{ margin: 0, fontSize: 'var(--cb-fs-small)' }}>
+          <p className="cb-muted" style={{ margin: 0 }}>
             {t('setup.couples.solo.hint')}
           </p>
         </>

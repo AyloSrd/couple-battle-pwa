@@ -16,42 +16,29 @@ export const PauseSheet: FC<TPauseSheetProps> = ({ onResume, onRestart, onQuit }
   const handleCancelQuit = () => setConfirmQuit(false);
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(26,28,44,0.7)',
-        display: 'grid',
-        placeItems: 'center',
-        padding: 'var(--cb-s4)',
-      }}
-    >
-      <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s3)', width: '100%', maxWidth: 340 }}>
-        <h2 className="cb-title" style={{ textAlign: 'center' }}>
-          {t('pause.title')}
-        </h2>
+    <div className="cb-overlay" role="dialog" aria-modal="true" aria-label={t('pause.title')}>
+      <PixelPanel className="cb-sheet">
+        <h2 className="cb-h2 cb-center">{t('pause.title')}</h2>
 
         {confirmQuit ? (
           <>
-            <p style={{ margin: 0, lineHeight: 1.6 }}>{t('pause.quit.confirm')}</p>
-            <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-              <PixelButton variant="ghost" block onClick={handleCancelQuit}>
+            <p className="cb-body-lg">{t('pause.quit.confirm')}</p>
+            <div className="cb-row-2">
+              <PixelButton variant="secondary" onClick={handleCancelQuit}>
                 {t('common.cancel')}
               </PixelButton>
-              <PixelButton variant="negative" block onClick={onQuit}>
+              <PixelButton variant="negative" onClick={onQuit}>
                 {t('common.confirm')}
               </PixelButton>
             </div>
           </>
         ) : (
           <>
-            <PixelButton variant="primary" block onClick={onResume}>
-              {t('pause.resume')}
-            </PixelButton>
-            <PixelButton variant="ghost" block onClick={onRestart}>
+            <PixelButton onClick={onResume}>{t('pause.resume')}</PixelButton>
+            <PixelButton variant="secondary" onClick={onRestart}>
               {t('pause.restartRound')}
             </PixelButton>
-            <PixelButton variant="negative" block onClick={handleAskQuit}>
+            <PixelButton variant="ghost" onClick={handleAskQuit}>
               {t('pause.quit')}
             </PixelButton>
           </>

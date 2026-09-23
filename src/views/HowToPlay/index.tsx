@@ -2,14 +2,14 @@ import { useRef, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { Screen, PixelPanel, PixelButton, ProgressDots, Sprite } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, ProgressDots, ModeIcon, type TModeIconMode } from '@/shared/Chrome';
 
-type TCard = { titleKey: TStringKey; bodyKey: TStringKey; sprite: string };
+type TCard = { titleKey: TStringKey; bodyKey: TStringKey; mode: TModeIconMode };
 
 const CARDS: TCard[] = [
-  { titleKey: 'howto.flash.title', bodyKey: 'howto.flash.body', sprite: 'mode-flash' },
-  { titleKey: 'howto.dilemma.title', bodyKey: 'howto.dilemma.body', sprite: 'mode-dilemma' },
-  { titleKey: 'howto.ultime.title', bodyKey: 'howto.ultime.body', sprite: 'ui-crown' },
+  { titleKey: 'howto.flash.title', bodyKey: 'howto.flash.body', mode: 'flash' },
+  { titleKey: 'howto.dilemma.title', bodyKey: 'howto.dilemma.body', mode: 'dilemma' },
+  { titleKey: 'howto.ultime.title', bodyKey: 'howto.ultime.body', mode: 'ultime' },
 ];
 
 export const HowToPlayView: FC = () => {
@@ -33,9 +33,12 @@ export const HowToPlayView: FC = () => {
 
   return (
     <Screen>
-      <PixelButton variant="ghost" onClick={handleBack}>
-        ← {t('common.back')}
-      </PixelButton>
+      <div className="cb-topbar">
+        <PixelButton variant="ghost" block={false} onClick={handleBack}>
+          ← {t('common.back')}
+        </PixelButton>
+        <ProgressDots total={CARDS.length} current={index} />
+      </div>
       <h1 className="cb-title">{t('howto.title')}</h1>
 
       <div
@@ -47,6 +50,7 @@ export const HowToPlayView: FC = () => {
           scrollSnapType: 'x mandatory',
           gap: 'var(--cb-s4)',
           scrollbarWidth: 'none',
+          padding: 'var(--cb-s1)',
         }}
       >
         {CARDS.map((card) => (
@@ -61,17 +65,14 @@ export const HowToPlayView: FC = () => {
               textAlign: 'center',
             }}
           >
-            <Sprite name={card.sprite} size={48} />
-            <h2 className="cb-heading">{t(card.titleKey)}</h2>
-            <p style={{ margin: 0, lineHeight: 1.6 }}>{t(card.bodyKey)}</p>
+            <ModeIcon mode={card.mode} size={96} />
+            <h2 className="cb-h2">{t(card.titleKey)}</h2>
+            <p className="cb-body-lg">{t(card.bodyKey)}</p>
           </PixelPanel>
         ))}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <ProgressDots total={CARDS.length} current={index} />
-      </div>
-      <p className="cb-muted" style={{ textAlign: 'center', margin: 0 }}>
+      <p className="cb-muted cb-center" style={{ margin: 0 }}>
         {t('howto.swipe')}
       </p>
     </Screen>

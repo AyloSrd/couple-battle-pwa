@@ -1,7 +1,7 @@
 import { useEffect, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
+import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { rankTeams, type TGameState } from '../domain/machine';
 
 type TProps = {
@@ -9,12 +9,11 @@ type TProps = {
   onNext: () => void;
 };
 
-/** V-Scoreboard — between-rounds standings. */
+/** V-Scoreboard — between-rounds standings, on the Spotlight stage. */
 export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
   const t = useT();
   const sound = useSoundApi();
   const ranked = rankTeams(state);
-  const maxScore = Math.max(1, ...ranked.map((r) => r.score));
   const allTied = ranked.every((r) => r.isWinner);
   const leader = ranked[0];
 
@@ -24,21 +23,26 @@ export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
 
   return (
     <>
-      <h1 className="cb-title">{t('score.title', { n: 1 })}</h1>
+      <h1 className="cb-title">{t('score.title', { n: state.round + 1 })}</h1>
 
-      {ranked.map((row) => (
-        <PixelPanel key={row.team.teamId} style={{ display: 'flex', alignItems: 'center', gap: 'var(--cb-s3)' }}>
-          <Sprite name={`avatar-${row.team.avatarId}`} size={32} />
-          {row.isWinner && !allTied && <Sprite name="ui-crown" size={16} />}
-          <div style={{ flex: 1, height: 14, background: 'var(--cb-paper)', border: '2px solid var(--cb-ink)' }}>
-            <div style={{ width: `${(row.score / maxScore) * 100}%`, height: '100%', background: 'var(--cb-gold)' }} />
-          </div>
-          <strong className="cb-heading">{row.score}</strong>
-        </PixelPanel>
-      ))}
+      <div className="cb-rows">
+        {ranked.map((row) => {
+          const label = t(`team.${row.team.avatarId}` as TStringKey);
+          const lead = row.isWinner && !allTied;
+          return (
+            <div key={row.team.teamId} className={['cb-row', lead ? 'cb-row--lead' : ''].filter(Boolean).join(' ')}>
+              <TeamArt teamId={row.team.avatarId} label={label} variant="avatar" />
+              <span>
+                {row.team.players[0]} &amp; {row.team.players[1]}
+              </span>
+              <span className="cb-score">{row.score}</span>
+            </div>
+          );
+        })}
+      </div>
 
       {state.roster.length > 1 && (
-        <p className="cb-muted" style={{ textAlign: 'center', margin: 0, fontSize: 'var(--cb-fs-small)' }}>
+        <p className="cb-muted cb-center" style={{ margin: 0 }}>
           {allTied
             ? t('score.tied')
             : leader
@@ -47,9 +51,8 @@ export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
         </p>
       )}
 
-      <PixelButton variant="gold" block onClick={onNext}>
-        {t('score.next')}
-      </PixelButton>
+      <div className="cb-grow" />
+      <PixelButton onClick={onNext}>{t('score.next')}</PixelButton>
     </>
   );
 };

@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { PixelPanel, PixelButton, Sprite, ProgressDots } from '@/shared/Chrome';
+import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton } from '@/shared/Chrome';
 import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
 
 type TProps = {
@@ -24,51 +24,36 @@ export const GuessReveal: FC<TProps> = ({ state, guesserName, partnerName, onRev
   const handleNo = () => onAutoGuess(t('common.no'));
 
   return (
-    <div style={{ flex: 1, display: 'grid', gap: 'var(--cb-s4)', alignContent: 'start' }}>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+    <>
+      <div className="cb-topbar">
+        <Chip>{t('flash.side.chip.guessers')}</Chip>
         <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
       </div>
-      <p className="cb-heading" style={{ textAlign: 'center', margin: 0 }}>
-        {t('guess.turn', { name: guesserName, partner: partnerName })}
-      </p>
+      <h2 className="cb-h2">{t('guess.turn', { name: guesserName, partner: partnerName })}</h2>
 
-      <PixelPanel style={{ textAlign: 'center' }}>
-        <p className="cb-question" style={{ margin: 0 }}>
-          {questionText(question, 'name', partnerName) || '—'}
-        </p>
+      <PixelPanel>
+        <p className="cb-question">{questionText(question, 'name', partnerName) || '—'}</p>
       </PixelPanel>
 
       {twoNames ? (
-        <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-          <PixelButton variant="primary" block onClick={() => onAutoGuess(twoNames[0])}>
-            {twoNames[0]}
-          </PixelButton>
-          <PixelButton variant="primary" block onClick={() => onAutoGuess(twoNames[1])}>
-            {twoNames[1]}
-          </PixelButton>
+        <div className="cb-answers">
+          <AnswerButton label={twoNames[0]} tone="p1" onClick={() => onAutoGuess(twoNames[0])} />
+          <AnswerButton label={twoNames[1]} tone="p2" onClick={() => onAutoGuess(twoNames[1])} />
         </div>
       ) : isYesNo ? (
-        <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-          <PixelButton variant="positive" block onClick={handleYes}>
-            {t('common.yes')}
-          </PixelButton>
-          <PixelButton variant="negative" block onClick={handleNo}>
-            {t('common.no')}
-          </PixelButton>
+        <div className="cb-answers">
+          <AnswerButton label={t('common.yes')} tone="p1" onClick={handleYes} />
+          <AnswerButton label={t('common.no')} tone="p2" onClick={handleNo} />
         </div>
       ) : (
         <>
-          <p className="cb-muted" style={{ textAlign: 'center', margin: 0, fontSize: 'var(--cb-fs-small)' }}>
+          <div className="cb-grow" />
+          <p className="cb-muted cb-center" style={{ margin: 0 }}>
             {t('guess.outloud')}
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <Sprite name="card-back" width={96} height={128} />
-          </div>
-          <PixelButton variant="gold" block onClick={onReveal} style={{ fontSize: 'var(--cb-fs-heading)' }}>
-            {t('guess.reveal')}
-          </PixelButton>
+          <PixelButton onClick={onReveal}>{t('guess.reveal')}</PixelButton>
         </>
       )}
-    </div>
+    </>
   );
 };
