@@ -2,7 +2,7 @@ import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { AVATAR_IDS, type TAvatarId } from '@/shared/game';
-import { PixelButton, Sprite } from '@/shared/Chrome';
+import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { takenAvatars, type TSetupState } from '../domain/machine';
 
 type TProps = {
@@ -11,10 +11,16 @@ type TProps = {
   onNext: () => void;
 };
 
+/** The title is the localized pick line after its "Duo n :" head (the chip shows the head). */
+function pickTitle(full: string): string {
+  const idx = full.indexOf(':');
+  return idx === -1 ? full : full.slice(idx + 1).trim();
+}
+
 /**
- * Step A — TEAM PICK. The avatar grid is the hero: big tiles (2–3 cols, each
- * avatar ≥ 25% of viewport width), team name underneath. Tapping a free tile
- * SELECTS it (no auto-advance); the pinned "Suivant" advances.
+ * Step A — TEAM PICK. 2-column grid of team tiles (art or placeholder initial,
+ * name in Inter underneath). Tapping a free tile SELECTS it (no auto-advance);
+ * taken tiles are disabled; the pinned "Suivant" advances.
  */
 export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
   const t = useT();
@@ -40,76 +46,39 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
 
   return (
     <>
-      <h1 className="cb-title" style={{ margin: 0 }}>
-        {t('setup.team.pick', { n: state.coupleIdx + 1 })}
+      <h1 className="cb-title cb-cap" style={{ marginBottom: 'var(--cb-s2)' }}>
+        {pickTitle(t('setup.team.pick', { n: state.coupleIdx + 1 }))}
       </h1>
 
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          display: 'grid',
-          // 2–3 columns max; each tile keeps the avatar ≥ 25% of viewport width.
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(28vw, 140px), 1fr))',
-          gap: 'var(--cb-s3)',
-          alignContent: 'start',
-          padding: 'var(--cb-s1)',
-        }}
-      >
+      <div className="cb-teams" style={{ flex: 1, alignContent: 'start' }}>
         {AVATAR_IDS.map((id) => {
           const isTaken = taken.has(id);
           const isSelected = state.avatar === id;
+          const name = t(`team.${id}` as TStringKey);
           return (
-            <PixelButton
+            <button
               key={id}
-              variant={isSelected ? 'gold' : 'ghost'}
+              type="button"
+              className="cb-team"
               onClick={handleTap(id)}
               aria-label={id}
               aria-pressed={isSelected}
               disabled={isTaken}
-              style={{
-                display: 'grid',
-                justifyItems: 'center',
-                gap: 'var(--cb-s1)',
-                padding: 'var(--cb-s2)',
-                position: 'relative',
-              }}
             >
-              <Sprite
-                name={`avatar-${id}`}
-                {...(isSelected ? { className: 'cb-anim-bounce' } : {})}
-                style={{
-                  width: 'min(25vw, 120px)',
-                  height: 'min(25vw, 120px)',
-                  ...(isTaken ? { filter: 'grayscale(1)', opacity: 0.5 } : {}),
-                }}
-              />
-              {/* Team-name labels render in the BODY font: the pixel display font
-                  draws accented capitals (É, È, Ê…) shrunken by design. */}
-              <span style={{ fontSize: 'var(--cb-fs-small)', fontFamily: 'var(--cb-font-body)' }}>
-                {t(`team.${id}` as TStringKey)}
-              </span>
-              {isTaken && (
-                <Sprite name="ui-lock" size={16} style={{ position: 'absolute', top: 6, right: 6 }} />
-              )}
-            </PixelButton>
+              <TeamArt teamId={id} label={name} variant="tile" />
+              <span className="cb-team-name">{name}</span>
+            </button>
           );
         })}
       </div>
 
       {toast && (
-        <p style={{ margin: 0, color: 'var(--cb-red)', fontSize: 'var(--cb-fs-small)', textAlign: 'center' }}>
+        <div className="cb-toast cb-toast--error" role="status">
           {t('setup.team.taken')}
-        </p>
+        </div>
       )}
 
-      <PixelButton
-        variant="gold"
-        block
-        onClick={onNext}
-        disabled={state.avatar === null}
-        style={{ fontSize: 'var(--cb-fs-title)' }}
-      >
+      <PixelButton onClick={onNext} disabled={state.avatar === null}>
         {t('common.next')}
       </PixelButton>
     </>

@@ -1,7 +1,7 @@
 import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
+import { PixelPanel, PixelButton, Chip, ProgressDots, modeIconSmall } from '@/shared/Chrome';
 import { dilemmaQuestion, dilemmaTotal, questionText, type TGameState } from '../domain/machine';
 
 type TProps = {
@@ -22,26 +22,20 @@ export const DilemmaQuestion: FC<TProps> = ({ state, onReady }) => {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--cb-s2)' }}>
-        <Sprite name="mode-dilemma" size={20} />
-        <span className="cb-muted" style={{ fontSize: 'var(--cb-fs-small)' }}>
-          {t('common.question', { n: state.questionIdx + 1, total })}
-        </span>
+      <div className="cb-topbar">
+        <Chip icon={modeIconSmall('dilemma')}>{t('mode.dilemma.name')}</Chip>
+        <ProgressDots total={total} current={state.questionIdx} />
       </div>
 
-      <PixelPanel style={{ flex: 1, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-        <p className="cb-question" style={{ margin: 0 }}>
-          {questionText(question, 'you') || '—'}
-        </p>
+      <PixelPanel>
+        <p className="cb-question">{questionText(question, 'you') || '—'}</p>
       </PixelPanel>
 
-      <p className="cb-muted" style={{ textAlign: 'center', margin: 0, fontSize: 'var(--cb-fs-small)' }}>
+      <div className="cb-grow" />
+      <p className="cb-muted cb-center" style={{ margin: 0 }}>
         {t('dilemma.rule')}
       </p>
-
-      <PixelButton variant="gold" block onClick={onReady} style={{ fontSize: 'var(--cb-fs-title)' }}>
-        {t('dilemma.ready')}
-      </PixelButton>
+      <PixelButton onClick={onReady}>{t('dilemma.ready')}</PixelButton>
     </>
   );
 };

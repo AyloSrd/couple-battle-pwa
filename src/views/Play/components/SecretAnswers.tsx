@@ -1,21 +1,11 @@
-import { useState, type ChangeEvent, type CSSProperties, type FC } from 'react';
+import { useState, type ChangeEvent, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { PixelPanel, PixelButton, Sprite, ProgressDots } from '@/shared/Chrome';
+import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton, Field } from '@/shared/Chrome';
 import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'secretInput' }>;
   onLock: (answer: string) => void;
-};
-
-const inputStyle: CSSProperties = {
-  fontFamily: 'var(--cb-font-body)',
-  fontSize: 'var(--cb-fs-body)',
-  padding: 'var(--cb-s3)',
-  border: 'var(--cb-border)',
-  background: 'var(--cb-white)',
-  width: '100%',
-  boxSizing: 'border-box',
 };
 
 /** V-SecretAnswers — the answerer privately answers, then locks. No going back. */
@@ -39,54 +29,31 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
 
   return (
-    <div style={{ flex: 1, display: 'grid', gap: 'var(--cb-s4)', alignContent: 'start' }}>
-      {/* "Answerers' side" indicator — the questions are shared within this group,
-          so no dimmed "secret" vignette; only the OTHER side must not look. */}
-      <div
-        className="cb-muted"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--cb-s2)',
-          justifyContent: 'center',
-          fontSize: 'var(--cb-fs-small)',
-        }}
-      >
-        <Sprite name="ui-lock" size={14} />
-        <span>{t('flash.side.chip.answerers')}</span>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+    <>
+      {/* "Answerers' side" chip — the questions are shared within this group;
+          only the OTHER side must not look. */}
+      <div className="cb-topbar">
+        <Chip>{t('flash.side.chip.answerers')}</Chip>
         <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
       </div>
 
-      <PixelPanel style={{ textAlign: 'center' }}>
-        <p className="cb-question" style={{ margin: 0 }}>
-          {questionText(question, 'you') || '—'}
-        </p>
+      <PixelPanel>
+        <p className="cb-question">{questionText(question, 'you') || '—'}</p>
       </PixelPanel>
 
       {twoNames ? (
-        <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-          <PixelButton variant="primary" block onClick={() => lock(twoNames[0])}>
-            {twoNames[0]}
-          </PixelButton>
-          <PixelButton variant="primary" block onClick={() => lock(twoNames[1])}>
-            {twoNames[1]}
-          </PixelButton>
+        <div className="cb-answers">
+          <AnswerButton label={twoNames[0]} tone="p1" onClick={() => lock(twoNames[0])} />
+          <AnswerButton label={twoNames[1]} tone="p2" onClick={() => lock(twoNames[1])} />
         </div>
       ) : isYesNo ? (
-        <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-          <PixelButton variant="positive" block onClick={handleYes}>
-            {t('common.yes')}
-          </PixelButton>
-          <PixelButton variant="negative" block onClick={handleNo}>
-            {t('common.no')}
-          </PixelButton>
+        <div className="cb-answers">
+          <AnswerButton label={t('common.yes')} tone="p1" onClick={handleYes} />
+          <AnswerButton label={t('common.no')} tone="p2" onClick={handleNo} />
         </div>
       ) : (
         <>
-          <input
-            style={inputStyle}
+          <Field
             placeholder={t('secret.placeholder')}
             value={text}
             onChange={handleChange}
@@ -94,11 +61,12 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
             autoCapitalize="off"
             autoFocus
           />
-          <PixelButton variant="gold" block onClick={handleSubmitText} disabled={!text.trim()}>
+          <div className="cb-grow" />
+          <PixelButton onClick={handleSubmitText} disabled={!text.trim()}>
             {t('secret.submit')}
           </PixelButton>
         </>
       )}
-    </div>
+    </>
   );
 };

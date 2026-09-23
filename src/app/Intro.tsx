@@ -1,36 +1,24 @@
-import { useEffect, useState, type CSSProperties, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { AVATAR_IDS } from '@/shared/game';
+import { Screen, teamArtUrl } from '@/shared/Chrome';
+import logo480 from '@/assets/art/logo-480.webp';
+import logo960 from '@/assets/art/logo-960.webp';
+import modeFlash from '@/assets/art/mode-flash-256.webp';
+import modeDilemma from '@/assets/art/mode-dilemma-256.webp';
+import modeUltime from '@/assets/art/mode-ultime-256.webp';
 
 /**
- * The boot loader, ahead of the router. A short studio splash that preloads the
- * critical assets (so the first real screen doesn't flash), then hands off to
- * the app. Gated once per session by the caller.
+ * The boot loader, ahead of the router. The Ninou Games studio splash on the
+ * Spotlight stage: preloads the critical assets (fonts, logo, mode icons, team
+ * art) so the first real screen doesn't flash, then hands off to the app.
+ * Gated once per session by the caller.
  */
 
 const BASE = import.meta.env.BASE_URL;
 const STEPS = 12;
-const STEP_MS = 200; // ~2.4s minimum retro fill
+const STEP_MS = 200; // ~2.4s minimum fill
 const PRELOAD_TIMEOUT_MS = 6000;
-
-// Critical assets to have ready before revealing the app (the SW precaches the
-// rest for offline; this just avoids first-paint flashes).
-const SPRITE_NAMES = [
-  'logo',
-  'logo-icon',
-  ...AVATAR_IDS.map((id) => `avatar-${id}`),
-  'ui-heart', 'ui-crown', 'ui-skull', 'ui-spark', 'ui-lock', 'ui-eye-no', 'ui-gear', 'ui-pause',
-  'ui-btn', 'ui-btn-pressed', 'ui-panel', 'ui-flag-fr', 'ui-flag-en', 'ui-toggle-on', 'ui-toggle-off',
-  'ui-dot-empty', 'ui-dot-current', 'ui-dot-done',
-  'ui-confetti-1', 'ui-confetti-2', 'ui-confetti-3', 'ui-confetti-4',
-  'mode-flash', 'mode-dilemma',
-  'diff-mix', 'diff-easy', 'diff-medium', 'diff-hard',
-  'theme-home', 'theme-food', 'theme-travel', 'theme-work', 'theme-hobbies', 'theme-goingout',
-  'theme-money', 'theme-childhood', 'theme-personality', 'theme-dreams', 'theme-intimacy', 'theme-random',
-  'count-1', 'count-2', 'count-3', 'count-go', 'count-burst',
-  'card-back', 'card-front', 'bg-hearts',
-  'demo-phone', 'demo-bubble-think', 'demo-bubble-answer',
-];
 
 function preloadImage(url: string): Promise<void> {
   return new Promise((resolve) => {
@@ -43,9 +31,17 @@ function preloadImage(url: string): Promise<void> {
 
 /** Fonts + critical images. Resolves when ready, or after a safety timeout. */
 function preloadAssets(): Promise<void> {
+  const teamArt = AVATAR_IDS.flatMap((id) => [teamArtUrl(id, 512), teamArtUrl(id, 768)]).filter(
+    (u): u is string => Boolean(u),
+  );
   const urls = [
     `${BASE}splash/ninou-penguins.png`,
-    ...SPRITE_NAMES.map((n) => `${BASE}sprites/${n}.svg`),
+    logo480,
+    logo960,
+    modeFlash,
+    modeDilemma,
+    modeUltime,
+    ...Array.from(new Set(teamArt)),
   ];
   const fonts = document.fonts ? document.fonts.ready.then(() => undefined) : Promise.resolve();
   const assets = Promise.all([fonts, ...urls.map(preloadImage)]).then(() => undefined);
@@ -53,49 +49,40 @@ function preloadAssets(): Promise<void> {
   return Promise.race([assets, timeout]);
 }
 
-const fullScreen: CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  background: 'var(--cb-ink)',
-  display: 'grid',
-  placeItems: 'center',
-  padding: 'var(--cb-s5)',
-  boxSizing: 'border-box',
-};
-
 const StudioSplash: FC<{ progress: number; label: string }> = ({ progress, label }) => (
-  <div style={fullScreen}>
-    <div
-      style={{ display: 'grid', gap: 'var(--cb-s6)', justifyItems: 'center', width: 'min(70vw, 460px)' }}
-    >
-      <img
-        src={`${BASE}splash/ninou-penguins.png`}
-        alt=""
-        style={{ width: '100%', imageRendering: 'pixelated' }}
-      />
-      <div
-        style={{
-          fontFamily: 'var(--cb-font-display)',
-          color: 'var(--cb-cream)',
-          fontSize: 'var(--cb-fs-heading)',
-          letterSpacing: '2px',
-        }}
-      >
+  <Screen stage center style={{ position: 'fixed', inset: 0, maxWidth: 'none' }}>
+    <div className="cb-glow" aria-hidden="true" />
+    <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s6)', width: 'min(70vw, 460px)' }}>
+      {/* The studio's own identity — kept as-is, now on the stage. */}
+      <img src={`${BASE}splash/ninou-penguins.png`} alt="" style={{ width: '100%' }} draggable={false} />
+      <div className="cb-label" style={{ color: 'var(--cb-text)', letterSpacing: 'var(--cb-tracking-overline)', textTransform: 'uppercase' }}>
         {label}
       </div>
       <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
         style={{
           width: '80%',
-          height: 18,
-          background: 'var(--cb-white)',
-          border: 'var(--cb-border)',
-          boxSizing: 'border-box',
+          height: 10,
+          borderRadius: 'var(--cb-r-pill)',
+          background: 'var(--cb-surface)',
+          overflow: 'hidden',
         }}
       >
-        <div style={{ width: `${progress * 100}%`, height: '100%', background: 'var(--cb-gold)' }} />
+        <div
+          style={{
+            width: `${progress * 100}%`,
+            height: '100%',
+            borderRadius: 'var(--cb-r-pill)',
+            background: 'var(--cb-gold)',
+            transition: 'width var(--cb-t-screen) var(--cb-ease-out)',
+          }}
+        />
       </div>
     </div>
-  </div>
+  </Screen>
 );
 
 export const Intro: FC<{ onDone: () => void }> = ({ onDone }) => {
@@ -114,7 +101,7 @@ export const Intro: FC<{ onDone: () => void }> = ({ onDone }) => {
     };
   }, []);
 
-  // Stepped retro loading bar.
+  // Stepped loading bar.
   useEffect(() => {
     const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS)), STEP_MS);
     return () => clearInterval(id);

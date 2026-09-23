@@ -1,8 +1,6 @@
-/* Global stylesheet. Imports design tokens first, then a minimal pixel-arcade
-   base. Fonts are self-hosted (see fonts.css) — no runtime Google Fonts. */
+/* Global stylesheet: fonts → tokens → base. Visual system v2 ("Paper + Spotlight"). */
 @import './fonts.css';
 @import './tokens.css';
-@import './anim.css';
 
 *,
 *::before,
@@ -19,12 +17,11 @@ body,
 body {
   margin: 0;
   background: var(--cb-bg);
-  color: var(--cb-text);
-  font-family: var(--cb-font-body);
+  color: var(--cb-text-body);
+  font-family: var(--cb-font-ui);
   font-size: var(--cb-fs-body);
-  line-height: 1.5;
-  -webkit-font-smoothing: none;
-  /* pixel fonts stay crisp; disable text size auto-inflation on mobile */
+  line-height: var(--cb-lh-body);
+  -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 }
@@ -37,11 +34,24 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-img {
-  image-rendering: pixelated;
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
-/* Respect reduced-motion everywhere: near-instant, no loops. */
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Visible focus ring on every control (tokens own the colour). */
+:focus-visible {
+  outline: 3px solid var(--cb-focus);
+  outline-offset: 3px;
+}
+
+/* Reduced motion: no slams/overshoots/loops — content (numerals included) stays. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -51,10 +61,4 @@ img {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* Visible keyboard focus for a11y (pixel outline). */
-:focus-visible {
-  outline: 3px solid var(--cb-blue);
-  outline-offset: 2px;
 }

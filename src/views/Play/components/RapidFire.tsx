@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
+import { PixelPanel, PixelButton, Chip, ProgressDots, TeamArt } from '@/shared/Chrome';
 import {
   rapidQuestionOf,
   questionText,
@@ -35,7 +35,7 @@ function answererNameOf(state: TGameState): string {
   return '';
 }
 
-/** V-FinalRapidFire — the crown-deciding finale (Ultime). Ink spotlight vibe. */
+/** V-FinalRapidFire — the crown-deciding finale (Ultime), on the Spotlight stage. */
 export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
   const t = useT();
   const handleSynchro = () => onJudge(true);
@@ -43,67 +43,71 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
 
   if (state.kind === 'rapidIntro') {
     return (
-      <div style={{ flex: 1, display: 'grid', placeItems: 'center', textAlign: 'center', gap: 'var(--cb-s5)' }}>
-        <div style={{ display: 'grid', gap: 'var(--cb-s4)', justifyItems: 'center' }}>
-          <Sprite name="ui-crown" size={48} />
-          <h1 className="cb-title">{t('final.intro.title')}</h1>
-          <p style={{ margin: 0, lineHeight: 1.6 }}>{t('final.intro.body')}</p>
-          <PixelButton variant="gold" block onClick={onNext}>
-            {t('common.start')}
-          </PixelButton>
+      <>
+        <div className="cb-glow" aria-hidden="true" />
+        <div className="cb-grow" style={{ display: 'grid', placeItems: 'center', textAlign: 'center' }}>
+          <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s4)' }}>
+            <h1 className="cb-title">{t('final.intro.title')}</h1>
+            <p className="cb-body-lg" style={{ color: 'var(--cb-text-muted)' }}>
+              {t('final.intro.body')}
+            </p>
+          </div>
         </div>
-      </div>
+        <PixelButton onClick={onNext}>{t('common.start')}</PixelButton>
+      </>
     );
   }
 
   if (state.kind === 'rapidTurn') {
     const team = state.roster[state.coupleIdx];
     return (
-      <div style={{ flex: 1, display: 'grid', placeItems: 'center', textAlign: 'center', gap: 'var(--cb-s5)' }}>
-        <div style={{ display: 'grid', gap: 'var(--cb-s4)', justifyItems: 'center' }}>
-          {team && <Sprite name={`avatar-${team.avatarId}`} size={96} />}
-          <h1 className="cb-title">{t('final.turn', { team: teamNameOf(state, t) })}</h1>
-          <PixelButton variant="gold" block onClick={onNext}>
-            {t('common.start')}
-          </PixelButton>
+      <>
+        <div className="cb-glow" aria-hidden="true" style={{ top: '34%' }} />
+        <div className="cb-grow" style={{ display: 'grid', placeItems: 'center', textAlign: 'center' }}>
+          <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s4)', width: '100%' }}>
+            {team && <TeamArt teamId={team.avatarId} label={teamNameOf(state, t)} variant="hero" className="cb-reveal-in" />}
+            <h1 className="cb-title">{t('final.turn', { team: teamNameOf(state, t) })}</h1>
+          </div>
         </div>
-      </div>
+        <PixelButton onClick={onNext}>{t('common.start')}</PixelButton>
+      </>
     );
   }
 
+  const question = rapidQuestionOf(state);
+  const header = (
+    <div className="cb-topbar">
+      <Chip>{teamNameOf(state, t)}</Chip>
+      <ProgressDots total={ULTIME_RAPID_PER_COUPLE} current={state.questionIdx} />
+    </div>
+  );
+
   if (state.kind === 'rapidQuestion') {
-    const question = rapidQuestionOf(state);
     return (
       <>
-        <p className="cb-muted" style={{ margin: 0, fontSize: 'var(--cb-fs-small)' }}>
-          {t('common.question', { n: state.questionIdx + 1, total: ULTIME_RAPID_PER_COUPLE })} · {teamNameOf(state, t)}
-        </p>
-        <PixelPanel style={{ flex: 1, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-          <p className="cb-question" style={{ margin: 0 }}>
-            {questionText(question, 'name', answererNameOf(state)) || '—'}
-          </p>
+        {header}
+        <PixelPanel>
+          <p className="cb-question">{questionText(question, 'name', answererNameOf(state)) || '—'}</p>
         </PixelPanel>
-        <PixelButton variant="gold" block onClick={onReady} style={{ fontSize: 'var(--cb-fs-title)' }}>
-          {t('dilemma.ready')}
-        </PixelButton>
+        <div className="cb-grow" />
+        <PixelButton onClick={onReady}>{t('dilemma.ready')}</PixelButton>
       </>
     );
   }
 
   // rapidJudge
-  const question = rapidQuestionOf(state);
   return (
     <>
-      <PixelPanel style={{ flex: 1, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-        <p className="cb-question" style={{ margin: 0 }}>
-          {questionText(question, 'name', answererNameOf(state)) || '—'}
-        </p>
+      {header}
+      <PixelPanel>
+        <p className="cb-question">{questionText(question, 'name', answererNameOf(state)) || '—'}</p>
       </PixelPanel>
-      <div style={{ display: 'flex', gap: 'var(--cb-s2)' }}>
-        <PixelButton variant="positive" block onClick={handleSynchro}>
+      <div className="cb-grow" />
+      <div className="cb-row-2">
+        <PixelButton variant="positive" onClick={handleSynchro}>
           {t('final.synchro')}
         </PixelButton>
-        <PixelButton variant="negative" block onClick={handleMismatch}>
+        <PixelButton variant="negative" onClick={handleMismatch}>
           {t('final.mismatch')}
         </PixelButton>
       </div>

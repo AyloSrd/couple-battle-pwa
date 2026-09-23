@@ -1,6 +1,6 @@
-import { useRef, type CSSProperties, type FC, type KeyboardEvent } from 'react';
+import { useRef, type FC, type KeyboardEvent } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { PixelPanel, PixelButton, Sprite } from '@/shared/Chrome';
+import { PixelPanel, PixelButton, Field, TeamArt } from '@/shared/Chrome';
 import { isLastCouple, type TSetupState, type TSetupError } from '../domain/machine';
 
 type TProps = {
@@ -9,26 +9,17 @@ type TProps = {
   onConfirm: () => void;
 };
 
-const inputStyle: CSSProperties = {
-  fontFamily: 'var(--cb-font-body)',
-  fontSize: 'var(--cb-fs-body)',
-  padding: 'var(--cb-s2) var(--cb-s3)',
-  border: 'var(--cb-border)',
-  background: 'var(--cb-white)',
-  width: '100%',
-  boxSizing: 'border-box',
-};
-
 const ERROR_KEY: Record<Exclude<TSetupError, null>, TStringKey> = {
   required: 'setup.names.required',
   duplicate: 'setup.names.duplicate',
 };
 
-/** Step B — NAMES. Header with the chosen avatar small on top, two inputs
- *  (autofocus first; Enter jumps to the second; Enter again submits). */
+/** Step B — NAMES. Chosen team small on top, two fields (autofocus first;
+ *  Enter jumps to the second; Enter again submits). */
 export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
   const t = useT();
   const secondRef = useRef<HTMLInputElement>(null);
+  const teamName = state.avatar ? t(`team.${state.avatar}` as TStringKey) : '';
 
   const handleKey1 = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -45,45 +36,35 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
 
   return (
     <>
-      <div style={{ display: 'grid', justifyItems: 'center', gap: 'var(--cb-s2)' }}>
-        {state.avatar && <Sprite name={`avatar-${state.avatar}`} size={48} />}
-        <h1 className="cb-title" style={{ margin: 0, textAlign: 'center' }}>
-          {t('setup.names.title', {
-            team: state.avatar ? t(`team.${state.avatar}` as TStringKey) : '',
-          })}
-        </h1>
+      <div style={{ display: 'grid', justifyItems: 'center', gap: 'var(--cb-s3)' }}>
+        {state.avatar && <TeamArt teamId={state.avatar} label={teamName} variant="avatarLg" />}
+        <h1 className="cb-title cb-center">{t('setup.names.title', { team: teamName })}</h1>
       </div>
 
-      <PixelPanel style={{ display: 'grid', gap: 'var(--cb-s3)' }}>
-        <input
-          style={inputStyle}
+      <PixelPanel className="cb-stack">
+        <Field
           placeholder={t('setup.names.p1')}
           value={state.name1}
           onChange={(e) => onChangeName(1, e.target.value)}
           onKeyDown={handleKey1}
+          aria-invalid={state.error === 'required' && !state.name1.trim() ? true : undefined}
           autoFocus
           maxLength={16}
         />
-        <input
+        <Field
           ref={secondRef}
-          style={inputStyle}
           placeholder={t('setup.names.p2')}
           value={state.name2}
           onChange={(e) => onChangeName(2, e.target.value)}
           onKeyDown={handleKey2}
+          aria-invalid={state.error !== null ? true : undefined}
           maxLength={16}
         />
+        {state.error && <p className="cb-field-error">{t(ERROR_KEY[state.error])}</p>}
       </PixelPanel>
 
-      {state.error && (
-        <p style={{ margin: 0, color: 'var(--cb-red)', fontSize: 'var(--cb-fs-small)' }}>
-          {t(ERROR_KEY[state.error])}
-        </p>
-      )}
-
-      <PixelButton variant="gold" block onClick={onConfirm} style={{ fontSize: 'var(--cb-fs-title)' }}>
-        {isLastCouple(state) ? t('setup.ready') : t('common.next')}
-      </PixelButton>
+      <div className="cb-grow" />
+      <PixelButton onClick={onConfirm}>{isLastCouple(state) ? t('setup.ready') : t('common.next')}</PixelButton>
     </>
   );
 };

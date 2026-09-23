@@ -6,7 +6,7 @@ import { useWakeLockApi } from '@/shared/wakeLock';
 import { useGetSave, usePutSave } from '@/shared/save';
 import { useDraftGame } from '@/shared/session';
 import { AVATAR_IDS } from '@/shared/game';
-import { Screen, PixelButton, Sprite } from '@/shared/Chrome';
+import { Screen, PixelButton } from '@/shared/Chrome';
 import {
   reduce,
   toSnapshot,
@@ -204,6 +204,10 @@ export const PlayView: FC = () => {
 
   const showPause = game.kind !== 'final';
   const solo = game.roster.length === 1;
+  // Spotlight stage ONLY for the theatrical beats (STYLE-V2 §1): the rapid-fire
+  // finale, the between-rounds scoreboard and the final results. Countdowns
+  // render their own stage screen above. Everything else is Paper.
+  const stage = game.kind.startsWith('rapid') || game.kind === 'scoreboard' || game.kind === 'final';
 
   /** Names for the couple currently in the Flash spotlight. */
   const namesFor = (round: number, coupleIdx: number) => {
@@ -218,16 +222,11 @@ export const PlayView: FC = () => {
   };
 
   return (
-    <Screen>
+    <Screen stage={stage} className={showPause ? 'cb-page--with-pause' : undefined}>
       {showPause && (
-        <div style={{ position: 'fixed', top: 'var(--cb-s3)', right: 'var(--cb-s3)', zIndex: 20 }}>
-          <PixelButton
-            variant="ghost"
-            onClick={handlePause}
-            aria-label={t('pause.title')}
-            style={{ minWidth: 44, minHeight: 44 }}
-          >
-            <Sprite name="ui-pause" size={16} />
+        <div style={{ position: 'fixed', top: 'calc(var(--cb-s3) + env(safe-area-inset-top))', right: 'var(--cb-s3)', zIndex: 20 }}>
+          <PixelButton variant="ghost" block={false} onClick={handlePause} aria-label={t('pause.title')} className="cb-icon-btn">
+            ⏸
           </PixelButton>
         </div>
       )}
@@ -257,7 +256,7 @@ export const PlayView: FC = () => {
       {game.kind === 'handoff' &&
         (() => {
           const n = namesFor(game.round, game.coupleIdx);
-          return <Handoff avatarId={n.avatarId} name={n.answererName} onConfirm={handlePassConfirm} />;
+          return <Handoff avatarId={n.avatarId} teamName={n.teamName} name={n.answererName} onConfirm={handlePassConfirm} />;
         })()}
       {game.kind === 'secretInput' && (
         <SecretAnswers key={`${game.questionIdx}-${game.coupleIdx}`} state={game} onLock={handleLock} />

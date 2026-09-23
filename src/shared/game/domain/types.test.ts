@@ -1,7 +1,6 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { AVATAR_IDS, ZAvatarIdSchema } from './types';
+import { teamArtUrl, teamsWithArt } from '@/shared/Chrome';
 import { fr } from '@/data/strings.fr';
 import { en } from '@/data/strings.en';
 
@@ -27,19 +26,22 @@ describe('team registry (AVATAR_IDS)', () => {
     }
   });
 
-  it('every team has a resolvable avatar-<id>.svg sprite shipped with the app', () => {
+  it('every team resolves to character art by id or to the placeholder (never a missing file)', () => {
     for (const id of AVATAR_IDS) {
-      const file = resolve(process.cwd(), 'public/sprites', `avatar-${id}.svg`);
-      expect(existsSync(file), `missing sprite ${file}`).toBe(true);
+      const art = teamArtUrl(id, 512);
+      if (art) expect(art).toMatch(new RegExp(`team-${id}-idle-(512|768)\\.webp`));
+      else expect(art).toBeUndefined(); // → placeholder tile (tinted square + initial)
     }
+    // every shipped render belongs to a registry team (no orphan art)
+    for (const id of teamsWithArt()) expect((AVATAR_IDS as readonly string[]).includes(id)).toBe(true);
   });
 
-  it('retired teams are gone: not in the registry, no string, no sprite, schema rejects them', () => {
+  it('retired teams are gone: not in the registry, no string, no art, schema rejects them', () => {
     for (const id of RETIRED) {
       expect((AVATAR_IDS as readonly string[]).includes(id)).toBe(false);
       expect(fr).not.toHaveProperty(`team.${id}`);
       expect(en).not.toHaveProperty(`team.${id}`);
-      expect(existsSync(resolve(process.cwd(), 'public/sprites', `avatar-${id}.svg`))).toBe(false);
+      expect(teamArtUrl(id, 512)).toBeUndefined();
       expect(ZAvatarIdSchema.safeParse(id).success).toBe(false);
     }
   });
