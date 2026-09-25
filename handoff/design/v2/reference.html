@@ -1,6 +1,8 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Couple Battle v2 — reference screens</title>
 <link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css">
 <style>
+/* global-level reset the app provides via src/styles/global.css — chrome.css assumes it */
+*,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:#E7E1E6;font-family:var(--cb-font-ui);padding:36px}
 .sheet{display:grid;grid-template-columns:repeat(3,390px);gap:30px}
 .frame{display:flex;flex-direction:column;gap:10px}
@@ -11,7 +13,7 @@ h1.sh{font:800 30px/1.1 var(--cb-font-display);color:var(--cb-eggplant);margin:0
 p.sh{color:#6B5C73;margin:0 0 28px;font-size:14px}
 </style></head><body>
 <h1 class="sh">Couple Battle v2 — reference screens</h1>
-<p class="sh">Built only from tokens.css + components.css + the delivered assets. Paper system everywhere; Spotlight stage for countdown, reveal and results.</p>
+<p class="sh">Built only from tokens.css + components.css + the delivered assets. Calm pastel Paper everywhere; sunburst rays (`cb-burst`) for countdown, reveal and results.</p>
 <div class="sheet">
 
 <div class="frame"><div class="phone"><main class="cb-page">
@@ -59,17 +61,17 @@ p.sh{color:#6B5C73;margin:0 0 28px;font-size:14px}
   <p class="cb-muted cb-center">Pointez au signal — les deux en même temps.</p>
 </main></div><span>V-DilemmaQuestion · paper</span></div>
 
-<div class="frame"><div class="phone"><main class="cb-page cb-stage" style="justify-content:center;align-items:center">
+<div class="frame"><div class="phone"><main class="cb-page cb-burst" style="justify-content:center;align-items:center">
   <div class="cb-glow"></div>
   <div class="cb-numeral">3</div>
   <p class="cb-muted" style="margin-top:26px;font-size:15px">Prêts ?</p>
-</main></div><span>V-Countdown · stage</span></div>
+</main></div><span>V-Countdown · burst</span></div>
 
-<div class="frame"><div class="phone"><main class="cb-page cb-stage">
+<div class="frame"><div class="phone"><main class="cb-page cb-burst">
   <div class="cb-topbar"><span class="cb-chip">Finale</span><span></span></div>
   <div class="cb-glow" style="top:30%"></div>
   <img class="cb-char" src="web/team-otters-idle-768.webp" alt="" style="width:64%">
-  <p class="cb-verdict" style="color:#fff;margin-top:6px">Les Loutres gagnent !</p>
+  <p class="cb-verdict" style="margin-top:6px">Les Loutres gagnent !</p>
   <p class="cb-muted cb-center" style="margin:6px 0 18px">Marie &amp; Tom, duo légendaire.</p>
   <div class="cb-rows">
     <div class="cb-row cb-row--lead"><span class="cb-avatar"><img src="web/team-otters-idle-512.webp" alt=""></span>Marie &amp; Tom<span class="cb-score">14</span></div>
@@ -77,6 +79,6 @@ p.sh{color:#6B5C73;margin:0 0 28px;font-size:14px}
   </div>
   <div class="cb-grow"></div>
   <button class="cb-btn">Revanche !</button>
-</main></div><span>V-FinalResults · stage</span></div>
+</main></div><span>V-FinalResults · burst</span></div>
 
 </div></body></html>
