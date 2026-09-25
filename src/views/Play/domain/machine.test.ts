@@ -21,12 +21,15 @@ import {
   questionText,
   FLASH_SET,
   type TGameConfig,
+  type TGameEvent,
   type TGameState,
   type TResult,
   type TVerdict,
 } from './machine';
-import type { TRoster } from '@/shared/game/domain/types';
+import { AVATAR_IDS, type TMode, type TRoster } from '@/shared/game/domain/types';
 import type { TQuestion, TQuestionType } from '@/shared/questions/domain/types';
+import { deckSizeFor } from '@/shared/questions/domain/services';
+import { ZGameSnapshotSchema } from '@/shared/save/domain/types';
 
 const roster: TRoster = [
   { teamId: 't1', avatarId: 'otters', players: ['A', 'B'] },
@@ -587,5 +590,123 @@ describe('Ultime machine (composition)', () => {
     expect(fromSnapshot(toSnapshot(rapidTurn))).toEqual(rapidTurn);
     const rq = reduce(rapidTurn, { type: 'next' });
     expect(fromSnapshot(toSnapshot(rq))).toEqual(rq);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Persisted-schema round-trip: every real state must be saveable
+// ---------------------------------------------------------------------------
+
+/** The one deterministic event each non-final kind advances on. */
+const SCRIPT: Record<Exclude<TGameState['kind'], 'final'>, TGameEvent> = {
+  question: { type: 'ready' },
+  countdown: { type: 'countdownDone' },
+  resolve: { type: 'confirm', result: 'match' },
+  sideAnswerers: { type: 'passConfirm' },
+  handoff: { type: 'passConfirm' },
+  // Longest answer the secret input allows (maxLength 40).
+  secretInput: { type: 'lockAnswer', answer: 'x'.repeat(40) },
+  sideGuessers: { type: 'passConfirm' },
+  guess: { type: 'reveal' },
+  judge: { type: 'judge', verdict: 'exact' },
+  rapidIntro: { type: 'next' },
+  rapidTurn: { type: 'next' },
+  rapidQuestion: { type: 'ready' },
+  rapidCountdown: { type: 'countdownDone' },
+  rapidJudge: { type: 'rapidJudge', synchro: true },
+  scoreboard: { type: 'next' },
+};
+
+/** A real roster: teamIds t1..tN (as Setup assigns them), 16-char names (the input cap). */
+function realRoster(n: number): TRoster {
+  return Array.from({ length: n }, (_, i) => ({
+    teamId: `t${i + 1}`,
+    avatarId: AVATAR_IDS[i]!,
+    players: [`P${i + 1}a`.padEnd(16, '_'), `P${i + 1}b`.padEnd(16, '_')] as [string, string],
+  }));
+}
+
+/** Catalog-like ids (the real catalog tops out at 1035). */
+function realDeck(mode: TMode, size: number): TQuestion[] {
+  return Array.from({ length: size }, (_, i) => ({
+    id: 1000 + i,
+    theme: 'childhood' as const,
+    difficulty: 'easy' as const,
+    type: mode === 'dilemma' ? ('who_of_two' as const) : ('open' as const),
+    you: `q${i}`,
+    name: `q${i} de {name}`,
+  }));
+}
+
+/** True when a question-bearing state's cursor points past the end of the deck. */
+function pointsPastDeck(state: TGameState): boolean {
+  switch (state.kind) {
+    case 'handoff':
+    case 'secretInput':
+    case 'guess':
+    case 'judge':
+      return flashQuestion(state) === undefined;
+    case 'question':
+    case 'resolve':
+      return dilemmaQuestion(state) === undefined;
+    case 'rapidQuestion':
+    case 'rapidCountdown':
+    case 'rapidJudge':
+      return rapidQuestionOf(state) === undefined;
+    default:
+      return false;
+  }
+}
+
+/** Drive a game to `final`, asserting the snapshot schema after every transition. */
+function playToFinalCheckingSnapshots(config: TGameConfig): { maxQuestionIdx: number; pastDeck: boolean } {
+  let s = initGame(config);
+  let maxQuestionIdx = 0;
+  let pastDeck = false;
+  const check = (state: TGameState) => {
+    const snapshot = toSnapshot(state);
+    const result = ZGameSnapshotSchema.safeParse(snapshot);
+    expect(result.success, `snapshot rejected in "${state.kind}": ${result.error?.message ?? ''}`).toBe(true);
+    maxQuestionIdx = Math.max(maxQuestionIdx, snapshot.cursor.questionIdx);
+    pastDeck ||= pointsPastDeck(state);
+  };
+  check(s);
+  for (let step = 0; s.kind !== 'final'; step++) {
+    if (step > 1000) throw new Error(`no final after 1000 steps (stuck in "${s.kind}")`);
+    const next = reduce(s, SCRIPT[s.kind]);
+    if (next === s) throw new Error(`no progress from "${s.kind}"`);
+    s = next;
+    check(s);
+  }
+  return { maxQuestionIdx, pastDeck };
+}
+
+describe('every real state fits the persisted snapshot schema', () => {
+  const modes: TMode[] = ['flash', 'dilemma', 'ultime'];
+  const cases = modes.flatMap((mode) => [1, 2, 3, 4].map((couples) => [mode, couples] as const));
+
+  it.each(cases)('%s with %i couple(s), nominal deck', (mode, couples) => {
+    const deck = realDeck(mode, deckSizeFor(mode, couples));
+    playToFinalCheckingSnapshots({ roster: realRoster(couples), mode, difficulty: 'mix', themes: [], deck });
+  });
+
+  const shortCases = (['flash', 'ultime'] as const).flatMap((mode) =>
+    [1, 4].flatMap((couples) => [1, 2].map((size) => [mode, couples, size] as const)),
+  );
+
+  it.each(shortCases)('%s with %i couple(s), short deck of %i', (mode, couples, size) => {
+    const deck = realDeck(mode, size);
+    const { maxQuestionIdx, pastDeck } = playToFinalCheckingSnapshots({
+      roster: realRoster(couples),
+      mode,
+      difficulty: 'mix',
+      themes: [],
+      deck,
+    });
+    // The cursor legitimately runs past the end of a short deck…
+    expect(pastDeck).toBe(true);
+    // …and in Ultime the persisted questionIdx itself exceeds deck.length
+    // (Dilemma segment is always 5), which the schema must not reject.
+    if (mode === 'ultime') expect(maxQuestionIdx).toBeGreaterThan(deck.length);
   });
 });

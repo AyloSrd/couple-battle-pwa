@@ -7,7 +7,8 @@ import type { TStringVars } from './types';
 export function interpolate(template: string, vars?: TStringVars): string {
   if (!vars) return template;
   return template.replace(/\{(\w+)\}/g, (match, key: string) => {
-    const value = vars[key];
+    // Own keys only: `{constructor}`/`{toString}` must not reach the prototype.
+    const value = Object.hasOwn(vars, key) ? vars[key] : undefined;
     return value === undefined ? match : String(value);
   });
 }

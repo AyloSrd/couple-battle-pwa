@@ -18,6 +18,18 @@ describe('interpolate', () => {
     expect(interpolate('Hi {name}', { other: 'x' })).toBe('Hi {name}');
   });
 
+  it.each(['constructor', 'toString', 'hasOwnProperty', '__proto__'])(
+    'ignores prototype keys: {%s} stays an unknown slot',
+    (key) => {
+      expect(interpolate(`Hi {${key}}`, { name: 'x' })).toBe(`Hi {${key}}`);
+      expect(interpolate(`Hi {${key}}`, {})).toBe(`Hi {${key}}`);
+    },
+  );
+
+  it('still fills an own key that shares a prototype name', () => {
+    expect(interpolate('{constructor}', { constructor: 'ok' })).toBe('ok');
+  });
+
   it('is a no-op without vars', () => {
     expect(interpolate('plain text')).toBe('plain text');
   });

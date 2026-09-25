@@ -51,16 +51,27 @@ export type TCursor = z.infer<typeof ZCursorSchema>;
 /**
  * Full session state, written on every transition and cleared on game end.
  * Powers crash/refresh resume (views-spec §2).
+ *
+ * Bounds are set just above what a real game can produce, so they reject a
+ * tampered/corrupt record (which then self-heals away on read) without ever
+ * rejecting a real machine state:
+ *  - deck ≤ 64 (largest real draw: Ultime with 4 couples = 4 + 5 + 4×5 = 29);
+ *  - secretAnswers keys are `answerKey(teamId, questionId)` (e.g. `t4|1035`),
+ *    values are typed answers (input `maxLength` 40), yes/no, or a player name;
+ *  - scores are keyed by roster teamIds (`t1`..`t4`);
+ *  - cursor: coupleIdx indexes the roster, round ≤ 3 (Ultime's last round),
+ *    questionIdx ≤ 64. `questionIdx < deck.length` is deliberately NOT checked:
+ *    a short draw (small pool) legitimately runs past the deck.
  */
 export const ZGameSnapshotSchema = z.object({
   roster: ZRosterSchema,
   mode: ZModeSchema,
   difficulty: ZGameDifficultySchema,
   themes: z.array(ZThemeIdSchema),
-  deck: z.array(ZQuestionSchema),
+  deck: z.array(ZQuestionSchema).max(64),
   cursor: ZCursorSchema,
-  scores: z.record(z.string(), z.number().int()),
-  secretAnswers: z.record(z.string(), z.string()),
+  scores: z.record(z.string().regex(/^t[1-4]$/), z.number().int()),
+  secretAnswers: z.record(z.string().max(32), z.string().max(40)),
   // Dilemma resolve: per-couple match/miss for the current question (so a
   // mid-resolve refresh restores the confirmed couples' badges).
   confirmed: z.record(z.string(), z.enum(['match', 'miss'])).default({}),
@@ -68,6 +79,16 @@ export const ZGameSnapshotSchema = z.object({
   // implausibly in the future) is dropped on read — see `isSnapshotStale`.
   // Required: a pre-`savedAt` record fails the schema and self-heals away.
   savedAt: z.number().int().nonnegative(),
+}).superRefine((s, ctx) => {
+  if (s.cursor.coupleIdx >= s.roster.length) {
+    ctx.addIssue({ code: 'custom', path: ['cursor', 'coupleIdx'], message: 'coupleIdx out of roster range' });
+  }
+  if (s.cursor.round > 3) {
+    ctx.addIssue({ code: 'custom', path: ['cursor', 'round'], message: 'round out of range' });
+  }
+  if (s.cursor.questionIdx > 64) {
+    ctx.addIssue({ code: 'custom', path: ['cursor', 'questionIdx'], message: 'questionIdx out of range' });
+  }
 });
 export type TGameSnapshot = z.infer<typeof ZGameSnapshotSchema>;
 
