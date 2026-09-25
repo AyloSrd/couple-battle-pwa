@@ -433,6 +433,45 @@ describe('Flash machine — sofa sides', () => {
     expect(s.scores).toEqual({ t1: 6 });
   });
 
+  describe('a judged slot\'s secret leaves the state (and the snapshot)', () => {
+    // 2 couples, both answered both shared questions: t1|1 t2|1 t1|2 t2|2.
+    const locked = () => reduce(collectRound(initGame(flashConfig('this_or_that')), (q, c) => `c${c}q${q}`), { type: 'passConfirm' });
+
+    it('judge drops only the judged (couple, question) key', () => {
+      const guess = locked();
+      const judge = reduce(guess, { type: 'reveal' });
+      expect(judge.kind).toBe('judge');
+      const before = structuredClone(judge);
+
+      const next = reduce(judge, { type: 'judge', verdict: 'exact' }); // slot (0,0) = t1|1
+      expect(next.kind).toBe('guess');
+      if (next.kind === 'guess') {
+        expect(next.secretAnswers).toEqual({ 't2|1': 'c1q0', 't1|2': 'c0q1', 't2|2': 'c1q1' });
+      }
+      expect(toSnapshot(next).secretAnswers).not.toHaveProperty('t1|1');
+      expect(judge).toEqual(before); // incoming state not mutated
+      if (judge.kind === 'judge') expect(judge.secretAnswers).toHaveProperty('t1|1', 'c0q0');
+
+      // next slot (0,1) = t2|1: the other couple's answer to the SAME question
+      const after = reduce(reduce(next, { type: 'reveal' }), { type: 'judge', verdict: 'miss' });
+      if (after.kind === 'guess') expect(after.secretAnswers).toEqual({ 't1|2': 'c0q1', 't2|2': 'c1q1' });
+    });
+
+    it('autoGuess drops only the judged (couple, question) key', () => {
+      const guess = locked();
+      const before = structuredClone(guess);
+
+      const next = reduce(guess, { type: 'autoGuess', guess: 'c0q0' }); // slot (0,0) = t1|1
+      expect(next.kind).toBe('guess');
+      expect(next.scores).toEqual({ t1: 2, t2: 0 }); // judged against the truth before dropping it
+      if (next.kind === 'guess') {
+        expect(next.secretAnswers).toEqual({ 't2|1': 'c1q0', 't1|2': 'c0q1', 't2|2': 'c1q1' });
+      }
+      expect(guess).toEqual(before); // incoming state not mutated
+      if (guess.kind === 'guess') expect(guess.secretAnswers).toHaveProperty('t1|1', 'c0q0');
+    });
+  });
+
   it('mid-phase resume: every Flash state round-trips through a snapshot with locked answers intact', () => {
     const gate = initGame(flashConfig('open'));
     expect(fromSnapshot(toSnapshot(gate))).toEqual(gate);

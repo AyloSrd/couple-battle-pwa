@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IDBPDatabase } from 'idb';
 import { createSaveIdbApi } from './idb';
 import { SAVE_DEFAULTS, type TGameSnapshot } from '../domain/types';
@@ -19,6 +19,10 @@ function fakeDb(seed: Record<string, unknown> = {}) {
   return { db, store };
 }
 
+const NOW = Date.UTC(2026, 8, 25, 20, 0, 0);
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+
 const validSnapshot: TGameSnapshot = {
   roster: [{ teamId: 't1', avatarId: 'otters', players: ['A', 'B'] }],
   mode: 'dilemma',
@@ -29,9 +33,18 @@ const validSnapshot: TGameSnapshot = {
   scores: { t1: 0 },
   secretAnswers: {},
   confirmed: {},
+  savedAt: NOW - MINUTE,
 };
 
 describe('createSaveIdbApi', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('returns the key default when nothing was ever written', async () => {
     const api = createSaveIdbApi(fakeDb().db);
     expect(await api.get('gameSnapshot')).toBeNull();
@@ -70,5 +83,35 @@ describe('createSaveIdbApi', () => {
     expect(store.has('gameSnapshot')).toBe(false);
     await api.put('gameSnapshot', validSnapshot);
     expect(store.get('gameSnapshot')).toEqual(validSnapshot);
+  });
+
+  describe('gameSnapshot resume window', () => {
+    const { savedAt: _omit, ...withoutSavedAt } = validSnapshot;
+
+    it.each([
+      ['expired (saved 13 h ago)', { ...validSnapshot, savedAt: NOW - 13 * HOUR }],
+      ['future-dated (saved now + 10 min)', { ...validSnapshot, savedAt: NOW + 10 * MINUTE }],
+      ['pre-savedAt (no savedAt at all)', withoutSavedAt],
+    ])('%s → null, and the record is deleted', async (_label, stored) => {
+      const { db } = fakeDb({ gameSnapshot: stored });
+      const api = createSaveIdbApi(db);
+
+      await expect(api.get('gameSnapshot')).resolves.toBeNull();
+      expect(await db.get('save', 'gameSnapshot')).toBeUndefined(); // gone from the store
+      expect(await api.get('gameSnapshot')).toBeNull();
+    });
+
+    it.each([
+      ['fresh (saved 1 min ago)', NOW - MINUTE],
+      ['just inside 12 h', NOW - 12 * HOUR],
+      ['future skew boundary (now + 5 min)', NOW + 5 * MINUTE],
+    ])('%s is returned and kept', async (_label, savedAt) => {
+      const fresh = { ...validSnapshot, savedAt };
+      const { db } = fakeDb({ gameSnapshot: fresh });
+      const api = createSaveIdbApi(db);
+
+      expect(await api.get('gameSnapshot')).toEqual(fresh);
+      expect(await db.get('save', 'gameSnapshot')).toEqual(fresh);
+    });
   });
 });

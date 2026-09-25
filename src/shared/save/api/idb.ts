@@ -1,5 +1,6 @@
 import { openDB, type IDBPDatabase } from 'idb';
 import { SAVE_DEFAULTS, SAVE_SCHEMAS, type TSaveShape } from '../domain/types';
+import { isSnapshotStale } from '../domain/services';
 import type { TSaveApi } from './index';
 
 const DB_NAME = 'couple-battle';
@@ -24,6 +25,8 @@ export function openSaveDb(): Promise<IDBPDatabase> {
  * saved with a team that has since been retired) must never take the app
  * down: `get` falls back to the key's default and drops the stale record, so
  * a corrupt/outdated save degrades to "never written" instead of throwing.
+ * A `gameSnapshot` past its resume window (`isSnapshotStale`) is dropped the
+ * same way.
  */
 export function createSaveIdbApi(db: IDBPDatabase): TSaveApi {
   return {
@@ -36,6 +39,16 @@ export function createSaveIdbApi(db: IDBPDatabase): TSaveApi {
       if (!result.success) {
         await db.delete(STORE, key); // self-heal: don't keep failing on every load
         return structuredClone(SAVE_DEFAULTS[key]);
+      }
+      if (key === 'gameSnapshot') {
+        // An expired (or future-dated) in-progress game is treated like a
+        // corrupt one: dropped, so neither Home's Resume nor #/play can bring
+        // it back.
+        const snapshot = result.data as TSaveShape['gameSnapshot'];
+        if (snapshot !== null && isSnapshotStale(snapshot, Date.now())) {
+          await db.delete(STORE, key);
+          return structuredClone(SAVE_DEFAULTS[key]);
+        }
       }
       return result.data as TSaveShape[typeof key];
     },

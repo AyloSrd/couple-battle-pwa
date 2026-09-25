@@ -64,6 +64,10 @@ export const ZGameSnapshotSchema = z.object({
   // Dilemma resolve: per-couple match/miss for the current question (so a
   // mid-resolve refresh restores the confirmed couples' badges).
   confirmed: z.record(z.string(), z.enum(['match', 'miss'])).default({}),
+  // Epoch ms of the write. A snapshot older than the resume window (or dated
+  // implausibly in the future) is dropped on read — see `isSnapshotStale`.
+  // Required: a pre-`savedAt` record fails the schema and self-heals away.
+  savedAt: z.number().int().nonnegative(),
 });
 export type TGameSnapshot = z.infer<typeof ZGameSnapshotSchema>;
 
