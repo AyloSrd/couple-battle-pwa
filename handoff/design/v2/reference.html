@@ -1,0 +1,82 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Couple Battle v2 — reference screens</title>
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css">
+<style>
+body{margin:0;background:#E7E1E6;font-family:var(--cb-font-ui);padding:36px}
+.sheet{display:grid;grid-template-columns:repeat(3,390px);gap:30px}
+.frame{display:flex;flex-direction:column;gap:10px}
+.frame>span{font:700 11px/1 var(--cb-font-ui);letter-spacing:.09em;text-transform:uppercase;color:#8B7C92;text-align:center}
+.phone{width:390px;height:800px;border-radius:40px;overflow:hidden;box-shadow:var(--cb-e3)}
+.phone .cb-page{min-height:100%;height:100%}
+h1.sh{font:800 30px/1.1 var(--cb-font-display);color:var(--cb-eggplant);margin:0 0 6px}
+p.sh{color:#6B5C73;margin:0 0 28px;font-size:14px}
+</style></head><body>
+<h1 class="sh">Couple Battle v2 — reference screens</h1>
+<p class="sh">Built only from tokens.css + components.css + the delivered assets. Paper system everywhere; Spotlight stage for countdown, reveal and results.</p>
+<div class="sheet">
+
+<div class="frame"><div class="phone"><main class="cb-page">
+  <div class="cb-topbar"><span></span><span class="cb-chip">FR</span></div>
+  <div class="cb-grow" style="display:flex;flex-direction:column;justify-content:center;gap:18px">
+    <img class="cb-logo" src="web/logo-960.webp" alt="Couple Battle">
+    <img class="cb-char" src="web/team-otters-idle-768.webp" alt="" style="width:62%">
+  </div>
+  <button class="cb-btn">Jouer</button>
+  <button class="cb-btn cb-btn--ghost">Comment on joue ?</button>
+</main></div><span>V-Home</span></div>
+
+<div class="frame"><div class="phone"><main class="cb-page">
+  <div class="cb-topbar"><span class="cb-chip">Étape 2 / 3</span><span class="cb-dots"><i class="on"></i><i class="on"></i><i></i></span></div>
+  <h2 class="cb-title" style="margin-bottom:20px">Choisissez votre bataille</h2>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <button class="cb-mode"><img src="web/mode-flash-256.webp" alt=""><div><h3>Flash</h3><p>Devinez les réponses de l’autre.</p></div><span class="cb-dur">~10 min</span></button>
+    <button class="cb-mode"><img src="web/mode-dilemma-256.webp" alt=""><div><h3>Dilemme</h3><p>3, 2, 1… pointez ! Même réponse = point.</p></div><span class="cb-dur">~15 min</span></button>
+    <button class="cb-mode"><img src="web/mode-ultime-256.webp" alt=""><div><h3>Ultime</h3><p>Le grand format, pour couronner le duo suprême.</p></div><span class="cb-dur">30+ min</span></button>
+  </div>
+</main></div><span>V-ModeSelect</span></div>
+
+<div class="frame"><div class="phone"><main class="cb-page">
+  <div class="cb-topbar"><span class="cb-chip">Duo 1</span><span class="cb-dots"><i class="on"></i><i></i></span></div>
+  <h2 class="cb-title" style="margin-bottom:18px">Choisissez votre équipe</h2>
+  <div class="cb-teams">
+    <button class="cb-team" aria-pressed="true"><span class="cb-team-art"><img src="web/team-otters-idle-512.webp" alt=""></span><span class="cb-team-name">Les Loutres</span></button>
+    <button class="cb-team"><span class="cb-team-art"><span class="cb-team-placeholder">P</span></span><span class="cb-team-name">Les Pingouins</span></button>
+    <button class="cb-team"><span class="cb-team-art"><span class="cb-team-placeholder">É</span></span><span class="cb-team-name">Les Écureuils</span></button>
+    <button class="cb-team" aria-disabled="true"><span class="cb-team-art"><span class="cb-team-placeholder">L</span></span><span class="cb-team-name">Les Lions</span></button>
+  </div>
+  <div class="cb-grow"></div>
+  <button class="cb-btn">Suivant</button>
+</main></div><span>V-Setup · étape A</span></div>
+
+<div class="frame"><div class="phone"><main class="cb-page">
+  <div class="cb-topbar"><span class="cb-chip"><img src="web/mode-dilemma-128.webp" alt="">Dilemme</span><span class="cb-dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+  <div class="cb-card"><p class="cb-question">Qui de vous deux planifie les vacances en premier ?</p></div>
+  <div style="height:22px"></div>
+  <div class="cb-answers">
+    <button class="cb-answer"><span class="cb-initial">M</span>Marie</button>
+    <button class="cb-answer cb-answer--p2"><span class="cb-initial">T</span>Tom</button>
+  </div>
+  <div class="cb-grow"></div>
+  <p class="cb-muted cb-center">Pointez au signal — les deux en même temps.</p>
+</main></div><span>V-DilemmaQuestion · paper</span></div>
+
+<div class="frame"><div class="phone"><main class="cb-page cb-stage" style="justify-content:center;align-items:center">
+  <div class="cb-glow"></div>
+  <div class="cb-numeral">3</div>
+  <p class="cb-muted" style="margin-top:26px;font-size:15px">Prêts ?</p>
+</main></div><span>V-Countdown · stage</span></div>
+
+<div class="frame"><div class="phone"><main class="cb-page cb-stage">
+  <div class="cb-topbar"><span class="cb-chip">Finale</span><span></span></div>
+  <div class="cb-glow" style="top:30%"></div>
+  <img class="cb-char" src="web/team-otters-idle-768.webp" alt="" style="width:64%">
+  <p class="cb-verdict" style="color:#fff;margin-top:6px">Les Loutres gagnent !</p>
+  <p class="cb-muted cb-center" style="margin:6px 0 18px">Marie &amp; Tom, duo légendaire.</p>
+  <div class="cb-rows">
+    <div class="cb-row cb-row--lead"><span class="cb-avatar"><img src="web/team-otters-idle-512.webp" alt=""></span>Marie &amp; Tom<span class="cb-score">14</span></div>
+    <div class="cb-row"><span class="cb-avatar">P</span>Léa &amp; Noa<span class="cb-score">11</span></div>
+  </div>
+  <div class="cb-grow"></div>
+  <button class="cb-btn">Revanche !</button>
+</main></div><span>V-FinalResults · stage</span></div>
+
+</div></body></html>

@@ -1,0 +1,162 @@
+/* ==========================================================================
+   Couple Battle — Design tokens v2  ("Candy Paper" system + "Spotlight" stage)
+   Palette & typefaces: Master Brand & Style Guide v1.0. Everything else: v2 design system.
+   Single source of truth — components must only reference --cb-* tokens.
+   ========================================================================== */
+
+/* ---------- fonts (self-hosted, OFL — see fonts/OFL-*.txt) ---------- */
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 600; font-display: swap;
+  src: url('./fonts/bricolage-grotesque-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 700; font-display: swap;
+  src: url('./fonts/bricolage-grotesque-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 800; font-display: swap;
+  src: url('./fonts/bricolage-grotesque-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 400; font-display: swap;
+  src: url('./fonts/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 500; font-display: swap;
+  src: url('./fonts/inter-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap;
+  src: url('./fonts/inter-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 700; font-display: swap;
+  src: url('./fonts/inter-latin-700-normal.woff2') format('woff2'); }
+
+:root {
+  /* ---------- brand palette (style guide) ---------- */
+  --cb-eggplant: #300147;
+  --cb-ink: #24152C;
+  --cb-canvas: #FFF8F7;
+  --cb-soft-white: #FCEDEF;
+  --cb-violet: #611EFA;
+  --cb-violet-edge: #3F0DB5;      /* pressable bottom lip of violet buttons */
+  --cb-pink: #F21CA6;
+  --cb-pink-deep: #C4137F;
+  --cb-gold: #FDD724;
+  --cb-orange: #FCA114;
+  --cb-coral: #F64559;
+  --cb-coral-edge: #C22A3D;
+  --cb-ribbon: #C64AE2;
+
+  /* ---------- semantic (light "paper" surfaces) ---------- */
+  --cb-bg: var(--cb-canvas);
+  --cb-bg-dot: rgba(242, 28, 166, .13);   /* faint dot texture on the canvas */
+  --cb-surface: #FFFFFF;
+  --cb-surface-sunk: #F4EEF6;
+  --cb-surface-lip: rgba(48, 1, 71, .10);  /* the 2px "paper lip" under cards */
+  --cb-text: var(--cb-eggplant);
+  --cb-text-body: var(--cb-ink);
+  --cb-text-muted: #6B5C73;
+  --cb-text-on-color: #FFFFFF;
+  --cb-border: rgba(48, 1, 71, .14);
+  --cb-focus: var(--cb-pink);
+
+  --cb-action: var(--cb-violet);
+  --cb-action-edge: var(--cb-violet-edge);
+  --cb-p1: var(--cb-violet);              /* player 1 / partner A colour */
+  --cb-p1-edge: var(--cb-violet-edge);
+  --cb-p2: var(--cb-coral);               /* player 2 / partner B colour */
+  --cb-p2-edge: var(--cb-coral-edge);
+  --cb-win: var(--cb-gold);
+  --cb-win-grad: linear-gradient(95deg, #FFF0C2, #FFE59B);
+  --cb-points: var(--cb-orange);          /* "+2" on light */
+
+  --cb-chip-bg: #FDE4F3;
+  --cb-chip-text: var(--cb-pink-deep);
+
+  --cb-success: #1C8A62;
+  --cb-success-bg: #DCF7EC;
+  --cb-warning: #A65A00;
+  --cb-error: #B3263E;
+  --cb-error-bg: #FDE3E7;
+  --cb-disabled: #A79EAA;
+
+  /* ---------- type ---------- */
+  --cb-font-display: 'Bricolage Grotesque', 'SF Pro Display', Roboto, Arial, sans-serif;
+  --cb-font-ui: 'Inter', 'SF Pro Text', Roboto, Arial, sans-serif;
+  /* scale — size / line-height / weight (style guide type scale) */
+  --cb-fs-display-xl: 48px;  --cb-lh-display-xl: 52px;   /* 800 · final result */
+  --cb-fs-display-lg: 40px;  --cb-lh-display-lg: 44px;   /* 800 · score, "+2" */
+  --cb-fs-h1: 32px;          --cb-lh-h1: 38px;           /* 700 · screen title */
+  --cb-fs-h2: 24px;          --cb-lh-h2: 30px;           /* 700 · question text min */
+  --cb-fs-question: 26px;    --cb-lh-question: 31px;     /* 700 · question card (readable across a table) */
+  --cb-fs-body-lg: 18px;     --cb-lh-body-lg: 26px;      /* 500 */
+  --cb-fs-body: 16px;        --cb-lh-body: 24px;         /* 400 */
+  --cb-fs-label: 15px;       --cb-lh-label: 18px;        /* 700 · buttons */
+  --cb-fs-caption: 13px;     --cb-lh-caption: 18px;      /* 500 */
+  --cb-fs-overline: 11px;                                /* 700 · chips, uppercase, +0.09em */
+  --cb-fs-numeral: clamp(120px, 40vw, 170px);           /* 800 · countdown 3·2·1 */
+  --cb-tracking-display: -0.02em;
+  --cb-tracking-overline: 0.09em;
+
+  /* ---------- space (4px base) ---------- */
+  --cb-s1: 4px;  --cb-s2: 8px;  --cb-s3: 12px; --cb-s4: 16px;
+  --cb-s5: 20px; --cb-s6: 24px; --cb-s7: 32px; --cb-s8: 48px;
+  --cb-page-x: 20px;            /* horizontal page padding (+ safe-area inset) */
+
+  /* ---------- radius ---------- */
+  --cb-r-sm: 12px;   /* chips inside cards, avatars tiles */
+  --cb-r-md: 16px;   /* buttons, rows */
+  --cb-r-lg: 24px;   /* cards */
+  --cb-r-xl: 32px;   /* sheets, hero panels */
+  --cb-r-pill: 999px;
+
+  /* ---------- elevation (coloured, never heavy black) ---------- */
+  --cb-e0: none;
+  --cb-e1: 0 2px 0 var(--cb-surface-lip), 0 4px 10px rgba(48, 1, 71, .05);
+  --cb-e2: 0 2px 0 var(--cb-surface-lip), 0 10px 24px rgba(48, 1, 71, .07);
+  --cb-e3: 0 20px 44px rgba(48, 1, 71, .22), 0 2px 6px rgba(48, 1, 71, .10);
+  --cb-lip: 4px;              /* pressable button bottom edge depth */
+
+  /* ---------- sizes ---------- */
+  --cb-h-btn: 56px;           /* primary */
+  --cb-h-btn-sec: 52px;
+  --cb-h-answer: 66px;        /* answer / name buttons (64–88) */
+  --cb-h-field: 56px;
+  --cb-h-chip: 32px;
+  --cb-target-min: 48px;
+
+  /* ---------- motion ---------- */
+  --cb-ease-out: cubic-bezier(.2, .8, .2, 1);
+  --cb-ease-overshoot: cubic-bezier(.3, 1.45, .45, 1);
+  --cb-t-tap: 100ms;
+  --cb-t-screen: 260ms;
+  --cb-t-count: 700ms;        /* per numeral — also drives the ring drain */
+  --cb-t-reveal: 550ms;
+  --cb-t-score: 420ms;
+}
+
+/* ==========================================================================
+   SPOTLIGHT STAGE — the dark theatrical mode for the big beats only:
+   countdown, reveal, finale (rapid-fire), final results, birthday card.
+   Apply with <div class="cb-stage"> (or data-stage on the screen root).
+   It re-maps the semantic tokens, so components look right automatically.
+   ========================================================================== */
+.cb-stage, [data-stage] {
+  --cb-bg: #150024;
+  --cb-bg-stage:
+    radial-gradient(150% 70% at 50% 8%, rgba(97, 30, 250, .55) 0%, rgba(97, 30, 250, 0) 62%),
+    radial-gradient(120% 60% at 50% 100%, rgba(242, 28, 166, .30) 0%, rgba(242, 28, 166, 0) 60%),
+    linear-gradient(#22013A, #150024);
+  --cb-surface: rgba(255, 255, 255, .07);
+  --cb-surface-sunk: rgba(255, 255, 255, .05);
+  --cb-surface-lip: rgba(0, 0, 0, .25);
+  --cb-text: #FFFFFF;
+  --cb-text-body: #F6EEF9;
+  --cb-text-muted: rgba(255, 255, 255, .58);
+  --cb-border: rgba(255, 255, 255, .14);
+  --cb-chip-bg: rgba(255, 255, 255, .10);
+  --cb-chip-text: #F7C9EA;
+  --cb-success: #5FE3B0;
+  --cb-success-bg: rgba(95, 227, 176, .14);
+  --cb-points: var(--cb-gold);
+  --cb-glow-pink: 0 0 90px rgba(242, 28, 166, .75), 0 0 30px rgba(97, 30, 250, .5);
+  --cb-glow-gold: 0 0 50px rgba(253, 215, 36, .5);
+  --cb-e1: inset 0 0 0 1.5px rgba(255, 255, 255, .14);
+  --cb-e2: 0 18px 44px rgba(0, 0, 0, .42), 0 0 0 1px rgba(255, 255, 255, .05);
+  color: var(--cb-text-body);
+  background: var(--cb-bg-stage);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --cb-t-tap: 0ms; --cb-t-screen: 0ms; --cb-t-reveal: 0ms; --cb-t-score: 0ms;
+          --cb-ease-overshoot: linear; }
+}
