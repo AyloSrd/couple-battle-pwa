@@ -1,4 +1,4 @@
-/* Global stylesheet: fonts → tokens → base. Visual system v2 ("Paper + Spotlight"). */
+/* Global stylesheet: fonts → tokens → base. Visual system "Paper" on the "Pastel sunburst". */
 @import './fonts.css';
 @import './tokens.css';
 
@@ -16,7 +16,8 @@ body,
 
 body {
   margin: 0;
-  background: var(--cb-bg);
+  /* calm gradient over the solid cream fallback; covers wide screens around the 480px column */
+  background: var(--cb-bg-calm) var(--cb-bg);
   color: var(--cb-text-body);
   font-family: var(--cb-font-ui);
   font-size: var(--cb-fs-body);

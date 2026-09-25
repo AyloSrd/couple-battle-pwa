@@ -23,7 +23,7 @@ const GO_KEY = {
 } as const satisfies Record<TCountdownGo, TStringKey>;
 
 /**
- * V-Countdown — the game's signature beat, on the Spotlight stage. Numerals slam
+ * V-Countdown — the game's signature beat, on the sunburst (burst). Numerals slam
  * in with rising ticks + haptics, then the GO word. Auto-advances (dispatches
  * countdownDone) ~1.5s after GO. `ticks` = 3 (Dilemma) or 2 (rapid-fire); `go`
  * picks the GO word for the mechanic (default: point). Ticks, haptics and
@@ -72,7 +72,7 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
   const digit = digits[phase] ?? '1';
 
   return (
-    <Screen stage center>
+    <Screen burst center>
       <div className="cb-glow" aria-hidden="true" />
       {isGo ? (
         <div className="cb-go cb-reveal-in" role="status">

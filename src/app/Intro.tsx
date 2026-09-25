@@ -10,7 +10,7 @@ import modeUltime from '@/assets/art/mode-ultime-256.webp';
 
 /**
  * The boot loader, ahead of the router. The Ninou Games studio splash on the
- * Spotlight stage: preloads the critical assets (fonts, logo, mode icons, team
+ * sunburst (burst) background: preloads the critical assets (fonts, logo, mode icons, team
  * art) so the first real screen doesn't flash, then hands off to the app.
  * Gated once per session by the caller.
  */
@@ -50,10 +50,10 @@ function preloadAssets(): Promise<void> {
 }
 
 const StudioSplash: FC<{ progress: number; label: string }> = ({ progress, label }) => (
-  <Screen stage center style={{ position: 'fixed', inset: 0, maxWidth: 'none' }}>
+  <Screen burst center style={{ position: 'fixed', inset: 0, maxWidth: 'none' }}>
     <div className="cb-glow" aria-hidden="true" />
     <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s6)', width: 'min(70vw, 460px)' }}>
-      {/* The studio's own identity — kept as-is, now on the stage. */}
+      {/* The studio's own identity — kept as-is, now on the sunburst. */}
       <img src={`${BASE}splash/ninou-penguins.png`} alt="" style={{ width: '100%' }} draggable={false} />
       <div className="cb-label" style={{ color: 'var(--cb-text)', letterSpacing: 'var(--cb-tracking-overline)', textTransform: 'uppercase' }}>
         {label}
@@ -76,7 +76,7 @@ const StudioSplash: FC<{ progress: number; label: string }> = ({ progress, label
             width: `${progress * 100}%`,
             height: '100%',
             borderRadius: 'var(--cb-r-pill)',
-            background: 'var(--cb-gold)',
+            background: 'var(--cb-action)',
             transition: 'width var(--cb-t-screen) var(--cb-ease-out)',
           }}
         />

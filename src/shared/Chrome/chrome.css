@@ -1,6 +1,7 @@
 /* Shared chrome — the v2 component recipes (handoff/design/v2/components.css)
-   ported onto the app's primitives. Tokens only; the few literal colours below
-   are the reference's own button-edge values, kept verbatim. */
+   ported onto the app's primitives, re-skinned "Pastel sunburst": Paper cards
+   everywhere, calm pastel background by default, sunburst rays on `.cb-burst`.
+   Tokens only (rgba whites/eggplant for shadows and glows aside). */
 
 /* ---------- page shell (Screen) ---------- */
 .cb-page {
@@ -13,7 +14,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--cb-s3);
-  background: var(--cb-bg);
+  background: var(--cb-bg-calm) var(--cb-bg);
   color: var(--cb-text-body);
   font-family: var(--cb-font-ui);
   font-size: var(--cb-fs-body);
@@ -22,17 +23,9 @@
   isolation: isolate;
   animation: cb-screen-in var(--cb-t-screen) var(--cb-ease-out) both;
 }
-/* faint pink dot texture — paper screens only */
-.cb-page:not(.cb-stage)::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(circle at 1px 1px, var(--cb-bg-dot) 1px, transparent 0) 0 0 / 16px 16px;
-}
-.cb-page.cb-stage {
-  background: var(--cb-bg-stage);
+/* the big beats (countdown, rapid-fire, scoreboard, final, studio splash): sunburst rays */
+.cb-page.cb-burst {
+  background: var(--cb-bg-burst) var(--cb-bg);
 }
 .cb-page--center {
   justify-content: center;
@@ -92,9 +85,6 @@ button.cb-chip {
 .cb-dots i.on {
   background: var(--cb-pink);
 }
-.cb-stage .cb-dots i.on {
-  background: var(--cb-gold);
-}
 
 /* ---------- type ---------- */
 .cb-title {
@@ -135,19 +125,12 @@ button.cb-chip {
   text-align: center;
 }
 
-/* ---------- card (always light, even on stage: the "lit object") ---------- */
+/* ---------- card (white paper on a 2px lip, on every background) ---------- */
 .cb-card {
   background: var(--cb-surface);
   border-radius: var(--cb-r-lg);
   padding: var(--cb-s6) var(--cb-s5);
   box-shadow: var(--cb-e2);
-}
-.cb-stage .cb-card {
-  background: var(--cb-canvas);
-  color: var(--cb-ink);
-}
-.cb-stage .cb-card .cb-muted {
-  color: #6b5c73; /* reference muted on the lit card */
 }
 
 /* ---------- buttons: pressable, with a real bottom lip ---------- */
@@ -155,6 +138,7 @@ button.cb-chip {
   --btn-bg: var(--cb-action);
   --btn-edge: var(--cb-action-edge);
   --btn-fg: var(--cb-text-on-color);
+  --btn-ring-w: 0px; /* pastel variants add an inset edge ring (fills are ~1.2:1 on the background) */
   appearance: none;
   border: 0;
   width: 100%;
@@ -165,7 +149,9 @@ button.cb-chip {
   color: var(--btn-fg);
   font: 700 var(--cb-fs-label) / var(--cb-lh-label) var(--cb-font-ui);
   letter-spacing: 0.01em;
-  box-shadow: 0 var(--cb-lip) 0 var(--btn-edge);
+  box-shadow:
+    inset 0 0 0 var(--btn-ring-w) var(--btn-edge),
+    0 var(--cb-lip) 0 var(--btn-edge);
   transform: translateY(0);
   transition:
     transform var(--cb-t-tap) var(--cb-ease-out),
@@ -180,16 +166,19 @@ button.cb-chip {
 }
 .cb-btn:active:not(:disabled) {
   transform: translateY(calc(var(--cb-lip) - 1px));
-  box-shadow: 0 1px 0 var(--btn-edge);
+  box-shadow:
+    inset 0 0 0 var(--btn-ring-w) var(--btn-edge),
+    0 1px 0 var(--btn-edge);
 }
 .cb-btn--inline {
   width: auto;
   padding: 0 18px;
 }
 .cb-btn--win {
-  --btn-bg: linear-gradient(135deg, var(--cb-gold), var(--cb-orange));
-  --btn-edge: #c77f00;
+  --btn-bg: var(--cb-win-grad);
+  --btn-edge: var(--cb-win-edge);
   --btn-fg: var(--cb-eggplant);
+  --btn-ring-w: 1.5px;
 }
 .cb-btn--secondary {
   --btn-bg: var(--cb-surface);
@@ -213,30 +202,24 @@ button.cb-chip {
   opacity: 0.7;
 }
 .cb-btn--positive {
-  --btn-bg: var(--cb-success);
-  --btn-edge: color-mix(in srgb, var(--cb-success) 70%, black);
+  --btn-bg: var(--cb-success-bg);
+  --btn-edge: var(--cb-success-edge);
+  --btn-fg: var(--cb-eggplant);
+  --btn-ring-w: 1.5px;
 }
 .cb-btn--negative {
-  --btn-bg: var(--cb-coral);
-  --btn-edge: var(--cb-coral-edge);
+  --btn-bg: var(--cb-error-bg);
+  --btn-edge: var(--cb-error-edge);
+  --btn-fg: var(--cb-eggplant);
+  --btn-ring-w: 1.5px;
 }
 .cb-btn:disabled,
 .cb-btn[aria-disabled='true'] {
   --btn-bg: var(--cb-disabled);
-  --btn-edge: #8a8190;
+  --btn-edge: var(--cb-disabled-edge);
   --btn-fg: var(--cb-text-on-color);
   cursor: default;
   transform: none;
-}
-/* on stage the primary CTA is gold */
-.cb-stage .cb-btn:not(.cb-btn--secondary):not(.cb-btn--ghost):not(.cb-btn--positive):not(.cb-btn--negative):not(:disabled) {
-  --btn-bg: var(--cb-gold);
-  --btn-edge: #c79f00;
-  --btn-fg: var(--cb-eggplant);
-}
-.cb-stage .cb-btn--secondary {
-  --btn-bg: var(--cb-surface);
-  --btn-fg: var(--cb-text);
 }
 
 /* ---------- answer / partner-name buttons ---------- */
@@ -248,6 +231,7 @@ button.cb-chip {
 .cb-answer {
   --a-bg: var(--cb-p1);
   --a-edge: var(--cb-p1-edge);
+  --a-ring-w: 0px; /* p2's pastel fill adds an inset edge ring */
   appearance: none;
   border: 0;
   width: 100%;
@@ -262,7 +246,9 @@ button.cb-chip {
   gap: 13px;
   cursor: pointer;
   font: 700 16px / 1.2 var(--cb-font-ui);
-  box-shadow: 0 var(--cb-lip) 0 var(--a-edge);
+  box-shadow:
+    inset 0 0 0 var(--a-ring-w) var(--a-edge),
+    0 var(--cb-lip) 0 var(--a-edge);
   margin-bottom: var(--cb-lip);
   transition:
     transform var(--cb-t-tap) var(--cb-ease-out),
@@ -271,11 +257,15 @@ button.cb-chip {
 }
 .cb-answer:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--a-edge);
+  box-shadow:
+    inset 0 0 0 var(--a-ring-w) var(--a-edge),
+    0 1px 0 var(--a-edge);
 }
 .cb-answer--p2 {
   --a-bg: var(--cb-p2);
   --a-edge: var(--cb-p2-edge);
+  --a-ring-w: 1.5px;
+  color: var(--cb-p2-text);
 }
 .cb-answer--neutral {
   --a-bg: var(--cb-surface);
@@ -295,25 +285,20 @@ button.cb-chip {
   background: rgba(255, 255, 255, 0.22);
   font: 800 15px / 1 var(--cb-font-display);
 }
+.cb-answer--p2 .cb-initial {
+  background: rgba(255, 255, 255, 0.55);
+}
 .cb-answer--neutral .cb-initial {
   background: var(--cb-surface-sunk);
   color: var(--cb-violet);
 }
 .cb-answer[aria-pressed='true'] {
-  outline: 3px solid var(--cb-gold);
+  outline: 3px solid var(--cb-violet);
   outline-offset: 3px;
 }
 .cb-answer--locked {
   filter: saturate(0.55);
   cursor: default;
-}
-.cb-stage .cb-answer {
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.14);
-  margin-bottom: 0;
-}
-.cb-stage .cb-answer .cb-initial {
-  background: var(--a-bg);
 }
 
 /* ---------- text field ---------- */
@@ -449,7 +434,7 @@ button.cb-chip {
   transform: translateY(-2px);
 }
 .cb-team[aria-pressed='true'] .cb-team-art {
-  background: #efe8ff;
+  background: var(--cb-team-art-selected);
 }
 .cb-team[aria-pressed='true']::after {
   content: '✓';
@@ -528,16 +513,8 @@ button.cb-chip {
 }
 .cb-row--lead {
   background: var(--cb-win-grad);
-  box-shadow: 0 2px 0 rgba(253, 215, 36, 0.55);
+  box-shadow: 0 2px 0 var(--cb-win-edge);
   color: var(--cb-eggplant);
-}
-.cb-stage .cb-row--lead {
-  background: linear-gradient(90deg, rgba(253, 215, 36, 0.22), rgba(253, 215, 36, 0.06));
-  box-shadow: inset 0 0 0 1px rgba(253, 215, 36, 0.35);
-  color: var(--cb-text-on-color);
-}
-.cb-stage .cb-row--lead .cb-score {
-  color: var(--cb-gold);
 }
 
 /* ---------- countdown ---------- */
@@ -545,11 +522,8 @@ button.cb-chip {
   font: 800 var(--cb-fs-numeral) / 0.9 var(--cb-font-display);
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  color: var(--cb-pink);
-}
-.cb-stage .cb-numeral {
-  color: var(--cb-text-on-color);
-  text-shadow: var(--cb-glow-pink);
+  color: var(--cb-violet);
+  text-shadow: var(--cb-glow-light);
 }
 .cb-numeral.is-in {
   animation: cb-slam var(--cb-t-count) var(--cb-ease-out) both;
@@ -563,8 +537,8 @@ button.cb-chip {
   font: 800 var(--cb-fs-display-lg) / var(--cb-lh-display-lg) var(--cb-font-display);
   letter-spacing: var(--cb-tracking-display);
   text-transform: uppercase;
-  color: var(--cb-gold);
-  text-shadow: var(--cb-glow-gold);
+  color: var(--cb-pink-deep);
+  text-shadow: var(--cb-glow-light);
 }
 @media (prefers-reduced-motion: reduce) {
   .cb-numeral.is-in { animation: none; }
@@ -579,17 +553,15 @@ button.cb-chip {
   margin: 0;
 }
 .cb-verdict--miss {
-  color: var(--cb-coral);
+  color: var(--cb-error);
 }
 .cb-points {
   font: 800 66px / 1 var(--cb-font-display);
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
   color: var(--cb-points);
+  text-shadow: var(--cb-glow-light);
   text-align: center;
-}
-.cb-stage .cb-points {
-  text-shadow: var(--cb-glow-gold);
 }
 .cb-points.is-in,
 .cb-reveal-in {
@@ -617,18 +589,13 @@ button.cb-chip {
   color: var(--cb-error);
 }
 
-/* ---------- character stage slot (duo / solo renders) ---------- */
+/* ---------- character slot (duo / solo renders) ---------- */
 .cb-char {
   display: block;
   margin: 0 auto;
   width: min(78%, 360px);
   aspect-ratio: 1;
   object-fit: contain;
-}
-.cb-stage .cb-char {
-  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));
-}
-.cb-page:not(.cb-stage) .cb-char {
   filter: drop-shadow(0 14px 22px rgba(48, 1, 71, 0.16));
 }
 /* placeholder hero for teams without art: big tinted initial */
@@ -644,11 +611,7 @@ button.cb-chip {
   color: var(--cb-violet);
   opacity: 0.6;
 }
-.cb-stage .cb-char-placeholder {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--cb-text-on-color);
-}
-/* stage-only soft glow behind a hero element */
+/* soft light bloom behind a hero element (burst screens) */
 .cb-glow {
   position: absolute;
   width: 280px;
@@ -657,7 +620,7 @@ button.cb-chip {
   top: 42%;
   transform: translate(-50%, -50%);
   z-index: -1;
-  background: radial-gradient(circle, rgba(242, 28, 166, 0.45), transparent 65%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(248, 198, 216, 0.45) 40%, transparent 68%);
   filter: blur(10px);
   pointer-events: none;
 }

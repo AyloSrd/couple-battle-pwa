@@ -2,9 +2,9 @@ import type { ButtonHTMLAttributes, FC } from 'react';
 import './chrome.css';
 
 /**
- * Button variants (v2): `primary` is the violet CTA (turns gold on the Spotlight
- * stage), `win` the gold gradient, `secondary` the outlined paper button, `ghost`
- * text-only, `positive`/`negative` the success/coral verdict buttons.
+ * Button variants: `primary` is the violet CTA (on every screen, burst included),
+ * `win` the pastel butter gradient, `secondary` the outlined paper button, `ghost`
+ * text-only, `positive`/`negative` the pastel mint/pink verdict buttons.
  */
 export type TPixelButtonVariant = 'primary' | 'secondary' | 'ghost' | 'win' | 'positive' | 'negative';
 

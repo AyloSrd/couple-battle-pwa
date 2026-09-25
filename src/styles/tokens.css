@@ -1,8 +1,11 @@
-/* Couple Battle — design tokens v2 ("Paper" system + "Spotlight" stage).
+/* Couple Battle — design tokens ("Paper" system on a "Pastel sunburst" background).
    Source: handoff/design/v2/tokens.css — palette & typefaces from the Master
-   Brand & Style Guide v1.0. Components reference --cb-* tokens ONLY. */
+   Brand & Style Guide v1.0; red / yellow / green re-tuned to pastels, every
+   violet untouched. Components reference --cb-* tokens ONLY. */
 
 :root {
+  color-scheme: light;
+
   /* ---------- brand palette (style guide) ---------- */
   --cb-eggplant: #300147;
   --cb-ink: #24152C;
@@ -12,44 +15,61 @@
   --cb-violet-edge: #3F0DB5;      /* pressable bottom lip of violet buttons */
   --cb-pink: #F21CA6;
   --cb-pink-deep: #C4137F;
-  --cb-gold: #FDD724;
+  --cb-gold: #FDD724;               /* brand palette only — no component uses gold/orange/coral */
   --cb-orange: #FCA114;
   --cb-coral: #F64559;
   --cb-coral-edge: #C22A3D;
   --cb-ribbon: #C64AE2;
 
   /* ---------- semantic (light "paper" surfaces) ---------- */
-  --cb-bg: var(--cb-canvas);
-  --cb-bg-dot: rgba(242, 28, 166, .13);   /* faint dot texture on the canvas */
+  --cb-bg: #FFF6D9;                       /* solid fallback colour (butter-cream) */
+  /* Pastel backgrounds: lavender → butter-cream → blush-pink, never dark.
+     `calm` for every Paper screen; `burst` (sunburst rays) for the big beats.
+     TODO(art): when bg-calm.webp / bg-burst.webp are delivered, copy them to
+     src/assets/art/ and prepend `url('../assets/art/bg-….webp') center / cover no-repeat`
+     as the top layer of the matching token below. */
+  --cb-bg-calm: linear-gradient(100deg, #E9DDFB 0%, #FFF6D9 50%, #FBD9E6 100%);
+  --cb-bg-burst:
+    repeating-conic-gradient(from 0deg at 50% 45dvh, rgba(255, 255, 255, .35) 0deg 6deg, transparent 6deg 15deg),
+    linear-gradient(100deg, #D9C8F7, #FFF6D9, #F8C6D8);
   --cb-surface: #FFFFFF;
   --cb-surface-sunk: #F4EEF6;
   --cb-surface-lip: rgba(48, 1, 71, .10);  /* the 2px "paper lip" under cards */
   --cb-text: var(--cb-eggplant);
   --cb-text-body: var(--cb-ink);
-  --cb-text-muted: #6B5C73;
+  --cb-text-muted: #5E4E66;               /* ≥4.5:1 on every background stop */
   --cb-text-on-color: #FFFFFF;
   --cb-border: rgba(48, 1, 71, .14);
-  --cb-focus: var(--cb-pink);
+  --cb-focus: var(--cb-pink-deep);        /* ≥3.6:1 on every background stop */
 
   --cb-action: var(--cb-violet);
   --cb-action-edge: var(--cb-violet-edge);
   --cb-p1: var(--cb-violet);              /* player 1 / partner A colour */
   --cb-p1-edge: var(--cb-violet-edge);
-  --cb-p2: var(--cb-coral);               /* player 2 / partner B colour */
-  --cb-p2-edge: var(--cb-coral-edge);
-  --cb-win: var(--cb-gold);
-  --cb-win-grad: linear-gradient(95deg, #FFF0C2, #FFE59B);
-  --cb-points: var(--cb-orange);          /* "+2" on light */
+  --cb-p2: #FFB3C1;                       /* player 2 / partner B colour (also "Non") */
+  --cb-p2-edge: #F28CA0;
+  --cb-p2-text: var(--cb-eggplant);
+  --cb-win: #FFE7A0;
+  --cb-win-edge: #F2C95E;
+  --cb-win-grad: linear-gradient(95deg, #FFF3CC, #FFE7A0);
+  --cb-points: var(--cb-violet);          /* "+2" (a pastel can't pass 3:1 as text) */
 
   --cb-chip-bg: #FDE4F3;
   --cb-chip-text: var(--cb-pink-deep);
 
-  --cb-success: #1C8A62;
-  --cb-success-bg: #DCF7EC;
+  --cb-success: #0F6B4A;                  /* text only */
+  --cb-success-bg: #CFF5E3;
+  --cb-success-edge: #9EDFC1;
   --cb-warning: #A65A00;
-  --cb-error: #B3263E;
-  --cb-error-bg: #FDE3E7;
+  --cb-error: #9E1F35;                    /* text only */
+  --cb-error-bg: #FFD6DC;
+  --cb-error-edge: #F2A7B3;
   --cb-disabled: #A79EAA;
+  --cb-disabled-edge: #8A8190;
+  --cb-team-art-selected: #EFE8FF;        /* picked team tile's art well */
+
+  /* soft white halo for big numerals / GO / points on the sunburst */
+  --cb-glow-light: 0 0 24px rgba(255, 255, 255, .9), 0 0 6px rgba(255, 255, 255, .9);
 
   /* ---------- type ---------- */
   --cb-font-display: 'Bricolage Grotesque', 'SF Pro Display', Roboto, Arial, sans-serif;
@@ -104,38 +124,6 @@
   --cb-t-count: 700ms;        /* per numeral — also drives the ring drain */
   --cb-t-reveal: 550ms;
   --cb-t-score: 420ms;
-}
-
-/* ==========================================================================
-   SPOTLIGHT STAGE — the dark theatrical mode for the big beats only:
-   countdown, reveal, finale (rapid-fire), final results, birthday card.
-   Apply with <div class="cb-stage"> (or data-stage on the screen root).
-   It re-maps the semantic tokens, so components look right automatically.
-   ========================================================================== */
-.cb-stage, [data-stage] {
-  --cb-bg: #150024;
-  --cb-bg-stage:
-    radial-gradient(150% 70% at 50% 8%, rgba(97, 30, 250, .55) 0%, rgba(97, 30, 250, 0) 62%),
-    radial-gradient(120% 60% at 50% 100%, rgba(242, 28, 166, .30) 0%, rgba(242, 28, 166, 0) 60%),
-    linear-gradient(#22013A, #150024);
-  --cb-surface: rgba(255, 255, 255, .07);
-  --cb-surface-sunk: rgba(255, 255, 255, .05);
-  --cb-surface-lip: rgba(0, 0, 0, .25);
-  --cb-text: #FFFFFF;
-  --cb-text-body: #F6EEF9;
-  --cb-text-muted: rgba(255, 255, 255, .58);
-  --cb-border: rgba(255, 255, 255, .14);
-  --cb-chip-bg: rgba(255, 255, 255, .10);
-  --cb-chip-text: #F7C9EA;
-  --cb-success: #5FE3B0;
-  --cb-success-bg: rgba(95, 227, 176, .14);
-  --cb-points: var(--cb-gold);
-  --cb-glow-pink: 0 0 90px rgba(242, 28, 166, .75), 0 0 30px rgba(97, 30, 250, .5);
-  --cb-glow-gold: 0 0 50px rgba(253, 215, 36, .5);
-  --cb-e1: inset 0 0 0 1.5px rgba(255, 255, 255, .14);
-  --cb-e2: 0 18px 44px rgba(0, 0, 0, .42), 0 0 0 1px rgba(255, 255, 255, .05);
-  color: var(--cb-text-body);
-  background: var(--cb-bg-stage);
 }
 
 @media (prefers-reduced-motion: reduce) {
