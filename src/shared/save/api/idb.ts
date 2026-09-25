@@ -7,14 +7,31 @@ const DB_NAME = 'couple-battle';
 const STORE = 'save';
 const DB_VERSION = 1;
 
-/** Open (and migrate) the single save database. Call once, in the container. */
+/**
+ * Open (and migrate) the single save database. Call once, in the container.
+ *
+ * `blocked` fires when an older tab still holds a connection to a previous
+ * version — that tab needs to close before this open can proceed, so it
+ * never resolves on its own; reject instead so the caller can fall back
+ * (rather than hang forever). `blocking` is the mirror case (this tab is the
+ * one holding an old connection open against a newer one elsewhere) — close
+ * it so the other tab can proceed.
+ */
 export function openSaveDb(): Promise<IDBPDatabase> {
-  return openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE);
-      }
-    },
+  return new Promise((resolve, reject) => {
+    openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(STORE)) {
+          db.createObjectStore(STORE);
+        }
+      },
+      blocked(_currentVersion, _blockedVersion, _event) {
+        reject(new Error('openSaveDb: blocked by another open connection'));
+      },
+      blocking(_currentVersion, _blockedVersion, event) {
+        (event.target as IDBDatabase).close();
+      },
+    }).then(resolve, reject);
   });
 }
 

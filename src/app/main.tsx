@@ -8,6 +8,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SoundApiProvider } from '@/shared/sound';
 import { LangProvider } from '@/shared/i18n';
+import { SAVE_DEFAULTS } from '@/shared/save';
 import { createContainer } from './container';
 import { Intro } from './Intro';
 import { routeTree } from '../routeTree.gen';
@@ -71,7 +72,7 @@ async function bootstrap() {
   const queryClient = new QueryClient();
   const container = await createContainer();
   // Seed the intro's language from persisted settings (FR fallback baked in).
-  const settings = await container.saveApi.get('settings');
+  const settings = await container.saveApi.get('settings').catch(() => SAVE_DEFAULTS.settings);
   const router = createAppRouter({ ...container, queryClient });
 
   const rootEl = document.getElementById('root');

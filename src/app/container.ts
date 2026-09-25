@@ -42,9 +42,21 @@ export async function createContainer(
     };
   }
 
+  let saveApi: TSaveApi;
+  try {
+    saveApi = createSaveIdbApi(await openSaveDb());
+  } catch (error) {
+    // IndexedDB can be blocked (an older tab holding the connection) or
+    // unavailable (private browsing, storage disabled) — never take the whole
+    // app down over it. Fall back to an in-memory save so the session still
+    // works; it just won't survive a reload.
+    console.warn('openSaveDb failed, falling back to in-memory save', error);
+    saveApi = createSaveMemoryApi();
+  }
+
   return {
     questionsApi,
-    saveApi: createSaveIdbApi(await openSaveDb()),
+    saveApi,
     soundApi: createSoundWebAudioApi(),
     wakeLockApi: createWakeLockBrowserApi(),
   };
