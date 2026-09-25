@@ -57,7 +57,7 @@
   --cb-chip-bg: #FDE4F3;
   --cb-chip-text: var(--cb-pink-deep);
 
-  --cb-success: #0F6B4A;                  /* text only */
+  --cb-success: #0C5F41;                  /* text only — ≥4.97:1 on every background stop (#0F6B4A was 4.21 on the burst lavender) */
   --cb-success-bg: #CFF5E3;
   --cb-success-edge: #9EDFC1;
   --cb-warning: #A65A00;
