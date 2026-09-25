@@ -1,3 +1,4 @@
+import './zodConfig';
 import { StrictMode, useState, type FC, type PropsWithChildren } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
