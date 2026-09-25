@@ -42,7 +42,7 @@ Vite + React 19 + TS strict + Vitest + ESLint (with `eslint-plugin-boundaries` o
 `import/no-restricted-paths` encoding the import-boundary table from ARCHITECTURE.md) +
 vite-plugin-pwa + GitHub Actions workflow deploying `dist/` to Pages. Copy the inputs above into
 place. `base` configured for project pages; router on `createHashHistory()`.
-**Gate:** `npm run typecheck && npm run lint && npm run test && npm run build` all green; empty
+**Gate:** `pnpm typecheck && pnpm lint && pnpm test && pnpm build` all green; empty
 app deploys to Pages; boundary lint fails on a deliberate forbidden import (prove it, then remove
 the probe).
 
