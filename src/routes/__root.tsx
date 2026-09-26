@@ -3,7 +3,7 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import type { TContainer } from '../app/container';
 import { QuestionsApiProvider } from '@/shared/questions/provider';
-import { SaveApiProvider, useGetSave, usePutSave } from '@/shared/save';
+import { SAVE_DEFAULTS, SaveApiProvider, useGetSave, usePutSave } from '@/shared/save';
 import { SoundApiProvider, useSoundApi } from '@/shared/sound';
 import { WakeLockApiProvider } from '@/shared/wakeLock';
 import { LangProvider, type TLang } from '@/shared/i18n';
@@ -14,15 +14,18 @@ export type TRouterContext = TContainer & { queryClient: QueryClient };
 
 /**
  * Reads persisted settings once, applies the sound preference, and seeds the
- * language context (persisting changes back to settings). Renders nothing until
- * settings resolve — the Splash view (added with the walking skeleton) will
- * fill this beat.
+ * language context (persisting changes back to settings). Renders nothing only
+ * while the read is pending; if it fails (IndexedDB unavailable/corrupt), falls
+ * back to the defaults so the app still boots — language changes still try to
+ * persist.
  */
-const LangGate: FC<PropsWithChildren> = ({ children }) => {
+export const LangGate: FC<PropsWithChildren> = ({ children }) => {
   const settingsQuery = useGetSave('settings');
   const putSettings = usePutSave('settings');
   const soundApi = useSoundApi();
-  const settings = settingsQuery.data;
+  // Keep already-loaded data if a later refetch fails; defaults only when nothing loaded.
+  const settings =
+    settingsQuery.data ?? (settingsQuery.isError ? SAVE_DEFAULTS.settings : undefined);
 
   useEffect(() => {
     if (settings) soundApi.setEnabled(settings.sound);
