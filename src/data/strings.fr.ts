@@ -163,8 +163,6 @@ export const fr = {
   "sfx.tap": "any button press",
   "sfx.whoosh": "view transitions",
   "splash.loading": "Chargement…",
-  "splash.studio": "NINOU GAMES",
-  "splash.tap": "Touche l'écran pour continuer",
   "spr.avatar.cats": "32×32",
   "spr.avatar.cocktails": "32×32",
   "spr.avatar.ducks": "32×32",

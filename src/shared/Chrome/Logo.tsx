@@ -8,6 +8,8 @@ export const Logo: FC<{ alt: string; small?: boolean; className?: string }> = ({
   <img
     className={['cb-logo', small ? 'cb-logo--sm' : '', className ?? ''].filter(Boolean).join(' ')}
     src={logo480}
+    width={480}
+    height={373}
     srcSet={`${logo480} 1x, ${logo960} 2x`}
     alt={alt}
     draggable={false}
