@@ -21,12 +21,15 @@ import {
   questionText,
   FLASH_SET,
   type TGameConfig,
+  type TGameEvent,
   type TGameState,
   type TResult,
   type TVerdict,
 } from './machine';
-import type { TRoster } from '@/shared/game/domain/types';
+import { AVATAR_IDS, type TMode, type TRoster } from '@/shared/game/domain/types';
 import type { TQuestion, TQuestionType } from '@/shared/questions/domain/types';
+import { deckSizeFor } from '@/shared/questions/domain/services';
+import { ZGameSnapshotSchema } from '@/shared/save/domain/types';
 
 const roster: TRoster = [
   { teamId: 't1', avatarId: 'otters', players: ['A', 'B'] },
@@ -433,6 +436,45 @@ describe('Flash machine — sofa sides', () => {
     expect(s.scores).toEqual({ t1: 6 });
   });
 
+  describe('a judged slot\'s secret leaves the state (and the snapshot)', () => {
+    // 2 couples, both answered both shared questions: t1|1 t2|1 t1|2 t2|2.
+    const locked = () => reduce(collectRound(initGame(flashConfig('this_or_that')), (q, c) => `c${c}q${q}`), { type: 'passConfirm' });
+
+    it('judge drops only the judged (couple, question) key', () => {
+      const guess = locked();
+      const judge = reduce(guess, { type: 'reveal' });
+      expect(judge.kind).toBe('judge');
+      const before = structuredClone(judge);
+
+      const next = reduce(judge, { type: 'judge', verdict: 'exact' }); // slot (0,0) = t1|1
+      expect(next.kind).toBe('guess');
+      if (next.kind === 'guess') {
+        expect(next.secretAnswers).toEqual({ 't2|1': 'c1q0', 't1|2': 'c0q1', 't2|2': 'c1q1' });
+      }
+      expect(toSnapshot(next).secretAnswers).not.toHaveProperty('t1|1');
+      expect(judge).toEqual(before); // incoming state not mutated
+      if (judge.kind === 'judge') expect(judge.secretAnswers).toHaveProperty('t1|1', 'c0q0');
+
+      // next slot (0,1) = t2|1: the other couple's answer to the SAME question
+      const after = reduce(reduce(next, { type: 'reveal' }), { type: 'judge', verdict: 'miss' });
+      if (after.kind === 'guess') expect(after.secretAnswers).toEqual({ 't1|2': 'c0q1', 't2|2': 'c1q1' });
+    });
+
+    it('autoGuess drops only the judged (couple, question) key', () => {
+      const guess = locked();
+      const before = structuredClone(guess);
+
+      const next = reduce(guess, { type: 'autoGuess', guess: 'c0q0' }); // slot (0,0) = t1|1
+      expect(next.kind).toBe('guess');
+      expect(next.scores).toEqual({ t1: 2, t2: 0 }); // judged against the truth before dropping it
+      if (next.kind === 'guess') {
+        expect(next.secretAnswers).toEqual({ 't2|1': 'c1q0', 't1|2': 'c0q1', 't2|2': 'c1q1' });
+      }
+      expect(guess).toEqual(before); // incoming state not mutated
+      if (guess.kind === 'guess') expect(guess.secretAnswers).toHaveProperty('t1|1', 'c0q0');
+    });
+  });
+
   it('mid-phase resume: every Flash state round-trips through a snapshot with locked answers intact', () => {
     const gate = initGame(flashConfig('open'));
     expect(fromSnapshot(toSnapshot(gate))).toEqual(gate);
@@ -548,5 +590,123 @@ describe('Ultime machine (composition)', () => {
     expect(fromSnapshot(toSnapshot(rapidTurn))).toEqual(rapidTurn);
     const rq = reduce(rapidTurn, { type: 'next' });
     expect(fromSnapshot(toSnapshot(rq))).toEqual(rq);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Persisted-schema round-trip: every real state must be saveable
+// ---------------------------------------------------------------------------
+
+/** The one deterministic event each non-final kind advances on. */
+const SCRIPT: Record<Exclude<TGameState['kind'], 'final'>, TGameEvent> = {
+  question: { type: 'ready' },
+  countdown: { type: 'countdownDone' },
+  resolve: { type: 'confirm', result: 'match' },
+  sideAnswerers: { type: 'passConfirm' },
+  handoff: { type: 'passConfirm' },
+  // Longest answer the secret input allows (maxLength 40).
+  secretInput: { type: 'lockAnswer', answer: 'x'.repeat(40) },
+  sideGuessers: { type: 'passConfirm' },
+  guess: { type: 'reveal' },
+  judge: { type: 'judge', verdict: 'exact' },
+  rapidIntro: { type: 'next' },
+  rapidTurn: { type: 'next' },
+  rapidQuestion: { type: 'ready' },
+  rapidCountdown: { type: 'countdownDone' },
+  rapidJudge: { type: 'rapidJudge', synchro: true },
+  scoreboard: { type: 'next' },
+};
+
+/** A real roster: teamIds t1..tN (as Setup assigns them), 16-char names (the input cap). */
+function realRoster(n: number): TRoster {
+  return Array.from({ length: n }, (_, i) => ({
+    teamId: `t${i + 1}`,
+    avatarId: AVATAR_IDS[i]!,
+    players: [`P${i + 1}a`.padEnd(16, '_'), `P${i + 1}b`.padEnd(16, '_')] as [string, string],
+  }));
+}
+
+/** Catalog-like ids (the real catalog tops out at 1035). */
+function realDeck(mode: TMode, size: number): TQuestion[] {
+  return Array.from({ length: size }, (_, i) => ({
+    id: 1000 + i,
+    theme: 'childhood' as const,
+    difficulty: 'easy' as const,
+    type: mode === 'dilemma' ? ('who_of_two' as const) : ('open' as const),
+    you: `q${i}`,
+    name: `q${i} de {name}`,
+  }));
+}
+
+/** True when a question-bearing state's cursor points past the end of the deck. */
+function pointsPastDeck(state: TGameState): boolean {
+  switch (state.kind) {
+    case 'handoff':
+    case 'secretInput':
+    case 'guess':
+    case 'judge':
+      return flashQuestion(state) === undefined;
+    case 'question':
+    case 'resolve':
+      return dilemmaQuestion(state) === undefined;
+    case 'rapidQuestion':
+    case 'rapidCountdown':
+    case 'rapidJudge':
+      return rapidQuestionOf(state) === undefined;
+    default:
+      return false;
+  }
+}
+
+/** Drive a game to `final`, asserting the snapshot schema after every transition. */
+function playToFinalCheckingSnapshots(config: TGameConfig): { maxQuestionIdx: number; pastDeck: boolean } {
+  let s = initGame(config);
+  let maxQuestionIdx = 0;
+  let pastDeck = false;
+  const check = (state: TGameState) => {
+    const snapshot = toSnapshot(state);
+    const result = ZGameSnapshotSchema.safeParse(snapshot);
+    expect(result.success, `snapshot rejected in "${state.kind}": ${result.error?.message ?? ''}`).toBe(true);
+    maxQuestionIdx = Math.max(maxQuestionIdx, snapshot.cursor.questionIdx);
+    pastDeck ||= pointsPastDeck(state);
+  };
+  check(s);
+  for (let step = 0; s.kind !== 'final'; step++) {
+    if (step > 1000) throw new Error(`no final after 1000 steps (stuck in "${s.kind}")`);
+    const next = reduce(s, SCRIPT[s.kind]);
+    if (next === s) throw new Error(`no progress from "${s.kind}"`);
+    s = next;
+    check(s);
+  }
+  return { maxQuestionIdx, pastDeck };
+}
+
+describe('every real state fits the persisted snapshot schema', () => {
+  const modes: TMode[] = ['flash', 'dilemma', 'ultime'];
+  const cases = modes.flatMap((mode) => [1, 2, 3, 4].map((couples) => [mode, couples] as const));
+
+  it.each(cases)('%s with %i couple(s), nominal deck', (mode, couples) => {
+    const deck = realDeck(mode, deckSizeFor(mode, couples));
+    playToFinalCheckingSnapshots({ roster: realRoster(couples), mode, difficulty: 'mix', themes: [], deck });
+  });
+
+  const shortCases = (['flash', 'ultime'] as const).flatMap((mode) =>
+    [1, 4].flatMap((couples) => [1, 2].map((size) => [mode, couples, size] as const)),
+  );
+
+  it.each(shortCases)('%s with %i couple(s), short deck of %i', (mode, couples, size) => {
+    const deck = realDeck(mode, size);
+    const { maxQuestionIdx, pastDeck } = playToFinalCheckingSnapshots({
+      roster: realRoster(couples),
+      mode,
+      difficulty: 'mix',
+      themes: [],
+      deck,
+    });
+    // The cursor legitimately runs past the end of a short deck…
+    expect(pastDeck).toBe(true);
+    // …and in Ultime the persisted questionIdx itself exceeds deck.length
+    // (Dilemma segment is always 5), which the schema must not reject.
+    if (mode === 'ultime') expect(maxQuestionIdx).toBeGreaterThan(deck.length);
   });
 });

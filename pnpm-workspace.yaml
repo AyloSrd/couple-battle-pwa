@@ -4,3 +4,7 @@
 allowBuilds:
   esbuild: false
   unrs-resolver: false
+
+minimumReleaseAge: 1440
+trustPolicy: no-downgrade
+blockExoticSubdeps: true

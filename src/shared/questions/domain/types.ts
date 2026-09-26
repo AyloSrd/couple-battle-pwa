@@ -31,8 +31,8 @@ export const ZQuestionSchema = z.object({
   theme: ZThemeIdSchema,
   difficulty: ZQuestionDifficultySchema,
   type: ZQuestionTypeSchema,
-  you: z.string().min(1),
-  name: z.string().min(1),
+  you: z.string().min(1).max(500),
+  name: z.string().min(1).max(500),
 });
 export type TQuestion = z.infer<typeof ZQuestionSchema>;
 

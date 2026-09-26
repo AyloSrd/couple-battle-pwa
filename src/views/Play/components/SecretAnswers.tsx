@@ -60,6 +60,9 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
             maxLength={40}
             autoCapitalize="off"
             autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
           />
           <div className="cb-grow" />
           <PixelButton onClick={handleSubmitText} disabled={!text.trim()}>
