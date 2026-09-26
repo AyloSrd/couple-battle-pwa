@@ -14,7 +14,7 @@ type TFinalScreenProps = {
   solo?: TSoloResult | undefined;
 };
 
-/** V-FinalResults — the winner on the Spotlight stage. Fanfare once on mount. */
+/** V-FinalResults — the winner on the sunburst (burst). Fanfare once on mount. */
 export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame, solo }) => {
   const t = useT();
   const sound = useSoundApi();

@@ -8,7 +8,7 @@ type TChipProps = {
   className?: string;
 };
 
-/** Overline chip: uppercase Inter, pink on paper, translucent on stage. */
+/** Overline chip: uppercase Inter, pink on pink-tint paper, on every background. */
 export const Chip: FC<TChipProps> = ({ children, icon, className }) => (
   <span className={['cb-chip', className ?? ''].filter(Boolean).join(' ')}>
     {icon && <img src={icon} alt="" />}

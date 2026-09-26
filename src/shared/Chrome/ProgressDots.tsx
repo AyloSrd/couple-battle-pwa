@@ -8,7 +8,7 @@ type TProgressDotsProps = {
   current: number;
 };
 
-/** Row of progress dots: done + current lit (pink; gold on stage), the rest hollow. */
+/** Row of progress dots: done + current lit (pink), the rest hollow. */
 export const ProgressDots: FC<TProgressDotsProps> = ({ total, current }) => (
   <span className="cb-dots" role="progressbar" aria-valuemin={1} aria-valuemax={total} aria-valuenow={current + 1}>
     {Array.from({ length: total }, (_, index) => (

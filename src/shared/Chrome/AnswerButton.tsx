@@ -3,7 +3,7 @@ import './chrome.css';
 
 type TAnswerButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   label: string;
-  /** Partner colour: p1 violet, p2 coral, neutral paper (yes/no, generic picks). */
+  /** Partner colour: p1 violet, p2 pastel pink, neutral paper (yes/no, generic picks). */
   tone?: 'p1' | 'p2' | 'neutral';
   /** Leading initial tile; defaults to the label's first letter. Pass `null` for none. */
   initial?: string | null;

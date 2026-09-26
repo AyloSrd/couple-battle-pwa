@@ -35,7 +35,7 @@ function answererNameOf(state: TGameState): string {
   return '';
 }
 
-/** V-FinalRapidFire — the crown-deciding finale (Ultime), on the Spotlight stage. */
+/** V-FinalRapidFire — the crown-deciding finale (Ultime), on the sunburst (burst). */
 export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
   const t = useT();
   const handleSynchro = () => onJudge(true);

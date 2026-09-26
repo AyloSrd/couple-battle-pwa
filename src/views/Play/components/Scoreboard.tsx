@@ -9,7 +9,7 @@ type TProps = {
   onNext: () => void;
 };
 
-/** V-Scoreboard — between-rounds standings, on the Spotlight stage. */
+/** V-Scoreboard — between-rounds standings, on the sunburst (burst). */
 export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
   const t = useT();
   const sound = useSoundApi();

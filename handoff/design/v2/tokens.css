@@ -1,7 +1,24 @@
-/* Couple Battle — design tokens ("Paper" system on a "Pastel sunburst" background).
-   Source: handoff/design/v2/tokens.css — palette & typefaces from the Master
-   Brand & Style Guide v1.0; red / yellow / green re-tuned to pastels, every
-   violet untouched. Components reference --cb-* tokens ONLY. */
+/* ==========================================================================
+   Couple Battle — Design tokens v2  ("Paper" system + "Sunburst" burst)
+   Palette & typefaces: Master Brand & Style Guide v1.0. Everything else: v2 design system.
+   Single source of truth — components must only reference --cb-* tokens.
+   ========================================================================== */
+
+/* ---------- fonts (self-hosted, OFL — see fonts/OFL-*.txt) ---------- */
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 600; font-display: swap;
+  src: url('./fonts/bricolage-grotesque-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 700; font-display: swap;
+  src: url('./fonts/bricolage-grotesque-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 800; font-display: swap;
+  src: url('./fonts/bricolage-grotesque-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 400; font-display: swap;
+  src: url('./fonts/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 500; font-display: swap;
+  src: url('./fonts/inter-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap;
+  src: url('./fonts/inter-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 700; font-display: swap;
+  src: url('./fonts/inter-latin-700-normal.woff2') format('woff2'); }
 
 :root {
   color-scheme: light;

@@ -197,17 +197,17 @@ export const PlayView: FC = () => {
 
   if (snapshotQuery.isPending || !game) return null;
 
-  // The countdown owns the whole ink-dark screen: 3 ticks → "POINTEZ !" for
+  // The countdown owns the whole sunburst screen: 3 ticks → "POINTEZ !" for
   // Dilemma; 2 ticks → "RÉPONDEZ !" for the rapid-fire (nobody points there).
   if (game.kind === 'countdown') return <Countdown onDone={handleCountdownDone} />;
   if (game.kind === 'rapidCountdown') return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
 
   const showPause = game.kind !== 'final';
   const solo = game.roster.length === 1;
-  // Spotlight stage ONLY for the theatrical beats (STYLE-V2 §1): the rapid-fire
+  // Sunburst (burst) background ONLY for the theatrical beats: the rapid-fire
   // finale, the between-rounds scoreboard and the final results. Countdowns
-  // render their own stage screen above. Everything else is Paper.
-  const stage = game.kind.startsWith('rapid') || game.kind === 'scoreboard' || game.kind === 'final';
+  // render their own burst screen above. Everything else is calm Paper.
+  const burst = game.kind.startsWith('rapid') || game.kind === 'scoreboard' || game.kind === 'final';
 
   /** Names for the couple currently in the Flash spotlight. */
   const namesFor = (round: number, coupleIdx: number) => {
@@ -222,7 +222,7 @@ export const PlayView: FC = () => {
   };
 
   return (
-    <Screen stage={stage} className={showPause ? 'cb-page--with-pause' : undefined}>
+    <Screen burst={burst} className={showPause ? 'cb-page--with-pause' : undefined}>
       {showPause && (
         <div style={{ position: 'fixed', top: 'calc(var(--cb-s3) + env(safe-area-inset-top))', right: 'var(--cb-s3)', zIndex: 20 }}>
           <PixelButton variant="ghost" block={false} onClick={handlePause} aria-label={t('pause.title')} className="cb-icon-btn">
