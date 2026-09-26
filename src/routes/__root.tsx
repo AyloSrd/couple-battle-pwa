@@ -15,8 +15,7 @@ export type TRouterContext = TContainer & { queryClient: QueryClient };
 /**
  * Reads persisted settings once, applies the sound preference, and seeds the
  * language context (persisting changes back to settings). Renders nothing until
- * settings resolve — the Splash view (added with the walking skeleton) will
- * fill this beat.
+ * settings resolve (a local IndexedDB read, a few ms).
  */
 const LangGate: FC<PropsWithChildren> = ({ children }) => {
   const settingsQuery = useGetSave('settings');

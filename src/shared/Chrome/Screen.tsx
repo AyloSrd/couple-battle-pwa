@@ -6,7 +6,7 @@ type TScreenProps = HTMLAttributes<HTMLElement> & {
   center?: boolean;
   /**
    * Sunburst "burst" background — the pastel rays for the big beats ONLY:
-   * countdown, rapid-fire finale, scoreboard, final results, studio splash.
+   * countdown, rapid-fire finale, scoreboard, final results.
    * Everything else is the calm pastel Paper. Set here on the shell, never per component.
    */
   burst?: boolean;

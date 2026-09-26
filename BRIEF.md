@@ -58,6 +58,11 @@ sound toggle works (tap blip); settings survive a reload; `createContainer('memo
 app in tests; all checks green.
 
 ### Phase 1.b — Ninou Games intro (the gift wrapping)
+> **Removed.** The birthday card went first (PR #1), then the studio splash (`remove-studio-splash`):
+> the gift has been delivered, and the app now boots straight into Home. This deliberately departs
+> from `handoff/docs/views-spec.md` too: there is no V-Splash before V-Home any more (it had been
+> merged into the studio splash). Kept below as history; the gate no longer applies.
+
 A boot sequence shown on EVERY cold start of the PWA, before V-Home. Two screens:
 1. **Studio splash** — `handoff/design/splash/ninou-penguins.png` centered (crisp rendering,
    ~70% viewport width max) on the ink-dark ground, "NINOU GAMES" (`splash.studio`) beneath it in
@@ -73,8 +78,8 @@ Notes: implement as the app boot flow ahead of the router (the existing V-Splash
 merge into screen 1); precache the PNG; the birthday line shows on every launch — it is the gift.
 The three new string keys (`splash.studio`, `splash.birthday`, `splash.tap`) were added to
 `handoff/data/strings.*.ts` — sync them into the `src/data` copies.
-**Gate:** cold start on a phone (and offline) shows penguins → bar → birthday card; tapping lands
-on Home with audio unlocked (the next tap blips).
+~~**Gate:** cold start on a phone (and offline) shows penguins → bar → birthday card; tapping lands
+on Home with audio unlocked (the next tap blips).~~
 
 ### Phase 2 — Vertical slice: DILEMMA
 Smallest real mode, proves the whole game loop. Machine states + views per spec §5
