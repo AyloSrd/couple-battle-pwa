@@ -42,8 +42,9 @@ class Engine {
     if (!this.ctx) {
       const AC =
         window.AudioContext ??
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
           .webkitAudioContext;
+      if (!AC) return; // no WebAudio support — stay silent instead of throwing
       this.ctx = new AC();
       this.master = this.ctx.createGain();
       this.master.gain.value = this.baseVolume;
@@ -115,6 +116,7 @@ class Engine {
   play(id: TSoundId, opt: TPlayOpts = {}) {
     if (!this.enabled) return;
     this.unlock();
+    if (!this.ctx) return; // no AudioContext available — nothing to play
     const fx: Record<string, () => void> = {
       'sfx.tap':       () => this.tone({ freq: 880, dur: 0.05, vol: 0.3 }),
       'sfx.back':      () => this.tone({ freq: 440, dur: 0.06, vol: 0.3 }),
@@ -186,7 +188,8 @@ class Engine {
     }
     if (!id || !this.enabled) return;
     this.unlock();
-    this.musicGain = this.ctx!.createGain();
+    if (!this.ctx) return; // no AudioContext available — nothing to loop
+    this.musicGain = this.ctx.createGain();
     this.musicGain.gain.value = 0.3;
     this.musicGain.connect(this.master!);
     const loops: Record<string, { bpm: number; bars: number; notes: [number, number, number, OscillatorType][] }> = {

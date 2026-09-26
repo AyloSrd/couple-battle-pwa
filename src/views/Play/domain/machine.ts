@@ -275,6 +275,12 @@ function collectSlot(
   return { kind, round, questionIdx: slot.questionIdx, coupleIdx: slot.coupleIdx, secretAnswers, ...ctx };
 }
 
+function withoutKey(answers: TSecretAnswers, key: string): TSecretAnswers {
+  const { [key]: _dropped, ...rest } = answers;
+  return rest;
+}
+
+/** Score the judged slot (judge AND autoGuess both land here), then advance. */
 function scoreAndAdvanceGuess(
   ctx: TGameContext,
   round: number,
@@ -285,8 +291,13 @@ function scoreAndAdvanceGuess(
 ): TGameState {
   const team = ctx.roster[coupleIdx];
   const next = addScore(ctx, team?.teamId, points);
+  // The judged slot's secret has served its purpose: drop it from the next
+  // state (and so from the persisted snapshot) instead of keeping it until the
+  // round ends. Copy — never mutate the incoming map.
+  const q = ctx.deck[flashSharedIndex(round, questionIdx)];
+  const remaining = team && q ? withoutKey(secretAnswers, answerKey(team.teamId, q.id)) : secretAnswers;
   const slot = nextFlashSlot(ctx.roster.length, questionIdx, coupleIdx);
-  if (slot) return { kind: 'guess', round, questionIdx: slot.questionIdx, coupleIdx: slot.coupleIdx, secretAnswers, ...next };
+  if (slot) return { kind: 'guess', round, questionIdx: slot.questionIdx, coupleIdx: slot.coupleIdx, secretAnswers: remaining, ...next };
   return finishFlashRound(next, round);
 }
 
@@ -432,7 +443,7 @@ export function activeCouple(state: TGameState): TTeam | undefined {
 
 // ---- Snapshot --------------------------------------------------------------
 
-export function toSnapshot(state: TGameState): TGameSnapshot {
+export function toSnapshot(state: TGameState, now: number = Date.now()): TGameSnapshot {
   const questionIdx = 'questionIdx' in state ? state.questionIdx : 0;
   const round = 'round' in state ? state.round : 0;
   const coupleIdx = 'coupleIdx' in state ? state.coupleIdx : 0;
@@ -447,6 +458,7 @@ export function toSnapshot(state: TGameState): TGameSnapshot {
     scores: state.scores,
     secretAnswers,
     confirmed: state.kind === 'resolve' ? state.results : {},
+    savedAt: now,
   };
 }
 

@@ -1,6 +1,6 @@
 /// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -8,9 +8,55 @@ import { VitePWA } from 'vite-plugin-pwa';
 // Project page: https://aylosrd.github.io/couple-battle-pwa/
 const BASE = '/couple-battle-pwa/';
 
+// Strict CSP, production build only: Vite dev injects CSS as inline <style>, so a static meta in
+// index.html would unstyle `pnpm dev`. No 'unsafe-eval' (Zod runs jitless, see src/app/zodConfig.ts),
+// no 'unsafe-inline', no upgrade-insecure-requests (breaks `pnpm preview --host` over LAN http).
+const CSP = [
+  "default-src 'none'",
+  "script-src 'self'",
+  "style-src 'self'",
+  "img-src 'self'",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "manifest-src 'self'",
+  "worker-src 'self'",
+  "base-uri 'none'",
+  "form-action 'none'",
+  "object-src 'none'",
+  "frame-src 'none'",
+].join('; ');
+
+const CHARSET_META = '<meta charset="UTF-8" />';
+
+function cspMeta(): Plugin {
+  return {
+    name: 'csp-meta',
+    apply: 'build',
+    transformIndexHtml(html) {
+      if (!html.includes(CHARSET_META)) {
+        throw new Error(`csp-meta: "${CHARSET_META}" not found in index.html — CSP not injected`);
+      }
+      return html.replace(
+        CHARSET_META,
+        `${CHARSET_META}
+    <meta http-equiv="Content-Security-Policy" content="${CSP}" />
+    <meta name="referrer" content="no-referrer" />`,
+      );
+    },
+  };
+}
+
 export default defineConfig({
   base: BASE,
+  build: {
+    rolldownOptions: {
+      // Run chunks in import order: otherwise the shared chunk holding zod + every schema executes
+      // before the entry, i.e. before zodConfig sets jitless, and the CSP logs an eval violation.
+      output: { strictExecutionOrder: true },
+    },
+  },
   plugins: [
+    cspMeta(),
     // Must run before the React plugin.
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react(),

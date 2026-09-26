@@ -50,6 +50,9 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
           aria-invalid={state.error === 'required' && !state.name1.trim() ? true : undefined}
           autoFocus
           maxLength={16}
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
         />
         <Field
           ref={secondRef}
@@ -59,6 +62,9 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
           onKeyDown={handleKey2}
           aria-invalid={state.error !== null ? true : undefined}
           maxLength={16}
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
         />
         {state.error && <p className="cb-field-error">{t(ERROR_KEY[state.error])}</p>}
       </PixelPanel>

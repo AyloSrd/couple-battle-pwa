@@ -8,3 +8,18 @@ dev-dist/
 # typecheck/build/dev — see package.json scripts).
 src/routeTree.gen.ts
 handoff/design/v2/source/
+
+# Local/editor/env files — never commit these
+.env
+.env.*
+!.env.example
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+Thumbs.db
+.claude/settings.local.json
+.claude/launch.json
+coverage/
+*.log
+*.tsbuildinfo

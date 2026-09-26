@@ -15,7 +15,7 @@ export type TNewGameConfig = {
  * This is the hand-off contract between the setup flow (which draws the deck and
  * writes this) and the Play machine (which reads it via `fromSnapshot`).
  */
-export function newGameSnapshot(config: TNewGameConfig): TGameSnapshot {
+export function newGameSnapshot(config: TNewGameConfig, now: number = Date.now()): TGameSnapshot {
   const scores: Record<string, number> = {};
   for (const team of config.roster) scores[team.teamId] = 0;
   // Opening phase per mode (must match the machine's initGame): Flash AND
@@ -31,5 +31,21 @@ export function newGameSnapshot(config: TNewGameConfig): TGameSnapshot {
     scores,
     secretAnswers: {},
     confirmed: {},
+    savedAt: now,
   };
+}
+
+/** How long an in-progress game stays resumable after its last write. */
+export const SNAPSHOT_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+/** Clock-skew tolerance for a snapshot dated in the future. */
+export const SNAPSHOT_MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
+
+/**
+ * A snapshot is stale — and must not be resumed — once it is older than
+ * `SNAPSHOT_MAX_AGE_MS`, or when it claims to be from further in the future
+ * than `SNAPSHOT_MAX_FUTURE_SKEW_MS` (a tampered or skewed clock). This bounds
+ * how long a Flash round's locked secret answers can sit on the device.
+ */
+export function isSnapshotStale(s: TGameSnapshot, now: number): boolean {
+  return now - s.savedAt > SNAPSHOT_MAX_AGE_MS || s.savedAt > now + SNAPSHOT_MAX_FUTURE_SKEW_MS;
 }

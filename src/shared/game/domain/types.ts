@@ -52,11 +52,16 @@ export const AVATAR_IDS = [
 export type TAvatarId = (typeof AVATAR_IDS)[number];
 export const ZAvatarIdSchema = z.enum(AVATAR_IDS);
 
-/** One couple. `teamId` is stable within a game; scores are keyed by it. */
+/** A player's name as Setup produces it: trimmed, non-empty, ≤ 16 chars (the
+ *  name inputs' `maxLength`). */
+const ZPlayerNameSchema = z.string().trim().min(1).max(16);
+
+/** One couple. `teamId` is stable within a game; scores are keyed by it.
+ *  Setup assigns `t1`..`t4` in roster order (1–4 couples). */
 export const ZTeamSchema = z.object({
-  teamId: z.string(),
+  teamId: z.string().regex(/^t[1-4]$/),
   avatarId: ZAvatarIdSchema,
-  players: z.tuple([z.string(), z.string()]),
+  players: z.tuple([ZPlayerNameSchema, ZPlayerNameSchema]),
 });
 export type TTeam = z.infer<typeof ZTeamSchema>;
 
