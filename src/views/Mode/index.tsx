@@ -5,6 +5,7 @@ import { useSoundApi } from '@/shared/sound';
 import { useDraftGame } from '@/shared/session';
 import { Mode, type TMode } from '@/shared/game';
 import { Screen, ProgressDots, ModeIcon, BackButton } from '@/shared/Chrome';
+import './view.css';
 
 type TModeCardDef = {
   mode: TMode;
@@ -24,7 +25,7 @@ const ModeCard: FC<{ def: TModeCardDef; onPick: (mode: TMode) => void }> = ({ de
   const handlePick = () => onPick(def.mode);
   return (
     <button type="button" className="cb-mode" onClick={handlePick}>
-      <ModeIcon mode={def.mode} size={64} />
+      <ModeIcon mode={def.mode} size={96} />
       <div>
         <h3>{t(def.nameKey)}</h3>
         <p>{t(def.descKey)}</p>
@@ -52,15 +53,13 @@ export const ModeView: FC = () => {
   };
 
   return (
-    <Screen>
+    <Screen className="cb-v-mode">
       <div className="cb-topbar">
         <BackButton label={t('common.back')} onClick={handleBack} />
         <ProgressDots total={3} current={1} />
       </div>
-      <h1 className="cb-title" style={{ marginBottom: 'var(--cb-s2)' }}>
-        {t('mode.title')}
-      </h1>
-      <div className="cb-stack">
+      <h1 className="cb-title">{t('mode.title')}</h1>
+      <div className="cb-modes">
         {CARDS.map((def) => (
           <ModeCard key={def.mode} def={def} onPick={handlePick} />
         ))}
