@@ -1,4 +1,4 @@
-import { useEffect, useReducer, type FC } from 'react';
+import { useReducer, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
@@ -32,14 +32,6 @@ export const SetupView: FC = () => {
 
   const [state, dispatch] = useReducer(reduceSetup, undefined, initSetup);
 
-  // Final couple locked in → seed the draft roster and head to mode select.
-  useEffect(() => {
-    if (state.step === 'done') {
-      setRoster(state.teams as TRoster);
-      navigate({ to: '/mode' });
-    }
-  }, [state.step, state.teams, setRoster, navigate]);
-
   const handleBack = () => {
     sound.play('sfx.back');
     if (state.step === 'count') {
@@ -64,6 +56,11 @@ export const SetupView: FC = () => {
     const next = reduceSetup(state, { type: 'confirmNames' });
     sound.play(next.error ? 'sfx.error' : 'sfx.select');
     dispatch({ type: 'confirmNames' });
+    // Final couple locked in → seed the draft roster and head to mode select.
+    if (next.step === 'done') {
+      setRoster(next.teams as TRoster);
+      navigate({ to: '/mode' });
+    }
   };
   const handlePassConfirm = () => {
     sound.play('sfx.tap');
