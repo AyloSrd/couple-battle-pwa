@@ -1,9 +1,24 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { warmMediaCache } from './warmMediaCache';
 
 describe('warmMediaCache', () => {
+  const controlled = (controller: object | null) =>
+    Object.defineProperty(navigator, 'serviceWorker', { value: { controller }, configurable: true });
+
+  beforeEach(() => {
+    controlled({});
+  });
   afterEach(() => {
     vi.unstubAllGlobals();
+    Reflect.deleteProperty(navigator, 'serviceWorker');
+  });
+
+  it('does nothing while no service worker controls the page (no double download)', async () => {
+    controlled(null);
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    await warmMediaCache('/splash/ninou.mp4');
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('issues one full GET (no Range header) and drains the body', async () => {
