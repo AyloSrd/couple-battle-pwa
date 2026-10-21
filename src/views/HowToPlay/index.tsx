@@ -2,7 +2,7 @@ import { useRef, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { Screen, PixelPanel, PixelButton, ProgressDots, ModeIcon, type TModeIconMode } from '@/shared/Chrome';
+import { Screen, PixelPanel, ProgressDots, ModeIcon, type TModeIconMode, BackButton } from '@/shared/Chrome';
 
 type TCard = { titleKey: TStringKey; bodyKey: TStringKey; mode: TModeIconMode };
 
@@ -34,9 +34,7 @@ export const HowToPlayView: FC = () => {
   return (
     <Screen>
       <div className="cb-topbar">
-        <PixelButton variant="ghost" block={false} onClick={handleBack}>
-          ← {t('common.back')}
-        </PixelButton>
+        <BackButton label={t('common.back')} onClick={handleBack} />
         <ProgressDots total={CARDS.length} current={index} />
       </div>
       <h1 className="cb-title">{t('howto.title')}</h1>

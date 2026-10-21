@@ -1,120 +1,145 @@
-/* Couple Battle — design tokens ("Paper" system on a "Pastel sunburst" background).
-   Source: handoff/design/v2/tokens.css — palette & typefaces from the Master
-   Brand & Style Guide v1.0; red / yellow / green re-tuned to pastels, every
-   violet untouched. Components reference --cb-* tokens ONLY. */
+/* Couple Battle — design tokens, "Colored" system (refont v3, from the Oct 7 keyart):
+   deep violet stage with light rays, cream cards with a chunky dark-violet outline,
+   glossy gold CTAs. Components reference --cb-* tokens ONLY.
+
+   Text colours are SCOPED: the page sets the "on stage" set (white), and every
+   surface (card, tile, row, field, sheet) re-declares the "on surface" set
+   (eggplant) — see chrome.css. A component just uses --cb-text / --cb-text-muted. */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  /* ---------- brand palette (style guide) ---------- */
-  --cb-eggplant: #300147;
+  /* ---------- brand palette ---------- */
+  --cb-violet-950: #14054A;          /* outlines, lips, darkest stage */
+  --cb-violet-900: #1E0868;
+  --cb-violet-800: #2A0B8F;
+  --cb-violet-700: #3712B8;
+  --cb-violet-600: #5420E8;
+  --cb-violet-500: #6E3BFF;
+  --cb-violet-200: #DCCBFF;
+  --cb-violet-100: #EEE6FF;
+  --cb-eggplant: #2B0A5C;            /* text on cream / gold */
   --cb-ink: #24152C;
-  --cb-canvas: #FFF8F7;
-  --cb-soft-white: #FCEDEF;
-  --cb-violet: #611EFA;
-  --cb-violet-edge: #3F0DB5;      /* pressable bottom lip of violet buttons */
-  --cb-pink: #F21CA6;
-  --cb-pink-deep: #C4137F;
-  --cb-gold: #FDD724;               /* brand palette only — no component uses gold/orange/coral */
-  --cb-orange: #FCA114;
-  --cb-coral: #F64559;
-  --cb-coral-edge: #C22A3D;
-  --cb-ribbon: #C64AE2;
+  --cb-cream: #FFF7EA;
+  --cb-pink: #FF3FA4;
+  --cb-pink-deep: #D9127F;
+  --cb-gold-hi: #FFE36B;
+  --cb-gold: #FFC21F;
+  --cb-gold-lo: #FF9A0F;
+  --cb-mint-hi: #A8F5CF;
+  --cb-mint: #4FD99A;
+  --cb-rose-hi: #FFC2D3;
+  --cb-rose: #FF6F98;
 
-  /* ---------- semantic (light "paper" surfaces) ---------- */
-  --cb-bg: #FFF6D9;                       /* solid fallback colour (butter-cream) */
-  /* Pastel backgrounds: lavender → butter-cream → blush-pink, never dark.
-     `calm` for every Paper screen; `burst` (sunburst rays) for the big beats.
-     TODO(art): when bg-calm.webp / bg-burst.webp are delivered, copy them to
-     src/assets/art/ and prepend `url('../assets/art/bg-….webp') center / cover no-repeat`
-     as the top layer of the matching token below. */
-  --cb-bg-calm: linear-gradient(100deg, #E9DDFB 0%, #FFF6D9 50%, #FBD9E6 100%);
+  /* ---------- stage (page background) ---------- */
+  --cb-bg: var(--cb-violet-800);     /* solid fallback */
+  /* calm: violet bloom + faint rays — every screen */
+  --cb-bg-calm:
+    repeating-conic-gradient(from 0deg at 50% 38%, rgba(255, 255, 255, .045) 0deg 6deg, transparent 6deg 15deg),
+    radial-gradient(120% 75% at 50% 38%, #5A24F0 0%, #3712B8 48%, #1E0868 100%);
+  /* burst: stronger rays + pink core — the big beats (countdown, finale, scores, results) */
   --cb-bg-burst:
-    repeating-conic-gradient(from 0deg at 50% 45dvh, rgba(255, 255, 255, .35) 0deg 6deg, transparent 6deg 15deg),
-    linear-gradient(100deg, #D9C8F7, #FFF6D9, #F8C6D8);
-  --cb-surface: #FFFFFF;
-  --cb-surface-sunk: #F4EEF6;
-  --cb-surface-lip: rgba(48, 1, 71, .10);  /* the 2px "paper lip" under cards */
-  --cb-text: var(--cb-eggplant);
-  --cb-text-body: var(--cb-ink);
-  --cb-text-muted: #5E4E66;               /* ≥4.5:1 on every background stop */
+    radial-gradient(42% 30% at 50% 40%, rgba(255, 63, 164, .30) 0%, transparent 100%),
+    repeating-conic-gradient(from 0deg at 50% 40%, rgba(255, 255, 255, .08) 0deg 6deg, transparent 6deg 15deg),
+    radial-gradient(120% 75% at 50% 40%, #6230F5 0%, #3712B8 50%, #1E0868 100%);
+
+  /* ---------- text, on stage (default) and on surfaces (scoped in chrome.css) ---------- */
+  --cb-on-stage: #FFFFFF;
+  --cb-on-stage-muted: rgba(255, 255, 255, .84);   /* ≥ 4.5:1 on every stage stop */
+  --cb-on-stage-border: rgba(255, 255, 255, .30);
+  --cb-on-surface: var(--cb-eggplant);
+  --cb-on-surface-body: var(--cb-ink);
+  --cb-on-surface-muted: #5E4E66;                  /* ≥ 6:1 on cream */
+  --cb-on-surface-border: rgba(42, 11, 143, .18);
+
+  --cb-text: var(--cb-on-stage);
+  --cb-text-body: var(--cb-on-stage);
+  --cb-text-muted: var(--cb-on-stage-muted);
+  --cb-border: var(--cb-on-stage-border);
   --cb-text-on-color: #FFFFFF;
-  --cb-border: rgba(48, 1, 71, .14);
-  --cb-focus: var(--cb-pink-deep);        /* ≥3.6:1 on every background stop */
+  --cb-title-shadow: 0 3px 0 var(--cb-violet-950), 0 6px 14px rgba(20, 5, 74, .45);
+  --cb-focus: var(--cb-gold-hi);                   /* re-scoped to violet on surfaces */
 
-  --cb-action: var(--cb-violet);
-  --cb-action-edge: var(--cb-violet-edge);
-  --cb-p1: var(--cb-violet);              /* player 1 / partner A colour */
-  --cb-p1-edge: var(--cb-violet-edge);
-  --cb-p2: #FFB3C1;                       /* player 2 / partner B colour (also "Non") */
-  --cb-p2-edge: #F28CA0;
+  /* ---------- surfaces ---------- */
+  --cb-surface: var(--cb-cream);
+  --cb-surface-sunk: var(--cb-violet-100);
+  --cb-outline: var(--cb-violet-950);              /* the chunky outline on cards & buttons */
+  --cb-outline-w: 3px;
+
+  /* ---------- actions ---------- */
+  --cb-action-grad: linear-gradient(180deg, var(--cb-gold-hi) 0%, var(--cb-gold) 55%, var(--cb-gold-lo) 100%);
+  --cb-action-text: var(--cb-eggplant);
+  --cb-positive-grad: linear-gradient(180deg, var(--cb-mint-hi) 0%, var(--cb-mint) 100%);
+  --cb-positive-text: #0B3D27;
+  --cb-negative-grad: linear-gradient(180deg, var(--cb-rose-hi) 0%, var(--cb-rose) 100%);
+  --cb-negative-text: #4A0620;
+  --cb-p1: var(--cb-violet-500);                   /* player 1 / partner A */
+  --cb-p1-text: #FFFFFF;
+  --cb-p2: #FF8CC0;                                /* player 2 / partner B (also "Non") */
   --cb-p2-text: var(--cb-eggplant);
-  --cb-win: #FFE7A0;
-  --cb-win-edge: #F2C95E;
-  --cb-win-grad: linear-gradient(95deg, #FFF3CC, #FFE7A0);
-  --cb-points: var(--cb-violet);          /* "+2" (a pastel can't pass 3:1 as text) */
+  --cb-win-grad: var(--cb-action-grad);
+  --cb-points: var(--cb-gold);
 
-  --cb-chip-bg: #FDE4F3;
-  --cb-chip-text: var(--cb-pink-deep);
+  --cb-chip-bg: var(--cb-pink);
+  --cb-chip-text: #FFFFFF;
 
-  --cb-success: #0C5F41;                  /* text only — ≥4.97:1 on every background stop (#0F6B4A was 4.21 on the burst lavender) */
-  --cb-success-bg: #CFF5E3;
-  --cb-success-edge: #9EDFC1;
-  --cb-warning: #A65A00;
-  --cb-error: #9E1F35;                    /* text only */
-  --cb-error-bg: #FFD6DC;
-  --cb-error-edge: #F2A7B3;
-  --cb-disabled: #A79EAA;
-  --cb-disabled-edge: #8A8190;
-  --cb-team-art-selected: #EFE8FF;        /* picked team tile's art well */
+  /* verdict text: on stage pastel, on surface dark (scoped) */
+  --cb-success: var(--cb-mint-hi);
+  --cb-error: var(--cb-rose-hi);
+  --cb-success-bg: var(--cb-mint-hi);
+  --cb-success-ink: #0B5E3C;
+  --cb-error-bg: var(--cb-rose-hi);
+  --cb-error-ink: #9E1F35;
+  --cb-disabled: #8F86A8;
+  --cb-disabled-text: #F1EEF8;
+  --cb-team-art-bg: linear-gradient(180deg, var(--cb-violet-100) 0%, var(--cb-violet-200) 100%);
 
-  /* soft white halo for big numerals / GO / points on the sunburst */
-  --cb-glow-light: 0 0 24px rgba(255, 255, 255, .9), 0 0 6px rgba(255, 255, 255, .9);
+  --cb-glow-light: 0 0 24px rgba(255, 63, 164, .55), 0 3px 0 var(--cb-violet-950);
 
   /* ---------- type ---------- */
   --cb-font-display: 'Bricolage Grotesque', 'SF Pro Display', Roboto, Arial, sans-serif;
   --cb-font-ui: 'Inter', 'SF Pro Text', Roboto, Arial, sans-serif;
-  /* scale — size / line-height / weight (style guide type scale) */
-  --cb-fs-display-xl: 48px;  --cb-lh-display-xl: 52px;   /* 800 · final result */
-  --cb-fs-display-lg: 40px;  --cb-lh-display-lg: 44px;   /* 800 · score, "+2" */
-  --cb-fs-h1: 32px;          --cb-lh-h1: 38px;           /* 700 · screen title */
-  --cb-fs-h2: 24px;          --cb-lh-h2: 30px;           /* 700 · question text min */
-  --cb-fs-question: 26px;    --cb-lh-question: 31px;     /* 700 · question card (readable across a table) */
-  --cb-fs-body-lg: 18px;     --cb-lh-body-lg: 26px;      /* 500 */
-  --cb-fs-body: 16px;        --cb-lh-body: 24px;         /* 400 */
-  --cb-fs-label: 15px;       --cb-lh-label: 18px;        /* 700 · buttons */
-  --cb-fs-caption: 13px;     --cb-lh-caption: 18px;      /* 500 */
-  --cb-fs-overline: 11px;                                /* 700 · chips, uppercase, +0.09em */
-  --cb-fs-numeral: clamp(120px, 40vw, 170px);           /* 800 · countdown 3·2·1 */
+  /* scale — bigger than v2: read across a table, one-handed */
+  --cb-fs-display-xl: 52px;  --cb-lh-display-xl: 56px;   /* 800 · final result */
+  --cb-fs-display-lg: 44px;  --cb-lh-display-lg: 48px;   /* 800 · score, "+2" */
+  --cb-fs-h1: 36px;          --cb-lh-h1: 40px;           /* 800 · screen title */
+  --cb-fs-h2: 28px;          --cb-lh-h2: 32px;           /* 800 */
+  --cb-fs-question: 30px;    --cb-lh-question: 36px;     /* 800 · question card */
+  --cb-fs-body-lg: 20px;     --cb-lh-body-lg: 28px;      /* 600 */
+  --cb-fs-body: 17px;        --cb-lh-body: 25px;         /* 400 */
+  --cb-fs-label: 20px;       --cb-lh-label: 24px;        /* 800 display · buttons */
+  --cb-fs-caption: 14px;     --cb-lh-caption: 20px;      /* 600 */
+  --cb-fs-overline: 13px;                                /* 800 · chips, uppercase */
+  --cb-fs-numeral: clamp(140px, 46vw, 200px);           /* 800 · countdown 3·2·1 */
   --cb-tracking-display: -0.02em;
-  --cb-tracking-overline: 0.09em;
+  --cb-tracking-overline: 0.08em;
 
   /* ---------- space (4px base) ---------- */
   --cb-s1: 4px;  --cb-s2: 8px;  --cb-s3: 12px; --cb-s4: 16px;
   --cb-s5: 20px; --cb-s6: 24px; --cb-s7: 32px; --cb-s8: 48px;
-  --cb-page-x: 20px;            /* horizontal page padding (+ safe-area inset) */
+  --cb-page-x: 16px;            /* horizontal page padding (+ safe-area inset) */
 
   /* ---------- radius ---------- */
-  --cb-r-sm: 12px;   /* chips inside cards, avatars tiles */
-  --cb-r-md: 16px;   /* buttons, rows */
-  --cb-r-lg: 24px;   /* cards */
-  --cb-r-xl: 32px;   /* sheets, hero panels */
+  --cb-r-sm: 12px;
+  --cb-r-md: 18px;
+  --cb-r-lg: 24px;
+  --cb-r-xl: 32px;
   --cb-r-pill: 999px;
 
-  /* ---------- elevation (coloured, never heavy black) ---------- */
+  /* ---------- elevation (outline + hard lip + soft drop) ---------- */
   --cb-e0: none;
-  --cb-e1: 0 2px 0 var(--cb-surface-lip), 0 4px 10px rgba(48, 1, 71, .05);
-  --cb-e2: 0 2px 0 var(--cb-surface-lip), 0 10px 24px rgba(48, 1, 71, .07);
-  --cb-e3: 0 20px 44px rgba(48, 1, 71, .22), 0 2px 6px rgba(48, 1, 71, .10);
-  --cb-lip: 4px;              /* pressable button bottom edge depth */
+  --cb-e1: 0 3px 0 var(--cb-outline), 0 6px 12px rgba(20, 5, 74, .30);
+  --cb-e2: 0 5px 0 var(--cb-outline), 0 12px 24px rgba(20, 5, 74, .38);
+  --cb-e3: 0 24px 48px rgba(10, 2, 40, .55);
+  --cb-lip: 5px;              /* pressable button bottom edge depth */
 
   /* ---------- sizes ---------- */
-  --cb-h-btn: 56px;           /* primary */
-  --cb-h-btn-sec: 52px;
-  --cb-h-answer: 66px;        /* answer / name buttons (64–88) */
-  --cb-h-field: 56px;
-  --cb-h-chip: 32px;
-  --cb-target-min: 48px;
+  --cb-h-btn: 64px;           /* primary */
+  --cb-h-btn-sec: 56px;
+  --cb-h-answer: 76px;        /* answer / name buttons */
+  --cb-h-field: 60px;
+  --cb-h-chip: 34px;
+  --cb-target-min: 52px;
 
   /* ---------- motion ---------- */
   --cb-ease-out: cubic-bezier(.2, .8, .2, 1);

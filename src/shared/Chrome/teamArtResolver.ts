@@ -1,29 +1,53 @@
 /**
  * Team character art, resolved BY TEAM ID from whatever files exist under
- * src/assets/art/. Naming contract: `team-{id}-idle-{512|768}.webp`. Adding a
- * couple is a file drop — no code change. Teams without art fall back to the
- * placeholder tile (tinted square + team initial) in the components.
+ * src/assets/art/. Naming contract:
+ *   portrait (waist-up, square)  `team-{id}-{256|384}.webp`  → tiles, avatars
+ *   full body (2:3)              `team-{id}-full-512.webp`   → the hero slot
+ * Adding a couple is a file drop — no code change. Teams without art fall back to
+ * the placeholder tile (tinted square + team initial) in the components.
  */
-const FILES = import.meta.glob('/src/assets/art/team-*-idle-*.webp', {
+const FILES = import.meta.glob('/src/assets/art/team-*.webp', {
   eager: true,
   query: '?url',
   import: 'default',
 }) as Record<string, string>;
 
-const ART = new Map<string, string>(); // "id:size" → url
+export type TTeamArtKind = 'portrait' | 'full';
+export type TTeamArtSize = 256 | 384 | 512;
+
+const ART = new Map<string, string>(); // "id:kind:size" → url
 for (const [path, url] of Object.entries(FILES)) {
-  const m = /team-([a-z0-9]+)-idle-(\d+)\.webp$/.exec(path);
-  if (m) ART.set(`${m[1]}:${m[2]}`, url);
+  const full = /team-([a-z0-9]+)-full-(\d+)\.webp$/.exec(path);
+  if (full) {
+    ART.set(`${full[1]}:full:${full[2]}`, url);
+    continue;
+  }
+  const portrait = /team-([a-z0-9]+)-(\d+)\.webp$/.exec(path);
+  if (portrait) ART.set(`${portrait[1]}:portrait:${portrait[2]}`, url);
 }
 
-export type TTeamArtSize = 512 | 768;
+const SIZES: Record<TTeamArtKind, readonly TTeamArtSize[]> = { portrait: [256, 384], full: [512] };
 
-/** URL of a team's idle render at `size`, the other size if only that exists, else undefined. */
-export function teamArtUrl(teamId: string, size: TTeamArtSize): string | undefined {
-  return ART.get(`${teamId}:${size}`) ?? ART.get(`${teamId}:${size === 768 ? 512 : 768}`);
+/** URL of a team's `kind` render at `size`, else the nearest shipped size, else undefined. */
+export function teamArtUrl(teamId: string, kind: TTeamArtKind, size?: TTeamArtSize): string | undefined {
+  const sizes = SIZES[kind];
+  const wanted = size ?? sizes[sizes.length - 1];
+  const exact = ART.get(`${teamId}:${kind}:${wanted}`);
+  if (exact) return exact;
+  for (const s of sizes) {
+    const url = ART.get(`${teamId}:${kind}:${s}`);
+    if (url) return url;
+  }
+  return undefined;
 }
 
-/** Ids that have any art shipped (for tests / preloading). */
+/** Ids that have a portrait shipped (for tests / preloading). */
 export function teamsWithArt(): string[] {
-  return Array.from(new Set(Array.from(ART.keys()).map((k) => k.split(':')[0] ?? '')));
+  return Array.from(
+    new Set(
+      Array.from(ART.keys())
+        .filter((k) => k.includes(':portrait:'))
+        .map((k) => k.split(':')[0] ?? ''),
+    ),
+  );
 }

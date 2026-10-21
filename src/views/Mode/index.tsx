@@ -4,7 +4,7 @@ import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { useDraftGame } from '@/shared/session';
 import { Mode, type TMode } from '@/shared/game';
-import { Screen, PixelButton, ProgressDots, ModeIcon } from '@/shared/Chrome';
+import { Screen, ProgressDots, ModeIcon, BackButton } from '@/shared/Chrome';
 
 type TModeCardDef = {
   mode: TMode;
@@ -54,9 +54,7 @@ export const ModeView: FC = () => {
   return (
     <Screen>
       <div className="cb-topbar">
-        <PixelButton variant="ghost" block={false} onClick={handleBack}>
-          ← {t('common.back')}
-        </PixelButton>
+        <BackButton label={t('common.back')} onClick={handleBack} />
         <ProgressDots total={3} current={1} />
       </div>
       <h1 className="cb-title" style={{ marginBottom: 'var(--cb-s2)' }}>

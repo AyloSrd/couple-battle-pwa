@@ -16,6 +16,7 @@ const CSP = [
   "script-src 'self'",
   "style-src 'self'",
   "img-src 'self'",
+  "media-src 'self'",
   "font-src 'self'",
   "connect-src 'self'",
   "manifest-src 'self'",
@@ -64,7 +65,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Precache everything — the game must be 100% playable offline after first load.
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico,woff2,json}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico,woff2,json,mp4}'],
         navigateFallback: `${BASE}index.html`,
       },
       includeAssets: ['favicon-32.png', 'apple-touch-icon.png'],
@@ -75,8 +76,8 @@ export default defineConfig({
         lang: 'fr',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#FFF6D9',
-        theme_color: '#FFF6D9',
+        background_color: '#2A0B8F',
+        theme_color: '#2A0B8F',
         icons: [
           { src: 'pwa-icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-icons/icon-512.png', sizes: '512x512', type: 'image/png' },

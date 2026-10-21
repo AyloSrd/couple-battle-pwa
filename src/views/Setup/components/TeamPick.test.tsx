@@ -37,7 +37,7 @@ describe('V-Setup Step A — team grid', () => {
       const tile = screen.getByRole('button', { name: id });
       const name = fr[`team.${id}`];
       expect(tile).toHaveTextContent(name);
-      const art = teamArtUrl(id, 512);
+      const art = teamArtUrl(id, 'portrait', 256);
       const img = tile.querySelector('.cb-team-art img');
       const placeholder = tile.querySelector('.cb-team-placeholder');
       if (art) {
@@ -48,8 +48,8 @@ describe('V-Setup Step A — team grid', () => {
         expect(placeholder?.textContent, `${id} placeholder`).toBe(name.charAt(0).toUpperCase());
       }
     }
-    // the only delivered art so far is the otters — resolved by id, no code naming it
-    expect(teamArtUrl('otters', 512)).toContain('team-otters-idle-512');
+    // art is resolved by id, no code naming a team
+    expect(teamArtUrl('otters', 'portrait', 256)).toContain('team-otters-256');
   });
 
   it('team-name labels are the Inter label class (accents intact: É, not a display-font glyph)', () => {

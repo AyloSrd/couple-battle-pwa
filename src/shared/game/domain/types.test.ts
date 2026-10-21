@@ -28,8 +28,10 @@ describe('team registry (AVATAR_IDS)', () => {
 
   it('every team resolves to character art by id or to the placeholder (never a missing file)', () => {
     for (const id of AVATAR_IDS) {
-      const art = teamArtUrl(id, 512);
-      if (art) expect(art).toMatch(new RegExp(`team-${id}-idle-(512|768)\\.webp`));
+      const art = teamArtUrl(id, 'portrait');
+      if (art) expect(art).toMatch(new RegExp(`team-${id}-(256|384)\\.webp`));
+      const full = teamArtUrl(id, 'full');
+      if (full) expect(full).toMatch(new RegExp(`team-${id}-full-512\\.webp`));
       else expect(art).toBeUndefined(); // → placeholder tile (tinted square + initial)
     }
     // every shipped render belongs to a registry team (no orphan art)
@@ -41,7 +43,8 @@ describe('team registry (AVATAR_IDS)', () => {
       expect((AVATAR_IDS as readonly string[]).includes(id)).toBe(false);
       expect(fr).not.toHaveProperty(`team.${id}`);
       expect(en).not.toHaveProperty(`team.${id}`);
-      expect(teamArtUrl(id, 512)).toBeUndefined();
+      expect(teamArtUrl(id, 'portrait')).toBeUndefined();
+      expect(teamArtUrl(id, 'full')).toBeUndefined();
       expect(ZAvatarIdSchema.safeParse(id).success).toBe(false);
     }
   });

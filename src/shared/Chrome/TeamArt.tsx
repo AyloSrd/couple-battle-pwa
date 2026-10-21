@@ -8,10 +8,10 @@ type TTeamArtProps = {
   /** Localized team name — its initial is the placeholder when no art exists. */
   label: string;
   /**
-   * tile   — square art area inside a setup tile (512)
-   * avatar — 40px face-crop for score rows / chips (512, object-position on the face)
-   * avatarLg — 96px face-crop for gates / handoffs
-   * hero   — the big character slot: Home, winner, active finale team (768)
+   * tile     — square portrait inside a setup tile (256 / 384 @2x)
+   * avatar   — 44px face-crop of the portrait for score rows / chips (256)
+   * avatarLg — 112px face-crop for gates / handoffs (256)
+   * hero     — the big full-body slot: winner, active finale team (512, 2:3)
    */
   variant: 'tile' | 'avatar' | 'avatarLg' | 'hero';
   className?: string;
@@ -27,7 +27,8 @@ export const TeamArt: FC<TTeamArtProps> = ({ teamId, label, variant, className }
   const initial = initialOf(label, teamId);
 
   if (variant === 'hero') {
-    const url = teamArtUrl(teamId, 768);
+    // full body (2:3); a team with only a portrait still gets its portrait in the slot
+    const url = teamArtUrl(teamId, 'full') ?? teamArtUrl(teamId, 'portrait', 384);
     if (!url) {
       return (
         <div className={['cb-char-placeholder', className ?? ''].filter(Boolean).join(' ')} aria-hidden="true">
@@ -35,34 +36,35 @@ export const TeamArt: FC<TTeamArtProps> = ({ teamId, label, variant, className }
         </div>
       );
     }
-    const small = teamArtUrl(teamId, 512);
-    return (
-      <img
-        className={['cb-char', className ?? ''].filter(Boolean).join(' ')}
-        src={url}
-        {...(small && small !== url ? { srcSet: `${small} 1x, ${url} 2x` } : {})}
-        alt=""
-        draggable={false}
-      />
-    );
+    return <img className={['cb-char', className ?? ''].filter(Boolean).join(' ')} src={url} alt="" draggable={false} />;
   }
 
-  const url = teamArtUrl(teamId, 512);
+  const small = teamArtUrl(teamId, 'portrait', 256);
   if (variant === 'tile') {
+    const large = teamArtUrl(teamId, 'portrait', 384);
     return (
       <span className={['cb-team-art', className ?? ''].filter(Boolean).join(' ')}>
-        {url ? <img src={url} alt="" draggable={false} /> : <span className="cb-team-placeholder">{initial}</span>}
+        {small ? (
+          <img
+            src={small}
+            {...(large && large !== small ? { srcSet: `${small} 1x, ${large} 2x` } : {})}
+            alt=""
+            draggable={false}
+          />
+        ) : (
+          <span className="cb-team-placeholder">{initial}</span>
+        )}
       </span>
     );
   }
 
-  // avatar / avatarLg
+  // avatar / avatarLg — portrait, face crop
   return (
     <span
       className={['cb-avatar', variant === 'avatarLg' ? 'cb-avatar--lg' : '', className ?? ''].filter(Boolean).join(' ')}
       aria-hidden="true"
     >
-      {url ? <img src={url} alt="" draggable={false} /> : initial}
+      {small ? <img src={small} alt="" draggable={false} /> : initial}
     </span>
   );
 };
