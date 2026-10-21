@@ -74,9 +74,12 @@ export default defineConfig({
             urlPattern: ({ url }) => url.pathname.endsWith('.mp4'),
             handler: 'CacheFirst',
             options: {
+              // Replacing a clip? Give it a new file name: entries are keyed by URL.
               cacheName: 'cb-media',
               rangeRequests: true,
               cacheableResponse: { statuses: [200] },
+              // Bounded: a stale or orphaned clip is evicted, never kept forever.
+              expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
         ],
