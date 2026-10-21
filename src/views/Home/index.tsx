@@ -1,12 +1,14 @@
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useT, useLang, type TStringKey } from '@/shared/i18n';
+import { useT, useLang } from '@/shared/i18n';
 import { useGetSave, usePutSave } from '@/shared/save';
 import { useSoundApi } from '@/shared/sound';
 import { useDraftGame } from '@/shared/session';
 import { useInstallPrompt } from '@/shared/pwa';
-import { AVATAR_IDS } from '@/shared/game';
-import { Screen, PixelPanel, PixelButton, ChipButton, Logo, TeamArt, teamsWithArt } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, ChipButton, Logo } from '@/shared/Chrome';
+import chars600 from '@/assets/art/chars-home-600.webp';
+import chars900 from '@/assets/art/chars-home-900.webp';
+import './view.css';
 
 const IOS_HINT_KEY = 'cb-ios-hint-seen';
 
@@ -18,11 +20,13 @@ function readIosHintSeen(): boolean {
   }
 }
 
-/** A team that has character art, for the Home hero (first delivered = otters). */
-function pickHeroTeam(): string | null {
-  const withArt = teamsWithArt().filter((id) => (AVATAR_IDS as readonly string[]).includes(id));
-  return withArt[Math.floor(Math.random() * withArt.length)] ?? null;
-}
+/** Settings gear — inline so Home needs no extra image file. Decorative: the button carries the label. */
+const GearIcon: FC = () => (
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+);
 
 export const HomeView: FC = () => {
   const t = useT();
@@ -40,8 +44,6 @@ export const HomeView: FC = () => {
   const [iosHintSeen] = useState(readIosHintSeen);
   const showAndroidInstall = platform === 'android' && !installDismissed;
   const showIosInstall = platform === 'ios' && !installDismissed && !iosHintSeen;
-
-  const [hero] = useState(pickHeroTeam);
 
   // Menu music while on Home (only once audio is on); stops when leaving.
   const soundOn = settingsQuery.data?.sound ?? false;
@@ -95,7 +97,7 @@ export const HomeView: FC = () => {
   };
 
   return (
-    <Screen>
+    <Screen className="cb-v-home">
       <div className="cb-topbar">
         <span />
         <ChipButton onClick={handleToggleLang} aria-label={t('settings.language')}>
@@ -103,20 +105,25 @@ export const HomeView: FC = () => {
         </ChipButton>
       </div>
 
-      <div className="cb-grow" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18 }}>
-        <Logo alt={t('app.name')} />
-        <p className="cb-muted cb-center" style={{ margin: 0 }}>
-          {t('app.tagline')}
-        </p>
-        {hero && (
-          <TeamArt teamId={hero} label={t(`team.${hero}` as TStringKey)} variant="hero" className="cb-home-hero" />
-        )}
+      <Logo alt={t('app.name')} className="cb-v-home-logo" />
+
+      <div className="cb-v-home-stage">
+        <img
+          className="cb-v-home-chars"
+          src={chars600}
+          srcSet={`${chars600} 600w, ${chars900} 900w`}
+          sizes="(min-width: 480px) 480px, 100vw"
+          width={600}
+          height={400}
+          alt=""
+          draggable={false}
+        />
       </div>
 
       {hasResume && (
-        <PixelPanel className="cb-stack">
+        <PixelPanel className="cb-stack cb-v-home-panel">
           <strong className="cb-h2">{t('common.resume.title')}</strong>
-          <p style={{ margin: 0 }}>{t('common.resume.body')}</p>
+          <p>{t('common.resume.body')}</p>
           <PixelButton onClick={handleResume}>{t('common.resume.yes')}</PixelButton>
           <PixelButton variant="ghost" onClick={handleDiscard}>
             {t('common.resume.no')}
@@ -124,16 +131,25 @@ export const HomeView: FC = () => {
         </PixelPanel>
       )}
 
-      <PixelButton onClick={handlePlay}>{t('home.play')}</PixelButton>
-      <PixelButton variant="ghost" onClick={handleHowto}>
-        {t('home.howto')}
-      </PixelButton>
-      <PixelButton variant="ghost" onClick={handleSettings}>
-        {t('home.settings')}
+      <PixelButton className="cb-v-home-play" onClick={handlePlay}>
+        {t('home.play')}
       </PixelButton>
 
+      <div className="cb-v-home-links">
+        <button type="button" className="cb-v-home-howto" onClick={handleHowto}>
+          <span className="cb-v-home-round" aria-hidden="true">
+            ?
+          </span>
+          <span className="cb-v-home-howto-label">{t('home.howto')}</span>
+        </button>
+        <span className="cb-v-home-divider" aria-hidden="true" />
+        <button type="button" className="cb-v-home-round" aria-label={t('home.settings')} onClick={handleSettings}>
+          <GearIcon />
+        </button>
+      </div>
+
       {showAndroidInstall && (
-        <PixelPanel className="cb-stack">
+        <PixelPanel className="cb-stack cb-v-home-panel">
           <PixelButton variant="secondary" onClick={handleInstall}>
             {t('home.install.android')}
           </PixelButton>
@@ -143,10 +159,8 @@ export const HomeView: FC = () => {
         </PixelPanel>
       )}
       {showIosInstall && (
-        <PixelPanel className="cb-stack">
-          <p className="cb-muted" style={{ margin: 0 }}>
-            {t('home.install.ios')}
-          </p>
+        <PixelPanel className="cb-stack cb-v-home-panel">
+          <p className="cb-muted">{t('home.install.ios')}</p>
           <PixelButton variant="ghost" onClick={handleDismissInstall}>
             {t('home.install.dismiss')}
           </PixelButton>
