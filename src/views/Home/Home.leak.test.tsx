@@ -11,7 +11,7 @@ import {
 } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LangProvider } from '@/shared/i18n';
-import { SaveApiProvider } from '@/shared/save';
+import { SAVE_DEFAULTS, SaveApiProvider } from '@/shared/save';
 import { createSaveMemoryApi } from '@/shared/save/api/memory';
 import { SoundApiProvider } from '@/shared/sound';
 import { createSoundNoopApi } from '@/shared/sound/api/noop';
@@ -23,7 +23,7 @@ function setup() {
   const sound = createSoundNoopApi();
   const music = vi.spyOn(sound, 'music');
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const saveApi = createSaveMemoryApi({ settings: { lang: 'en', sound: true } });
+  const saveApi = createSaveMemoryApi({ settings: { ...SAVE_DEFAULTS.settings, lang: 'en', sound: true } });
   const Root: FC = () => (
     <QueryClientProvider client={qc}>
       <SaveApiProvider api={saveApi}>
