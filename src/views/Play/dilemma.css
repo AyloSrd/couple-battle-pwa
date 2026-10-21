@@ -1,0 +1,216 @@
+/* Dilemma screens (V-DilemmaQuestion, V-Countdown, V-DilemmaResolve) — "Colored" skin, bigger and
+   fuller than v2 ("use the whole page, more gaming"). Every rule is scoped under `.cb-v-dilemma`
+   so nothing leaks to other screens; tokens only (rgba shadows aside). The text colours follow
+   the scoped tokens: white on the stage, eggplant inside .cb-card. */
+
+/* the view fills the Screen column (Question / Resolve render inside Play's shell) */
+.cb-v-dilemma--question,
+.cb-v-dilemma--resolve {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-s4);
+}
+
+/* ---------- V-DilemmaQuestion ---------- */
+/* (also on Resolve) up to 10 dots + the mode chip must clear the fixed pause button at 360 px */
+.cb-v-dilemma .cb-topbar .cb-chip {
+  flex: none;
+}
+.cb-v-dilemma .cb-dots {
+  gap: 4px;
+}
+.cb-v-dilemma .cb-dots i {
+  width: 8px;
+  height: 8px;
+}
+.cb-v-dilemma .cb-v-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cb-s4);
+  text-align: center;
+  padding: var(--cb-s6) var(--cb-s4);
+}
+.cb-v-dilemma .cb-v-mode-icon {
+  width: 88px;
+  height: 88px;
+  flex: none;
+  filter: drop-shadow(0 6px 10px rgba(20, 5, 74, 0.3));
+}
+.cb-v-dilemma .cb-question {
+  font-size: clamp(var(--cb-fs-question), 9vw, 40px);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+.cb-v-dilemma .cb-v-rule {
+  margin: 0;
+  text-align: center;
+  font: 700 var(--cb-fs-body) / var(--cb-lh-body) var(--cb-font-ui);
+  color: var(--cb-text);
+  text-shadow: 0 2px 0 var(--cb-violet-950);
+}
+.cb-v-dilemma .cb-v-cta {
+  min-height: 80px;
+  font-size: clamp(var(--cb-fs-label), 7.5vw, 30px);
+  letter-spacing: 0.02em;
+}
+@media (max-height: 640px) {
+  .cb-v-dilemma .cb-v-mode-icon {
+    display: none;
+  }
+}
+
+/* ---------- V-Countdown (burst stage) ---------- */
+.cb-v-dilemma--count .cb-glow {
+  width: min(480px, 130vw);
+  height: min(480px, 130vw);
+}
+.cb-v-dilemma .cb-v-count-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.cb-v-dilemma .cb-numeral {
+  font-size: clamp(190px, 64vw, 300px);
+}
+.cb-v-dilemma .cb-v-ring {
+  position: absolute;
+  inset: 4% -4%;
+  border-radius: 50%;
+  border: 6px solid var(--cb-gold);
+  box-shadow: 0 0 32px rgba(255, 194, 31, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  animation: cb-v-ring var(--cb-t-count) var(--cb-ease-out) both;
+}
+@keyframes cb-v-ring {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+.cb-v-dilemma .cb-v-get-ready {
+  margin: var(--cb-s6) 0 0;
+  font: 800 var(--cb-fs-body-lg) / var(--cb-lh-body-lg) var(--cb-font-display);
+  color: var(--cb-text);
+  text-shadow: var(--cb-title-shadow);
+  text-wrap: balance;
+}
+.cb-v-dilemma .cb-go {
+  font-size: clamp(var(--cb-fs-display-lg), 15vw, 72px);
+  line-height: 1;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cb-v-dilemma .cb-v-ring {
+    animation: none;
+    display: none;
+  }
+}
+
+/* ---------- V-DilemmaResolve ---------- */
+/* one row, never taller than one badge: with 3+ duos done it scrolls inside itself, not the page */
+.cb-v-dilemma .cb-v-confirmed {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--cb-s2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cb-v-dilemma .cb-v-confirmed::-webkit-scrollbar {
+  display: none;
+}
+.cb-v-dilemma .cb-v-confirmed > *,
+.cb-v-dilemma .cb-v-badges > * {
+  flex: none;
+  white-space: nowrap;
+}
+.cb-v-dilemma .cb-v-badges {
+  display: contents;
+}
+.cb-v-dilemma .cb-badge .cb-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+.cb-v-dilemma .cb-v-resolve-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cb-s3);
+  text-align: center;
+  padding: var(--cb-s5) var(--cb-s4);
+}
+/* the team hero takes whatever height is left (flex, never a fixed px height) */
+.cb-v-dilemma .cb-v-hero {
+  position: relative;
+  align-self: stretch;
+  flex: 1 1 88px; /* the minimum; grows into whatever height the screen has left */
+  min-height: 88px;
+  max-height: 300px;
+}
+.cb-v-dilemma .cb-v-hero .cb-char,
+.cb-v-dilemma .cb-v-hero .cb-char-placeholder {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+.cb-v-dilemma .cb-v-hero .cb-char {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+.cb-v-dilemma .cb-v-hero .cb-char-placeholder {
+  width: auto;
+  height: 100%;
+  font-size: 64px;
+}
+.cb-v-dilemma .cb-v-resolve-title {
+  font: 800 clamp(var(--cb-fs-h2), 8.5vw, var(--cb-fs-h1)) / 1.08 var(--cb-font-display);
+  letter-spacing: var(--cb-tracking-display);
+  color: var(--cb-text);
+  text-shadow: none;
+  overflow-wrap: anywhere;
+}
+.cb-v-dilemma .cb-v-resolve-q {
+  margin: 0;
+  color: var(--cb-text-body);
+  font: 600 var(--cb-fs-body) / var(--cb-lh-body) var(--cb-font-ui);
+  overflow-wrap: anywhere;
+}
+.cb-v-dilemma .cb-v-resolve-ask {
+  font-weight: 800;
+  color: var(--cb-text);
+}
+.cb-v-dilemma .cb-v-verdicts {
+  width: 100%;
+  margin-top: var(--cb-s2);
+}
+.cb-v-dilemma .cb-v-verdicts .cb-btn {
+  min-height: 84px;
+  padding: 0 var(--cb-s2);
+  font-size: var(--cb-fs-label);
+  line-height: 1.15;
+  text-align: center;
+}
+.cb-v-dilemma .cb-v-liar {
+  margin: 0;
+  text-align: center;
+}
+@media (max-height: 700px) {
+  .cb-v-dilemma .cb-v-verdicts .cb-btn {
+    min-height: 72px;
+  }
+  .cb-v-dilemma .cb-v-resolve-card {
+    padding-block: var(--cb-s4);
+    gap: var(--cb-s2);
+  }
+}

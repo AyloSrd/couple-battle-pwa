@@ -2,6 +2,7 @@ import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { Screen } from '@/shared/Chrome';
+import '../dilemma.css';
 
 function vibrate(pattern: number | number[]) {
   navigator.vibrate?.(pattern);
@@ -72,7 +73,7 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
   const digit = digits[phase] ?? '1';
 
   return (
-    <Screen burst center>
+    <Screen burst center className="cb-v-dilemma cb-v-dilemma--count">
       <div className="cb-glow" aria-hidden="true" />
       {isGo ? (
         <div className="cb-go cb-reveal-in" role="status">
@@ -80,13 +81,14 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
         </div>
       ) : (
         <>
-          {/* key re-mounts the numeral so the slam replays per tick */}
-          <div key={digit} className="cb-numeral is-in" aria-live="assertive">
-            {digit}
+          {/* key re-mounts the numeral (and its ring) so the slam replays per tick */}
+          <div key={digit} className="cb-v-count-stage">
+            <span className="cb-v-ring" aria-hidden="true" />
+            <div className="cb-numeral is-in" aria-live="assertive">
+              {digit}
+            </div>
           </div>
-          <p className="cb-muted" style={{ marginTop: 'var(--cb-s6)', fontSize: 'var(--cb-fs-label)' }}>
-            {t('dilemma.getready')}
-          </p>
+          <p className="cb-v-get-ready">{t('dilemma.getready')}</p>
         </>
       )}
     </Screen>
