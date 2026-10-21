@@ -124,6 +124,8 @@ export const fr = {
   "results.solo.newBest": "Nouveau record : {points} pts !",
   "results.solo.notBest": "{points} pts — votre record reste {best}.",
   "results.stat.synchro": "Meilleure synchro : {team}",
+  "results.tie": "🤝 Ex æquo : {teams} !",
+  "results.tie.sub": "Égalité parfaite à {score} pts — personne ne lâche.",
   "results.winner": "👑 {team} remporte la bataille !",
   "results.winner.sub": "{name1} & {name2}, duo légendaire.",
   "score.leader": "{team} mène la danse !",
