@@ -1,7 +1,9 @@
 /* Flash screens (PassPhone, SideGate, Handoff, SecretAnswers, GuessReveal, Judge) —
    "Colored" refont: everything bigger, the whole page used. Every rule is scoped under
    `.cb-v-flash` (the root of each of these views) so nothing leaks to other screens.
-   Tokens only (rgba shadows / glass aside). Heights flex with dvh — no fixed pixel heights. */
+   Tokens only (rgba shadows / glass aside). Cards and heroes flex to fill the page; the only
+   fixed pixel sizes are touch-target minimums (buttons, answers, field) and small chrome
+   (chip, dots). */
 
 .cb-v-flash {
   --flash-gap: var(--cb-s4);
