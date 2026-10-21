@@ -15,7 +15,7 @@ Palette and typefaces come from the Master Brand & Style Guide v1.0; the design 
 | V-FinalRapidFire (whole finale) | Setup (team pick, names, pass interstitial) |
 | V-Scoreboard (between rounds) | ModeSelect, DifficultySelect, ModeGuidelines |
 | V-FinalResults | PassPhone, sofa-side gates, SecretAnswers |
-| Phase 1.b studio splash | GuessReveal, Judge, DilemmaQuestion, DilemmaResolve, PauseSheet |
+| | GuessReveal, Judge, DilemmaQuestion, DilemmaResolve, PauseSheet |
 
 `bg-calm.webp` / `bg-burst.webp` art layers are **not delivered yet**. When they land: copy them to `src/assets/art/` and prepend `url('../assets/art/bg-….webp') center / cover no-repeat` as the top layer of the matching token — see the `TODO(art)` comment above `--cb-bg-calm` / `--cb-bg-burst` in `tokens.css`.
 
@@ -146,7 +146,7 @@ Success text is the one row that changed outcome for the shipped palette: darken
 
 | Path | Use |
 |---|---|
-| `web/logo-480.webp`, `web/logo-960.webp` | approved logo (extracted from the guide, never redrawn) — Home, Phase 1.b, Legal |
+| `web/logo-480.webp`, `web/logo-960.webp` | approved logo (extracted from the guide, never redrawn) — Home, Legal |
 | `web/mode-{flash,dilemma,ultime}-{128,256}.webp` | mode cards (256), chips and headers (128) |
 | `web/team-otters-idle-{512,768}.webp` | otters team art — team tile (512), hero/winner/finale (768) |
 | `source/` | full-size PNG masters — not shipped in the bundle |
@@ -159,7 +159,7 @@ Not produced yet (keep text-only for now, no icons): difficulty cards, theme tog
 
 ## 6. Retired
 
-Press Start 2P and IBM Plex Mono · all pixel sprites in `handoff/design/sprites/` (flags included — use text "FR / EN" chips) · the old `handoff/design/tokens.css` · the old `handoff/design/pwa-icons/`. The Spotlight stage remap and its dark tokens (`--cb-bg-stage`, `#150024`/`#22013A`, `--cb-glow-pink`/`--cb-glow-gold`) are retired too — `.cb-stage` / `[data-stage]` no longer exist, and nothing remaps `--cb-surface`, `--cb-text`, `--cb-success` etc. for a dark mode. The Ninou Games penguin splash stays as-is (it is the studio's own identity) and now sits on the Sunburst background instead of the Spotlight stage.
+Press Start 2P and IBM Plex Mono · all pixel sprites in `handoff/design/sprites/` (flags included — use text "FR / EN" chips) · the old `handoff/design/tokens.css` · the old `handoff/design/pwa-icons/`. The Spotlight stage remap and its dark tokens (`--cb-bg-stage`, `#150024`/`#22013A`, `--cb-glow-pink`/`--cb-glow-gold`) are retired too — `.cb-stage` / `[data-stage]` no longer exist, and nothing remaps `--cb-surface`, `--cb-text`, `--cb-success` etc. for a dark mode. The Ninou Games studio splash (and its penguin PNG) is retired as well: the app boots straight into Home.
 
 ## 7. Rules
 

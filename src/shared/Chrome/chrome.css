@@ -23,7 +23,7 @@
   isolation: isolate;
   animation: cb-screen-in var(--cb-t-screen) var(--cb-ease-out) both;
 }
-/* the big beats (countdown, rapid-fire, scoreboard, final, studio splash): sunburst rays */
+/* the big beats (countdown, rapid-fire, scoreboard, final): sunburst rays */
 .cb-page.cb-burst {
   background: var(--cb-bg-burst) var(--cb-bg);
 }
