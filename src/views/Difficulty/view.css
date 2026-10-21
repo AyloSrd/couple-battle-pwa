@@ -47,6 +47,7 @@
 /* chosen card: a check badge on top of the gold ring (shape, not colour alone) */
 .cb-v-difficulty .cb-diffs .cb-mode[aria-pressed='true']::after {
   content: '✓';
+  content: '✓' / ''; /* decorative: aria-pressed already says it */
   position: absolute;
   top: -10px;
   right: 14px;
@@ -55,9 +56,9 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--cb-pink);
-  border: 2px solid #FFFFFF;
-  color: var(--cb-text-on-color);
+  background: var(--cb-chip-bg);
+  border: 2px solid var(--cb-chip-text);
+  color: var(--cb-chip-text);
   font: 800 16px / 1 var(--cb-font-ui);
 }
 
@@ -119,6 +120,7 @@
 }
 .cb-v-difficulty .cb-theme-chip[aria-pressed='true']::after {
   content: '✓';
+  content: '✓' / ''; /* decorative: aria-pressed already says it */
   position: absolute;
   top: -8px;
   right: -4px;
@@ -127,9 +129,9 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--cb-pink);
-  border: 2px solid #FFFFFF;
-  color: var(--cb-text-on-color);
+  background: var(--cb-chip-bg);
+  border: 2px solid var(--cb-chip-text);
+  color: var(--cb-chip-text);
   font: 800 13px / 1 var(--cb-font-ui);
 }
 
@@ -138,6 +140,14 @@
   min-height: 72px;
   font-size: var(--cb-fs-h2);
   line-height: var(--cb-lh-label);
+}
+
+/* ---------- 360x800-class phones: one-line title so the Start button stays on the page ---------- */
+@media (max-height: 840px) {
+  .cb-v-difficulty .cb-title {
+    font-size: var(--cb-fs-h2);
+    line-height: var(--cb-lh-h2);
+  }
 }
 
 /* ---------- short phones (~640px): keep the whole list + the start button on one page ---------- */
