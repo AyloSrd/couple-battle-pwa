@@ -7,6 +7,7 @@ import {
   ULTIME_RAPID_PER_COUPLE,
   type TGameState,
 } from '../domain/machine';
+import '../results.css';
 
 type TRapidState = Extract<
   TGameState,
@@ -43,34 +44,30 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
 
   if (state.kind === 'rapidIntro') {
     return (
-      <>
+      <div className="cb-v-rapid">
         <div className="cb-glow" aria-hidden="true" />
-        <div className="cb-grow" style={{ display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-          <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s4)' }}>
-            <h1 className="cb-title">{t('final.intro.title')}</h1>
-            <p className="cb-body-lg" style={{ color: 'var(--cb-text-muted)' }}>
-              {t('final.intro.body')}
-            </p>
-          </div>
+        <div className="cb-rapid-stage">
+          <h1 className="cb-title cb-rapid-title">{t('final.intro.title')}</h1>
+          <PixelPanel className="cb-rapid-card">
+            <p>{t('final.intro.body')}</p>
+          </PixelPanel>
         </div>
         <PixelButton onClick={onNext}>{t('common.start')}</PixelButton>
-      </>
+      </div>
     );
   }
 
   if (state.kind === 'rapidTurn') {
     const team = state.roster[state.coupleIdx];
     return (
-      <>
-        <div className="cb-glow" aria-hidden="true" style={{ top: '34%' }} />
-        <div className="cb-grow" style={{ display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-          <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s4)', width: '100%' }}>
-            {team && <TeamArt teamId={team.avatarId} label={teamNameOf(state, t)} variant="hero" className="cb-reveal-in" />}
-            <h1 className="cb-title">{t('final.turn', { team: teamNameOf(state, t) })}</h1>
-          </div>
+      <div className="cb-v-rapid">
+        <div className="cb-glow" aria-hidden="true" />
+        <div className="cb-rapid-stage">
+          {team && <TeamArt teamId={team.avatarId} label={teamNameOf(state, t)} variant="hero" className="cb-reveal-in" />}
+          <h1 className="cb-title cb-rapid-turn">{t('final.turn', { team: teamNameOf(state, t) })}</h1>
         </div>
         <PixelButton onClick={onNext}>{t('common.start')}</PixelButton>
-      </>
+      </div>
     );
   }
 
@@ -81,29 +78,28 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
       <ProgressDots total={ULTIME_RAPID_PER_COUPLE} current={state.questionIdx} />
     </div>
   );
+  const questionCard = (
+    <PixelPanel className="cb-rapid-question">
+      <p className="cb-question">{questionText(question, 'name', answererNameOf(state)) || '—'}</p>
+    </PixelPanel>
+  );
 
   if (state.kind === 'rapidQuestion') {
     return (
-      <>
+      <div className="cb-v-rapid">
         {header}
-        <PixelPanel>
-          <p className="cb-question">{questionText(question, 'name', answererNameOf(state)) || '—'}</p>
-        </PixelPanel>
-        <div className="cb-grow" />
+        {questionCard}
         <PixelButton onClick={onReady}>{t('dilemma.ready')}</PixelButton>
-      </>
+      </div>
     );
   }
 
   // rapidJudge
   return (
-    <>
+    <div className="cb-v-rapid">
       {header}
-      <PixelPanel>
-        <p className="cb-question">{questionText(question, 'name', answererNameOf(state)) || '—'}</p>
-      </PixelPanel>
-      <div className="cb-grow" />
-      <div className="cb-row-2">
+      {questionCard}
+      <div className="cb-row-2 cb-rapid-judge">
         <PixelButton variant="positive" onClick={handleSynchro}>
           {t('final.synchro')}
         </PixelButton>
@@ -111,6 +107,6 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
           {t('final.mismatch')}
         </PixelButton>
       </div>
-    </>
+    </div>
   );
 };

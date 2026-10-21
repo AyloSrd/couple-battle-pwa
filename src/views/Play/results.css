@@ -1,0 +1,229 @@
+/* Finale + results views (S8): RapidFire, Scoreboard, FinalScreen, PauseSheet.
+   Every rule is scoped under a view root class so nothing leaks to other screens.
+   Tokens only (rgba shadows aside). Text colours come from the scoped --cb-text* set:
+   white on the stage, eggplant inside .cb-card / .cb-row / .cb-sheet. */
+
+/* ---------- shared screen column ---------- */
+.cb-v-rapid,
+.cb-v-score,
+.cb-v-final {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-s4);
+}
+
+/* ---------- score rows (Scoreboard + FinalScreen) ---------- */
+.cb-v-score .cb-rows,
+.cb-v-final .cb-rows {
+  gap: var(--cb-s3);
+}
+.cb-v-score .cb-row,
+.cb-v-final .cb-row {
+  gap: var(--cb-s4);
+  padding: var(--cb-s3) var(--cb-s4);
+  border-radius: var(--cb-r-lg);
+  box-shadow: var(--cb-e2);
+  min-height: 72px;
+}
+.cb-v-score .cb-row > span:not(.cb-avatar):not(.cb-score),
+.cb-v-final .cb-row > span:not(.cb-avatar):not(.cb-score) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font: 800 var(--cb-fs-body-lg) / 1.15 var(--cb-font-display);
+  letter-spacing: -0.01em;
+}
+.cb-v-score .cb-row .cb-avatar,
+.cb-v-final .cb-row .cb-avatar {
+  width: 56px;
+  height: 56px;
+  border-width: var(--cb-outline-w);
+  border-radius: var(--cb-r-md);
+  font-size: 22px;
+}
+.cb-v-score .cb-row .cb-score,
+.cb-v-final .cb-row .cb-score {
+  font-size: var(--cb-fs-display-lg);
+  line-height: 1;
+  padding-left: var(--cb-s2);
+}
+
+/* ---------- RapidFire ---------- */
+.cb-v-rapid .cb-rapid-stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--cb-s5);
+  text-align: center;
+  min-height: 0;
+}
+.cb-v-rapid .cb-rapid-title {
+  font-size: clamp(var(--cb-fs-h1), 11vw, var(--cb-fs-display-xl));
+  line-height: 1.05;
+}
+.cb-v-rapid .cb-rapid-turn {
+  font-size: clamp(var(--cb-fs-h2), 9vw, var(--cb-fs-display-lg));
+  line-height: 1.08;
+}
+.cb-v-rapid .cb-rapid-card {
+  width: 100%;
+  text-align: center;
+}
+.cb-v-rapid .cb-rapid-card p {
+  font: 700 var(--cb-fs-body-lg) / var(--cb-lh-body-lg) var(--cb-font-ui);
+  color: var(--cb-text-body);
+  text-wrap: balance;
+}
+.cb-v-rapid .cb-glow {
+  top: 34%;
+}
+.cb-v-rapid .cb-char {
+  height: clamp(200px, 42dvh, 420px);
+}
+/* question / judge: the question card takes the whole page */
+.cb-v-rapid .cb-rapid-question {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: var(--cb-s5);
+  min-height: 0;
+}
+.cb-v-rapid .cb-rapid-question .cb-question {
+  font-size: clamp(var(--cb-fs-h2), min(8.6vw, 4.6dvh), 40px);
+  line-height: 1.15;
+}
+/* the two verdict buttons stack: full-width, thumb-sized, labels never wrap mid-word */
+.cb-v-rapid .cb-rapid-judge {
+  flex-direction: column;
+  gap: var(--cb-s2);
+}
+.cb-v-rapid .cb-rapid-judge .cb-btn {
+  flex: none;
+  min-height: var(--cb-h-answer);
+  border-radius: var(--cb-r-lg);
+  font-size: calc(var(--cb-fs-body-lg) + 2px);
+  line-height: 1.15;
+}
+
+/* ---------- Scoreboard ---------- */
+.cb-v-score .cb-score-title {
+  font-size: clamp(var(--cb-fs-h2), 9vw, var(--cb-fs-h1));
+  text-align: center;
+}
+.cb-v-score .cb-rows {
+  flex: 1;
+  justify-content: center;
+}
+.cb-v-score .cb-row {
+  min-height: 84px;
+}
+.cb-v-score .cb-row .cb-avatar {
+  width: 64px;
+  height: 64px;
+}
+.cb-v-score .cb-score-note {
+  margin: 0;
+  text-align: center;
+  color: var(--cb-text);
+  font: 800 var(--cb-fs-body-lg) / var(--cb-lh-body-lg) var(--cb-font-display);
+  text-shadow: var(--cb-title-shadow);
+  text-wrap: balance;
+}
+
+/* ---------- FinalScreen ---------- */
+.cb-v-final .cb-glow {
+  top: 30%;
+}
+.cb-v-final .cb-char {
+  /* the winner takes whatever room the page has left */
+  height: auto;
+  flex: 1000 1 170px;
+  min-height: 170px;
+  max-height: 440px;
+}
+/* tie: the tied teams' portraits stand side by side where the winner hero would be */
+.cb-v-final .cb-final-tied {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--cb-s3);
+  padding: var(--cb-s2) 0;
+}
+.cb-v-final .cb-final-tied .cb-team-art {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 150px;
+  border: var(--cb-outline-w) solid var(--cb-outline);
+  border-radius: var(--cb-r-lg);
+  box-shadow: var(--cb-e2);
+  rotate: -3deg;
+}
+.cb-v-final .cb-final-tied .cb-team-art:nth-child(even) {
+  rotate: 3deg;
+}
+.cb-v-final .cb-final-head {
+  display: grid;
+  justify-items: center;
+  gap: var(--cb-s2);
+  text-align: center;
+}
+.cb-v-final .cb-verdict {
+  color: var(--cb-text);
+  font-size: clamp(var(--cb-fs-h2), 8.6vw, var(--cb-fs-h1));
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.cb-v-final .cb-final-sub {
+  margin: 0;
+  color: var(--cb-text-muted);
+  font: 700 var(--cb-fs-body) / var(--cb-lh-body) var(--cb-font-ui);
+  text-wrap: balance;
+}
+.cb-v-final .cb-btn--ghost {
+  color: var(--cb-text);
+  font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------- PauseSheet ---------- */
+.cb-v-pause .cb-sheet {
+  max-width: 420px;
+  gap: var(--cb-s4);
+  padding: var(--cb-s7) var(--cb-s5) var(--cb-s6);
+}
+.cb-v-pause .cb-h2 {
+  font-size: var(--cb-fs-h1);
+  line-height: var(--cb-lh-h1);
+}
+.cb-v-pause .cb-sheet .cb-btn:not(.cb-btn--ghost) {
+  min-height: var(--cb-h-btn);
+}
+.cb-v-pause .cb-btn--ghost {
+  font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
+}
+.cb-v-pause .cb-pause-confirm {
+  text-align: center;
+  font: 800 var(--cb-fs-h2) / var(--cb-lh-h2) var(--cb-font-display);
+  letter-spacing: var(--cb-tracking-display);
+  text-wrap: balance;
+}
+.cb-v-pause .cb-row-2 {
+  gap: var(--cb-s3);
+}
+
+/* the final lists every team under a headline and two buttons: slightly tighter rows */
+.cb-v-final .cb-row {
+  min-height: 64px;
+  padding: var(--cb-s2) var(--cb-s4);
+}
+.cb-v-final .cb-row .cb-avatar {
+  width: 48px;
+  height: 48px;
+}
+.cb-v-final .cb-row .cb-score {
+  font-size: var(--cb-fs-h1);
+}
