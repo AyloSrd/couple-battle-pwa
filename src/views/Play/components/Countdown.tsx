@@ -1,12 +1,9 @@
 import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
+import { useGetSave } from '@/shared/save';
 import { Screen } from '@/shared/Chrome';
 import '../dilemma.css';
-
-function vibrate(pattern: number | number[]) {
-  navigator.vibrate?.(pattern);
-}
 
 const STEP_MS = 700;
 const GO_MS = 1500;
@@ -37,6 +34,11 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
 }) => {
   const t = useT();
   const sound = useSoundApi();
+  // Settings are already cached by the app gate when a game runs; default on until read.
+  const vibrationOn = useGetSave('settings').data?.vibration ?? true;
+  const vibrate = (pattern: number | number[]) => {
+    if (vibrationOn) navigator.vibrate?.(pattern);
+  };
   const digits = ticks === 2 ? ['2', '1'] : ['3', '2', '1'];
   const [phase, setPhase] = useState(0); // 0..digits.length-1 = digit, digits.length = go
 

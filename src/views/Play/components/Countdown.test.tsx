@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SaveApiProvider, saveKeys } from '@/shared/save';
+import { createSaveMemoryApi } from '@/shared/save/api/memory';
 import { LangProvider } from '@/shared/i18n';
 import { SoundApiProvider } from '@/shared/sound';
 import { createSoundNoopApi } from '@/shared/sound/api/noop';
@@ -8,11 +11,20 @@ import { Countdown } from './Countdown';
 
 const STEP_MS = 700;
 
-function mount(ui: ReactElement, lang: 'fr' | 'en' = 'fr') {
+function mount(ui: ReactElement, lang: 'fr' | 'en' = 'fr', vibration = true) {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const settings = { lang, sound: true, vibration };
+  const save = createSaveMemoryApi({ settings });
+  // The app gate has read the settings before any game screen mounts: start with a warm cache.
+  qc.setQueryData(saveKeys.byKey('settings'), settings);
   return render(
-    <LangProvider initialLang={lang}>
-      <SoundApiProvider api={createSoundNoopApi()}>{ui}</SoundApiProvider>
-    </LangProvider>,
+    <QueryClientProvider client={qc}>
+      <SaveApiProvider api={save}>
+        <LangProvider initialLang={lang}>
+          <SoundApiProvider api={createSoundNoopApi()}>{ui}</SoundApiProvider>
+        </LangProvider>
+      </SaveApiProvider>
+    </QueryClientProvider>,
   );
 }
 
@@ -69,5 +81,35 @@ describe('Countdown — GO word per context', () => {
       expect(onDone).toHaveBeenCalledTimes(1);
       view.unmount();
     }
+  });
+});
+
+describe('Countdown — vibration setting', () => {
+  let vibrate: ReturnType<typeof vi.fn>;
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vibrate = vi.fn();
+    Object.defineProperty(navigator, 'vibrate', { value: vibrate, configurable: true, writable: true });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    Reflect.deleteProperty(navigator, 'vibrate');
+  });
+
+  it('buzzes on the first tick and on GO when vibration is on', () => {
+    mount(<Countdown ticks={2} go="answer" onDone={() => {}} />, 'fr', true);
+    expect(vibrate).toHaveBeenCalledWith(50); // first tick, at mount
+    act(() => {
+      vi.advanceTimersByTime(2 * STEP_MS);
+    });
+    expect(vibrate).toHaveBeenCalledWith([60, 40, 60]); // GO
+  });
+
+  it('stays silent on the haptics when vibration is off', () => {
+    mount(<Countdown ticks={2} go="answer" onDone={() => {}} />, 'fr', false);
+    act(() => {
+      vi.advanceTimersByTime(2 * STEP_MS + 1500);
+    });
+    expect(vibrate).not.toHaveBeenCalled();
   });
 });

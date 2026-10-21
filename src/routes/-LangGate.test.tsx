@@ -43,7 +43,7 @@ describe('LangGate', () => {
   });
 
   it('uses the stored settings when the read succeeds', async () => {
-    const { setEnabled } = mount(createSaveMemoryApi({ settings: { lang: 'en', sound: false } }));
+    const { setEnabled } = mount(createSaveMemoryApi({ settings: { lang: 'en', sound: false, vibration: true } }));
 
     expect(await screen.findByText('Yes')).toBeInTheDocument();
     expect(setEnabled).toHaveBeenCalledWith(false);
