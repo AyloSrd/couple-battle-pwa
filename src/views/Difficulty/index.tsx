@@ -13,14 +13,37 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useListQuestions, drawDeck, deckSizeFor } from '@/shared/questions';
 import { useGetSave, usePutSave, newGameSnapshot, saveKeys } from '@/shared/save';
 import { Screen, PixelPanel, PixelButton, ProgressDots, BackButton } from '@/shared/Chrome';
+import './view.css';
 
-// Text-only for now: difficulty and theme icons aren't produced yet (v2 §3).
 const DIFFS: { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey }[] = [
   { id: GameDifficulty.Mix, nameKey: 'diff.mix.name', descKey: 'diff.mix.desc' },
   { id: GameDifficulty.Easy, nameKey: 'diff.easy.name', descKey: 'diff.easy.desc' },
   { id: GameDifficulty.Medium, nameKey: 'diff.medium.name', descKey: 'diff.medium.desc' },
   { id: GameDifficulty.Hard, nameKey: 'diff.hard.name', descKey: 'diff.hard.desc' },
 ];
+
+// Emojis live here (by id), not in the question data or the strings.
+const DIFF_EMOJI: Record<TGameDifficulty, string> = {
+  [GameDifficulty.Mix]: '🔀',
+  [GameDifficulty.Easy]: '💗',
+  [GameDifficulty.Medium]: '⚡',
+  [GameDifficulty.Hard]: '🔥',
+};
+
+const THEME_EMOJI: Record<TThemeId, string> = {
+  homeDaily: '🏠',
+  foodDrinks: '🍕',
+  travel: '✈️',
+  workAmbition: '💼',
+  hobbies: '🎮',
+  goingOut: '🎉',
+  money: '💰',
+  childhood: '🧸',
+  personality: '🎭',
+  dreams: '🚀',
+  loveIntimacy: '💋',
+  random: '🎲',
+};
 
 const THEME_KEY: Record<TThemeId, TStringKey> = {
   homeDaily: 'theme.homeDaily',
@@ -119,16 +142,14 @@ export const DifficultyView: FC = () => {
   const intimacyWarn = themes.includes('loveIntimacy') && coupleCount > 1;
 
   return (
-    <Screen>
+    <Screen className="cb-v-difficulty">
       <div className="cb-topbar">
         <BackButton label={t('common.back')} onClick={handleBack} />
         <ProgressDots total={3} current={2} />
       </div>
-      <h1 className="cb-title" style={{ marginBottom: 'var(--cb-s2)' }}>
-        {t('diff.title')}
-      </h1>
+      <h1 className="cb-title">{t('diff.title')}</h1>
 
-      <div className="cb-stack" role="radiogroup" aria-label={t('diff.title')}>
+      <div className="cb-diffs" role="radiogroup" aria-label={t('diff.title')}>
         {DIFFS.map((d) => (
           <button
             key={d.id}
@@ -139,6 +160,9 @@ export const DifficultyView: FC = () => {
             aria-pressed={difficulty === d.id}
             onClick={makePickDifficulty(d.id)}
           >
+            <span className="cb-emoji" aria-hidden="true">
+              {DIFF_EMOJI[d.id]}
+            </span>
             <div>
               <h3>{t(d.nameKey)}</h3>
               <p>{t(d.descKey)}</p>
@@ -147,25 +171,35 @@ export const DifficultyView: FC = () => {
         ))}
       </div>
 
-      <PixelButton variant="ghost" onClick={handleToggleThemes} aria-expanded={themesOpen}>
-        {t('themes.title')} {themesOpen ? '▲' : '▼'}
+      <PixelButton
+        variant="ghost"
+        className="cb-themes-toggle"
+        onClick={handleToggleThemes}
+        aria-expanded={themesOpen}
+      >
+        <span aria-hidden="true">🏷️</span>
+        <span className="cb-themes-toggle-label">{t('themes.title')}</span>
+        <span className="cb-chevron" aria-hidden="true">
+          {themesOpen ? '▲' : '▼'}
+        </span>
       </PixelButton>
 
       {themesOpen && (
-        <PixelPanel className="cb-stack">
-          <p className="cb-muted" style={{ margin: 0 }}>
-            {t('themes.hint')}
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--cb-s2)' }}>
+        <PixelPanel className="cb-themes">
+          <p className="cb-muted">{t('themes.hint')}</p>
+          <div className="cb-theme-grid">
             {THEME_IDS.map((id) => (
               <PixelButton
                 key={id}
+                className="cb-theme-chip"
                 variant={themes.includes(id) ? 'primary' : 'secondary'}
                 aria-pressed={themes.includes(id)}
                 onClick={makeToggleTheme(id)}
-                style={{ minHeight: 'var(--cb-h-btn-sec)', fontSize: 'var(--cb-fs-caption)' }}
               >
-                {t(THEME_KEY[id])}
+                <span className="cb-emoji" aria-hidden="true">
+                  {THEME_EMOJI[id]}
+                </span>
+                <span>{t(THEME_KEY[id])}</span>
               </PixelButton>
             ))}
           </div>
@@ -173,8 +207,7 @@ export const DifficultyView: FC = () => {
         </PixelPanel>
       )}
 
-      <div className="cb-grow" />
-      <PixelButton onClick={handleStart} disabled={!allQuestions.data}>
+      <PixelButton className="cb-start" onClick={handleStart} disabled={!allQuestions.data}>
         {t('common.start')}
       </PixelButton>
 

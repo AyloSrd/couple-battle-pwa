@@ -1,0 +1,51 @@
+/* V-Mode layout — everything scoped under .cb-v-mode so nothing leaks to other screens.
+   The three cards share the whole page height (flex), never shrinking below their content. */
+
+.cb-v-mode {
+  gap: var(--cb-s3);
+}
+
+.cb-v-mode .cb-modes {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* room for the duration badge that overhangs each card's top edge */
+  gap: var(--cb-s5);
+  padding-top: var(--cb-s2);
+}
+
+.cb-v-mode .cb-mode {
+  position: relative;
+  flex: 1 1 0;
+  gap: var(--cb-s3);
+  padding: var(--cb-s3);
+  border-radius: var(--cb-r-xl);
+}
+.cb-v-mode .cb-mode img {
+  /* grows with the screen height: 80px on a short phone, up to 128px on a tall one */
+  width: clamp(72px, 14dvh, 128px);
+  height: clamp(72px, 14dvh, 128px);
+}
+.cb-v-mode .cb-mode h3 {
+  /* grows a little on tall screens, floors at the h2 token */
+  font-size: clamp(var(--cb-fs-h2), 4dvh, 36px);
+  line-height: 1.1;
+}
+.cb-v-mode .cb-mode p {
+  margin-top: var(--cb-s1);
+  font: 600 clamp(16px, 2.3dvh, 20px) / 1.25 var(--cb-font-ui);
+}
+
+/* duration: a game-style badge hanging off the card's top-right corner */
+.cb-v-mode .cb-mode .cb-dur {
+  position: absolute;
+  top: calc(var(--cb-s4) * -1);
+  right: var(--cb-s4);
+  margin: 0;
+  padding: 7px 14px;
+  background: var(--cb-chip-bg);
+  color: var(--cb-chip-text);
+  border: 2px solid var(--cb-outline);
+  box-shadow: 0 2px 0 var(--cb-outline);
+  font: 800 var(--cb-fs-caption) / 1 var(--cb-font-display);
+}

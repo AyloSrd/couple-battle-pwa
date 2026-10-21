@@ -1,0 +1,189 @@
+/* V-Difficulty layout — everything scoped under .cb-v-difficulty so nothing leaks.
+   Bigger, "gaming" option cards with an emoji tile; the card list absorbs spare height. */
+
+.cb-v-difficulty {
+  gap: var(--cb-s3);
+}
+.cb-v-difficulty .cb-title {
+  margin-bottom: var(--cb-s2);
+}
+
+/* ---------- difficulty cards ---------- */
+.cb-v-difficulty .cb-diffs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-s3);
+  /* breathing room for the check badge that overhangs a chosen card */
+  padding-top: var(--cb-s2);
+}
+.cb-v-difficulty .cb-diffs .cb-mode {
+  position: relative;
+  flex: 1 1 0;
+  gap: var(--cb-s4);
+  padding: var(--cb-s3) var(--cb-s4);
+  border-radius: var(--cb-r-xl);
+}
+.cb-v-difficulty .cb-diffs .cb-mode h3 {
+  font-size: var(--cb-fs-h2);
+  line-height: var(--cb-lh-h2);
+}
+.cb-v-difficulty .cb-diffs .cb-mode p {
+  margin-top: 2px;
+  font: 600 15px / 1.3 var(--cb-font-ui);
+}
+.cb-v-difficulty .cb-mode .cb-emoji {
+  flex: none;
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--cb-r-md);
+  background: var(--cb-surface-sunk);
+  border: 2px solid var(--cb-outline);
+  font-size: 34px;
+  line-height: 1;
+}
+/* chosen card: a check badge on top of the gold ring (shape, not colour alone) */
+.cb-v-difficulty .cb-diffs .cb-mode[aria-pressed='true']::after {
+  content: '✓';
+  content: '✓' / ''; /* decorative: aria-pressed already says it */
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--cb-chip-bg);
+  border: 2px solid var(--cb-chip-text);
+  color: var(--cb-chip-text);
+  font: 800 16px / 1 var(--cb-font-ui);
+}
+
+/* ---------- themes ---------- */
+.cb-v-difficulty .cb-btn.cb-themes-toggle {
+  min-height: var(--cb-h-btn-sec);
+  justify-content: flex-start;
+  gap: var(--cb-s3);
+  padding: 0 var(--cb-s4);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--cb-r-md);
+  background: rgba(20, 5, 74, 0.45);
+  font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
+  text-align: left;
+}
+.cb-v-difficulty .cb-themes-toggle-label {
+  flex: 1;
+}
+.cb-v-difficulty .cb-themes-toggle .cb-chevron {
+  font-size: var(--cb-fs-caption);
+}
+
+.cb-v-difficulty .cb-themes {
+  display: grid;
+  gap: var(--cb-s3);
+  padding: var(--cb-s4);
+}
+.cb-v-difficulty .cb-themes .cb-muted {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.cb-v-difficulty .cb-theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--cb-s3) var(--cb-s2);
+}
+.cb-v-difficulty .cb-btn.cb-theme-chip {
+  position: relative;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--cb-s1);
+  min-height: 88px;
+  padding: var(--cb-s2) var(--cb-s2);
+  border-radius: var(--cb-r-md);
+  font: 800 15px / 1.15 var(--cb-font-display);
+  letter-spacing: 0;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.cb-v-difficulty .cb-theme-chip .cb-emoji {
+  font-size: 30px;
+  line-height: 1;
+}
+.cb-v-difficulty .cb-theme-chip[aria-pressed='false'] .cb-emoji {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+}
+.cb-v-difficulty .cb-theme-chip[aria-pressed='true']::after {
+  content: '✓';
+  content: '✓' / ''; /* decorative: aria-pressed already says it */
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--cb-chip-bg);
+  border: 2px solid var(--cb-chip-text);
+  color: var(--cb-chip-text);
+  font: 800 13px / 1 var(--cb-font-ui);
+}
+
+/* ---------- start ---------- */
+.cb-v-difficulty .cb-btn.cb-start {
+  min-height: 72px;
+  font-size: var(--cb-fs-h2);
+  line-height: var(--cb-lh-label);
+}
+
+/* ---------- 360x800-class phones: one-line title so the Start button stays on the page ---------- */
+@media (max-height: 840px) {
+  .cb-v-difficulty .cb-title {
+    font-size: var(--cb-fs-h2);
+    line-height: var(--cb-lh-h2);
+  }
+}
+
+/* ---------- short phones (~640px): keep the whole list + the start button on one page ---------- */
+@media (max-height: 700px) {
+  .cb-v-difficulty {
+    gap: var(--cb-s2);
+  }
+  .cb-v-difficulty .cb-title {
+    margin-bottom: 0;
+    font-size: var(--cb-fs-h2);
+    line-height: var(--cb-lh-h2);
+  }
+  .cb-v-difficulty .cb-diffs {
+    gap: var(--cb-s2);
+  }
+  .cb-v-difficulty .cb-diffs .cb-mode {
+    gap: var(--cb-s3);
+    padding: var(--cb-s2) var(--cb-s3);
+  }
+  .cb-v-difficulty .cb-diffs .cb-mode h3 {
+    font-size: var(--cb-fs-body-lg);
+    line-height: 1.1;
+  }
+  .cb-v-difficulty .cb-diffs .cb-mode p {
+    font-size: var(--cb-fs-caption);
+    line-height: 1.25;
+  }
+  .cb-v-difficulty .cb-mode .cb-emoji {
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+  }
+  .cb-v-difficulty .cb-btn.cb-themes-toggle {
+    min-height: var(--cb-target-min);
+  }
+  .cb-v-difficulty .cb-btn.cb-start {
+    min-height: var(--cb-h-btn);
+  }
+}
