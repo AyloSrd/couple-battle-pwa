@@ -1,23 +1,48 @@
-import { useRef, useState, type FC } from 'react';
+import { useEffect, useEffectEvent, useRef, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { Screen, PixelPanel, ProgressDots, ModeIcon, type TModeIconMode, BackButton } from '@/shared/Chrome';
+import { Screen, PixelPanel, ModeIcon, type TModeIconMode, BackButton } from '@/shared/Chrome';
+import { clampIndex, indexFromKey, indexFromScroll } from './domain/carousel';
+import './view.css';
 
-type TCard = { titleKey: TStringKey; bodyKey: TStringKey; mode: TModeIconMode };
+type TSlide = { nameKey: TStringKey; bodyKey: TStringKey; mode: TModeIconMode };
 
-const CARDS: TCard[] = [
-  { titleKey: 'howto.flash.title', bodyKey: 'howto.flash.body', mode: 'flash' },
-  { titleKey: 'howto.dilemma.title', bodyKey: 'howto.dilemma.body', mode: 'dilemma' },
-  { titleKey: 'howto.ultime.title', bodyKey: 'howto.ultime.body', mode: 'ultime' },
+const SLIDES: TSlide[] = [
+  { nameKey: 'howto.flash.name', bodyKey: 'howto.flash.body', mode: 'flash' },
+  { nameKey: 'howto.dilemma.name', bodyKey: 'howto.dilemma.body', mode: 'dilemma' },
+  { nameKey: 'howto.ultime.name', bodyKey: 'howto.ultime.body', mode: 'ultime' },
 ];
 
 export const HowToPlayView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
   const sound = useSoundApi();
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
+
+  const goTo = (target: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const next = clampIndex(target, SLIDES.length);
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollTo({ left: next * el.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
+  };
+
+  // Arrow keys / Home / End work wherever the focus is on this screen.
+  const onKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+    const next = indexFromKey(event.key, index, SLIDES.length);
+    if (next === null) return;
+    event.preventDefault();
+    sound.play('sfx.tap');
+    goTo(next);
+  });
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => onKeyDown(event);
+    window.addEventListener('keydown', listener);
+    return () => window.removeEventListener('keydown', listener);
+  }, []);
 
   const handleBack = () => {
     sound.play('sfx.back');
@@ -25,54 +50,57 @@ export const HowToPlayView: FC = () => {
   };
 
   const handleScroll = () => {
-    const el = scrollerRef.current;
+    const el = trackRef.current;
     if (!el) return;
-    const next = Math.round(el.scrollLeft / el.clientWidth);
-    if (next !== index) setIndex(next);
+    setIndex(indexFromScroll(el.scrollLeft, el.clientWidth, SLIDES.length));
+  };
+
+  const handleDot = (target: number) => {
+    if (target === index) return;
+    sound.play('sfx.tap');
+    goTo(target);
   };
 
   return (
-    <Screen>
+    <Screen className="cb-v-howto">
       <div className="cb-topbar">
         <BackButton label={t('common.back')} onClick={handleBack} />
-        <ProgressDots total={CARDS.length} current={index} />
       </div>
       <h1 className="cb-title">{t('howto.title')}</h1>
 
       <div
-        ref={scrollerRef}
+        ref={trackRef}
+        className="cb-howto-track"
         onScroll={handleScroll}
-        style={{
-          display: 'flex',
-          overflowX: 'auto',
-          scrollSnapType: 'x mandatory',
-          gap: 'var(--cb-s4)',
-          scrollbarWidth: 'none',
-          padding: 'var(--cb-s1)',
-        }}
+        role="region"
+        aria-label={t('howto.title')}
+        tabIndex={0}
       >
-        {CARDS.map((card) => (
-          <PixelPanel
-            key={card.titleKey}
-            style={{
-              flex: '0 0 100%',
-              scrollSnapAlign: 'center',
-              display: 'grid',
-              gap: 'var(--cb-s3)',
-              justifyItems: 'center',
-              textAlign: 'center',
-            }}
-          >
-            <ModeIcon mode={card.mode} size={96} />
-            <h2 className="cb-h2">{t(card.titleKey)}</h2>
-            <p className="cb-body-lg">{t(card.bodyKey)}</p>
+        {SLIDES.map((slide) => (
+          <PixelPanel key={slide.nameKey} className="cb-howto-slide" role="group" aria-label={t(slide.nameKey)}>
+            <div className="cb-howto-art">
+              <ModeIcon mode={slide.mode} size={192} />
+            </div>
+            <h2 className="cb-h2">{t(slide.nameKey)}</h2>
+            <p className="cb-howto-body">{t(slide.bodyKey)}</p>
           </PixelPanel>
         ))}
       </div>
 
-      <p className="cb-muted cb-center" style={{ margin: 0 }}>
-        {t('howto.swipe')}
-      </p>
+      <div className="cb-howto-dots">
+        {SLIDES.map((slide, i) => (
+          <button
+            key={slide.nameKey}
+            type="button"
+            className="cb-howto-dot"
+            aria-label={t(slide.nameKey)}
+            aria-current={i === index ? 'true' : undefined}
+            onClick={() => handleDot(i)}
+          />
+        ))}
+      </div>
+
+      <p className="cb-muted cb-center cb-howto-hint">{t('howto.swipe')}</p>
     </Screen>
   );
 };
