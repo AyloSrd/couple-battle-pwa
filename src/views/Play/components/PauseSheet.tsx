@@ -1,6 +1,7 @@
 import { useState, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton } from '@/shared/Chrome';
+import '../results.css';
 
 type TPauseSheetProps = {
   onResume: () => void;
@@ -16,13 +17,13 @@ export const PauseSheet: FC<TPauseSheetProps> = ({ onResume, onRestart, onQuit }
   const handleCancelQuit = () => setConfirmQuit(false);
 
   return (
-    <div className="cb-overlay" role="dialog" aria-modal="true" aria-label={t('pause.title')}>
+    <div className="cb-overlay cb-v-pause" role="dialog" aria-modal="true" aria-label={t('pause.title')}>
       <PixelPanel className="cb-sheet">
         <h2 className="cb-h2 cb-center">{t('pause.title')}</h2>
 
         {confirmQuit ? (
           <>
-            <p className="cb-body-lg">{t('pause.quit.confirm')}</p>
+            <p className="cb-pause-confirm">{t('pause.quit.confirm')}</p>
             <div className="cb-row-2">
               <PixelButton variant="secondary" onClick={handleCancelQuit}>
                 {t('common.cancel')}
