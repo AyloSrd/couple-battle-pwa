@@ -12,7 +12,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useListQuestions, drawDeck, deckSizeFor } from '@/shared/questions';
 import { useGetSave, usePutSave, newGameSnapshot, saveKeys } from '@/shared/save';
-import { Screen, PixelPanel, PixelButton, ProgressDots } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, ProgressDots, BackButton } from '@/shared/Chrome';
 
 // Text-only for now: difficulty and theme icons aren't produced yet (v2 §3).
 const DIFFS: { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey }[] = [
@@ -121,9 +121,7 @@ export const DifficultyView: FC = () => {
   return (
     <Screen>
       <div className="cb-topbar">
-        <PixelButton variant="ghost" block={false} onClick={handleBack}>
-          ← {t('common.back')}
-        </PixelButton>
+        <BackButton label={t('common.back')} onClick={handleBack} />
         <ProgressDots total={3} current={2} />
       </div>
       <h1 className="cb-title" style={{ marginBottom: 'var(--cb-s2)' }}>

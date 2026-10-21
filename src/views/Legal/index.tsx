@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { Screen, PixelPanel, PixelButton, Logo } from '@/shared/Chrome';
+import { Screen, PixelPanel, Logo, BackButton } from '@/shared/Chrome';
 
 export const LegalView: FC = () => {
   const t = useT();
@@ -17,9 +17,7 @@ export const LegalView: FC = () => {
   return (
     <Screen>
       <div className="cb-topbar">
-        <PixelButton variant="ghost" block={false} onClick={handleBack}>
-          ← {t('common.back')}
-        </PixelButton>
+        <BackButton label={t('common.back')} onClick={handleBack} />
       </div>
       <Logo alt={t('app.name')} small />
       <h1 className="cb-title">{t('legal.title')}</h1>

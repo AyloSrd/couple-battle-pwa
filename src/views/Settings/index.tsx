@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useT, useLang, type TLang } from '@/shared/i18n';
 import { useGetSave, usePutSave } from '@/shared/save';
 import { useSoundApi } from '@/shared/sound';
-import { Screen, PixelPanel, PixelButton } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, BackButton } from '@/shared/Chrome';
 
 const Row: FC<{ label: string; children: ReactNode }> = ({ label, children }) => (
   <PixelPanel
@@ -79,9 +79,7 @@ export const SettingsView: FC = () => {
   return (
     <Screen>
       <div className="cb-topbar">
-        <PixelButton variant="ghost" block={false} onClick={handleBack}>
-          ← {t('common.back')}
-        </PixelButton>
+        <BackButton label={t('common.back')} onClick={handleBack} />
       </div>
       <h1 className="cb-title">{t('settings.title')}</h1>
 

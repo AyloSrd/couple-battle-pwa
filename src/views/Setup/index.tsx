@@ -4,7 +4,7 @@ import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { useDraftGame } from '@/shared/session';
 import { type TAvatarId, type TRoster } from '@/shared/game';
-import { Screen, PixelButton, Chip, ProgressDots } from '@/shared/Chrome';
+import { Screen, PixelButton, Chip, ProgressDots, BackButton } from '@/shared/Chrome';
 import { initSetup, reduceSetup } from './domain/machine';
 import { TeamPick } from './components/TeamPick';
 import { NameEntry } from './components/NameEntry';
@@ -79,9 +79,7 @@ export const SetupView: FC = () => {
   return (
     <Screen>
       <div className="cb-topbar">
-        <PixelButton variant="ghost" block={false} onClick={handleBack}>
-          ← {t('common.back')}
-        </PixelButton>
+        <BackButton label={t('common.back')} onClick={handleBack} />
         {inWizard && state.count !== null && (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--cb-s3)' }}>
             <Chip>{duoLabel(t('setup.team.pick', { n: chipCouple }))}</Chip>

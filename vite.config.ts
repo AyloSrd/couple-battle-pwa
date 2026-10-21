@@ -16,6 +16,7 @@ const CSP = [
   "script-src 'self'",
   "style-src 'self'",
   "img-src 'self'",
+  "media-src 'self'",
   "font-src 'self'",
   "connect-src 'self'",
   "manifest-src 'self'",
@@ -65,6 +66,23 @@ export default defineConfig({
       // Precache everything — the game must be 100% playable offline after first load.
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webp,ico,woff2,json}'],
+        // The splash video is NOT precached: iOS Safari only plays media answered with byte
+        // ranges, which the precache route cannot do. It is cached at runtime instead (the
+        // splash warms it with one full GET) and served with range support from that cache.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.endsWith('.mp4'),
+            handler: 'CacheFirst',
+            options: {
+              // Replacing a clip? Give it a new file name: entries are keyed by URL.
+              cacheName: 'cb-media',
+              rangeRequests: true,
+              cacheableResponse: { statuses: [200] },
+              // Bounded: a stale or orphaned clip is evicted, never kept forever.
+              expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+        ],
         navigateFallback: `${BASE}index.html`,
       },
       includeAssets: ['favicon-32.png', 'apple-touch-icon.png'],
@@ -75,8 +93,8 @@ export default defineConfig({
         lang: 'fr',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#FFF6D9',
-        theme_color: '#FFF6D9',
+        background_color: '#2A0B8F',
+        theme_color: '#2A0B8F',
         icons: [
           { src: 'pwa-icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-icons/icon-512.png', sizes: '512x512', type: 'image/png' },
