@@ -19,7 +19,16 @@ describe('ZSettingsSchema — vibration', () => {
     expect(ZSettingsSchema.parse(SAVE_DEFAULTS.settings)).toEqual(SAVE_DEFAULTS.settings);
   });
 
-  it('rejects a non-boolean vibration', () => {
-    expect(ZSettingsSchema.safeParse({ lang: 'fr', sound: true, vibration: 'yes' }).success).toBe(false);
+  it('a corrupt (non-boolean) vibration falls back to on and keeps lang and sound', () => {
+    expect(ZSettingsSchema.parse({ lang: 'en', sound: false, vibration: 'yes' })).toEqual({
+      lang: 'en',
+      sound: false,
+      vibration: true,
+    });
+  });
+
+  it('still rejects a corrupt lang or sound', () => {
+    expect(ZSettingsSchema.safeParse({ lang: 'de', sound: true, vibration: true }).success).toBe(false);
+    expect(ZSettingsSchema.safeParse({ lang: 'fr', sound: 'yes' }).success).toBe(false);
   });
 });

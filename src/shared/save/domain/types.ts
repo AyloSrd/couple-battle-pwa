@@ -10,12 +10,14 @@ import { Lang } from '@/shared/i18n/domain/types';
 
 /**
  * User settings. `vibration` (haptics on the countdown) was added after launch: a save written
- * before it existed has no such field and must keep parsing — it defaults to on.
+ * before it existed has no such field and must keep parsing — it defaults to on. A non-boolean
+ * value also falls back to on, so one bad field never costs the player their language/sound
+ * (the idb adapter would otherwise drop the whole settings record on a parse failure).
  */
 export const ZSettingsSchema = z.object({
   lang: z.enum([Lang.Fr, Lang.En]),
   sound: z.boolean(),
-  vibration: z.boolean().default(true),
+  vibration: z.boolean().catch(true),
 });
 export type TSettings = z.infer<typeof ZSettingsSchema>;
 
