@@ -18,11 +18,19 @@
   --cb-text-body: var(--cb-on-surface-body);
   --cb-text-muted: var(--cb-on-surface-muted);
   --cb-border: var(--cb-on-surface-border);
-  --cb-focus: var(--cb-violet-600);
   --cb-title-shadow: none;
   --cb-success: var(--cb-success-ink);
   --cb-error: var(--cb-error-ink);
   color: var(--cb-text-body);
+}
+/* Focus ring: an outline is drawn OUTSIDE the element, so it must contrast with what is
+   behind it. Only containers whose children sit on cream re-scope it to violet. The
+   interactive surfaces themselves (.cb-mode, .cb-team, .cb-btn--secondary, ...) keep the
+   inherited ring: gold on the stage, violet when nested in a card. */
+.cb-card,
+.cb-row,
+.cb-sheet {
+  --cb-focus: var(--cb-violet-600);
 }
 
 /* ---------- page shell (Screen) ---------- */
