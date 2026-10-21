@@ -72,3 +72,28 @@ describe('FinalScreen — headline', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Nouveau record');
   });
 });
+
+describe('FinalScreen — hero slot', () => {
+  it('shows the full-body hero for a single winner, no tie portraits', () => {
+    const { container } = mount(
+      <FinalScreen state={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />,
+    );
+    expect(container.querySelector('.cb-char, .cb-char-placeholder')).not.toBeNull();
+    expect(container.querySelector('.cb-final-tied')).toBeNull();
+  });
+
+  it('shows one portrait per tied team instead of the hero', () => {
+    const { container } = mount(
+      <FinalScreen state={finalState({ t1: 4, t2: 4, t3: 1 })} onRematch={noop} onNewGame={noop} />,
+    );
+    expect(container.querySelector('.cb-char, .cb-char-placeholder')).toBeNull();
+    expect(container.querySelectorAll('.cb-final-tied .cb-team-art')).toHaveLength(2);
+  });
+
+  it('shows all three portraits on a 3-way tie', () => {
+    const { container } = mount(
+      <FinalScreen state={finalState({ t1: 2, t2: 2, t3: 2 })} onRematch={noop} onNewGame={noop} />,
+    );
+    expect(container.querySelectorAll('.cb-final-tied .cb-team-art')).toHaveLength(3);
+  });
+});

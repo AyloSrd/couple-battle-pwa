@@ -4,6 +4,7 @@ import { useSoundApi } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { rankTeams, type TGameState } from '../domain/machine';
 import { joinNames, resolveOutcome } from '../domain/outcome';
+import '../results.css';
 
 /** Solo record outcome (only for a 1-couple game). */
 export type TSoloResult = { isBest: boolean; points: number; best: number };
@@ -51,8 +52,8 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
   }, [sound]);
 
   return (
-    <>
-      <div className="cb-glow" aria-hidden="true" style={{ top: '30%' }} />
+    <div className="cb-v-final">
+      <div className="cb-glow" aria-hidden="true" />
       {winner && (
         <TeamArt
           teamId={winner.team.avatarId}
@@ -61,10 +62,23 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
           className="cb-reveal-in"
         />
       )}
+      {outcome?.kind === 'tie' && (
+        <div className="cb-final-tied" aria-hidden="true">
+          {outcome.teams.map((r) => (
+            <TeamArt
+              key={r.team.teamId}
+              teamId={r.team.avatarId}
+              label={teamLabel(r.team.avatarId)}
+              variant="tile"
+              className="cb-reveal-in"
+            />
+          ))}
+        </div>
+      )}
 
-      <div className="cb-stack cb-center" style={{ justifyItems: 'center', gap: 'var(--cb-s2)' }}>
+      <div className="cb-final-head">
         {solo ? (
-          <h1 className="cb-verdict" style={{ color: 'var(--cb-text)' }}>
+          <h1 className="cb-verdict">
             {solo.isBest
               ? t('results.solo.newBest', { points: solo.points })
               : t('results.solo.notBest', { points: solo.points, best: solo.best })}
@@ -72,12 +86,8 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
         ) : (
           headline && (
             <>
-              <h1 className="cb-verdict" style={{ color: 'var(--cb-text)' }}>
-                {headline.title}
-              </h1>
-              <p className="cb-muted" style={{ margin: 0 }}>
-                {headline.sub}
-              </p>
+              <h1 className="cb-verdict">{headline.title}</h1>
+              <p className="cb-final-sub">{headline.sub}</p>
             </>
           )
         )}
@@ -100,10 +110,12 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
       </div>
 
       <div className="cb-grow" />
-      <PixelButton onClick={onRematch}>{t('results.rematch')}</PixelButton>
+      <PixelButton variant="win" onClick={onRematch}>
+        {t('results.rematch')}
+      </PixelButton>
       <PixelButton variant="ghost" onClick={onNewGame}>
         {t('results.newgame')}
       </PixelButton>
-    </>
+    </div>
   );
 };
