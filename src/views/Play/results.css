@@ -72,6 +72,7 @@
   text-align: center;
 }
 .cb-v-rapid .cb-rapid-card p {
+  margin: 0;
   font: 700 var(--cb-fs-body-lg) / var(--cb-lh-body-lg) var(--cb-font-ui);
   color: var(--cb-text-body);
   text-wrap: balance;
@@ -206,6 +207,7 @@
   font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
 }
 .cb-v-pause .cb-pause-confirm {
+  margin: 0;
   text-align: center;
   font: 800 var(--cb-fs-h2) / var(--cb-lh-h2) var(--cb-font-display);
   letter-spacing: var(--cb-tracking-display);
