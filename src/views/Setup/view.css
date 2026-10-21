@@ -1,0 +1,161 @@
+/* V-Setup — layout for the four steps (count, team, names, pass).
+   Every rule is scoped under .cb-v-setup so nothing leaks to other screens. */
+
+/* count + team must fit one page, no scroll: pin the page to the viewport and let the
+   flexible blocks (hero / grid) absorb the remaining height */
+.cb-v-setup--fit {
+  height: 100dvh;
+}
+.cb-v-setup {
+  gap: var(--cb-s3);
+}
+
+/* ---------- top bar: "Duo n" chip + progress dots ---------- */
+.cb-v-setup .cb-v-setup__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cb-s3);
+}
+
+/* ---------- titles ---------- */
+.cb-v-setup .cb-title {
+  text-align: center;
+  font-size: min(var(--cb-fs-display-lg), 11vw);
+  line-height: 1.08;
+}
+.cb-v-setup .cb-v-setup__title--sm {
+  font-size: min(var(--cb-fs-h1), 10vw);
+}
+.cb-v-setup .cb-v-setup__lead {
+  text-align: center;
+  font-family: var(--cb-font-display);
+  font-weight: 800;
+  font-size: var(--cb-fs-body-lg);
+  line-height: var(--cb-lh-body-lg);
+  letter-spacing: var(--cb-tracking-display);
+  text-shadow: var(--cb-title-shadow);
+  margin: 0;
+}
+
+/* ---------- hero: full-body duo, fills the free height ---------- */
+.cb-v-setup .cb-v-setup__hero {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+}
+.cb-v-setup .cb-v-setup__hero .cb-char,
+.cb-v-setup .cb-v-setup__hero .cb-char-placeholder {
+  position: absolute;
+  inset: auto 0 0;
+  margin: 0 auto;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+.cb-v-setup .cb-v-setup__hero .cb-char-placeholder {
+  height: auto;
+  width: min(60%, 220px);
+  max-height: 100%;
+}
+
+/* ---------- step: count ---------- */
+.cb-v-setup .cb-v-setup__counts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cb-s3) var(--cb-s4);
+}
+.cb-v-setup .cb-v-setup__counts .cb-btn {
+  min-height: clamp(68px, 11dvh, 120px);
+  border-radius: var(--cb-r-lg);
+  font-size: clamp(44px, 8dvh, 72px);
+  line-height: 1;
+}
+.cb-v-setup .cb-v-setup__hint {
+  padding: var(--cb-s3) var(--cb-s4);
+  border-radius: var(--cb-r-pill);
+  text-align: center;
+  font: 700 var(--cb-fs-caption) / var(--cb-lh-caption) var(--cb-font-ui);
+  box-shadow: var(--cb-e1);
+}
+
+/* ---------- step: team ---------- */
+.cb-v-setup .cb-v-setup__teams {
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: var(--cb-s3) var(--cb-s2);
+  padding-bottom: var(--cb-s2); /* room for the tiles' hard lip */
+}
+.cb-v-setup .cb-team {
+  min-height: 0;
+  min-width: 0;
+  padding: var(--cb-s2) var(--cb-s1) var(--cb-s2);
+  gap: var(--cb-s1);
+  border-radius: var(--cb-r-md);
+}
+.cb-v-setup .cb-team-art {
+  flex: 1 1 0;
+  min-height: 0;
+  aspect-ratio: auto;
+  border-radius: var(--cb-r-sm);
+}
+.cb-v-setup .cb-team-name {
+  flex: none;
+  text-align: center;
+  font-size: 14px;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.cb-v-setup .cb-team[aria-pressed='true']::after {
+  top: 4px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+}
+.cb-v-setup .cb-v-setup__toast {
+  position: fixed;
+  left: var(--cb-page-x);
+  right: var(--cb-page-x);
+  bottom: calc(var(--cb-h-btn) + var(--cb-lip) + var(--cb-s5) + var(--cb-s4) + env(safe-area-inset-bottom));
+  max-width: 448px;
+  margin: 0 auto;
+  z-index: 5;
+  font-size: var(--cb-fs-body);
+}
+
+/* ---------- step: names ---------- */
+.cb-v-setup .cb-v-setup__form {
+  gap: var(--cb-s4);
+}
+.cb-v-setup .cb-v-setup__form .cb-field {
+  height: calc(var(--cb-h-field) + var(--cb-s2));
+  font-size: var(--cb-fs-body-lg);
+  font-weight: 700;
+  border-radius: var(--cb-r-md);
+}
+.cb-v-setup .cb-v-setup__form .cb-field-error {
+  font-size: var(--cb-fs-body);
+  line-height: var(--cb-lh-body);
+}
+
+/* ---------- step: pass ---------- */
+.cb-v-setup .cb-v-setup__pass {
+  flex: 1;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--cb-s4);
+  text-align: center;
+}
+.cb-v-setup .cb-v-setup__pass .cb-numeral {
+  font-size: clamp(160px, 52vw, 240px);
+}
+.cb-v-setup .cb-v-setup__pass-label {
+  font-size: var(--cb-fs-h2);
+  line-height: var(--cb-lh-h2);
+  text-transform: uppercase;
+  letter-spacing: var(--cb-tracking-overline);
+  color: var(--cb-gold);
+  text-shadow: var(--cb-title-shadow);
+}
