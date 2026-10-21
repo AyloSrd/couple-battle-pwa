@@ -53,6 +53,9 @@ export async function createContainer(
     console.warn('openSaveDb failed, falling back to in-memory save', error);
     saveApi = createSaveMemoryApi();
   }
+  // Reading the snapshot drops it once past its resume window — do it at boot
+  // so an abandoned game's names and answers don't wait for Home to be opened.
+  void saveApi.get('gameSnapshot').catch(() => {});
 
   return {
     questionsApi,

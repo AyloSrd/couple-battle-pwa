@@ -15,10 +15,13 @@ const DB_VERSION = 1;
  * never resolves on its own; reject instead so the caller can fall back
  * (rather than hang forever). `blocking` is the mirror case (this tab is the
  * one holding an old connection open against a newer one elsewhere) — close
- * it so the other tab can proceed.
+ * it so the other tab can proceed. Once we've rejected on `blocked`, an open
+ * that succeeds later (the other tab closed) has no caller left: close it
+ * rather than leak the connection.
  */
 export function openSaveDb(): Promise<IDBPDatabase> {
   return new Promise((resolve, reject) => {
+    let settled = false;
     openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains(STORE)) {
@@ -26,12 +29,16 @@ export function openSaveDb(): Promise<IDBPDatabase> {
         }
       },
       blocked(_currentVersion, _blockedVersion, _event) {
+        settled = true;
         reject(new Error('openSaveDb: blocked by another open connection'));
       },
       blocking(_currentVersion, _blockedVersion, event) {
         (event.target as IDBDatabase).close();
       },
-    }).then(resolve, reject);
+    }).then((db) => {
+      if (settled) db.close();
+      else resolve(db);
+    }, reject);
   });
 }
 

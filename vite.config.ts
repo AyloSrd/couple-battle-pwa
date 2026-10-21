@@ -1,6 +1,6 @@
-/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
+import { configDefaults } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -100,5 +100,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: false,
+    // Agent worktrees live under .claude/ with their own node_modules — never run their tests here.
+    exclude: [...configDefaults.exclude, '.claude/**'],
   },
 });
