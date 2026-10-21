@@ -37,6 +37,9 @@ class Engine {
   musicTimer: ReturnType<typeof setInterval> | null = null;
   musicGain: GainNode | null = null;
   currentMusic: TMusicId | null = null;
+  // Voices of the music loop scheduled ahead (up to a whole loop pass) — kept so
+  // `music()` can stop them right away instead of letting them run out silently.
+  musicVoices = new Set<OscillatorNode>();
 
   unlock() {
     if (!this.ctx) {
@@ -49,8 +52,18 @@ class Engine {
       this.master = this.ctx.createGain();
       this.master.gain.value = this.baseVolume;
       this.master.connect(this.ctx.destination);
+      // A running context keeps the audio thread (and battery) busy even while
+      // silent: suspend it whenever the app is hidden, resume when back in view.
+      // Without a user gesture the resume may be refused — the next tap's
+      // `unlock()` retries it.
+      document.addEventListener('visibilitychange', () => {
+        if (!this.ctx) return;
+        if (document.visibilityState === 'hidden') this.ctx.suspend().catch(() => {});
+        else if (this.enabled) this.ctx.resume().catch(() => {});
+      });
     }
-    if (this.ctx.state === 'suspended') this.ctx.resume();
+    // 'interrupted' is iOS Safari's state after a call or screen lock.
+    if (this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
   }
 
   setEnabled(on: boolean) {
@@ -82,6 +95,7 @@ class Engine {
     o.connect(g).connect(out || this.master!);
     o.start(now);
     o.stop(now + dur + 0.02);
+    return o;
   }
 
   noise({ t = 0, dur = 0.1, vol = 0.4, hp = 800, lpFrom = null, lpTo = null }: TNoiseOpts) {
@@ -186,6 +200,14 @@ class Engine {
       this.musicGain.disconnect();
       this.musicGain = null;
     }
+    for (const o of this.musicVoices) {
+      try {
+        o.stop();
+      } catch {
+        // already stopped — ignore.
+      }
+    }
+    this.musicVoices.clear();
     if (!id || !this.enabled) return;
     this.unlock();
     if (!this.ctx) return; // no AudioContext available — nothing to loop
@@ -225,7 +247,9 @@ class Engine {
     let nextBar = this.ctx!.currentTime + 0.05;
     const scheduleBar = (at: number) => {
       L.notes.forEach(([b, f, d, type]) => {
-        this.tone({ freq: f, t: (at - this.ctx!.currentTime) + b * beat, dur: d * beat * 0.9, type, vol: type === 'square' ? 0.16 : 0.22, out: bus });
+        const o = this.tone({ freq: f, t: (at - this.ctx!.currentTime) + b * beat, dur: d * beat * 0.9, type, vol: type === 'square' ? 0.16 : 0.22, out: bus });
+        this.musicVoices.add(o);
+        o.onended = () => this.musicVoices.delete(o);
       });
     };
     scheduleBar(nextBar);
