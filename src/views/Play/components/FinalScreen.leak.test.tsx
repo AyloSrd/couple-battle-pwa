@@ -1,18 +1,20 @@
 import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
 import { SoundApiProvider } from '@/shared/sound';
 import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import type { TGameState } from '../domain/machine';
 import { FinalScreen } from './FinalScreen';
 
+const roster = [
+  { teamId: 't1', avatarId: 'lions', players: ['Ana', 'Bob'] },
+  { teamId: 't2', avatarId: 'bears', players: ['Cleo', 'Dan'] },
+] as const;
+
 const state = {
   kind: 'final',
-  roster: [
-    { teamId: 't1', avatarId: 'lions', players: ['Ana', 'Bob'] },
-    { teamId: 't2', avatarId: 'bears', players: ['Cleo', 'Dan'] },
-  ],
+  roster: roster.map((r) => ({ ...r, players: [...r.players] as [string, string] })),
   mode: 'dilemma',
   difficulty: 'easy',
   themes: [],
@@ -20,46 +22,48 @@ const state = {
   scores: { t1: 3, t2: 3 },
 } as unknown as Extract<TGameState, { kind: 'final' }>;
 
-type TCounts = Record<string, number>;
-// React DOM installs one permanent document-level `selectionchange` listener per document
-// (framework-owned, not ours) — ignore it so only our own subscriptions are compared.
-const FRAMEWORK_EVENTS = new Set(['selectionchange']);
-function tally(spy: { mock: { calls: unknown[][] } }): TCounts {
-  const out: TCounts = {};
+/** Per-event add/remove counts. React DOM registers one permanent `selectionchange`
+ *  listener on the document per root (its own, never removed) — not the component's. */
+function tally(spy: { mock: { calls: unknown[][] } }) {
+  const counts: Record<string, number> = {};
   for (const [type] of spy.mock.calls) {
-    const key = String(type);
-    if (!FRAMEWORK_EVENTS.has(key)) out[key] = (out[key] ?? 0) + 1;
+    if (type === 'selectionchange') continue;
+    counts[String(type)] = (counts[String(type)] ?? 0) + 1;
   }
-  return out;
+  return counts;
 }
 
 describe('FinalScreen — leaks', () => {
-  beforeEach(() => vi.useFakeTimers());
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
-  it('leaves no timer and no unbalanced listener after unmount (StrictMode)', () => {
+  it('leaves no timer and no unbalanced listener after unmount (StrictMode, tie)', () => {
     const winAdd = vi.spyOn(window, 'addEventListener');
     const winRemove = vi.spyOn(window, 'removeEventListener');
     const docAdd = vi.spyOn(document, 'addEventListener');
     const docRemove = vi.spyOn(document, 'removeEventListener');
 
-    const view = render(
+    const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="en">
+        <LangProvider initialLang="fr">
           <SoundApiProvider api={createSoundNoopApi()}>
             <FinalScreen state={state} onRematch={() => {}} onNewGame={() => {}} />
           </SoundApiProvider>
         </LangProvider>
       </StrictMode>,
     );
-    vi.advanceTimersByTime(10_000);
-    view.unmount();
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    unmount();
 
     expect(vi.getTimerCount()).toBe(0);
-    expect(tally(winRemove)).toEqual(tally(winAdd));
-    expect(tally(docRemove)).toEqual(tally(docAdd));
+    expect(tally(winAdd)).toEqual(tally(winRemove));
+    expect(tally(docAdd)).toEqual(tally(docRemove));
   });
 });

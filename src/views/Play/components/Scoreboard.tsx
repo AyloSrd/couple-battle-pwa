@@ -3,6 +3,7 @@ import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { rankTeams, type TGameState } from '../domain/machine';
+import '../results.css';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'scoreboard' }>;
@@ -22,8 +23,8 @@ export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
   }, [sound]);
 
   return (
-    <>
-      <h1 className="cb-title">{t('score.title', { n: state.round + 1 })}</h1>
+    <div className="cb-v-score">
+      <h1 className="cb-title cb-score-title">{t('score.title', { n: state.round + 1 })}</h1>
 
       <div className="cb-rows">
         {ranked.map((row) => {
@@ -42,7 +43,7 @@ export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
       </div>
 
       {state.roster.length > 1 && (
-        <p className="cb-muted cb-center" style={{ margin: 0 }}>
+        <p className="cb-score-note">
           {allTied
             ? t('score.tied')
             : leader
@@ -51,8 +52,7 @@ export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
         </p>
       )}
 
-      <div className="cb-grow" />
       <PixelButton onClick={onNext}>{t('score.next')}</PixelButton>
-    </>
+    </div>
   );
 };
