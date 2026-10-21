@@ -10,7 +10,7 @@ type TTeamArtProps = {
   /**
    * tile     — square portrait inside a setup tile (256 / 384 @2x)
    * avatar   — 44px face-crop of the portrait for score rows / chips (256)
-   * avatarLg — 112px face-crop for gates / handoffs (256)
+   * avatarLg — 112px face-crop for gates / handoffs (384)
    * hero     — the big full-body slot: winner, active finale team (512, 2:3)
    */
   variant: 'tile' | 'avatar' | 'avatarLg' | 'hero';
@@ -58,13 +58,14 @@ export const TeamArt: FC<TTeamArtProps> = ({ teamId, label, variant, className }
     );
   }
 
-  // avatar / avatarLg — portrait, face crop
+  // avatar / avatarLg — portrait, face crop (the 112px large avatar takes the 384 for 3x screens)
+  const face = variant === 'avatarLg' ? (teamArtUrl(teamId, 'portrait', 384) ?? small) : small;
   return (
     <span
       className={['cb-avatar', variant === 'avatarLg' ? 'cb-avatar--lg' : '', className ?? ''].filter(Boolean).join(' ')}
       aria-hidden="true"
     >
-      {small ? <img src={small} alt="" draggable={false} /> : initial}
+      {face ? <img src={face} alt="" draggable={false} /> : initial}
     </span>
   );
 };

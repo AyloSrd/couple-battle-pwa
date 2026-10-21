@@ -65,7 +65,21 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Precache everything — the game must be 100% playable offline after first load.
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico,woff2,json,mp4}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico,woff2,json}'],
+        // The splash video is NOT precached: iOS Safari only plays media answered with byte
+        // ranges, which the precache route cannot do. It is cached at runtime instead (the
+        // splash warms it with one full GET) and served with range support from that cache.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.endsWith('.mp4'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'cb-media',
+              rangeRequests: true,
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
         navigateFallback: `${BASE}index.html`,
       },
       includeAssets: ['favicon-32.png', 'apple-touch-icon.png'],
