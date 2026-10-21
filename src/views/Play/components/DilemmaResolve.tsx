@@ -1,7 +1,8 @@
 import type { FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { PixelPanel, PixelButton, TeamArt } from '@/shared/Chrome';
-import { dilemmaQuestion, questionText, type TGameState, type TResult } from '../domain/machine';
+import { PixelPanel, PixelButton, TeamArt, Chip, ProgressDots, modeIconSmall } from '@/shared/Chrome';
+import { dilemmaQuestion, dilemmaTotal, questionText, type TGameState, type TResult } from '../domain/machine';
+import '../dilemma.css';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'resolve' }>;
@@ -13,17 +14,23 @@ export const DilemmaResolve: FC<TProps> = ({ state, onConfirm }) => {
   const t = useT();
   const active = state.roster[state.coupleIdx];
   const question = dilemmaQuestion(state);
+  const total = dilemmaTotal(state.mode, state.deck.length);
   const confirmedTeams = state.roster.slice(0, state.coupleIdx);
 
   const handleMatch = () => onConfirm('match');
   const handleMiss = () => onConfirm('miss');
 
   return (
-    <>
+    <div className="cb-v-dilemma cb-v-dilemma--resolve">
+      <div className="cb-topbar">
+        <Chip icon={modeIconSmall('dilemma')}>{t('mode.dilemma.name')}</Chip>
+        <ProgressDots total={total} current={state.questionIdx} />
+      </div>
+
       {confirmedTeams.length > 0 && (
-        <div className="cb-stack" style={{ gap: 'var(--cb-s2)' }}>
+        <div className="cb-v-confirmed">
           <span className="cb-muted">{t('resolve.confirmed')}</span>
-          <div style={{ display: 'flex', gap: 'var(--cb-s2)', flexWrap: 'wrap' }}>
+          <div className="cb-v-badges">
             {confirmedTeams.map((team) => {
               const match = state.results[team.teamId] === 'match';
               return (
@@ -38,14 +45,14 @@ export const DilemmaResolve: FC<TProps> = ({ state, onConfirm }) => {
       )}
 
       {active && (
-        <PixelPanel className="cb-stack" style={{ justifyItems: 'center', textAlign: 'center', gap: 'var(--cb-s4)' }}>
-          <TeamArt teamId={active.avatarId} label={t(`team.${active.avatarId}` as TStringKey)} variant="avatarLg" />
-          <h2 className="cb-title">{t('resolve.title', { team: t(`team.${active.avatarId}` as TStringKey) })}</h2>
-          <p className="cb-muted" style={{ margin: 0 }}>
-            {questionText(question, 'you')}
-          </p>
-          <p className="cb-body-lg">{t('resolve.question')}</p>
-          <div className="cb-row-2" style={{ width: '100%' }}>
+        <PixelPanel className="cb-v-resolve-card">
+          <div className="cb-v-hero">
+            <TeamArt teamId={active.avatarId} label={t(`team.${active.avatarId}` as TStringKey)} variant="hero" />
+          </div>
+          <h2 className="cb-v-resolve-title">{t('resolve.title', { team: t(`team.${active.avatarId}` as TStringKey) })}</h2>
+          <p className="cb-v-resolve-q">{questionText(question, 'you')}</p>
+          <p className="cb-body-lg cb-v-resolve-ask">{t('resolve.question')}</p>
+          <div className="cb-row-2 cb-v-verdicts">
             <PixelButton variant="positive" onClick={handleMatch}>
               {t('resolve.match')}
             </PixelButton>
@@ -56,10 +63,7 @@ export const DilemmaResolve: FC<TProps> = ({ state, onConfirm }) => {
         </PixelPanel>
       )}
 
-      <div className="cb-grow" />
-      <p className="cb-muted cb-center" style={{ margin: 0 }}>
-        {t('resolve.liarStrip')}
-      </p>
-    </>
+      <p className="cb-muted cb-v-liar">{t('resolve.liarStrip')}</p>
+    </div>
   );
 };
