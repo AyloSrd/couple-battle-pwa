@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton } from '@/shared/Chrome';
+import '../flash.css';
 import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
 
 type TProps = {
@@ -24,14 +25,14 @@ export const GuessReveal: FC<TProps> = ({ state, guesserName, partnerName, onRev
   const handleNo = () => onAutoGuess(t('common.no'));
 
   return (
-    <>
+    <div className="cb-v-flash cb-v-flash--guess">
       <div className="cb-topbar">
         <Chip>{t('flash.side.chip.guessers')}</Chip>
         <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
       </div>
-      <h2 className="cb-h2">{t('guess.turn', { name: guesserName, partner: partnerName })}</h2>
+      <h2 className="cb-h2 cb-flash-lead">{t('guess.turn', { name: guesserName, partner: partnerName })}</h2>
 
-      <PixelPanel>
+      <PixelPanel className="cb-flash-card">
         <p className="cb-question">{questionText(question, 'name', partnerName) || '—'}</p>
       </PixelPanel>
 
@@ -47,13 +48,10 @@ export const GuessReveal: FC<TProps> = ({ state, guesserName, partnerName, onRev
         </div>
       ) : (
         <>
-          <div className="cb-grow" />
-          <p className="cb-muted cb-center" style={{ margin: 0 }}>
-            {t('guess.outloud')}
-          </p>
+          <p className="cb-muted cb-flash-hint">{t('guess.outloud')}</p>
           <PixelButton onClick={onReveal}>{t('guess.reveal')}</PixelButton>
         </>
       )}
-    </>
+    </div>
   );
 };

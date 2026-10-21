@@ -1,8 +1,9 @@
 import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { PixelPanel, PixelButton } from '@/shared/Chrome';
-import { flashQuestion, flashTruth, questionText, type TGameState, type TVerdict } from '../domain/machine';
+import { PixelPanel, PixelButton, Chip, ProgressDots } from '@/shared/Chrome';
+import '../flash.css';
+import { flashQuestion, flashSetSize, flashTruth, questionText, type TGameState, type TVerdict } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'judge' }>;
@@ -25,20 +26,23 @@ export const Judge: FC<TProps> = ({ state, answererName, onJudge }) => {
   const makeVerdict = (verdict: TVerdict) => () => onJudge(verdict);
 
   return (
-    <>
-      <h2 className="cb-h2">{questionText(question, 'name', answererName) || '—'}</h2>
-      <p className="cb-muted" style={{ margin: 0 }}>
+    <div className="cb-v-flash cb-v-flash--judge">
+      <div className="cb-topbar">
+        <Chip>{t('flash.side.chip.guessers')}</Chip>
+        <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
+      </div>
+      <h2 className="cb-h2 cb-flash-lead">{questionText(question, 'name', answererName) || '—'}</h2>
+      <p className="cb-muted cb-flash-hint">
         {t('guess.answerWas', { name: answererName })}
       </p>
 
       {/* the reveal card */}
-      <PixelPanel className="cb-reveal-in cb-center" style={{ padding: 'var(--cb-s7) var(--cb-s5)' }}>
+      <PixelPanel className="cb-flash-card cb-flash-card--reveal cb-reveal-in">
         <p className="cb-question">{answer ?? '—'}</p>
       </PixelPanel>
 
-      <div className="cb-grow" />
-      <p className="cb-label cb-center">{t('judge.title')}</p>
-      <div className="cb-stack" style={{ gap: 'var(--cb-s2)' }}>
+      <p className="cb-label cb-flash-verdict">{t('judge.title')}</p>
+      <div className="cb-stack cb-flash-verdicts">
         <PixelButton variant="positive" onClick={makeVerdict('exact')}>
           {t('judge.exact')}
         </PixelButton>
@@ -49,6 +53,6 @@ export const Judge: FC<TProps> = ({ state, answererName, onJudge }) => {
           {t('judge.miss')}
         </PixelButton>
       </div>
-    </>
+    </div>
   );
 };
