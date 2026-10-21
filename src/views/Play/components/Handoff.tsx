@@ -2,6 +2,7 @@ import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
+import '../flash.css';
 
 type TProps = {
   avatarId: string;
@@ -26,14 +27,12 @@ export const Handoff: FC<TProps> = ({ avatarId, teamName, name, onConfirm }) => 
   }, [sound]);
 
   return (
-    <>
-      <div className="cb-grow" style={{ display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-        <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s4)' }}>
-          <TeamArt teamId={avatarId} label={teamName} variant="avatarLg" />
-          <h2 className="cb-h2">{t('flash.side.next', { name })}</h2>
-        </div>
+    <div className="cb-v-flash cb-v-flash--handoff">
+      <div className="cb-flash-hero">
+        <TeamArt teamId={avatarId} label={teamName} variant="avatarLg" className="cb-reveal-in" />
+        <h2 className="cb-h2">{t('flash.side.next', { name })}</h2>
       </div>
       <PixelButton onClick={onConfirm}>{t('pass.secret.confirm', { name })}</PixelButton>
-    </>
+    </div>
   );
 };

@@ -2,6 +2,7 @@ import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
+import '../flash.css';
 
 type TProps = {
   variant: 'secret' | 'back';
@@ -25,21 +26,19 @@ export const PassPhone: FC<TProps> = ({ variant, avatarId, name, teamName, onCon
   const isSecret = variant === 'secret';
 
   return (
-    <>
-      <div className="cb-grow" style={{ display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-        <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s4)' }}>
-          <TeamArt teamId={avatarId} label={teamName ?? ''} variant="avatarLg" />
-          <h1 className="cb-title">
-            {isSecret ? t('pass.secret.title', { name: name ?? '' }) : t('pass.back.title')}
-          </h1>
-          <p className="cb-muted" style={{ margin: 0 }}>
-            {isSecret ? t('pass.secret.sub', { team: teamName ?? '' }) : t('pass.back.sub')}
-          </p>
-        </div>
+    <div className="cb-v-flash cb-v-flash--passphone">
+      <div className="cb-flash-hero">
+        <TeamArt teamId={avatarId} label={teamName ?? ''} variant="avatarLg" className="cb-reveal-in" />
+        <h1 className="cb-title">
+          {isSecret ? t('pass.secret.title', { name: name ?? '' }) : t('pass.back.title')}
+        </h1>
+        <p className="cb-flash-sub">
+          {isSecret ? t('pass.secret.sub', { team: teamName ?? '' }) : t('pass.back.sub')}
+        </p>
       </div>
       <PixelButton onClick={onConfirm}>
         {isSecret ? t('pass.secret.confirm', { name: name ?? '' }) : t('pass.back.confirm')}
       </PixelButton>
-    </>
+    </div>
   );
 };
