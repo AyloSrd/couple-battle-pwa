@@ -1,0 +1,120 @@
+/* How to play — full-page swipe carousel. Every rule is scoped under .cb-v-howto
+   so nothing leaks to other screens. */
+
+/* One page: the stage fills the viewport and the card takes all the free height. */
+.cb-v-howto {
+  height: 100dvh;
+  min-height: 0;
+  gap: var(--cb-s3);
+}
+
+.cb-v-howto .cb-title {
+  text-align: center;
+}
+
+/* ---------- swipe track (native scroll-snap, no JS drag) ---------- */
+.cb-v-howto .cb-howto-track {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: var(--cb-s4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--cb-s2);
+  scrollbar-width: none;
+  /* room for the card's outline lip + drop shadow, which the scroller would clip.
+     Keep gap == 2 x padding-inline (s4 == 2 x s2): a slide step then equals the
+     track's clientWidth, which is what the view's scroll maths relies on. */
+  margin-inline: calc(var(--cb-s2) * -1);
+  padding: 0 var(--cb-s2) var(--cb-s4);
+}
+.cb-v-howto .cb-howto-track::-webkit-scrollbar {
+  display: none;
+}
+.cb-v-howto .cb-howto-track:focus-visible {
+  outline-offset: 2px;
+  border-radius: var(--cb-r-lg);
+}
+
+/* ---------- one card per mode ---------- */
+.cb-v-howto .cb-howto-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cb-s4);
+  padding: var(--cb-s6) var(--cb-s5);
+  text-align: center;
+  overflow-y: auto; /* safety net on very short screens */
+}
+
+/* the icon takes whatever height the text leaves */
+.cb-v-howto .cb-howto-art {
+  flex: 1 1 0;
+  min-height: 96px;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+.cb-v-howto .cb-howto-art img {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: 260px;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.cb-v-howto .cb-howto-slide .cb-h2 {
+  font-size: var(--cb-fs-h1);
+  line-height: var(--cb-lh-h1);
+}
+
+.cb-v-howto .cb-howto-body {
+  margin: 0;
+  font: 600 clamp(var(--cb-fs-body-lg), 3.1dvh, 24px) / 1.38 var(--cb-font-ui);
+  text-wrap: pretty;
+}
+
+/* ---------- dots (tappable) ---------- */
+.cb-v-howto .cb-howto-dots {
+  display: flex;
+  justify-content: center;
+}
+.cb-v-howto .cb-howto-dot {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  width: var(--cb-target-min);
+  height: var(--cb-target-min);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.cb-v-howto .cb-howto-dot::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transition:
+    transform var(--cb-t-tap) var(--cb-ease-out),
+    background-color var(--cb-t-tap) var(--cb-ease-out);
+}
+.cb-v-howto .cb-howto-dot[aria-current='true']::before {
+  background: var(--cb-pink);
+  box-shadow: 0 0 0 2px #ffffff;
+  transform: scale(1.2);
+}
+
+.cb-v-howto .cb-howto-hint {
+  margin: 0;
+  font-size: var(--cb-fs-body);
+  line-height: var(--cb-lh-body);
+}
