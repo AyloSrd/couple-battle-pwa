@@ -45,7 +45,7 @@
 
   /* ---------- text, on stage (default) and on surfaces (scoped in chrome.css) ---------- */
   --cb-on-stage: #FFFFFF;
-  --cb-on-stage-muted: rgba(255, 255, 255, .84);   /* ≥ 4.5:1 on every stage stop */
+  --cb-on-stage-muted: rgba(255, 255, 255, .88);   /* ≥ 4.5:1 on the calm stage incl. rays; burst re-scopes it */
   --cb-on-stage-border: rgba(255, 255, 255, .30);
   --cb-on-surface: var(--cb-eggplant);
   --cb-on-surface-body: var(--cb-ink);
@@ -80,7 +80,7 @@
   --cb-win-grad: var(--cb-action-grad);
   --cb-points: var(--cb-gold);
 
-  --cb-chip-bg: var(--cb-pink);
+  --cb-chip-bg: var(--cb-pink-deep);                /* white text 4.8:1 (pink #FF3FA4 was 3.2:1) */
   --cb-chip-text: #FFFFFF;
 
   /* verdict text: on stage pastel, on surface dark (scoped) */
