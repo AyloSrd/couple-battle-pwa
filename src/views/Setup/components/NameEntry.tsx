@@ -36,12 +36,9 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
 
   return (
     <>
-      <div style={{ display: 'grid', justifyItems: 'center', gap: 'var(--cb-s3)' }}>
-        {state.avatar && <TeamArt teamId={state.avatar} label={teamName} variant="avatarLg" />}
-        <h1 className="cb-title cb-center">{t('setup.names.title', { team: teamName })}</h1>
-      </div>
+      <h1 className="cb-title">{t('setup.names.title', { team: teamName })}</h1>
 
-      <PixelPanel className="cb-stack">
+      <PixelPanel className="cb-stack cb-v-setup__form">
         <Field
           placeholder={t('setup.names.p1')}
           value={state.name1}
@@ -69,7 +66,9 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
         {state.error && <p className="cb-field-error">{t(ERROR_KEY[state.error])}</p>}
       </PixelPanel>
 
-      <div className="cb-grow" />
+      <div className="cb-v-setup__hero">
+        {state.avatar && <TeamArt teamId={state.avatar} label={teamName} variant="hero" />}
+      </div>
       <PixelButton onClick={onConfirm}>{isLastCouple(state) ? t('setup.ready') : t('common.next')}</PixelButton>
     </>
   );
