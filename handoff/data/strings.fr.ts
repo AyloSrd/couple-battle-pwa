@@ -111,6 +111,8 @@ export const fr = {
   "results.newgame": "Nouvelle partie",
   "results.rematch": "REVANCHE !",
   "results.stat.synchro": "Meilleure synchro : {team}",
+  "results.tie": "🤝 Ex æquo : {teams} !",
+  "results.tie.sub": "Égalité parfaite à {score} pts — personne ne lâche.",
   "results.winner": "👑 {team} remporte la bataille !",
   "results.winner.sub": "{name1} & {name2}, duo légendaire.",
   "score.leader": "{team} mène la danse !",

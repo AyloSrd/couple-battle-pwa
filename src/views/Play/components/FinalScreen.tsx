@@ -1,8 +1,9 @@
 import { useEffect, type FC } from 'react';
-import { useT, type TStringKey } from '@/shared/i18n';
+import { useLang, useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { rankTeams, type TGameState } from '../domain/machine';
+import { joinNames, resolveOutcome } from '../domain/outcome';
 
 /** Solo record outcome (only for a 1-couple game). */
 export type TSoloResult = { isBest: boolean; points: number; best: number };
@@ -17,10 +18,32 @@ type TFinalScreenProps = {
 /** V-FinalResults — the winner on the sunburst (burst). Fanfare once on mount. */
 export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame, solo }) => {
   const t = useT();
+  const { lang } = useLang();
   const sound = useSoundApi();
   const ranked = rankTeams(state);
-  const winner = ranked[0];
+  const outcome = resolveOutcome(ranked);
+  const winner = outcome?.kind === 'winner' ? outcome.winner : undefined;
   const allTied = ranked.every((r) => r.isWinner);
+  const teamLabel = (avatarId: string) => t(`team.${avatarId}` as TStringKey);
+  const headline = !outcome
+    ? null
+    : outcome.kind === 'winner'
+      ? {
+          title: t('results.winner', { team: teamLabel(outcome.winner.team.avatarId) }),
+          sub: t('results.winner.sub', {
+            name1: outcome.winner.team.players[0],
+            name2: outcome.winner.team.players[1],
+          }),
+        }
+      : {
+          title: t('results.tie', {
+            teams: joinNames(
+              outcome.teams.map((r) => teamLabel(r.team.avatarId)),
+              lang,
+            ),
+          }),
+          sub: t('results.tie.sub', { score: outcome.score }),
+        };
 
   useEffect(() => {
     sound.play('mus.fanfare');
@@ -47,16 +70,13 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
               : t('results.solo.notBest', { points: solo.points, best: solo.best })}
           </h1>
         ) : (
-          winner && (
+          headline && (
             <>
               <h1 className="cb-verdict" style={{ color: 'var(--cb-text)' }}>
-                {t('results.winner', { team: t(`team.${winner.team.avatarId}` as TStringKey) })}
+                {headline.title}
               </h1>
               <p className="cb-muted" style={{ margin: 0 }}>
-                {t('results.winner.sub', {
-                  name1: winner.team.players[0],
-                  name2: winner.team.players[1],
-                })}
+                {headline.sub}
               </p>
             </>
           )

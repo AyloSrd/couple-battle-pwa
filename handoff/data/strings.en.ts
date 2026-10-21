@@ -111,6 +111,8 @@ export const en = {
   "results.newgame": "New game",
   "results.rematch": "REMATCH!",
   "results.stat.synchro": "Best sync: {team}",
+  "results.tie": "🤝 It's a tie: {teams}!",
+  "results.tie.sub": "Dead heat at {score} pts — nobody blinks.",
   "results.winner": "👑 {team} wins the battle!",
   "results.winner.sub": "{name1} & {name2}, legendary duo.",
   "score.leader": "{team} leads the pack!",
