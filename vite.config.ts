@@ -71,7 +71,8 @@ export default defineConfig({
         // splash warms it with one full GET) and served with range support from that cache.
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.endsWith('.mp4'),
+            // Same-origin only: never cache (or serve from cache) a cross-origin clip.
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.endsWith('.mp4'),
             handler: 'CacheFirst',
             options: {
               // Replacing a clip? Give it a new file name: entries are keyed by URL.

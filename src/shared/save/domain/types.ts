@@ -4,6 +4,7 @@ import {
   ZGameDifficultySchema,
   ZThemeIdSchema,
   ZRosterSchema,
+  THEME_IDS,
 } from '@/shared/game/domain/types';
 import { ZQuestionSchema } from '@/shared/questions/domain/types';
 import { Lang } from '@/shared/i18n/domain/types';
@@ -21,8 +22,10 @@ export const ZSettingsSchema = z.object({
 });
 export type TSettings = z.infer<typeof ZSettingsSchema>;
 
-/** Global set of already-seen question ids (language-independent). */
-export const ZSeenQuestionIdsSchema = z.array(z.number().int().positive());
+/** Global set of already-seen question ids (language-independent). Bounded well above
+ *  the real pool (1,035 ids) so a tampered record cannot grow without limit. */
+export const SEEN_QUESTION_IDS_MAX = 10_000;
+export const ZSeenQuestionIdsSchema = z.array(z.number().int().positive()).max(SEEN_QUESTION_IDS_MAX);
 export type TSeenQuestionIds = z.infer<typeof ZSeenQuestionIdsSchema>;
 
 /** Which per-mode guideline screens the player has dismissed. */
@@ -65,22 +68,25 @@ export type TCursor = z.infer<typeof ZCursorSchema>;
  *  - secretAnswers keys are `answerKey(teamId, questionId)` (e.g. `t4|1035`),
  *    values are typed answers (input `maxLength` 40), yes/no, or a player name;
  *  - scores are keyed by roster teamIds (`t1`..`t4`);
+ *  - themes ⊆ THEME_IDS; secretAnswers ≤ 4 couples × 64 questions entries;
+ *  - confirmed is keyed by roster teamIds, like scores;
  *  - cursor: coupleIdx indexes the roster, round ≤ 3 (Ultime's last round),
  *    questionIdx ≤ 64. `questionIdx < deck.length` is deliberately NOT checked:
  *    a short draw (small pool) legitimately runs past the deck.
  */
+const SECRET_ANSWERS_MAX = 4 * 64;
 export const ZGameSnapshotSchema = z.object({
   roster: ZRosterSchema,
   mode: ZModeSchema,
   difficulty: ZGameDifficultySchema,
-  themes: z.array(ZThemeIdSchema),
+  themes: z.array(ZThemeIdSchema).max(THEME_IDS.length),
   deck: z.array(ZQuestionSchema).max(64),
   cursor: ZCursorSchema,
   scores: z.record(z.string().regex(/^t[1-4]$/), z.number().int()),
   secretAnswers: z.record(z.string().max(32), z.string().max(40)),
   // Dilemma resolve: per-couple match/miss for the current question (so a
   // mid-resolve refresh restores the confirmed couples' badges).
-  confirmed: z.record(z.string(), z.enum(['match', 'miss'])).default({}),
+  confirmed: z.record(z.string().regex(/^t[1-4]$/), z.enum(['match', 'miss'])).default({}),
   // Epoch ms of the write. A snapshot older than the resume window (or dated
   // implausibly in the future) is dropped on read — see `isSnapshotStale`.
   // Required: a pre-`savedAt` record fails the schema and self-heals away.
@@ -94,6 +100,9 @@ export const ZGameSnapshotSchema = z.object({
   }
   if (s.cursor.questionIdx > 64) {
     ctx.addIssue({ code: 'custom', path: ['cursor', 'questionIdx'], message: 'questionIdx out of range' });
+  }
+  if (Object.keys(s.secretAnswers).length > SECRET_ANSWERS_MAX) {
+    ctx.addIssue({ code: 'custom', path: ['secretAnswers'], message: 'too many secret answers' });
   }
 });
 export type TGameSnapshot = z.infer<typeof ZGameSnapshotSchema>;
