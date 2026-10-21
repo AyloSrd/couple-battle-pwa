@@ -1,0 +1,44 @@
+/* V-About — the Ninou poster + credits. Scoped under `.cb-v-about`; tokens only (rgba shadows
+   aside). The card is cream, so its text is eggplant (scoped tokens). */
+
+.cb-v-about .cb-v-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cb-s4);
+  padding: var(--cb-s4);
+  box-shadow: inset 0 -4px 0 rgba(42, 11, 143, 0.07), var(--cb-e2);
+}
+/* the poster (496:864, black) uses the height the rest of the page leaves; ratio kept, never cropped */
+.cb-v-about .cb-v-poster {
+  display: block;
+  height: clamp(180px, calc(100dvh - 345px), 480px);
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 496 / 864;
+  object-fit: contain;
+  border-radius: var(--cb-r-md);
+  border: var(--cb-outline-w) solid var(--cb-outline);
+  background: #000;
+}
+.cb-v-about .cb-v-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cb-s2);
+  width: 100%;
+  text-align: center;
+}
+.cb-v-about .cb-v-name {
+  margin: 0;
+  font: 800 var(--cb-fs-h2) / var(--cb-lh-h2) var(--cb-font-display);
+  letter-spacing: var(--cb-tracking-display);
+  color: var(--cb-text);
+}
+.cb-v-about .cb-v-credits {
+  margin: 0;
+  font: 700 var(--cb-fs-body-lg) / var(--cb-lh-body-lg) var(--cb-font-ui);
+  color: var(--cb-text-muted);
+}

@@ -45,7 +45,7 @@ describe('save queries + mutations (memory adapter)', () => {
   });
 
   it('reflects a seeded fixture', async () => {
-    renderWithSave(<SettingsProbe />, createSaveMemoryApi({ settings: { lang: 'en', sound: false } }));
+    renderWithSave(<SettingsProbe />, createSaveMemoryApi({ settings: { lang: 'en', sound: false, vibration: true } }));
     expect(await screen.findByTestId('lang')).toHaveTextContent('en');
     expect(screen.getByTestId('sound')).toHaveTextContent('false');
   });

@@ -1,5 +1,9 @@
 // Generated from docs/copy-assets.md — edit copy there, regenerate here.
 export const fr = {
+  "about.credits": "Un jeu signé Ninou Games",
+  "about.poster.alt": "Affiche Ninou Games",
+  "about.title": "À propos",
+  "about.version": "Version {version}",
   "app.name": "Couple Battle",
   "app.tagline": "Qui de vous deux connaît mieux l'autre ?",
   "common.back": "Retour",
@@ -141,6 +145,7 @@ export const fr = {
   "secret.progress": "Question {n}/{total}",
   "secret.submit": "Verrouiller ma réponse 🔒",
   "secret.title": "Chut, c'est secret 🤫",
+  "settings.about": "À propos",
   "settings.language": "Langue",
   "settings.legal": "Mentions légales",
   "settings.resetSeen": "Réinitialiser les questions vues",
@@ -150,6 +155,9 @@ export const fr = {
   "settings.sound.off": "Coupés",
   "settings.sound.on": "Activés",
   "settings.title": "Réglages",
+  "settings.vibration": "Vibrations",
+  "settings.vibration.off": "Coupées",
+  "settings.vibration.on": "Activées",
   "setup.couples.count": "Combien de duos ?",
   "setup.couples.solo.hint": "À deux ? Mode duel : battez votre record !",
   "setup.names.p1": "Prénom joueur·euse 1",

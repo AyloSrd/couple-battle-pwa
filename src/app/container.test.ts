@@ -46,7 +46,7 @@ describe('createContainer("memory")', () => {
 
   it('returns save defaults and the sound/wake-lock twins are inert', async () => {
     const c = await createContainer('memory');
-    await expect(c.saveApi.get('settings')).resolves.toEqual({ lang: 'fr', sound: true });
+    await expect(c.saveApi.get('settings')).resolves.toEqual({ lang: 'fr', sound: true, vibration: true });
     expect(() => c.soundApi.play('sfx.tap')).not.toThrow();
     await expect(c.wakeLockApi.request()).resolves.toBeUndefined();
     await expect(c.wakeLockApi.release()).resolves.toBeUndefined();
@@ -63,7 +63,7 @@ describe('createContainer() (persistent) when openSaveDb fails', () => {
     expect(idbMocks.createSaveIdbApi).not.toHaveBeenCalled();
     expect(soundMocks.createSoundWebAudioApi).toHaveBeenCalled();
     expect(wakeLockMocks.createWakeLockBrowserApi).toHaveBeenCalled();
-    await expect(c.saveApi.get('settings')).resolves.toEqual({ lang: 'fr', sound: true });
+    await expect(c.saveApi.get('settings')).resolves.toEqual({ lang: 'fr', sound: true, vibration: true });
     expect(warnSpy).toHaveBeenCalledTimes(1);
 
     warnSpy.mockRestore();

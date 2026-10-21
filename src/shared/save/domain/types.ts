@@ -8,10 +8,16 @@ import {
 import { ZQuestionSchema } from '@/shared/questions/domain/types';
 import { Lang } from '@/shared/i18n/domain/types';
 
-/** User settings. */
+/**
+ * User settings. `vibration` (haptics on the countdown) was added after launch: a save written
+ * before it existed has no such field and must keep parsing — it defaults to on. A non-boolean
+ * value also falls back to on, so one bad field never costs the player their language/sound
+ * (the idb adapter would otherwise drop the whole settings record on a parse failure).
+ */
 export const ZSettingsSchema = z.object({
   lang: z.enum([Lang.Fr, Lang.En]),
   sound: z.boolean(),
+  vibration: z.boolean().catch(true),
 });
 export type TSettings = z.infer<typeof ZSettingsSchema>;
 
@@ -116,7 +122,7 @@ export const SAVE_SCHEMAS = {
 
 /** Defaults returned when a key has never been written. */
 export const SAVE_DEFAULTS: TSaveShape = {
-  settings: { lang: Lang.Fr, sound: true },
+  settings: { lang: Lang.Fr, sound: true, vibration: true },
   seenQuestionIds: [],
   guidelinesSeen: { flash: false, dilemma: false, ultime: false },
   soloBest: { flash: 0, dilemma: 0, ultime: 0 },
