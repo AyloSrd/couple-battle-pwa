@@ -65,6 +65,11 @@
 }
 
 /* ---------- V-Countdown (burst stage) ---------- */
+/* the bigger bloom (130vw) is wider than a phone: clip it to the page box, or the document
+   becomes horizontally pannable during the countdown */
+.cb-v-dilemma--count {
+  overflow: clip;
+}
 .cb-v-dilemma--count .cb-glow {
   width: min(480px, 130vw);
   height: min(480px, 130vw);
