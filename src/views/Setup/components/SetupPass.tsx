@@ -29,16 +29,13 @@ export const SetupPass: FC<TProps> = ({ nextCoupleNumber, onConfirm }) => {
 
   return (
     <>
-      <div className="cb-grow" style={{ display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-        <div className="cb-stack" style={{ justifyItems: 'center', gap: 'var(--cb-s4)' }}>
-          <div className="cb-char-placeholder" aria-hidden="true" style={{ fontSize: 'var(--cb-fs-display-xl)', width: 'min(50%, 200px)' }}>
-            {nextCoupleNumber}
-          </div>
-          <span className="cb-label" style={{ color: 'var(--cb-text-muted)' }}>
-            {duoLabel(t('setup.team.pick', { n: nextCoupleNumber }))}
-          </span>
-          <h1 className="cb-title">{t('setup.pass.title')}</h1>
-        </div>
+      <div className="cb-glow" aria-hidden="true" />
+      <div className="cb-v-setup__pass">
+        <span className="cb-label cb-v-setup__pass-label">{duoLabel(t('setup.team.pick', { n: nextCoupleNumber }))}</span>
+        <span className="cb-numeral" aria-hidden="true">
+          {nextCoupleNumber}
+        </span>
+        <h1 className="cb-title">{t('setup.pass.title')}</h1>
       </div>
       <PixelButton onClick={onConfirm}>{t('setup.pass.confirm')}</PixelButton>
     </>

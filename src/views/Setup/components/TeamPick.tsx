@@ -1,9 +1,10 @@
 import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
-import { AVATAR_IDS, type TAvatarId } from '@/shared/game';
+import type { TAvatarId } from '@/shared/game';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { takenAvatars, type TSetupState } from '../domain/machine';
+import { PICKER_TEAMS } from '../domain/pickerTeams';
 
 type TProps = {
   state: TSetupState;
@@ -18,7 +19,7 @@ function pickTitle(full: string): string {
 }
 
 /**
- * Step A — TEAM PICK. 2-column grid of team tiles (art or placeholder initial,
+ * Step A — TEAM PICK. All teams on one page: a 3×2 grid of team tiles (art or placeholder initial,
  * name in Inter underneath). Tapping a free tile SELECTS it (no auto-advance);
  * taken tiles are disabled; the pinned "Suivant" advances.
  */
@@ -46,12 +47,12 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
 
   return (
     <>
-      <h1 className="cb-title cb-cap" style={{ marginBottom: 'var(--cb-s2)' }}>
+      <h1 className="cb-title cb-cap cb-v-setup__title--sm">
         {pickTitle(t('setup.team.pick', { n: state.coupleIdx + 1 }))}
       </h1>
 
-      <div className="cb-teams" style={{ flex: 1, alignContent: 'start' }}>
-        {AVATAR_IDS.map((id) => {
+      <div className="cb-teams cb-v-setup__teams">
+        {PICKER_TEAMS.map((id) => {
           const isTaken = taken.has(id);
           const isSelected = state.avatar === id;
           const name = t(`team.${id}` as TStringKey);
@@ -73,7 +74,7 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
       </div>
 
       {toast && (
-        <div className="cb-toast cb-toast--error" role="status">
+        <div className="cb-toast cb-toast--error cb-v-setup__toast" role="status">
           {t('setup.team.taken')}
         </div>
       )}
