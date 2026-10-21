@@ -1,0 +1,140 @@
+/* Home — the keyart: lightning stage, logo, the four characters, a big gold PLAY, then
+   "? How to play | gear". Every rule is scoped under .cb-v-home so nothing leaks to other
+   screens. Tokens only (rgba shadows aside). Fits one page down to ~640px tall; the stack
+   (logo / characters) flexes, the controls keep their size. */
+
+/* ---------- stage: the lightning art, full-bleed over the violet fallback ---------- */
+.cb-v-home.cb-page {
+  background:
+    url('../../assets/art/bg-home-720.webp') center bottom / cover no-repeat,
+    var(--cb-bg-calm) var(--cb-bg);
+  gap: var(--cb-s3);
+  padding-top: calc(var(--cb-s5) + env(safe-area-inset-top));
+  overflow-x: clip;
+}
+@media (min-width: 481px), (min-resolution: 1.5dppx) {
+  .cb-v-home.cb-page {
+    background:
+      url('../../assets/art/bg-home-1024.webp') center bottom / cover no-repeat,
+      var(--cb-bg-calm) var(--cb-bg);
+  }
+}
+
+/* language chip floats over the art, top-right, so it costs no vertical space */
+.cb-v-home .cb-topbar {
+  position: absolute;
+  top: calc(var(--cb-s3) + env(safe-area-inset-top));
+  right: calc(var(--cb-page-x) + env(safe-area-inset-right));
+  min-height: 0;
+  z-index: 1;
+}
+
+/* ---------- logo + characters: the flexing middle ---------- */
+.cb-v-home .cb-v-home-logo {
+  flex: none;
+  width: auto;
+  max-width: 100%;
+  height: clamp(110px, 25dvh, 250px);
+}
+.cb-v-home .cb-v-home-stage {
+  flex: 1;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* edge to edge: the duo-of-duos uses the full width of the column */
+.cb-v-home .cb-v-home-chars {
+  flex: none;
+  width: calc(100% + 2 * var(--cb-page-x));
+  max-width: none;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 22px rgba(10, 2, 40, 0.45));
+}
+
+/* ---------- PLAY: big, gaming ---------- */
+.cb-v-home .cb-v-home-play {
+  width: min(100%, 360px);
+  margin-inline: auto;
+  min-height: clamp(72px, 12dvh, 96px);
+  font: 800 var(--cb-fs-display-lg) / 1 var(--cb-font-display);
+  letter-spacing: var(--cb-tracking-display);
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.45);
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.55),
+    0 var(--cb-lip) 0 var(--cb-outline),
+    0 0 32px rgba(255, 194, 31, 0.55),
+    0 12px 20px rgba(20, 5, 74, 0.4);
+}
+.cb-v-home .cb-v-home-play:active:not(:disabled) {
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.55),
+    0 1px 0 var(--cb-outline);
+}
+
+/* ---------- "? How to play | gear" ---------- */
+.cb-v-home .cb-v-home-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cb-s3);
+  flex: none;
+  padding-top: var(--cb-s1);
+}
+.cb-v-home .cb-v-home-round {
+  appearance: none;
+  flex: none;
+  width: var(--cb-target-min);
+  height: var(--cb-target-min);
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 3px solid var(--cb-text);
+  background: rgba(20, 5, 74, 0.45);
+  color: var(--cb-text);
+  font: 800 28px / 1 var(--cb-font-display);
+  box-shadow:
+    0 3px 0 var(--cb-outline),
+    0 8px 14px rgba(20, 5, 74, 0.35);
+  cursor: pointer;
+  transition: transform var(--cb-t-tap) var(--cb-ease-out);
+}
+.cb-v-home button.cb-v-home-round:active,
+.cb-v-home .cb-v-home-howto:active .cb-v-home-round {
+  transform: translateY(2px);
+}
+.cb-v-home .cb-v-home-howto {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  min-height: var(--cb-target-min);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cb-s2);
+  color: var(--cb-text);
+  cursor: pointer;
+}
+.cb-v-home .cb-v-home-howto-label {
+  font: 800 var(--cb-fs-body-lg) / 1.15 var(--cb-font-display);
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  text-align: left;
+}
+.cb-v-home .cb-v-home-divider {
+  flex: none;
+  width: 2px;
+  height: 40px;
+  background: var(--cb-text-muted);
+  opacity: 0.6;
+}
+
+/* ---------- resume / install panels ---------- */
+.cb-v-home .cb-v-home-panel p {
+  margin: 0;
+}

@@ -165,6 +165,7 @@ export const en = {
   "sfx.tap": "5ms square blip, ~880Hz, fast decay",
   "sfx.whoosh": "filtered noise sweep, 120ms",
   "splash.loading": "Loading…",
+  "splash.skip": "Skip the intro",
   "spr.avatar.cats": "Team Chats — one asleep, obviously",
   "spr.avatar.cocktails": "Team Cocktails — two clinking martinis, one cherry",
   "spr.avatar.ducks": "Team Coin-Coin — rubber-duck yellow",

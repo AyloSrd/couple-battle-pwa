@@ -7,7 +7,9 @@ import {
   createHashHistory,
 } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SAVE_DEFAULTS } from '@/shared/save';
 import { createContainer } from './container';
+import { Boot } from './Boot';
 import { routeTree } from '../routeTree.gen';
 import type { TRouterContext } from '../routes/__root';
 // Register the beforeinstallprompt listener at boot — it can fire before Home
@@ -42,17 +44,22 @@ declare module '@tanstack/react-router' {
 async function bootstrap() {
   const queryClient = new QueryClient();
   const container = await createContainer();
+  // Seed the splash's language from persisted settings (FR fallback baked in).
+  const settings = await container.saveApi.get('settings').catch(() => SAVE_DEFAULTS.settings);
   const router = createAppRouter({ ...container, queryClient });
 
   const rootEl = document.getElementById('root');
   if (!rootEl) throw new Error('#root element not found');
 
   // Sound, language and the save/questions ports are provided by the root route
-  // (src/routes/__root.tsx); nothing renders outside the router.
+  // (src/routes/__root.tsx). The only thing rendered outside the router is the boot
+  // splash, which never blocks: the router mounts the moment it ends or fails.
   createRoot(rootEl).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <Boot lang={settings.lang}>
+          <RouterProvider router={router} />
+        </Boot>
       </QueryClientProvider>
     </StrictMode>,
   );
