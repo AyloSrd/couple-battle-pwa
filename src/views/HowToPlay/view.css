@@ -91,8 +91,8 @@
   border: 0;
   background: none;
   padding: 0;
-  width: 44px;
-  height: 44px;
+  width: var(--cb-target-min);
+  height: var(--cb-target-min);
   display: grid;
   place-items: center;
   cursor: pointer;
