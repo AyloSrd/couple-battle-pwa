@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton, Field } from '@/shared/Chrome';
+import '../flash.css';
 import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
 
 type TProps = {
@@ -29,7 +30,7 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
 
   return (
-    <>
+    <div className="cb-v-flash cb-v-flash--secret">
       {/* "Answerers' side" chip — the questions are shared within this group;
           only the OTHER side must not look. */}
       <div className="cb-topbar">
@@ -37,7 +38,7 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
         <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
       </div>
 
-      <PixelPanel>
+      <PixelPanel className="cb-flash-card">
         <p className="cb-question">{questionText(question, 'you') || '—'}</p>
       </PixelPanel>
 
@@ -64,12 +65,11 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
             autoCorrect="off"
             spellCheck={false}
           />
-          <div className="cb-grow" />
           <PixelButton onClick={handleSubmitText} disabled={!text.trim()}>
             {t('secret.submit')}
           </PixelButton>
         </>
       )}
-    </>
+    </div>
   );
 };
