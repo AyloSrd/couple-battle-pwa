@@ -33,7 +33,9 @@ export function createWakeLockBrowserApi(): TWakeLockApi {
       try {
         const s = await wl.request('screen');
         if (!active) {
-          await s.release();
+          // Not awaited: `pending` must clear in this same tick, so a request()
+          // right behind the release starts a fresh acquire instead of reusing us.
+          s.release().catch(() => {});
           return;
         }
         sentinel = s;

@@ -53,15 +53,17 @@ class Engine {
       this.master.gain.value = this.baseVolume;
       this.master.connect(this.ctx.destination);
       // A running context keeps the audio thread (and battery) busy even while
-      // silent: suspend it whenever the app is hidden. Back in view, resume only
-      // if a loop is playing — otherwise the next `play()`/`unlock()` does it.
+      // silent: suspend it whenever the app is hidden, resume when back in view.
+      // Without a user gesture the resume may be refused — the next tap's
+      // `unlock()` retries it.
       document.addEventListener('visibilitychange', () => {
         if (!this.ctx) return;
-        if (document.visibilityState === 'hidden') void this.ctx.suspend();
-        else if (this.musicGain) void this.ctx.resume();
+        if (document.visibilityState === 'hidden') this.ctx.suspend().catch(() => {});
+        else if (this.enabled) this.ctx.resume().catch(() => {});
       });
     }
-    if (this.ctx.state === 'suspended') this.ctx.resume();
+    // 'interrupted' is iOS Safari's state after a call or screen lock.
+    if (this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
   }
 
   setEnabled(on: boolean) {

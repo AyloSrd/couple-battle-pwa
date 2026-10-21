@@ -49,6 +49,20 @@ describe('createWakeLockBrowserApi', () => {
     expect(wl.sentinels[0]?.released).toBe(true);
   });
 
+  it('holds a lock when re-requested right after a late grant was dropped', async () => {
+    const api = createWakeLockBrowserApi();
+    void api.request();
+    await api.release();
+    wl.grant(); // arrives after release → dropped
+    await flush();
+    void api.request();
+    wl.grant();
+    await flush();
+
+    expect(wl.request).toHaveBeenCalledTimes(2);
+    expect(wl.sentinels[1]?.released).toBe(false);
+  });
+
   it('keeps a single request in flight (StrictMode / visibilitychange)', async () => {
     const api = createWakeLockBrowserApi();
     void api.request();
