@@ -15,6 +15,7 @@ const state: Extract<TGameState, { kind: 'judge' }> = {
   themes: [],
   deck: [{ id: 1, theme: 'childhood', difficulty: 'easy', type: 'open', you: 'q', name: 'q' }],
   scores: {},
+  history: [],
 };
 
 // Judge has one effect: a one-shot reveal cue on mount. No timers, no listeners.

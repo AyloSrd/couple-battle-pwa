@@ -4,6 +4,8 @@ import { useSoundApi } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { rankTeams, type TGameState } from '../domain/machine';
 import { joinNames, resolveOutcome } from '../domain/outcome';
+import { gameStats } from '../domain/stats';
+import { TeamStats } from './TeamStats';
 import '../results.css';
 
 /** Solo record outcome (only for a 1-couple game). */
@@ -25,6 +27,11 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
   const outcome = resolveOutcome(ranked);
   const winner = outcome?.kind === 'winner' ? outcome.winner : undefined;
   const allTied = ranked.every((r) => r.isWinner);
+  // A game resumed from a snapshot saved before history existed has none — or only the
+  // questions played after the resume. Chart only when every team's history adds up to
+  // its score (always true for a game played start to finish), never a partial picture.
+  const allStats = state.history.length > 0 ? gameStats(state.history, ranked.map((r) => r.team.teamId)) : [];
+  const stats = ranked.every((r) => allStats.find((s) => s.teamId === r.team.teamId)?.earned === r.score) ? allStats : [];
   const teamLabel = (avatarId: string) => t(`team.${avatarId}` as TStringKey);
   const headline = !outcome
     ? null
@@ -97,6 +104,7 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
         {ranked.map((row) => {
           const label = t(`team.${row.team.avatarId}` as TStringKey);
           const lead = row.isWinner && !allTied;
+          const teamStats = stats.find((s) => s.teamId === row.team.teamId);
           return (
             <div key={row.team.teamId} className={['cb-row', lead ? 'cb-row--lead' : ''].filter(Boolean).join(' ')}>
               <TeamArt teamId={row.team.avatarId} label={label} variant="avatar" />
@@ -104,6 +112,7 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
                 {row.team.players[0]} &amp; {row.team.players[1]}
               </span>
               <span className="cb-score">{row.score}</span>
+              {teamStats && teamStats.hearts.length > 0 && <TeamStats stats={teamStats} vsBest={solo} />}
             </div>
           );
         })}

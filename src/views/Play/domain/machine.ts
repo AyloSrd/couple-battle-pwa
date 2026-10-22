@@ -6,7 +6,7 @@ import type {
   TTeam,
 } from '@/shared/game/domain/types';
 import type { TQuestion } from '@/shared/questions/domain/types';
-import type { TGameSnapshot } from '@/shared/save/domain/types';
+import type { TGameSnapshot, THistoryEntry } from '@/shared/save/domain/types';
 import { interpolate } from '@/shared/i18n/domain/services';
 
 /**
@@ -57,6 +57,9 @@ export const ULTIME_ROUND_FLASH_1 = 1;
 export const ULTIME_ROUND_DILEMMA = 2;
 export const ULTIME_ROUND_RAPID = 3;
 
+export type { THistoryEntry };
+export type TStage = THistoryEntry['stage'];
+
 export type TGameContext = {
   roster: TRoster;
   mode: TMode;
@@ -64,6 +67,8 @@ export type TGameContext = {
   themes: TThemeId[];
   deck: TQuestion[];
   scores: Record<string, number>;
+  /** Every scored question so far (zero-point outcomes included), in play order. */
+  history: THistoryEntry[];
 };
 
 export type TSecretAnswers = Record<string, string>;
@@ -214,12 +219,24 @@ export function questionText(
 }
 
 function contextOf(state: TGameState): TGameContext {
-  const { roster, mode, difficulty, themes, deck, scores } = state;
-  return { roster, mode, difficulty, themes, deck, scores };
+  const { roster, mode, difficulty, themes, deck, scores, history } = state;
+  return { roster, mode, difficulty, themes, deck, scores, history };
 }
-function addScore(ctx: TGameContext, teamId: string | undefined, points: number): TGameContext {
-  if (!teamId || points === 0) return ctx;
-  return { ...ctx, scores: { ...ctx.scores, [teamId]: (ctx.scores[teamId] ?? 0) + points } };
+/**
+ * The single way a question gets scored: bumps the team's total AND appends the
+ * history entry (a zero still records — a miss is data), so the two cannot drift.
+ */
+function recordScore(
+  ctx: TGameContext,
+  teamId: string | undefined,
+  stage: TStage,
+  round: number,
+  points: number,
+  max: number,
+): TGameContext {
+  if (!teamId) return ctx;
+  const scores = points === 0 ? ctx.scores : { ...ctx.scores, [teamId]: (ctx.scores[teamId] ?? 0) + points };
+  return { ...ctx, scores, history: [...ctx.history, { teamId, stage, round, points, max }] };
 }
 
 // ---- Init ------------------------------------------------------------------
@@ -227,7 +244,7 @@ function addScore(ctx: TGameContext, teamId: string | undefined, points: number)
 export function initGame(config: TGameConfig): TGameState {
   const scores: Record<string, number> = {};
   for (const team of config.roster) scores[team.teamId] = 0;
-  const ctx = { ...config, scores };
+  const ctx = { ...config, scores, history: [] };
   if (config.mode === 'flash' || config.mode === 'ultime') {
     return { kind: 'sideAnswerers', round: 0, ...ctx };
   }
@@ -290,7 +307,7 @@ function scoreAndAdvanceGuess(
   points: number,
 ): TGameState {
   const team = ctx.roster[coupleIdx];
-  const next = addScore(ctx, team?.teamId, points);
+  const next = recordScore(ctx, team?.teamId, 'flash', round, points, FLASH_EXACT_POINTS);
   // The judged slot's secret has served its purpose: drop it from the next
   // state (and so from the persisted snapshot) instead of keeping it until the
   // round ends. Copy — never mutate the incoming map.
@@ -339,7 +356,14 @@ export function reduce(state: TGameState, event: TGameEvent): TGameState {
       const team = state.roster[state.coupleIdx];
       if (!team) return state;
       const results: TResolveResults = { ...state.results, [team.teamId]: event.result };
-      const ctx = event.result === 'match' ? addScore(contextOf(state), team.teamId, DILEMMA_MATCH_POINTS) : contextOf(state);
+      const ctx = recordScore(
+        contextOf(state),
+        team.teamId,
+        'dilemma',
+        0,
+        event.result === 'match' ? DILEMMA_MATCH_POINTS : 0,
+        DILEMMA_MATCH_POINTS,
+      );
       const nextCoupleIdx = state.coupleIdx + 1;
       if (nextCoupleIdx < state.roster.length) {
         return { kind: 'resolve', questionIdx: state.questionIdx, coupleIdx: nextCoupleIdx, results, ...ctx };
@@ -417,7 +441,14 @@ export function reduce(state: TGameState, event: TGameEvent): TGameState {
     case 'rapidJudge': {
       if (event.type !== 'rapidJudge') return state;
       const team = state.roster[state.coupleIdx];
-      const ctx = event.synchro ? addScore(contextOf(state), team?.teamId, RAPID_SYNCHRO_POINTS) : contextOf(state);
+      const ctx = recordScore(
+        contextOf(state),
+        team?.teamId,
+        'rapid',
+        0,
+        event.synchro ? RAPID_SYNCHRO_POINTS : 0,
+        RAPID_SYNCHRO_POINTS,
+      );
       return advanceRapid(ctx, state.coupleIdx, state.questionIdx);
     }
 
@@ -458,6 +489,7 @@ export function toSnapshot(state: TGameState, now: number = Date.now()): TGameSn
     scores: state.scores,
     secretAnswers,
     confirmed: state.kind === 'resolve' ? state.results : {},
+    history: state.history,
     savedAt: now,
   };
 }
@@ -470,6 +502,7 @@ export function fromSnapshot(snapshot: TGameSnapshot): TGameState {
     themes: snapshot.themes,
     deck: snapshot.deck,
     scores: snapshot.scores,
+    history: snapshot.history,
   };
   const { phase, round, coupleIdx, questionIdx } = snapshot.cursor;
   const secretAnswers = snapshot.secretAnswers;

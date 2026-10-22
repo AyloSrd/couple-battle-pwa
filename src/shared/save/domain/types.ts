@@ -75,6 +75,24 @@ export type TCursor = z.infer<typeof ZCursorSchema>;
  *    a short draw (small pool) legitimately runs past the deck.
  */
 const SECRET_ANSWERS_MAX = 4 * 64;
+
+/**
+ * One scored question, appended by the Play machine on every scoring decision (a
+ * zero-point outcome counts). `max` is what the question could have been worth, so
+ * the final screen can chart how in sync a team was. `history` is bounded to
+ * 4 couples × 64 questions; a snapshot saved before it existed parses to [].
+ */
+const HISTORY_MAX = 4 * 64;
+export const ZHistoryEntrySchema = z
+  .object({
+    teamId: z.string().regex(/^t[1-4]$/),
+    stage: z.enum(['flash', 'dilemma', 'rapid']),
+    round: z.number().int().min(0).max(3),
+    points: z.number().int().min(0).max(9),
+    max: z.number().int().min(0).max(9),
+  })
+  .refine((e) => e.points <= e.max, { message: 'points exceed max' });
+export type THistoryEntry = z.infer<typeof ZHistoryEntrySchema>;
 export const ZGameSnapshotSchema = z.object({
   roster: ZRosterSchema,
   mode: ZModeSchema,
@@ -87,6 +105,8 @@ export const ZGameSnapshotSchema = z.object({
   // Dilemma resolve: per-couple match/miss for the current question (so a
   // mid-resolve refresh restores the confirmed couples' badges).
   confirmed: z.record(z.string().regex(/^t[1-4]$/), z.enum(['match', 'miss'])).default({}),
+  // Every scored question so far, for the final screen's per-team charts.
+  history: z.array(ZHistoryEntrySchema).max(HISTORY_MAX).default([]),
   // Epoch ms of the write. A snapshot older than the resume window (or dated
   // implausibly in the future) is dropped on read — see `isSnapshotStale`.
   // Required: a pre-`savedAt` record fails the schema and self-heals away.
