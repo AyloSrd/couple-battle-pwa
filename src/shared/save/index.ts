@@ -11,6 +11,7 @@ export {
   type TGuidelinesSeen,
   type TSoloBest,
   type TGameSnapshot,
+  type THistoryEntry,
   type TCursor,
   type TSaveShape,
   type TSaveKey,

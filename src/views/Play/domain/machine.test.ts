@@ -586,10 +586,114 @@ describe('Ultime machine (composition)', () => {
       themes: base.themes,
       deck: base.deck,
       scores: base.scores,
+      history: base.history,
     };
     expect(fromSnapshot(toSnapshot(rapidTurn))).toEqual(rapidTurn);
     const rq = reduce(rapidTurn, { type: 'next' });
     expect(fromSnapshot(toSnapshot(rq))).toEqual(rq);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// History — every scoring decision appends exactly one entry
+// ---------------------------------------------------------------------------
+
+describe('history — one entry per scoring decision, scores unchanged', () => {
+  it('initGame starts empty (so a rematch / new game does too)', () => {
+    expect(initGame(config).history).toEqual([]);
+    expect(initGame(flashConfig('open')).history).toEqual([]);
+    expect(initGame(ultimeConfig()).history).toEqual([]);
+  });
+
+  it('dilemma confirm: a match records 1/1, a miss records 0/1 (zero outcomes included)', () => {
+    const s = playQuestion(initGame(config), ['match', 'miss']);
+    expect(s.history).toEqual([
+      { teamId: 't1', stage: 'dilemma', round: 0, points: 1, max: 1 },
+      { teamId: 't2', stage: 'dilemma', round: 0, points: 0, max: 1 },
+    ]);
+    expect(s.scores).toEqual({ t1: 1, t2: 0 });
+  });
+
+  it('flash judge: exact 2/2, close 1/2, miss 0/2, tagged with the flash round', () => {
+    const collected = collectRound(initGame(flashConfig('open')), always('a'));
+    const verdicts: TVerdict[] = ['exact', 'close', 'miss', 'exact'];
+    let i = 0;
+    const s = guessRound(collected, () => verdicts[i++]!);
+    // slot order: (q0,c0) (q0,c1) (q1,c0) (q1,c1)
+    expect(s.history).toEqual([
+      { teamId: 't1', stage: 'flash', round: 0, points: 2, max: 2 },
+      { teamId: 't2', stage: 'flash', round: 0, points: 1, max: 2 },
+      { teamId: 't1', stage: 'flash', round: 0, points: 0, max: 2 },
+      { teamId: 't2', stage: 'flash', round: 0, points: 2, max: 2 },
+    ]);
+    expect(s.scores).toEqual({ t1: 2, t2: 3 });
+  });
+
+  it('flash autoGuess records too, and round 1 is tagged 1', () => {
+    let s: TGameState = initGame(flashConfig('this_or_that', soloRoster));
+    s = reduce(playRound(s, always('Left'), always('exact')), { type: 'next' }); // not auto, round 0 done
+    s = collectRound(s, always('Left'));
+    s = reduce(s, { type: 'passConfirm' });
+    s = reduce(s, { type: 'autoGuess', guess: 'Left' }); // exact
+    s = reduce(s, { type: 'autoGuess', guess: 'Right' }); // miss → final
+    expect(s.kind).toBe('final');
+    const round1 = s.history.filter((h) => h.round === 1);
+    expect(round1).toEqual([
+      { teamId: 't1', stage: 'flash', round: 1, points: 2, max: 2 },
+      { teamId: 't1', stage: 'flash', round: 1, points: 0, max: 2 },
+    ]);
+    expect(s.history).toHaveLength(4);
+    expect(s.scores).toEqual({ t1: 4 + 2 });
+  });
+
+  it('rapid judge: synchro 2/2, no synchro 0/2', () => {
+    let s: TGameState = initGame({ ...ultimeConfig(), roster: soloRoster });
+    s = { ...s, kind: 'rapidTurn', coupleIdx: 0 } as TGameState;
+    s = ultimeRapidCouple(s, [true, false, true, false, false]);
+    expect(s.kind).toBe('final');
+    expect(s.history).toEqual([
+      { teamId: 't1', stage: 'rapid', round: 0, points: 2, max: 2 },
+      { teamId: 't1', stage: 'rapid', round: 0, points: 0, max: 2 },
+      { teamId: 't1', stage: 'rapid', round: 0, points: 2, max: 2 },
+      { teamId: 't1', stage: 'rapid', round: 0, points: 0, max: 2 },
+      { teamId: 't1', stage: 'rapid', round: 0, points: 0, max: 2 },
+    ]);
+    expect(s.scores).toEqual({ t1: 4 });
+  });
+
+  it('a full Ultime appends one entry per scored question, and the totals always equal the scores', () => {
+    let s: TGameState = initGame(ultimeConfig());
+    for (let step = 0; s.kind !== 'final'; step++) {
+      if (step > 1000) throw new Error('stuck');
+      s = reduce(s, SCRIPT[s.kind as Exclude<TGameState['kind'], 'final'>]);
+    }
+    // 2 couples: flash 2 rounds × 2 q × 2 couples = 8, dilemma 5 × 2 = 10, rapid 5 × 2 = 10
+    const by = (stage: string) => s.history.filter((h) => h.stage === stage).length;
+    expect([by('flash'), by('dilemma'), by('rapid')]).toEqual([8, 10, 10]);
+    for (const team of s.roster) {
+      const total = s.history.filter((h) => h.teamId === team.teamId).reduce((n, h) => n + h.points, 0);
+      expect(total).toBe(s.scores[team.teamId]);
+    }
+    expect(s.history.every((h) => h.points <= h.max)).toBe(true);
+  });
+
+  it('non-scoring transitions leave history untouched', () => {
+    const q = initGame(config);
+    expect(reduce(q, { type: 'ready' }).history).toBe(q.history);
+  });
+
+  it('round-trips through a snapshot (mid-game and at the final)', () => {
+    let s: TGameState = initGame(config);
+    for (let i = 0; i < 3; i++) s = playQuestion(s, ['match', 'miss']);
+    expect(s.history).toHaveLength(6);
+    expect(fromSnapshot(toSnapshot(s))).toEqual(s);
+    expect(ZGameSnapshotSchema.safeParse(toSnapshot(s)).success).toBe(true);
+  });
+
+  it('resuming a snapshot written before history existed starts with an empty history', () => {
+    const { history: _drop, ...legacy } = toSnapshot(initGame(config));
+    const parsed = ZGameSnapshotSchema.parse(legacy);
+    expect(fromSnapshot(parsed).history).toEqual([]);
   });
 });
 

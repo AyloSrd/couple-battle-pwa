@@ -31,6 +31,7 @@ export function newGameSnapshot(config: TNewGameConfig, now: number = Date.now()
     scores,
     secretAnswers: {},
     confirmed: {},
+    history: [],
     savedAt: now,
   };
 }

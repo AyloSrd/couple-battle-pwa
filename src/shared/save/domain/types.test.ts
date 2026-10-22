@@ -72,6 +72,33 @@ describe('persisted bounds — a tampered record is rejected, a real one passes'
     expect(ZGameSnapshotSchema.safeParse({ ...snapshot, secretAnswers }).success).toBe(false);
   });
 
+  it('a snapshot saved before history existed still parses, to an empty history', () => {
+    const parsed = ZGameSnapshotSchema.parse(snapshot);
+    expect(parsed.history).toEqual([]);
+  });
+
+  it('keeps a real history', () => {
+    const history = [
+      { teamId: 't1', stage: 'flash', round: 1, points: 1, max: 2 },
+      { teamId: 't1', stage: 'dilemma', round: 0, points: 0, max: 1 },
+    ];
+    expect(ZGameSnapshotSchema.parse({ ...snapshot, history }).history).toEqual(history);
+  });
+
+  it('rejects a tampered history: foreign team, bad stage, points above max, too many entries', () => {
+    const entry = { teamId: 't1', stage: 'rapid', round: 0, points: 2, max: 2 };
+    const bad = (e: object) => ZGameSnapshotSchema.safeParse({ ...snapshot, history: [e] }).success;
+    expect(bad(entry)).toBe(true);
+    expect(bad({ ...entry, teamId: 'x' })).toBe(false);
+    expect(bad({ ...entry, stage: 'nope' })).toBe(false);
+    expect(bad({ ...entry, points: 3 })).toBe(false);
+    expect(bad({ ...entry, points: -1 })).toBe(false);
+    expect(bad({ ...entry, round: 4 })).toBe(false);
+    expect(bad({ ...entry, points: 1.5 })).toBe(false);
+    const huge = Array.from({ length: 257 }, () => entry);
+    expect(ZGameSnapshotSchema.safeParse({ ...snapshot, history: huge }).success).toBe(false);
+  });
+
   it('seen question ids: the whole real pool passes, an oversized list is rejected', () => {
     const pool = Array.from({ length: 1035 }, (_, i) => i + 1);
     expect(ZSeenQuestionIdsSchema.safeParse(pool).success).toBe(true);

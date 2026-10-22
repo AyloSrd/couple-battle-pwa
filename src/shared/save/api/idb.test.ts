@@ -33,6 +33,7 @@ const validSnapshot: TGameSnapshot = {
   scores: { t1: 0 },
   secretAnswers: {},
   confirmed: {},
+  history: [],
   savedAt: NOW - MINUTE,
 };
 
