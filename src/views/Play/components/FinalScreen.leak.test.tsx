@@ -20,6 +20,10 @@ const state = {
   themes: [],
   deck: [],
   scores: { t1: 3, t2: 3 },
+  history: [
+    { teamId: 't1', stage: 'dilemma', round: 0, points: 1, max: 1 },
+    { teamId: 't2', stage: 'dilemma', round: 0, points: 0, max: 1 },
+  ],
 } as unknown as Extract<TGameState, { kind: 'final' }>;
 
 /** Per-event add/remove counts. React DOM registers one permanent `selectionchange`
