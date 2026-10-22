@@ -231,14 +231,16 @@
 }
 
 /* ---------- FinalScreen: per-team charts (TeamStats) ----------
-   The stats sit inside each team's row card, under the avatar / names / score line:
-   the row wraps and the stats take the full second line. */
+   The stats sit inside each team's row card, under the avatar / names / score line: the row
+   is a 3-column grid (a long pair of names wraps in its own column and never pushes the
+   score down) and the stats span the full second line. */
 .cb-v-final .cb-row {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   row-gap: var(--cb-s2);
 }
 .cb-v-final .cb-stats {
-  flex: 1 1 100%;
+  grid-column: 1 / -1;
   min-width: 0;
   display: grid;
   gap: var(--cb-s2);
@@ -320,6 +322,11 @@
 .cb-v-final .cb-heart-half {
   fill: var(--cb-gold);
   stroke: none;
+}
+/* the leader's card is gold itself: full / half hearts go eggplant so they still read */
+.cb-v-final .cb-row--lead .cb-heart--full .cb-heart-shape,
+.cb-v-final .cb-row--lead .cb-heart-half {
+  fill: var(--cb-outline);
 }
 
 /* per-stage bars: side by side (3 for Ultime, 2 flash rounds) */
