@@ -27,8 +27,11 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame
   const outcome = resolveOutcome(ranked);
   const winner = outcome?.kind === 'winner' ? outcome.winner : undefined;
   const allTied = ranked.every((r) => r.isWinner);
-  // A game resumed from a snapshot saved before history existed has none: no charts.
-  const stats = state.history.length > 0 ? gameStats(state.history, ranked.map((r) => r.team.teamId)) : [];
+  // A game resumed from a snapshot saved before history existed has none — or only the
+  // questions played after the resume. Chart only when every team's history adds up to
+  // its score (always true for a game played start to finish), never a partial picture.
+  const allStats = state.history.length > 0 ? gameStats(state.history, ranked.map((r) => r.team.teamId)) : [];
+  const stats = ranked.every((r) => allStats.find((s) => s.teamId === r.team.teamId)?.earned === r.score) ? allStats : [];
   const teamLabel = (avatarId: string) => t(`team.${avatarId}` as TStringKey);
   const headline = !outcome
     ? null

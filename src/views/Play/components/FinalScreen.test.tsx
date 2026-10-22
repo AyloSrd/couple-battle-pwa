@@ -220,6 +220,16 @@ describe('FinalScreen — per-team charts', () => {
     expect(screen.queryByRole('img', { name: /sync|synchro/ })).toBeNull();
   });
 
+  it('a partial history (old snapshot resumed mid-game) does not add up to the scores: no charts', () => {
+    // t1 scored 5 before the resume, only the post-resume 1 point was recorded
+    const partial = [h('t1', 'dilemma', 1, 1), h('t2', 'dilemma', 0, 1)];
+    const { container } = mount(
+      <FinalScreen state={finalState({ t1: 5, t2: 1 }, 2, partial)} onRematch={noop} onNewGame={noop} />,
+    );
+    expect(container.querySelector('.cb-stats')).toBeNull();
+    expect(container.querySelectorAll('.cb-row')).toHaveLength(2);
+  });
+
   it('empty history in solo keeps just the headline', () => {
     const { container } = mount(
       <FinalScreen state={finalState({ t1: 2 }, 1)} solo={{ isBest: true, points: 2, best: 2 }} onRematch={noop} onNewGame={noop} />,
