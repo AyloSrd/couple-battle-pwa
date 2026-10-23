@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton, Field } from '@/shared/Chrome';
+import { ActorBadge } from './ActorBadge';
 import '../flash.css';
 import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
 
@@ -38,7 +39,8 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
         <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
       </div>
 
-      <PixelPanel className="cb-flash-card">
+      <PixelPanel className="cb-flash-card cb-flash-card--player">
+        <ActorBadge state={state} variant="card" />
         <p className="cb-question">{questionText(question, 'you') || '—'}</p>
       </PixelPanel>
 
