@@ -4,7 +4,7 @@ import { LangProvider } from '@/shared/i18n';
 import { SoundApiProvider } from '@/shared/sound';
 import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { AVATAR_IDS } from '@/shared/game';
-import { playerArtUrl, teamArtUrl } from '@/shared/Chrome';
+import { playerArtUrl, teamArtUrl, teamsWithArt } from '@/shared/Chrome';
 import { fr } from '@/data/strings.fr';
 import { initSetup, reduceSetup } from '../domain/machine';
 import { PICKER_TEAMS } from '../domain/pickerTeams';
@@ -89,6 +89,10 @@ describe('V-Setup Step A — team grid', () => {
       expect(playerArtUrl(id, 1)).toBeUndefined();
       expect(playerArtUrl(id, 2)).toBeUndefined();
     }
+  });
+
+  it('the picker offers exactly the teams that have art (art without a tile, or a tile without art, fails here)', () => {
+    expect([...PICKER_TEAMS].sort()).toEqual([...teamsWithArt()].sort());
   });
 
   it('all six picker teams resolve portrait (256 + 384), full body and both busts', () => {
