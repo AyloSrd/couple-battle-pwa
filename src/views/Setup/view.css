@@ -79,26 +79,36 @@
 }
 
 /* ---------- step: team ---------- */
+/* title + grid + confirm form ONE compact block, centered in the free height. The tiles hug
+   the half-body couple portrait (square, full tile width) so they grow with the width of the
+   screen, never with its height: no stretched empty space around the art. */
+.cb-v-setup .cb-v-setup__team-block {
+  margin-block: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-s4);
+}
 .cb-v-setup .cb-v-setup__teams {
-  flex: 1 1 0;
-  min-height: 0;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--cb-s3) var(--cb-s2);
   padding-bottom: var(--cb-s2); /* room for the tiles' hard lip */
 }
 .cb-v-setup .cb-team {
-  min-height: 0;
   min-width: 0;
-  padding: var(--cb-s2) var(--cb-s1) var(--cb-s2);
+  padding: var(--cb-s1) var(--cb-s1) var(--cb-s2);
   gap: var(--cb-s1);
   border-radius: var(--cb-r-md);
 }
 .cb-v-setup .cb-team-art {
-  flex: 1 1 0;
-  min-height: 0;
-  aspect-ratio: auto;
+  flex: none;
+  width: 100%;
+  aspect-ratio: 1;
   border-radius: var(--cb-r-sm);
+}
+/* the faces sit in the upper half of the portrait: anchor there if the box is ever not square */
+.cb-v-setup .cb-team-art img {
+  object-fit: cover;
+  object-position: 50% 15%;
 }
 .cb-v-setup .cb-team-name {
   flex: none;
