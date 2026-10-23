@@ -116,6 +116,109 @@
   line-height: 1.1;
 }
 
+/* ---------- actor card (SecretAnswers, GuessReveal): who acts — bust + name, on a cream tab ---------- */
+.cb-v-flash {
+  --flash-disc: 96px;
+  --flash-tab-rise: 18px;
+  --flash-actor-name: 24px; /* height of the name label under the disc */
+}
+.cb-v-flash .cb-actor .cb-player-avatar {
+  width: var(--flash-disc);
+  height: var(--flash-disc);
+  font-size: calc(var(--flash-disc) * 0.4);
+}
+.cb-v-flash .cb-flash-card--player {
+  position: relative;
+  /* room for disc + name at the top; the question centres in what is left */
+  padding-top: calc(var(--flash-disc) + var(--flash-actor-name) + var(--cb-s1) + var(--cb-s3));
+  /* the tab rises above the card: keep it clear of whatever sits over the card */
+  margin-top: max(0px, calc(var(--flash-tab-rise) - var(--flash-gap)));
+}
+.cb-v-flash .cb-flash-card--player > .cb-actor--card {
+  position: absolute;
+  top: var(--cb-s1);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 2 * var(--cb-s4));
+  z-index: 1;
+}
+.cb-v-flash .cb-flash-card--player .cb-actor-name {
+  font-size: 22px;
+  line-height: var(--flash-actor-name);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* the tab: a cream bump on the card's top edge, outlined like the card, behind the disc */
+.cb-v-flash .cb-flash-card--player::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(-1 * (var(--cb-outline-w) + var(--flash-tab-rise)));
+  width: calc(var(--flash-disc) + var(--cb-s5));
+  height: calc(var(--flash-tab-rise) + var(--cb-outline-w));
+  box-sizing: border-box;
+  background: var(--cb-surface);
+  border: var(--cb-outline-w) solid var(--cb-outline);
+  border-bottom: 0;
+  border-radius: var(--cb-r-md) var(--cb-r-md) 0 0;
+}
+/* shorter phones: a smaller disc first … */
+@media (max-height: 850px) {
+  .cb-v-flash {
+    --flash-disc: 80px;
+    --flash-tab-rise: 16px;
+    --flash-actor-name: 22px;
+  }
+  .cb-v-flash .cb-flash-card--player {
+    padding-bottom: var(--cb-s3);
+  }
+  .cb-v-flash.cb-v-flash--secret .cb-answer,
+  .cb-v-flash.cb-v-flash--guess .cb-answer {
+    min-height: 72px;
+  }
+  .cb-v-flash .cb-flash-card--player .cb-actor-name {
+    font-size: 20px;
+  }
+}
+/* … then a smaller question and lead: the longest real question + two stacked answers still have to fit */
+@media (max-height: 800px) {
+  .cb-v-flash {
+    --flash-disc: 64px;
+    --flash-tab-rise: 14px;
+  }
+  .cb-v-flash--secret .cb-flash-card .cb-question,
+  .cb-v-flash--guess .cb-flash-card .cb-question {
+    font-size: clamp(22px, min(8vw, 4.2dvh), 36px);
+  }
+  .cb-v-flash.cb-v-flash--guess .cb-flash-lead {
+    font-size: 22px;
+  }
+}
+@media (max-height: 700px) {
+  .cb-v-flash {
+    --flash-disc: 56px;
+    --flash-tab-rise: 12px;
+  }
+}
+
+/* gates: the actor's bust is the hero (replaces the team portrait) */
+.cb-v-flash .cb-flash-hero .cb-actor--hero .cb-player-avatar {
+  width: min(44vw, 20dvh, 180px);
+  height: min(44vw, 20dvh, 180px);
+  font-size: 64px;
+  box-shadow: 0 0 0 4px var(--cb-gold), 0 0 36px rgba(255, 63, 164, 0.55), var(--cb-e2);
+}
+.cb-v-flash .cb-flash-hero .cb-actor-name {
+  font-size: clamp(var(--cb-fs-h2), 9vw, 36px);
+  text-shadow: var(--cb-title-shadow);
+}
+.cb-v-flash .cb-flash-hero .cb-actor-names {
+  color: var(--cb-text);
+  font-weight: 700;
+}
+
 /* ---------- answers (yes/no, two names): big, heavy, thumb-sized ---------- */
 .cb-v-flash .cb-answers {
   gap: var(--cb-s3);

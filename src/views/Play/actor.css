@@ -1,0 +1,52 @@
+/* ActorBadge — who acts on a screen. Own classes (`.cb-actor*`), so it can sit in any Play view;
+   per-screen placement (on a card, in a hero) is set in that screen's stylesheet. */
+.cb-actor {
+  display: inline-flex;
+  min-width: 0;
+}
+.cb-actor--card,
+.cb-actor--hero {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cb-s1);
+}
+.cb-actor--row {
+  align-items: center;
+  gap: var(--cb-s3);
+  flex: 0 1 auto;
+}
+.cb-actor-name {
+  font: 800 var(--cb-fs-h2) / 1.1 var(--cb-font-display);
+  letter-spacing: var(--cb-tracking-display);
+  color: var(--cb-text);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.cb-actor-names {
+  margin: 0;
+  font: 600 var(--cb-fs-body) / 1.2 var(--cb-font-ui);
+  color: var(--cb-text-body);
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.cb-actor-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.cb-actor--row .cb-actor-name,
+.cb-actor--row .cb-actor-names {
+  font-size: var(--cb-fs-body);
+  text-align: start;
+}
+.cb-actor--row .cb-actor-name {
+  line-height: 1.15;
+}
+/* a compact row never wraps: long names are cut, the dots beside it keep their room */
+.cb-actor--row .cb-actor-name,
+.cb-actor--row .cb-actor-names {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

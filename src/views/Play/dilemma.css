@@ -156,8 +156,8 @@
 .cb-v-dilemma .cb-v-hero {
   position: relative;
   align-self: stretch;
-  flex: 1 1 88px; /* the minimum; grows into whatever height the screen has left */
-  min-height: 88px;
+  flex: 1 1 56px; /* the minimum (the couple's "Name & Name" line takes its room from the portrait); grows into whatever height the screen has left */
+  min-height: 56px;
   max-height: 300px;
 }
 .cb-v-dilemma .cb-v-hero .cb-char,

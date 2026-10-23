@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton } from '@/shared/Chrome';
+import { ActorBadge } from './ActorBadge';
 import '../flash.css';
 import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
 
@@ -32,7 +33,8 @@ export const GuessReveal: FC<TProps> = ({ state, guesserName, partnerName, onRev
       </div>
       <h2 className="cb-h2 cb-flash-lead">{t('guess.turn', { name: guesserName, partner: partnerName })}</h2>
 
-      <PixelPanel className="cb-flash-card">
+      <PixelPanel className="cb-flash-card cb-flash-card--player">
+        <ActorBadge state={state} variant="card" />
         <p className="cb-question">{questionText(question, 'name', partnerName) || '—'}</p>
       </PixelPanel>
 
