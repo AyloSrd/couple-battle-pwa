@@ -31,4 +31,9 @@ describe('PlayerAvatar', () => {
     expect(empty.container.firstElementChild).toHaveTextContent('F');
     expect(empty.container.firstElementChild).toHaveAttribute('aria-hidden', 'true');
   });
+
+  it('takes the first code point as the initial, so an emoji-first name is not split', () => {
+    const { container } = render(<PlayerAvatar teamId="no-such-team" slot={1} name="🦊 Zoé" teamLabel="Fantômes" />);
+    expect(container.firstElementChild?.textContent).toBe('🦊');
+  });
 });

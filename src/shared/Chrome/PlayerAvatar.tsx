@@ -17,7 +17,9 @@ type TPlayerAvatarProps = {
 /** Round bust of one player's character. Decorative: the field next to it carries the name. */
 export const PlayerAvatar: FC<TPlayerAvatarProps> = ({ teamId, slot, name, teamLabel, className }) => {
   const src = playerArtUrl(teamId, slot);
-  const initial = (name.trim().charAt(0) || teamLabel.trim().charAt(0) || teamId.charAt(0)).toUpperCase();
+  // first code point, not UTF-16 unit: an emoji-first name must not render half a surrogate pair
+  const first = (text: string) => Array.from(text.trim())[0] ?? '';
+  const initial = (first(name) || first(teamLabel) || first(teamId)).toUpperCase();
   return (
     <span className={['cb-player-avatar', className ?? ''].filter(Boolean).join(' ')} aria-hidden="true">
       {src ? <img src={src} alt="" draggable={false} /> : initial}

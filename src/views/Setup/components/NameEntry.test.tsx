@@ -9,12 +9,13 @@ import { initSetup, reduceSetup } from '../domain/machine';
 import { PICKER_TEAMS } from '../domain/pickerTeams';
 import { NameEntry } from './NameEntry';
 
-function mountNames(avatarId: (typeof PICKER_TEAMS)[number], name1 = '', name2 = '') {
+function mountNames(avatarId: (typeof PICKER_TEAMS)[number], name1 = '', name2 = '', confirm = false) {
   let state = reduceSetup(initSetup(), { type: 'pickCount', count: 2 });
   state = reduceSetup(state, { type: 'selectAvatar', avatarId });
   state = reduceSetup(state, { type: 'confirmTeam' });
   state = reduceSetup(state, { type: 'setName', which: 1, value: name1 });
   state = reduceSetup(state, { type: 'setName', which: 2, value: name2 });
+  if (confirm) state = reduceSetup(state, { type: 'confirmNames' });
   return render(
     <LangProvider initialLang="fr">
       <SoundApiProvider api={createSoundNoopApi()}>
@@ -55,5 +56,24 @@ describe('V-Setup Step B — name avatars', () => {
   it('the team hero below is still rendered', () => {
     const { container } = mountNames('pandas');
     expect(container.querySelector('.cb-v-setup__hero .cb-char')).not.toBeNull();
+  });
+
+  it('keeps the field behaviour: autofocus, maxLength 16, no autofill/correct/spellcheck, aria-invalid on error', () => {
+    mountNames('lions', '', '', true);
+    const [f1, f2] = screen.getAllByRole('textbox');
+    for (const f of [f1, f2]) {
+      expect(f).toHaveAttribute('maxlength', '16');
+      expect(f).toHaveAttribute('autocomplete', 'off');
+      expect(f).toHaveAttribute('autocorrect', 'off');
+      expect(f).toHaveAttribute('spellcheck', 'false');
+      expect(f).toHaveAttribute('aria-invalid', 'true');
+    }
+    expect(f1).toHaveFocus();
+    expect(screen.getByText(fr['setup.names.required'])).toBeInTheDocument();
+  });
+
+  it('a player with a long name keeps the full value in the field', () => {
+    mountNames('otters', 'Maximilienne-Aa', 'Léo');
+    expect(screen.getAllByRole('textbox')[0]).toHaveValue('Maximilienne-Aa');
   });
 });
