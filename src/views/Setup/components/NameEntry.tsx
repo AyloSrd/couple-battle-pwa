@@ -1,6 +1,6 @@
 import { useRef, type FC, type KeyboardEvent } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { PixelPanel, PixelButton, Field, TeamArt } from '@/shared/Chrome';
+import { PixelPanel, PixelButton, Field, PlayerAvatar, TeamArt } from '@/shared/Chrome';
 import { isLastCouple, type TSetupState, type TSetupError } from '../domain/machine';
 
 type TProps = {
@@ -39,30 +39,40 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
       <h1 className="cb-title">{t('setup.names.title', { team: teamName })}</h1>
 
       <PixelPanel className="cb-stack cb-v-setup__form">
-        <Field
-          placeholder={t('setup.names.p1')}
-          value={state.name1}
-          onChange={(e) => onChangeName(1, e.target.value)}
-          onKeyDown={handleKey1}
-          aria-invalid={state.error === 'required' && !state.name1.trim() ? true : undefined}
-          autoFocus
-          maxLength={16}
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-        />
-        <Field
-          ref={secondRef}
-          placeholder={t('setup.names.p2')}
-          value={state.name2}
-          onChange={(e) => onChangeName(2, e.target.value)}
-          onKeyDown={handleKey2}
-          aria-invalid={state.error !== null ? true : undefined}
-          maxLength={16}
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-        />
+        <div className="cb-v-setup__player">
+          {state.avatar && (
+            <PlayerAvatar teamId={state.avatar} slot={1} name={state.name1} teamLabel={teamName} />
+          )}
+          <Field
+            placeholder={t('setup.names.p1')}
+            value={state.name1}
+            onChange={(e) => onChangeName(1, e.target.value)}
+            onKeyDown={handleKey1}
+            aria-invalid={state.error === 'required' && !state.name1.trim() ? true : undefined}
+            autoFocus
+            maxLength={16}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+          />
+        </div>
+        <div className="cb-v-setup__player">
+          {state.avatar && (
+            <PlayerAvatar teamId={state.avatar} slot={2} name={state.name2} teamLabel={teamName} />
+          )}
+          <Field
+            ref={secondRef}
+            placeholder={t('setup.names.p2')}
+            value={state.name2}
+            onChange={(e) => onChangeName(2, e.target.value)}
+            onKeyDown={handleKey2}
+            aria-invalid={state.error !== null ? true : undefined}
+            maxLength={16}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+          />
+        </div>
         {state.error && <p className="cb-field-error">{t(ERROR_KEY[state.error])}</p>}
       </PixelPanel>
 

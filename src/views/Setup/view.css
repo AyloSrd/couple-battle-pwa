@@ -139,6 +139,17 @@
   line-height: var(--cb-lh-body);
 }
 
+/* avatar + field on one row; the field takes the rest, never overflows */
+.cb-v-setup .cb-v-setup__player {
+  display: flex;
+  align-items: center;
+  gap: var(--cb-s3);
+}
+.cb-v-setup .cb-v-setup__player .cb-field {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 /* ---------- step: pass ---------- */
 .cb-v-setup .cb-v-setup__pass {
   flex: 1;
