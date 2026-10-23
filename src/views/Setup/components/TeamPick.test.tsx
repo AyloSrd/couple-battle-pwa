@@ -4,7 +4,7 @@ import { LangProvider } from '@/shared/i18n';
 import { SoundApiProvider } from '@/shared/sound';
 import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { AVATAR_IDS } from '@/shared/game';
-import { teamArtUrl } from '@/shared/Chrome';
+import { playerArtUrl, teamArtUrl, teamsWithArt } from '@/shared/Chrome';
 import { fr } from '@/data/strings.fr';
 import { initSetup, reduceSetup } from '../domain/machine';
 import { PICKER_TEAMS } from '../domain/pickerTeams';
@@ -24,7 +24,7 @@ function mountGrid() {
 describe('V-Setup Step A — team grid', () => {
   it('renders exactly one tile per picker team (6, all on one page), none extra', () => {
     mountGrid();
-    expect(PICKER_TEAMS).toEqual(['penguins', 'otters', 'lions', 'pandas', 'foxes', 'squirrels']);
+    expect(PICKER_TEAMS).toEqual(['otters', 'lions', 'foxes', 'squirrels', 'raccoons', 'mice']);
     const tiles = PICKER_TEAMS.map((id) => screen.getByRole('button', { name: id }));
     expect(tiles).toHaveLength(6);
     const avatarButtons = screen
@@ -72,10 +72,36 @@ describe('V-Setup Step A — team grid', () => {
 
   it('does not render any retired or not-yet-delivered team', () => {
     mountGrid();
-    for (const id of ['frogs', 'ducks', 'cats', 'pizzas', 'cocktails', 'rabbits', 'bears', 'raccoons', 'mice', 'ermines', 'owls']) {
+    for (const id of ['frogs', 'ducks', 'cats', 'pizzas', 'cocktails', 'rabbits', 'bears', 'ermines', 'owls']) {
       expect(screen.queryByRole('button', { name: id })).toBeNull();
     }
     expect(screen.queryByText('Les Manchots')).toBeNull();
-    expect(screen.getByText('Les Pingouins')).toBeInTheDocument();
+  });
+
+  it('penguins and pandas are not in the picker and resolve to NO art (no fallback to old art)', () => {
+    mountGrid();
+    for (const id of ['penguins', 'pandas']) {
+      expect(PICKER_TEAMS as readonly string[]).not.toContain(id);
+      expect(screen.queryByRole('button', { name: id })).toBeNull();
+      expect(teamArtUrl(id, 'portrait')).toBeUndefined();
+      expect(teamArtUrl(id, 'portrait', 256)).toBeUndefined();
+      expect(teamArtUrl(id, 'full')).toBeUndefined();
+      expect(playerArtUrl(id, 1)).toBeUndefined();
+      expect(playerArtUrl(id, 2)).toBeUndefined();
+    }
+  });
+
+  it('the picker offers exactly the teams that have art (art without a tile, or a tile without art, fails here)', () => {
+    expect([...PICKER_TEAMS].sort()).toEqual([...teamsWithArt()].sort());
+  });
+
+  it('all six picker teams resolve portrait (256 + 384), full body and both busts', () => {
+    for (const id of PICKER_TEAMS) {
+      expect(teamArtUrl(id, 'portrait', 256), `${id} 256`).toContain(`team-${id}-256`);
+      expect(teamArtUrl(id, 'portrait', 384), `${id} 384`).toContain(`team-${id}-384`);
+      expect(teamArtUrl(id, 'full'), `${id} full`).toContain(`team-${id}-full-512`);
+      expect(playerArtUrl(id, 1), `${id} p1`).toContain(`team-${id}-p1-192`);
+      expect(playerArtUrl(id, 2), `${id} p2`).toContain(`team-${id}-p2-192`);
+    }
   });
 });

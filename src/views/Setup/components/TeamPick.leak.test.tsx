@@ -8,10 +8,10 @@ import { fr } from '@/data/strings.fr';
 import { initSetup, reduceSetup, type TSetupState } from '../domain/machine';
 import { TeamPick } from './TeamPick';
 
-/** Couple 1 has locked penguins, so couple 2's grid shows a taken tile (its tap raises the toast). */
+/** Couple 1 has locked lions, so couple 2's grid shows a taken tile (its tap raises the toast). */
 function secondCoupleState(): TSetupState {
   let s = reduceSetup(initSetup(), { type: 'pickCount', count: 2 });
-  s = reduceSetup(s, { type: 'selectAvatar', avatarId: 'penguins' });
+  s = reduceSetup(s, { type: 'selectAvatar', avatarId: 'lions' });
   s = reduceSetup(s, { type: 'confirmTeam' });
   s = reduceSetup(s, { type: 'setName', which: 1, value: 'Ana' });
   s = reduceSetup(s, { type: 'setName', which: 2, value: 'Bo' });
@@ -53,7 +53,7 @@ describe('TeamPick — leaks (StrictMode, fake timers)', () => {
     );
 
     // A taken tile is disabled, so tapping it can never raise the toast (and so never arms its timer).
-    const taken = screen.getByRole('button', { name: 'penguins' });
+    const taken = screen.getByRole('button', { name: 'lions' });
     expect(taken).toBeDisabled();
     fireEvent.click(taken);
     expect(screen.queryByText(fr['setup.team.taken'])).toBeNull();

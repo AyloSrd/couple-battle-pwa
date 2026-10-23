@@ -19,8 +19,8 @@ function pickTitle(full: string): string {
 }
 
 /**
- * Step A — TEAM PICK. All teams on one page: a 3×2 grid of team tiles (art or placeholder initial,
- * name in Inter underneath). Tapping a free tile SELECTS it (no auto-advance);
+ * Step A — TEAM PICK. All teams on one page: a compact 3×2 grid of team tiles (the half-body couple
+ * portrait filling the tile width, or the placeholder initial; name in Inter underneath). Tapping a free tile SELECTS it (no auto-advance);
  * taken tiles are disabled; the pinned "Suivant" advances.
  */
 export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
@@ -46,7 +46,7 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
   };
 
   return (
-    <>
+    <div className="cb-v-setup__team-block">
       <h1 className="cb-title cb-cap cb-v-setup__title--sm">
         {pickTitle(t('setup.team.pick', { n: state.coupleIdx + 1 }))}
       </h1>
@@ -82,6 +82,6 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
       <PixelButton onClick={onNext} disabled={state.avatar === null}>
         {t('common.next')}
       </PixelButton>
-    </>
+    </div>
   );
 };
