@@ -54,7 +54,7 @@ describe('V-Setup Step B — name avatars', () => {
   });
 
   it('the team hero below is still rendered', () => {
-    const { container } = mountNames('pandas');
+    const { container } = mountNames('mice');
     expect(container.querySelector('.cb-v-setup__hero .cb-char')).not.toBeNull();
   });
 

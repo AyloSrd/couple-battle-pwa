@@ -45,6 +45,24 @@ describe('teamArtResolver', () => {
     expect(teamArtUrl('no-such-team', 'full')).toBeUndefined();
   });
 
+  it('ships art for exactly the six current teams; penguins/pandas have none and the old files are gone', () => {
+    expect([...teamsWithArt()].sort()).toEqual(['foxes', 'lions', 'mice', 'otters', 'raccoons', 'squirrels']);
+    expect(FILES.filter((f) => /team-(penguins|pandas)-/.test(f))).toEqual([]);
+    for (const id of ['penguins', 'pandas']) {
+      expect(teamArtUrl(id, 'portrait')).toBeUndefined();
+      expect(teamArtUrl(id, 'full')).toBeUndefined();
+      expect(playerArtUrl(id, 1)).toBeUndefined();
+      expect(playerArtUrl(id, 2)).toBeUndefined();
+    }
+    for (const id of teamsWithArt()) {
+      expect(teamArtUrl(id, 'portrait', 256)).toMatch(new RegExp(`team-${id}-256`));
+      expect(teamArtUrl(id, 'portrait', 384)).toMatch(new RegExp(`team-${id}-384`));
+      expect(teamArtUrl(id, 'full')).toMatch(new RegExp(`team-${id}-full-512`));
+      expect(playerArtUrl(id, 1)).toMatch(new RegExp(`team-${id}-p1-192`));
+      expect(playerArtUrl(id, 2)).toMatch(new RegExp(`team-${id}-p2-192`));
+    }
+  });
+
   describe('player busts', () => {
     const ids = AVATAR_IDS.filter((id) => playerArtUrl(id, 1) !== undefined);
 

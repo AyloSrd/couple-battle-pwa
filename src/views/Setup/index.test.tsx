@@ -60,7 +60,7 @@ describe('V-Setup → Mode hand-off', () => {
     mountSetup();
 
     fireEvent.click(await screen.findByRole('button', { name: '1' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'penguins' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'lions' }));
     fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
     const [first, second] = await screen.findAllByRole('textbox');
     fireEvent.change(first as HTMLElement, { target: { value: 'Ana' } });
