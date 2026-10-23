@@ -1,12 +1,13 @@
 import type { FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { PixelPanel, PixelButton, Chip, ProgressDots, TeamArt } from '@/shared/Chrome';
+import { PixelPanel, PixelButton, ProgressDots, TeamArt } from '@/shared/Chrome';
 import {
   rapidQuestionOf,
   questionText,
   ULTIME_RAPID_PER_COUPLE,
   type TGameState,
 } from '../domain/machine';
+import { ActorBadge } from './ActorBadge';
 import '../results.css';
 
 type TRapidState = Extract<
@@ -65,6 +66,7 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
         <div className="cb-rapid-stage">
           {team && <TeamArt teamId={team.avatarId} label={teamNameOf(state, t)} variant="hero" className="cb-reveal-in" />}
           <h1 className="cb-title cb-rapid-turn">{t('final.turn', { team: teamNameOf(state, t) })}</h1>
+          <ActorBadge state={state} variant="hero" />
         </div>
         <PixelButton onClick={onNext}>{t('common.start')}</PixelButton>
       </div>
@@ -74,7 +76,7 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
   const question = rapidQuestionOf(state);
   const header = (
     <div className="cb-topbar">
-      <Chip>{teamNameOf(state, t)}</Chip>
+      <ActorBadge state={state} variant="row" />
       <ProgressDots total={ULTIME_RAPID_PER_COUPLE} current={state.questionIdx} />
     </div>
   );

@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { PixelPanel, PixelButton, TeamArt, Chip, ProgressDots, modeIconSmall } from '@/shared/Chrome';
 import { dilemmaQuestion, dilemmaTotal, questionText, type TGameState, type TResult } from '../domain/machine';
+import { ActorBadge } from './ActorBadge';
 import '../dilemma.css';
 
 type TProps = {
@@ -50,6 +51,7 @@ export const DilemmaResolve: FC<TProps> = ({ state, onConfirm }) => {
             <TeamArt teamId={active.avatarId} label={t(`team.${active.avatarId}` as TStringKey)} variant="hero" />
           </div>
           <h2 className="cb-v-resolve-title">{t('resolve.title', { team: t(`team.${active.avatarId}` as TStringKey) })}</h2>
+          <ActorBadge state={state} variant="hero" />
           <p className="cb-v-resolve-q">{questionText(question, 'you')}</p>
           <p className="cb-body-lg cb-v-resolve-ask">{t('resolve.question')}</p>
           <div className="cb-row-2 cb-v-verdicts">

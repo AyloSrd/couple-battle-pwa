@@ -218,4 +218,9 @@
     padding-block: var(--cb-s4);
     gap: var(--cb-s2);
   }
+  /* the couple's "Name & Name" line takes its room from the portrait, not from the buttons */
+  .cb-v-dilemma .cb-v-hero {
+    flex-basis: 56px;
+    min-height: 56px;
+  }
 }
