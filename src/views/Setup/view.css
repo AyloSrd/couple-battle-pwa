@@ -148,6 +148,9 @@
 .cb-v-setup .cb-v-setup__player .cb-field {
   flex: 1 1 0;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ---------- step: pass ---------- */
