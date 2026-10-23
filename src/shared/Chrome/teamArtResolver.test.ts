@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { AVATAR_IDS } from '@/shared/game';
-import { teamArtUrl, teamsWithArt } from './teamArtResolver';
+import { playerArtUrl, teamArtUrl, teamsWithArt } from './teamArtResolver';
 
 // every team-*.webp the bundler knows about (same glob the resolver uses)
 const FILES = Object.keys(import.meta.glob('/src/assets/art/team-*.webp', { eager: true, query: '?url' }));
 
 describe('teamArtResolver', () => {
-  it('every shipped file is a portrait (256|384) or a full body (full-512) of a registry team', () => {
+  it('every shipped file is a portrait (256|384), a full body (full-512) or a player bust (p1|p2-192) of a registry team', () => {
     expect(FILES.length).toBeGreaterThan(0);
     for (const path of FILES) {
-      const m = /team-([a-z0-9]+)-(?:full-512|256|384)\.webp$/.exec(path);
+      const m = /team-([a-z0-9]+)-(?:full-512|256|384|p[12]-192)\.webp$/.exec(path);
       expect(m, path).not.toBeNull();
       expect((AVATAR_IDS as readonly string[]).includes(m?.[1] ?? ''), `${path} orphan art`).toBe(true);
     }
@@ -43,5 +43,53 @@ describe('teamArtResolver', () => {
     expect(teamArtUrl(id as string, 'portrait')).toMatch(/-384/); // default = largest
     expect(teamArtUrl('no-such-team', 'portrait')).toBeUndefined();
     expect(teamArtUrl('no-such-team', 'full')).toBeUndefined();
+  });
+
+  describe('player busts', () => {
+    const ids = AVATAR_IDS.filter((id) => playerArtUrl(id, 1) !== undefined);
+
+    it('ships both slots at 192 for every picker team, distinct per slot', () => {
+      expect(ids.length).toBeGreaterThan(0);
+      for (const id of ids) {
+        for (const slot of [1, 2] as const) {
+          expect(playerArtUrl(id, slot), `${id} p${slot}`).toMatch(new RegExp(`team-${id}-p${slot}-192`));
+        }
+        expect(playerArtUrl(id, 1)).not.toBe(playerArtUrl(id, 2));
+      }
+    });
+
+    it('a player file is never parsed as a portrait or a full body, and vice versa', () => {
+      for (const id of ids) {
+        // portrait / full resolve to their own files only, never a -pN- one
+        expect(teamArtUrl(id, 'portrait')).not.toMatch(/-p[12]-/);
+        expect(teamArtUrl(id, 'full') ?? '').not.toMatch(/-p[12]-/);
+        for (const slot of [1, 2] as const) {
+          expect(playerArtUrl(id, slot)).not.toMatch(/-full-|-(256|384|512)\./);
+        }
+      }
+      // teamsWithArt stays portrait-only (a team with busts but no portrait is not listed)
+      for (const id of teamsWithArt()) expect(teamArtUrl(id, 'portrait')).toBeDefined();
+    });
+
+    it('the three naming patterns are mutually exclusive on every shipped file', () => {
+      const portrait = /team-([a-z0-9]+)-(\d+)\.webp$/;
+      const full = /team-([a-z0-9]+)-full-(\d+)\.webp$/;
+      const player = /team-([a-z0-9]+)-p([12])-192\.webp$/;
+      for (const path of FILES) {
+        const hits = [portrait, full, player].filter((re) => re.test(path));
+        expect(hits, path).toHaveLength(1);
+      }
+      // a player name can't satisfy the portrait or full pattern, even on adversarial ids
+      expect(portrait.test('team-otters-p1-192.webp')).toBe(false);
+      expect(full.test('team-otters-p1-192.webp')).toBe(false);
+      expect(player.test('team-otters-256.webp')).toBe(false);
+      expect(player.test('team-otters-full-512.webp')).toBe(false);
+    });
+
+    it('missing art (unknown team or slot) resolves to undefined', () => {
+      expect(playerArtUrl('no-such-team', 1)).toBeUndefined();
+      expect(playerArtUrl('no-such-team', 2)).toBeUndefined();
+      expect(playerArtUrl('otters', 3 as unknown as 1)).toBeUndefined();
+    });
   });
 });
