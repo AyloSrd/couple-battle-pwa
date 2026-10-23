@@ -156,8 +156,8 @@
 .cb-v-dilemma .cb-v-hero {
   position: relative;
   align-self: stretch;
-  flex: 1 1 88px; /* the minimum; grows into whatever height the screen has left */
-  min-height: 88px;
+  flex: 1 1 56px; /* the minimum (the couple's "Name & Name" line takes its room from the portrait); grows into whatever height the screen has left */
+  min-height: 56px;
   max-height: 300px;
 }
 .cb-v-dilemma .cb-v-hero .cb-char,
@@ -217,10 +217,5 @@
   .cb-v-dilemma .cb-v-resolve-card {
     padding-block: var(--cb-s4);
     gap: var(--cb-s2);
-  }
-  /* the couple's "Name & Name" line takes its room from the portrait, not from the buttons */
-  .cb-v-dilemma .cb-v-hero {
-    flex-basis: 56px;
-    min-height: 56px;
   }
 }
