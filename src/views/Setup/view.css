@@ -152,6 +152,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* the narrower field must still show the whole hint ("Prénom joueur·euse 1") */
+.cb-v-setup .cb-v-setup__player .cb-field::placeholder {
+  font-size: var(--cb-fs-caption);
+}
 
 /* ---------- step: pass ---------- */
 .cb-v-setup .cb-v-setup__pass {
