@@ -103,4 +103,17 @@ describe('actorOf', () => {
   it('covers every state kind', () => {
     expect(new Set(states(roster, 0, 0).map((s) => s.kind)).size).toBe(16);
   });
+
+  it('a snapshot whose couple index points past the roster (old save) degrades to the table, never throws', () => {
+    const of = byKind(states(roster, 0, 7));
+    for (const kind of ['handoff', 'secretInput', 'guess', 'resolve', 'rapidTurn', 'rapidQuestion'] as const) {
+      expect(of(kind)).toEqual(table);
+    }
+  });
+
+  it('an empty roster has no solo side and no actor', () => {
+    const of = byKind(states([], 0, 0));
+    expect(of('sideAnswerers')).toEqual(table);
+    expect(of('sideGuessers')).toEqual(table);
+  });
 });
