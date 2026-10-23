@@ -165,7 +165,7 @@
   border-radius: var(--cb-r-md) var(--cb-r-md) 0 0;
 }
 /* shorter phones: a smaller disc first … */
-@media (max-height: 820px) {
+@media (max-height: 850px) {
   .cb-v-flash {
     --flash-disc: 80px;
     --flash-tab-rise: 16px;
@@ -174,15 +174,19 @@
   .cb-v-flash .cb-flash-card--player {
     padding-bottom: var(--cb-s3);
   }
+  .cb-v-flash.cb-v-flash--secret .cb-answer,
+  .cb-v-flash.cb-v-flash--guess .cb-answer {
+    min-height: 72px;
+  }
   .cb-v-flash .cb-flash-card--player .cb-actor-name {
     font-size: 20px;
   }
 }
-/* … and on the shortest, the longest real question + two answers still have to fit */
-@media (max-height: 700px) {
+/* … then a smaller question and lead: the longest real question + two stacked answers still have to fit */
+@media (max-height: 800px) {
   .cb-v-flash {
-    --flash-disc: 56px;
-    --flash-tab-rise: 12px;
+    --flash-disc: 64px;
+    --flash-tab-rise: 14px;
   }
   .cb-v-flash--secret .cb-flash-card .cb-question,
   .cb-v-flash--guess .cb-flash-card .cb-question {
@@ -191,9 +195,11 @@
   .cb-v-flash.cb-v-flash--guess .cb-flash-lead {
     font-size: 22px;
   }
-  .cb-v-flash.cb-v-flash--secret .cb-answer,
-  .cb-v-flash.cb-v-flash--guess .cb-answer {
-    min-height: 72px;
+}
+@media (max-height: 700px) {
+  .cb-v-flash {
+    --flash-disc: 56px;
+    --flash-tab-rise: 12px;
   }
 }
 
