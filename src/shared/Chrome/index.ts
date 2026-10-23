@@ -6,7 +6,15 @@ export { Chip, ChipButton } from './Chip';
 export { AnswerButton } from './AnswerButton';
 export { Field } from './Field';
 export { TeamArt } from './TeamArt';
-export { teamArtUrl, teamsWithArt, type TTeamArtKind, type TTeamArtSize } from './teamArtResolver';
+export {
+  teamArtUrl,
+  teamsWithArt,
+  playerArtUrl,
+  type TTeamArtKind,
+  type TTeamArtSize,
+  type TPlayerSlot,
+} from './teamArtResolver';
+export { PlayerAvatar } from './PlayerAvatar';
 export { BackButton } from './BackButton';
 export { Logo } from './Logo';
 export { ModeIcon, modeIconSmall, type TModeIconMode } from './ModeIcon';

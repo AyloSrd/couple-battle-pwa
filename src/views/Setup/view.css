@@ -139,6 +139,24 @@
   line-height: var(--cb-lh-body);
 }
 
+/* avatar + field on one row; the field takes the rest, never overflows */
+.cb-v-setup .cb-v-setup__player {
+  display: flex;
+  align-items: center;
+  gap: var(--cb-s3);
+}
+.cb-v-setup .cb-v-setup__player .cb-field {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* the narrower field must still show the whole hint ("Prénom joueur·euse 1") */
+.cb-v-setup .cb-v-setup__player .cb-field::placeholder {
+  font-size: var(--cb-fs-caption);
+}
+
 /* ---------- step: pass ---------- */
 .cb-v-setup .cb-v-setup__pass {
   flex: 1;
