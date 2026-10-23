@@ -548,6 +548,27 @@ button.cb-chip {
   font-size: 38px;
 }
 
+/* round player bust (name entry) — cream disc, chunky outline, face anchored high */
+.cb-player-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--cb-cream);
+  border: var(--cb-outline-w) solid var(--cb-outline);
+  overflow: hidden;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font: 800 28px / 1 var(--cb-font-display);
+  color: var(--cb-violet-600);
+}
+.cb-player-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
 /* ---------- score rows ---------- */
 .cb-rows {
   display: flex;
