@@ -2,7 +2,7 @@
 
 You are building **Couple Battle**: a mobile-first, offline-capable **PWA party game** where 1–4
 couples pass ONE phone around and compete to prove who knows their partner best. French is the
-primary language, English secondary. It ships as a static site on **GitHub Pages**. Frontend only —
+primary language, English and Spanish secondary. It ships as a static site on **GitHub Pages**. Frontend only —
 no server, no accounts, no analytics. It is a gift project: quality bar is "feels like a real game",
 not "enterprise product".
 
@@ -23,7 +23,8 @@ not "enterprise product".
 | Input | Use |
 |---|---|
 | `handoff/data/questions.fr.json` / `questions.en.json` | 1,035 questions each: `{id, theme, difficulty, type, text}`. Same ids across languages. Copy into `src/data/`, Zod-parse in the questions adapter |
-| `handoff/data/strings.fr.ts` / `strings.en.ts` | All 185 UI strings, `as const`, `{placeholder}` interpolation. Copy into `src/data/` |
+| `handoff/data/strings.fr.ts` / `strings.en.ts` | The original 185 UI strings, `as const`, `{placeholder}` interpolation. Copy into `src/data/` |
+| Spanish (`es`) | Added after launch and NOT in `handoff/`: `src/data/strings.es.ts` and `src/data/questions.es.json` are the source of truth (translated from FR; same keys and ids). `src/data` has also moved past `handoff/` for FR/EN (236 keys today) |
 | `handoff/design/tokens.css` | Design tokens — import globally, style everything through the `--cb-*` custom properties |
 | `handoff/design/sprites/*.svg` | 63 pixel sprites (1 SVG unit = 1 px, crisp). Serve from `public/` or import as assets; always render crisp (`image-rendering: pixelated` for raster fallbacks). Naming: manifest ids with dots→dashes (`spr.ui.heart` → `ui-heart.svg`) |
 | `handoff/design/pwa-icons/` | Manifest icons (512/192), apple-touch-icon, favicon |
@@ -123,5 +124,5 @@ Home, P2 sounds and charm animations (`anim.peek`, confetti), reduced-motion pas
 - Every domain rule and machine transition gets a co-located test, per ARCHITECTURE.md.
 - If the spec and reality conflict (an API changed, a rule is ambiguous), say so and propose —
   do not silently improvise.
-- Definition of done for any UI work: works one-handed on a 360-px-wide phone, in FR and EN,
+- Definition of done for any UI work: works one-handed on a 360-px-wide phone, in FR, EN and ES,
   with sound on and off.
