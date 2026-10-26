@@ -1,6 +1,6 @@
 import { useEffect, useState, type FC, type ReactNode } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useT, useLang, type TLang } from '@/shared/i18n';
+import { LANGS, LANG_NAMES, useT, useLang, type TLang } from '@/shared/i18n';
 import { useGetSave, usePutSave } from '@/shared/save';
 import { useSoundApi } from '@/shared/sound';
 import { Screen, PixelPanel, PixelButton, BackButton } from '@/shared/Chrome';
@@ -120,12 +120,11 @@ export const SettingsView: FC = () => {
 
       <div className="cb-v-list">
         <Row label={t('settings.language')}>
-          <PixelButton variant={lang === 'fr' ? 'primary' : 'secondary'} block={false} onClick={makeSetLang('fr')} aria-pressed={lang === 'fr'}>
-            FR
-          </PixelButton>
-          <PixelButton variant={lang === 'en' ? 'primary' : 'secondary'} block={false} onClick={makeSetLang('en')} aria-pressed={lang === 'en'}>
-            EN
-          </PixelButton>
+          {LANGS.map((l) => (
+            <PixelButton key={l} variant={lang === l ? 'primary' : 'secondary'} block={false} onClick={makeSetLang(l)} aria-pressed={lang === l} aria-label={LANG_NAMES[l]}>
+              {l.toUpperCase()}
+            </PixelButton>
+          ))}
         </Row>
 
         <Row label={t('settings.sound')} hint={settings?.sound ? t('settings.sound.on') : t('settings.sound.off')}>

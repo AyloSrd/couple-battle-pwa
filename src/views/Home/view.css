@@ -138,3 +138,45 @@
 .cb-v-home .cb-v-home-panel p {
   margin: 0;
 }
+
+/* ---------- language menu: drops under the chip, right-aligned, over the art ---------- */
+.cb-v-home .cb-v-home-lang {
+  position: relative;
+}
+.cb-v-home .cb-v-home-lang-menu {
+  --cb-text: var(--cb-on-surface);
+  position: absolute;
+  top: calc(100% + var(--cb-s2));
+  right: 0;
+  margin: 0;
+  padding: var(--cb-s1);
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  background: var(--cb-surface);
+  border: var(--cb-outline-w) solid var(--cb-outline);
+  border-radius: var(--cb-r-sm);
+  box-shadow: var(--cb-e1);
+}
+.cb-v-home .cb-v-home-lang-menu button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--cb-s3);
+  border: 0;
+  border-radius: calc(var(--cb-r-sm) - 4px);
+  background: transparent;
+  color: var(--cb-text);
+  font: 700 var(--cb-fs-body) / 1 var(--cb-font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+.cb-v-home .cb-v-home-lang-menu button[aria-pressed='true'] {
+  background: var(--cb-surface-sunk);
+}
+.cb-v-home .cb-v-home-lang-menu button:focus-visible {
+  outline: 3px solid var(--cb-violet-600);
+  outline-offset: -3px;
+}

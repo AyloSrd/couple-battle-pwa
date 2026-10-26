@@ -14,6 +14,7 @@
 /* ---------- setting row card ---------- */
 .cb-v-settings .cb-v-row {
   display: flex;
+  flex-wrap: wrap; /* three language pills drop under the label on a narrow phone */
   align-items: center;
   justify-content: space-between;
   gap: var(--cb-s3);
@@ -35,8 +36,9 @@
   display: flex;
   gap: var(--cb-s2);
   flex: none;
+  margin-left: auto;
 }
-/* FR / EN pills: the glossy buttons, sized for a thumb, lip drawn by the shadow (no margin) */
+/* FR / EN / ES pills: the glossy buttons, sized for a thumb, lip drawn by the shadow (no margin) */
 .cb-v-settings .cb-v-row .cb-btn {
   min-height: 52px;
   min-width: 64px;

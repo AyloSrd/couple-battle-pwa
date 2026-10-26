@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { es } from '@/data/strings.es';
 import { LangProvider } from '@/shared/i18n';
 import { SaveApiProvider, type TSaveApi } from '@/shared/save';
 import { createSaveMemoryApi } from '@/shared/save/api/memory';
@@ -51,6 +52,18 @@ describe('SettingsView', () => {
     fireEvent.click(sound);
     await waitFor(() => expect(sound).toHaveAttribute('aria-checked', 'false'));
     expect(await api.get('settings')).toMatchObject({ sound: false, vibration: true });
+  });
+
+  it('offers every language and switches the screen to the one picked', async () => {
+    mount();
+    const spanish = await screen.findByRole('button', { name: 'Español' });
+    expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Français' })).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(spanish);
+
+    expect(spanish).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('heading', { name: es['settings.title'] })).toBeInTheDocument();
   });
 
   it('opens Legal and About from their list rows', async () => {
