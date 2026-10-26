@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, FC, ReactNode } from 'react';
+import type { ComponentProps, FC, ReactNode } from 'react';
 import './chrome.css';
 
 type TChipProps = {
@@ -17,7 +17,7 @@ export const Chip: FC<TChipProps> = ({ children, icon, className }) => (
 );
 
 /** Tappable chip (language toggle etc.) — same look, ≥ 48px hit area via padding. */
-export const ChipButton: FC<ButtonHTMLAttributes<HTMLButtonElement>> = ({ className, children, ...rest }) => (
+export const ChipButton: FC<ComponentProps<'button'>> = ({ className, children, ...rest }) => (
   <button type="button" className={['cb-chip', className ?? ''].filter(Boolean).join(' ')} {...rest}>
     {children}
   </button>

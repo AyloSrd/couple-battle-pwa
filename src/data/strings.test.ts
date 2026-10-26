@@ -1,20 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { fr } from './strings.fr';
 import { en } from './strings.en';
+import { es } from './strings.es';
+
+const others = { en, es };
+const slots = (s: string) => (s.match(/\{\w+\}/g) ?? []).sort().join();
 
 describe('UI string dictionaries', () => {
-  it('FR and EN expose the exact same key set', () => {
-    const frKeys = Object.keys(fr).sort();
-    const enKeys = Object.keys(en).sort();
-    expect(enKeys).toEqual(frKeys);
+  it.each(Object.entries(others))('%s exposes the exact same key set as FR', (_, dict) => {
+    expect(Object.keys(dict).sort()).toEqual(Object.keys(fr).sort());
   });
 
-  it('has no empty values in either language', () => {
-    for (const [key, value] of Object.entries(fr)) {
-      expect(value, `fr.${key}`).not.toBe('');
+  it.each(Object.entries(others))('%s keeps every {placeholder} of the FR value', (_, dict) => {
+    for (const key of Object.keys(fr) as (keyof typeof fr)[]) {
+      expect(slots(dict[key]), key).toBe(slots(fr[key]));
     }
-    for (const [key, value] of Object.entries(en)) {
-      expect(value, `en.${key}`).not.toBe('');
+  });
+
+  it('has no empty values in any language', () => {
+    for (const [lang, dict] of Object.entries({ fr, ...others })) {
+      for (const [key, value] of Object.entries(dict)) {
+        expect(value, `${lang}.${key}`).not.toBe('');
+      }
     }
   });
 });

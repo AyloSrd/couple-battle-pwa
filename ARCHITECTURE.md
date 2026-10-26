@@ -18,7 +18,7 @@
 | Validation | **Zod** | Parse at every adapter boundary |
 | PWA | **vite-plugin-pwa** — https://vite-pwa-org.netlify.app/guide/ | `registerType: 'autoUpdate'`, precache everything: the game must be fully playable offline after first load |
 | IndexedDB | **idb** (thin promise wrapper) | Used only inside `api/idb.ts` adapters |
-| i18n | **No library — typed dictionaries + a ~30-line hook** (decision) | `src/data/strings.fr.ts` / `strings.en.ts` export `as const` objects; `shared/i18n` exposes `useT(): (key: TStringKey, vars?: Record<string, string \| number>) => string` with `TStringKey = keyof typeof fr` and `{name}`-style interpolation. Wrong keys are compile errors — with 2 locales and ~185 flat keys this beats react-i18next. FR is the fallback language |
+| i18n | **No library — typed dictionaries + a ~30-line hook** (decision) | `src/data/strings.fr.ts` / `strings.en.ts` / `strings.es.ts` export `as const` objects; `shared/i18n` exposes `useT(): (key: TStringKey, vars?: Record<string, string \| number>) => string` with `TStringKey = keyof typeof fr` and `{name}`-style interpolation. Wrong keys are compile errors — with 3 locales and ~236 flat keys this beats react-i18next. FR is the fallback language |
 | Testing | Vitest + React Testing Library | Memory adapters at the provider — never mock IndexedDB (doc below) |
 
 ## Mapping the generic doc onto Couple Battle
@@ -27,7 +27,7 @@ The doc below uses an RPG inventory as its running example. Translate as follows
 
 | Generic example | Couple Battle equivalent |
 |---|---|
-| `shared/catalog` (items.json) | `shared/questions` — bundled `questions.fr.json` / `questions.en.json`; port `TQuestionsApi { list(filter: TQuestionFilter): Promise<TQuestion[]> }`; adapter `json.ts` picks the file by language; `staleTime: Infinity` |
+| `shared/catalog` (items.json) | `shared/questions` — bundled `questions.fr.json` / `questions.en.json` / `questions.es.json`; port `TQuestionsApi { list(filter: TQuestionFilter): Promise<TQuestion[]> }`; adapter `json.ts` picks the file by language; `staleTime: Infinity` |
 | `shared/save` (IndexedDB) | `shared/save` — one `TSaveApi` port over one IDB database covering: `settings`, `seenQuestionIds`, `guidelinesSeen`, `soloBest`, `gameSnapshot` (see handoff/docs/views-spec.md §2 for shapes) |
 | `views/Inventory` etc. | `views/Home`, `views/Setup`, `views/Mode`, `views/Difficulty`, `views/Settings`, `views/HowToPlay`, `views/Legal`, `views/Play` |
 | domain services (`canEquip`) | `drawDeck`, `reduce(machine, event)`, `applyScore`, `rankTeams`, … — the game reducer lives in `views/Play/domain/` and is **always tested** |

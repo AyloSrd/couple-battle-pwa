@@ -34,6 +34,12 @@ describe('ZSettingsSchema — vibration', () => {
     });
   });
 
+  it('accepts every shipped language', () => {
+    for (const lang of ['fr', 'en', 'es']) {
+      expect(ZSettingsSchema.safeParse({ lang, sound: true, vibration: true }).success, lang).toBe(true);
+    }
+  });
+
   it('still rejects a corrupt lang or sound', () => {
     expect(ZSettingsSchema.safeParse({ lang: 'de', sound: true, vibration: true }).success).toBe(false);
     expect(ZSettingsSchema.safeParse({ lang: 'fr', sound: 'yes' }).success).toBe(false);

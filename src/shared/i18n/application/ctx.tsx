@@ -8,10 +8,11 @@ import {
 } from 'react';
 import { fr } from '@/data/strings.fr';
 import { en } from '@/data/strings.en';
+import { es } from '@/data/strings.es';
 import { interpolate } from '../domain/services';
 import { Lang, type TLang, type TStringKey, type TStringVars } from '../domain/types';
 
-const DICTS: Record<TLang, Record<TStringKey, string>> = { fr, en };
+const DICTS: Record<TLang, Record<TStringKey, string>> = { fr, en, es };
 
 type TLangContext = {
   lang: TLang;

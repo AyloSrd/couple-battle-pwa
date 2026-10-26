@@ -1,13 +1,14 @@
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useT, useLang } from '@/shared/i18n';
+import { useT } from '@/shared/i18n';
 import { useGetSave, usePutSave } from '@/shared/save';
 import { useSoundApi } from '@/shared/sound';
 import { useDraftGame } from '@/shared/session';
 import { useInstallPrompt } from '@/shared/pwa';
-import { Screen, PixelPanel, PixelButton, ChipButton, Logo } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, Logo } from '@/shared/Chrome';
 import chars600 from '@/assets/art/chars-home-600.webp';
 import chars900 from '@/assets/art/chars-home-900.webp';
+import { LangMenu } from './components/LangMenu';
 import './view.css';
 
 const IOS_HINT_KEY = 'cb-ios-hint-seen';
@@ -30,7 +31,6 @@ const GearIcon: FC = () => (
 
 export const HomeView: FC = () => {
   const t = useT();
-  const { lang, setLang } = useLang();
   const sound = useSoundApi();
   const navigate = useNavigate();
   const { reset } = useDraftGame();
@@ -52,11 +52,6 @@ export const HomeView: FC = () => {
     return () => sound.music(null);
   }, [sound, soundOn]);
 
-  const handleToggleLang = () => {
-    sound.unlock();
-    sound.play('sfx.tap');
-    setLang(lang === 'fr' ? 'en' : 'fr');
-  };
   const handlePlay = () => {
     sound.unlock();
     sound.play('sfx.select');
@@ -100,9 +95,7 @@ export const HomeView: FC = () => {
     <Screen className="cb-v-home">
       <div className="cb-topbar">
         <span />
-        <ChipButton onClick={handleToggleLang} aria-label={t('settings.language')}>
-          {lang.toUpperCase()}
-        </ChipButton>
+        <LangMenu />
       </div>
 
       <Logo alt={t('app.name')} className="cb-v-home-logo" />
