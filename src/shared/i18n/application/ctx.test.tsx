@@ -13,6 +13,7 @@ const Probe: FC = () => {
       <span data-testid="lang">{lang}</span>
       <button onClick={() => setLang('en')}>to-en</button>
       <button onClick={() => setLang('fr')}>to-fr</button>
+      <button onClick={() => setLang('es')}>to-es</button>
     </div>
   );
 };
@@ -31,6 +32,11 @@ describe('useT / LangProvider', () => {
     fireEvent.click(screen.getByText('to-en'));
     expect(screen.getByTestId('lang')).toHaveTextContent('en');
     expect(screen.getByTestId('value')).toHaveTextContent('Yes');
+
+    fireEvent.click(screen.getByText('to-es'));
+    expect(screen.getByTestId('lang')).toHaveTextContent('es');
+    expect(screen.getByTestId('value')).toHaveTextContent('Sí');
+    expect(document.documentElement.lang).toBe('es');
 
     fireEvent.click(screen.getByText('to-fr'));
     expect(screen.getByTestId('value')).toHaveTextContent('Oui');

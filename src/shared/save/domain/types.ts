@@ -16,7 +16,7 @@ import { Lang } from '@/shared/i18n/domain/types';
  * (the idb adapter would otherwise drop the whole settings record on a parse failure).
  */
 export const ZSettingsSchema = z.object({
-  lang: z.enum([Lang.Fr, Lang.En]),
+  lang: z.enum([Lang.Fr, Lang.En, Lang.Es]),
   sound: z.boolean(),
   vibration: z.boolean().catch(true),
 });
