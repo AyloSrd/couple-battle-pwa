@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SAVE_DEFAULTS } from '@/shared/save';
 import { createContainer } from './container';
 import { Boot } from './Boot';
+import { bootHash } from './bootRoute';
 import { routeTree } from '../routeTree.gen';
 import type { TRouterContext } from '../routes/__root';
 // Register the beforeinstallprompt listener at boot — it can fire before Home
@@ -42,6 +43,10 @@ declare module '@tanstack/react-router' {
 }
 
 async function bootstrap() {
+  // Before the router reads the URL: a reload mid new-game flow lands on Home.
+  const homeHash = bootHash(window.location.hash);
+  if (homeHash) window.history.replaceState(window.history.state, '', homeHash);
+
   const queryClient = new QueryClient();
   const container = await createContainer();
   // Seed the splash's language from persisted settings (FR fallback baked in).
