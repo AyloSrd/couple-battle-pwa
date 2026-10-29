@@ -30,7 +30,7 @@ export function filterQuestions(
   });
 }
 
-/** Which question types a mode draws from. Ultime reuses the Flash set at start. */
+/** Which question types a mode draws from. Ultime's own segments: see `drawUltimeDeck`. */
 export function modeQuestionTypes(mode: TMode): TQuestionType[] {
   if (mode === Mode.Dilemma) return [QuestionType.WhoOfTwo];
   return [QuestionType.Open, QuestionType.ThisOrThat, QuestionType.YesNo];
@@ -66,12 +66,15 @@ export type TDrawDeckOptions = {
  * themes, exclude already-seen ids, shuffle, take `size`. `rng` is injectable
  * for deterministic tests. May return fewer than `size` if the pool is small
  * (caller decides how to handle an empty pool — see error.deckEmpty).
+ *
+ * Ultime is drawn segment by segment (see `drawUltimeDeck`).
  */
 export function drawDeck(
   questions: TQuestion[],
   options: TDrawDeckOptions,
   rng: () => number = Math.random,
 ): TQuestion[] {
+  if (options.mode === Mode.Ultime) return drawUltimeDeck(questions, options, rng);
   const { mode, difficulty, themes, seenIds, size } = options;
   const pool = filterQuestions(questions, {
     types: modeQuestionTypes(mode),
@@ -80,6 +83,45 @@ export function drawDeck(
     excludeIds: seenIds,
   });
   return shuffle(pool, rng).slice(0, size);
+}
+
+/**
+ * Ultime reads its deck by fixed offsets (Flash block, then Dilemma, then
+ * Rapid-fire), so each segment is drawn from its own pool and a short segment
+ * would shift the next one into the wrong round: any short segment → empty
+ * deck (error.deckEmpty). Later segments exclude ids drawn by earlier ones.
+ *
+ * Rapid-fire draws `open` easy/medium only; a Hard game falls back to both.
+ */
+function drawUltimeDeck(
+  questions: TQuestion[],
+  options: TDrawDeckOptions,
+  rng: () => number,
+): TQuestion[] {
+  const { difficulty, themes, seenIds, size } = options;
+  const deck: TQuestion[] = [];
+  const take = (
+    filter: Omit<TQuestionFilter, 'lang' | 'excludeIds'>,
+    count: number,
+    keep: (q: TQuestion) => boolean = () => true,
+  ): boolean => {
+    const pool = filterQuestions(questions, { ...filter, excludeIds: [...seenIds, ...deck.map((q) => q.id)] });
+    const drawn = shuffle(pool.filter(keep), rng).slice(0, count);
+    deck.push(...drawn);
+    return drawn.length === count;
+  };
+
+  const rapidDifficulty =
+    difficulty === GameDifficulty.Easy || difficulty === GameDifficulty.Medium ? difficulty : GameDifficulty.Mix;
+  const complete =
+    take({ types: modeQuestionTypes(Mode.Flash), difficulty, themes }, FLASH_SHARED) &&
+    take({ types: modeQuestionTypes(Mode.Dilemma), difficulty, themes }, ULTIME_DILEMMA) &&
+    take(
+      { types: [QuestionType.Open], difficulty: rapidDifficulty, themes },
+      size - FLASH_SHARED - ULTIME_DILEMMA,
+      (q) => q.difficulty !== GameDifficulty.Hard,
+    );
+  return complete ? deck : [];
 }
 
 function shuffle<T>(input: T[], rng: () => number): T[] {

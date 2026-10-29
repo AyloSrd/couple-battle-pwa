@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { drawDeck, filterQuestions, modeQuestionTypes } from './services';
-import type { TQuestion } from './types';
+import { deckSizeFor, drawDeck, filterQuestions, modeQuestionTypes } from './services';
+import type { TQuestion, TQuestionDifficulty, TQuestionType } from './types';
 
 const Q: TQuestion[] = [
   { id: 1, theme: 'childhood', difficulty: 'easy', type: 'open', you: 'a', name: 'a of {name}' },
@@ -45,7 +45,7 @@ describe('modeQuestionTypes', () => {
   it('dilemma draws only who_of_two', () => {
     expect(modeQuestionTypes('dilemma')).toEqual(['who_of_two']);
   });
-  it('flash and ultime draw the open/this_or_that/yes_no set', () => {
+  it('flash (and Ultime\'s Flash segment) draw the open/this_or_that/yes_no set', () => {
     expect(modeQuestionTypes('flash')).toEqual(['open', 'this_or_that', 'yes_no']);
     expect(modeQuestionTypes('ultime')).toEqual(['open', 'this_or_that', 'yes_no']);
   });
@@ -69,5 +69,55 @@ describe('drawDeck', () => {
   it('caps at the requested size', () => {
     const deck = drawDeck(Q, { mode: 'flash', difficulty: 'mix', themes: [], seenIds: [], size: 1 }, rng0);
     expect(deck).toHaveLength(1);
+  });
+});
+
+describe('drawDeck — ultime', () => {
+  const rng0 = () => 0;
+  const DIFFICULTIES: TQuestionDifficulty[] = ['easy', 'medium', 'hard'];
+  const TYPES: TQuestionType[] = ['open', 'this_or_that', 'yes_no', 'who_of_two'];
+  // 10 questions of every type × difficulty → 120, ids 1..120.
+  const POOL: TQuestion[] = TYPES.flatMap((type, t) =>
+    DIFFICULTIES.flatMap((difficulty, d) =>
+      Array.from({ length: 10 }, (_, i) => ({
+        id: t * 30 + d * 10 + i + 1,
+        theme: 'childhood' as const,
+        difficulty,
+        type,
+        you: 'q',
+        name: 'q of {name}',
+      })),
+    ),
+  );
+  const draw = (difficulty: 'mix' | 'easy' | 'medium' | 'hard', couples = 2, questions = POOL) =>
+    drawDeck(questions, { mode: 'ultime', difficulty, themes: [], seenIds: [], size: deckSizeFor('ultime', couples) }, rng0);
+
+  it('lays out Flash types, then 5 who_of_two, then open rapid-fire', () => {
+    const deck = draw('mix');
+    expect(deck).toHaveLength(deckSizeFor('ultime', 2));
+    expect(deck.slice(0, 4).every((q) => q.type !== 'who_of_two')).toBe(true);
+    expect(deck.slice(4, 9).every((q) => q.type === 'who_of_two')).toBe(true);
+    expect(deck.slice(9).every((q) => q.type === 'open' && q.difficulty !== 'hard')).toBe(true);
+  });
+
+  it('never draws the same question twice across segments', () => {
+    const ids = draw('mix', 4).map((q) => q.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('keeps the chosen difficulty for rapid-fire when it is easy or medium', () => {
+    expect(draw('medium').slice(9).every((q) => q.difficulty === 'medium')).toBe(true);
+  });
+
+  it('falls back to easy/medium open questions for rapid-fire on Hard', () => {
+    const deck = draw('hard');
+    expect(deck).toHaveLength(deckSizeFor('ultime', 2));
+    expect(deck.slice(0, 9).every((q) => q.difficulty === 'hard')).toBe(true);
+    expect(deck.slice(9).every((q) => q.type === 'open' && q.difficulty !== 'hard')).toBe(true);
+  });
+
+  it('returns an empty deck when a segment is short, rather than shifting rounds', () => {
+    const fewDilemmas = POOL.filter((q) => q.type !== 'who_of_two' || q.id % 10 === 1);
+    expect(draw('mix', 2, fewDilemmas)).toEqual([]);
   });
 });
