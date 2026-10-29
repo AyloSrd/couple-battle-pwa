@@ -4,6 +4,7 @@ import { PixelPanel, PixelButton, ProgressDots, TeamArt } from '@/shared/Chrome'
 import {
   rapidQuestionOf,
   questionText,
+  rapidSubjectIndex,
   ULTIME_RAPID_PER_COUPLE,
   type TGameState,
 } from '../domain/machine';
@@ -30,10 +31,12 @@ function teamNameOf(state: TGameState, t: ReturnType<typeof useT>): string {
   return '';
 }
 
-/** The couple both answer at once; `{name}` in the prompt points at the first
- *  partner (roster order) as the reference answerer. */
-function answererNameOf(state: TGameState): string {
-  if ('coupleIdx' in state) return state.roster[state.coupleIdx]?.players[0] ?? '';
+/** The couple both answer at once; `{name}` in the prompt alternates between
+ *  the two partners from one question to the next. */
+function subjectNameOf(state: TGameState): string {
+  if ('coupleIdx' in state && 'questionIdx' in state) {
+    return state.roster[state.coupleIdx]?.players[rapidSubjectIndex(state.questionIdx)] ?? '';
+  }
   return '';
 }
 
@@ -82,7 +85,7 @@ export const RapidFire: FC<TProps> = ({ state, onNext, onReady, onJudge }) => {
   );
   const questionCard = (
     <PixelPanel className="cb-rapid-question">
-      <p className="cb-question">{questionText(question, 'name', answererNameOf(state)) || '—'}</p>
+      <p className="cb-question">{questionText(question, 'name', subjectNameOf(state)) || '—'}</p>
     </PixelPanel>
   );
 
