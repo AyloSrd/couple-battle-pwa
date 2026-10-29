@@ -7,6 +7,7 @@ import { DilemmaResolve } from './DilemmaResolve';
 import { Handoff } from './Handoff';
 import { Judge } from './Judge';
 import { PassPhone } from './PassPhone';
+import { rapidOffset } from '../domain/machine';
 import { RapidFire } from './RapidFire';
 import { SideGate } from './SideGate';
 
@@ -67,5 +68,15 @@ describe('screens that ask someone to act show WHO acts', () => {
     expect(q.container.querySelector('.cb-actor--row .cb-actor-names')?.textContent).toBe('Ana & Bo');
     const j = renderScreen(<RapidFire state={gameState('rapidJudge', { coupleIdx: 0 })} onNext={noop} onReady={noop} onJudge={noop} />);
     expect(j.container.querySelector('.cb-actor')).toBeNull();
+  });
+
+  it('RapidFire: the question is about each partner in turn', () => {
+    const base = gameState('rapidQuestion', { coupleIdx: 0 });
+    const deck = Array.from({ length: rapidOffset() + 2 }, (_, i) => ({ ...base.deck[0]!, id: i + 1, name: 'Q de {name}' }));
+    const textAt = (questionIdx: number) =>
+      renderScreen(<RapidFire state={{ ...base, deck, questionIdx }} onNext={noop} onReady={noop} onJudge={noop} />)
+        .container.querySelector('.cb-rapid-question .cb-question')?.textContent;
+    expect(textAt(0)).toBe('Q de Ana');
+    expect(textAt(1)).toBe('Q de Bo');
   });
 });

@@ -3,7 +3,7 @@ import { fireEvent } from '@testing-library/react';
 import { playerArtUrl } from '@/shared/Chrome';
 import { gameState, testRoster } from '@/test/gameStates';
 import { renderScreen } from '@/test/renderScreen';
-import { answererIndex } from '../domain/machine';
+import { answerKey, answererIndex } from '../domain/machine';
 import { GuessReveal } from './GuessReveal';
 
 function mount(round: number, coupleIdx: number) {
@@ -50,22 +50,24 @@ describe('GuessReveal — who acts: the GUESSER (the answerer’s partner)', () 
   });
 });
 
-describe('GuessReveal — the badge changed nothing about guessing', () => {
-  const typed = (type: 'open' | 'yes_no' | 'who_of_two') => ({
-    ...gameState('guess'),
-    deck: [{ id: 1, theme: 'childhood' as const, difficulty: 'easy' as const, type, you: 'Q?', name: 'Q de {name}?' }],
-  });
-  const mountTyped = (type: 'open' | 'yes_no' | 'who_of_two', h: { onReveal?: () => void; onAutoGuess?: (g: string) => void }) =>
-    renderScreen(
-      <GuessReveal
-        state={typed(type)}
-        guesserName="Bo"
-        partnerName="Ana"
-        onReveal={h.onReveal ?? (() => {})}
-        onAutoGuess={h.onAutoGuess ?? (() => {})}
-      />,
-    );
+type TQType = 'open' | 'yes_no' | 'who_of_two';
+const typed = (type: TQType, truth?: string) => ({
+  ...gameState('guess'),
+  deck: [{ id: 1, theme: 'childhood' as const, difficulty: 'easy' as const, type, you: 'Q?', name: 'Q de {name}?' }],
+  secretAnswers: truth === undefined ? {} : { [answerKey('t1', 1)]: truth },
+});
+const mountTyped = (type: TQType, h: { onReveal?: () => void; onAutoGuess?: (g: string) => void; truth?: string } = {}) =>
+  renderScreen(
+    <GuessReveal
+      state={typed(type, h.truth)}
+      guesserName="Bo"
+      partnerName="Ana"
+      onReveal={h.onReveal ?? (() => {})}
+      onAutoGuess={h.onAutoGuess ?? (() => {})}
+    />,
+  );
 
+describe('GuessReveal — the badge changed nothing about guessing', () => {
   it('open: REVEAL stays and fires onReveal', () => {
     const onReveal = vi.fn();
     const { getByRole } = mountTyped('open', { onReveal });
@@ -73,12 +75,47 @@ describe('GuessReveal — the badge changed nothing about guessing', () => {
     expect(onReveal).toHaveBeenCalledOnce();
   });
 
-  it('yes/no and who_of_two: the guess buttons stay and auto-guess their label', () => {
-    const yn = vi.fn();
-    fireEvent.click(mountTyped('yes_no', { onAutoGuess: yn }).getByRole('button', { name: /no/i }));
-    expect(yn).toHaveBeenCalledWith('No');
-    const two = vi.fn();
-    fireEvent.click(mountTyped('who_of_two', { onAutoGuess: two }).getByRole('button', { name: /Ana/ }));
-    expect(two).toHaveBeenCalledWith('Ana');
+  it('yes/no: the pick auto-guesses its label, on NEXT', () => {
+    const onAutoGuess = vi.fn();
+    const { getByRole } = mountTyped('yes_no', { onAutoGuess, truth: 'Yes' });
+    fireEvent.click(getByRole('button', { name: /no/i }));
+    expect(onAutoGuess).not.toHaveBeenCalled();
+    fireEvent.click(getByRole('button', { name: /next/i }));
+    expect(onAutoGuess).toHaveBeenCalledWith('No');
+  });
+
+  it('who_of_two: the pick auto-guesses its name, on NEXT', () => {
+    const onAutoGuess = vi.fn();
+    const { getByRole } = mountTyped('who_of_two', { onAutoGuess, truth: 'Ana' });
+    fireEvent.click(getByRole('button', { name: /Ana/ }));
+    fireEvent.click(getByRole('button', { name: /next/i }));
+    expect(onAutoGuess).toHaveBeenCalledWith('Ana');
+  });
+});
+
+describe('GuessReveal — an auto-judged pick reveals the partner’s real answer', () => {
+  const reveal = (c: HTMLElement) => c.querySelector('.cb-flash-card--reveal');
+
+  it('nothing is revealed before the pick', () => {
+    const { container } = mountTyped('yes_no', { truth: 'Yes' });
+    expect(reveal(container)).toBeNull();
+  });
+
+  it('a wrong pick shows the real answer and the miss verdict', () => {
+    const { container, getByRole, getByText } = mountTyped('yes_no', { truth: 'Yes' });
+    fireEvent.click(getByRole('button', { name: /no/i }));
+    expect(reveal(container)?.textContent).toBe('Yes');
+    expect(reveal(container)).toHaveClass('is-miss');
+    expect(getByText('Ana answered:')).toBeInTheDocument();
+    expect(getByText(/Missed!/)).toBeInTheDocument();
+    expect(container.querySelector('.cb-answers')).toBeNull();
+  });
+
+  it('a right pick shows the real answer and the match verdict', () => {
+    const { container, getByRole, getByText } = mountTyped('who_of_two', { truth: 'Bo' });
+    fireEvent.click(getByRole('button', { name: /Bo/ }));
+    expect(reveal(container)?.textContent).toBe('Bo');
+    expect(reveal(container)).toHaveClass('is-match');
+    expect(getByText(/MATCH! \+2/)).toBeInTheDocument();
   });
 });

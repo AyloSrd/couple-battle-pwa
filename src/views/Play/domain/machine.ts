@@ -150,6 +150,11 @@ export function flashDeckSize(): number {
 export function answererIndex(round: number): 0 | 1 {
   return (round % 2) as 0 | 1;
 }
+/** Rapid-fire: which partner a question's `{name}` is about — they take turns,
+ *  so a couple's five questions are not all about the same person. */
+export function rapidSubjectIndex(questionIdx: number): 0 | 1 {
+  return (questionIdx % 2) as 0 | 1;
+}
 
 /** Key for a couple's locked answer to a question; every couple's answers for
  *  the round coexist until the guessing phase completes. */

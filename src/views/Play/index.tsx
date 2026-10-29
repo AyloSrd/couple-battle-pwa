@@ -11,7 +11,6 @@ import {
   toSnapshot,
   fromSnapshot,
   initGame,
-  flashTruth,
   answererIndex,
   type TGameState,
   type TResult,
@@ -129,9 +128,7 @@ export const PlayView: FC = () => {
     dispatch({ type: 'reveal' }); // the riser plays on the Judge (flip) mount
   };
   const handleAutoGuess = (guess: string) => {
-    if (game?.kind !== 'guess') return;
-    const truth = flashTruth(game);
-    sound.play(truth !== undefined && guess === truth ? 'sfx.point.exact' : 'sfx.point.miss');
+    sound.play('sfx.tap'); // the match/miss sound played on the pick, with the reveal
     dispatch({ type: 'autoGuess', guess });
   };
   const handleJudge = (verdict: TVerdict) => {
@@ -254,6 +251,7 @@ export const PlayView: FC = () => {
           const n = namesFor(game.round, game.coupleIdx);
           return (
             <GuessReveal
+              key={`${game.round}-${game.questionIdx}-${game.coupleIdx}`}
               state={game}
               guesserName={n.guesserName}
               partnerName={n.answererName}

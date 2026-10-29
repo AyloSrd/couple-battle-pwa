@@ -10,6 +10,7 @@ import {
   flashSharedIndex,
   flashDeckSize,
   answererIndex,
+  rapidSubjectIndex,
   nextFlashSlot,
   answerKey,
   flashQuestion,
@@ -573,6 +574,10 @@ describe('Ultime machine (composition)', () => {
     expect(s.kind).toBe('final');
 
     expect(s.scores).toEqual({ t1: 4 + 4 + 5 + 10, t2: 0 + 4 + 0 + 6 });
+  });
+
+  it('rapid-fire questions alternate between the two partners', () => {
+    expect([0, 1, 2, 3, 4].map(rapidSubjectIndex)).toEqual([0, 1, 0, 1, 0]);
   });
 
   it('round-trips rapid-fire phases through a snapshot', () => {

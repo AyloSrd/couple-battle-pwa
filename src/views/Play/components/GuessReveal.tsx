@@ -1,9 +1,10 @@
-import type { FC } from 'react';
+import { useState, type FC } from 'react';
 import { useT } from '@/shared/i18n';
+import { useSoundApi } from '@/shared/sound';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton } from '@/shared/Chrome';
 import { ActorBadge } from './ActorBadge';
 import '../flash.css';
-import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
+import { flashQuestion, flashSetSize, flashTruth, questionText, type TGameState } from '../domain/machine';
 
 type TProps = {
   state: Extract<TGameState, { kind: 'guess' }>;
@@ -14,16 +15,28 @@ type TProps = {
 };
 
 /** V-GuessReveal — the guesser answers out loud; open questions reveal a card,
- *  yes/no are auto-judged on the guesser's pick. */
+ *  yes/no and who_of_two are auto-judged on the guesser's pick: the partner's
+ *  real answer is shown with the match/miss verdict, then NEXT scores it. */
 export const GuessReveal: FC<TProps> = ({ state, guesserName, partnerName, onReveal, onAutoGuess }) => {
   const t = useT();
+  const sound = useSoundApi();
+  const [picked, setPicked] = useState<string>();
   const question = flashQuestion(state);
+  const truth = flashTruth(state);
   const isYesNo = question?.type === 'yes_no';
   // who_of_two answers are one of the couple's two names (roster order).
   const twoNames = question?.type === 'who_of_two' ? state.roster[state.coupleIdx]?.players : undefined;
+  const isMatch = picked !== undefined && truth !== undefined && picked === truth;
 
-  const handleYes = () => onAutoGuess(t('common.yes'));
-  const handleNo = () => onAutoGuess(t('common.no'));
+  const pick = (guess: string) => {
+    sound.play(truth !== undefined && guess === truth ? 'sfx.point.exact' : 'sfx.point.miss');
+    setPicked(guess);
+  };
+  const handleYes = () => pick(t('common.yes'));
+  const handleNo = () => pick(t('common.no'));
+  const handleNext = () => {
+    if (picked !== undefined) onAutoGuess(picked);
+  };
 
   return (
     <div className="cb-v-flash cb-v-flash--guess">
@@ -38,10 +51,19 @@ export const GuessReveal: FC<TProps> = ({ state, guesserName, partnerName, onRev
         <p className="cb-question">{questionText(question, 'name', partnerName) || '—'}</p>
       </PixelPanel>
 
-      {twoNames ? (
+      {picked !== undefined ? (
+        <>
+          <p className="cb-muted cb-flash-hint">{t('guess.answerWas', { name: partnerName })}</p>
+          <PixelPanel className={`cb-flash-card cb-flash-card--reveal cb-flash-card--auto cb-reveal-in${isMatch ? ' is-match' : ' is-miss'}`}>
+            <p className="cb-question">{truth ?? '—'}</p>
+          </PixelPanel>
+          <p className="cb-label cb-flash-verdict">{t(isMatch ? 'judge.auto.match' : 'judge.auto.miss')}</p>
+          <PixelButton onClick={handleNext}>{t('common.next')}</PixelButton>
+        </>
+      ) : twoNames ? (
         <div className="cb-answers">
-          <AnswerButton label={twoNames[0]} tone="p1" onClick={() => onAutoGuess(twoNames[0])} />
-          <AnswerButton label={twoNames[1]} tone="p2" onClick={() => onAutoGuess(twoNames[1])} />
+          <AnswerButton label={twoNames[0]} tone="p1" onClick={() => pick(twoNames[0])} />
+          <AnswerButton label={twoNames[1]} tone="p2" onClick={() => pick(twoNames[1])} />
         </div>
       ) : isYesNo ? (
         <div className="cb-answers">
