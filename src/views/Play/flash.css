@@ -261,6 +261,20 @@
   gap: var(--cb-s2);
 }
 
+/* ---------- auto-judged reveal (yes/no, two names): the real answer under the question ---------- */
+.cb-v-flash .cb-flash-card--auto {
+  min-height: 72px;
+  padding: var(--cb-s3);
+}
+.cb-v-flash .cb-flash-card--auto.is-match {
+  border-color: var(--cb-mint);
+  box-shadow: 0 0 0 3px var(--cb-mint-hi), 0 0 28px rgba(79, 217, 154, 0.5), var(--cb-e2);
+}
+.cb-v-flash .cb-flash-card--auto.is-miss {
+  border-color: var(--cb-rose);
+  box-shadow: 0 0 0 3px var(--cb-rose-hi), 0 0 28px rgba(255, 111, 152, 0.5), var(--cb-e2);
+}
+
 /* ---------- question screens + Judge: tighter vertical rhythm so card + answers fit ~640px ---------- */
 .cb-v-flash--secret,
 .cb-v-flash--guess,
