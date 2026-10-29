@@ -38,7 +38,7 @@ describe('createContainer("memory")', () => {
   it('serves the real JSON catalog (catalog is always JSON)', async () => {
     const c = await createContainer('memory');
     const all = await c.questionsApi.list({ lang: 'fr' });
-    expect(all.length).toBe(1035);
+    expect(all.length).toBe(1135);
     const whoOfTwo = await c.questionsApi.list({ lang: 'fr', types: ['who_of_two'] });
     expect(whoOfTwo.length).toBeGreaterThan(0);
     expect(whoOfTwo.every((q) => q.type === 'who_of_two')).toBe(true);

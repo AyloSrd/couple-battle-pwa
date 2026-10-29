@@ -8278,5 +8278,805 @@
   "type": "yes_no",
   "you": "¿Te irías a vivir al extranjero mañana por el trabajo de tus sueños?",
   "name": "¿{name} se iría a vivir al extranjero mañana por el trabajo de sus sueños?"
+ },
+ {
+  "id": 1036,
+  "theme": "childhood",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos le echó la culpa de sus trastadas a un hermano o a un amigo?",
+  "name": "¿Quién de los dos le echó la culpa de sus trastadas a un hermano o a un amigo?"
+ },
+ {
+  "id": 1037,
+  "theme": "childhood",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos copió en un examen sin que nadie se diera cuenta?",
+  "name": "¿Quién de los dos copió en un examen sin que nadie se diera cuenta?"
+ },
+ {
+  "id": 1038,
+  "theme": "childhood",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos fingía tener fiebre para no ir al cole?",
+  "name": "¿Quién de los dos fingía tener fiebre para no ir al cole?"
+ },
+ {
+  "id": 1039,
+  "theme": "childhood",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha robado alguna vez chuches en una tienda?",
+  "name": "¿Quién de los dos ha robado alguna vez chuches en una tienda?"
+ },
+ {
+  "id": 1040,
+  "theme": "childhood",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos rompió algo valioso en casa de sus padres y nunca lo confesó?",
+  "name": "¿Quién de los dos rompió algo valioso en casa de sus padres y nunca lo confesó?"
+ },
+ {
+  "id": 1041,
+  "theme": "childhood",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos aún guarda su peluche de la infancia escondido en algún sitio?",
+  "name": "¿Quién de los dos aún guarda su peluche de la infancia escondido en algún sitio?"
+ },
+ {
+  "id": 1042,
+  "theme": "childhood",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos acabó más veces en el despacho del director?",
+  "name": "¿Quién de los dos acabó más veces en el despacho del director?"
+ },
+ {
+  "id": 1043,
+  "theme": "childhood",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se chivaba más en el patio del colegio?",
+  "name": "¿Quién de los dos se chivaba más en el patio del colegio?"
+ },
+ {
+  "id": 1044,
+  "theme": "dreams",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos antepondría su sueño al de su pareja?",
+  "name": "¿Quién de los dos antepondría su sueño al de su pareja?"
+ },
+ {
+  "id": 1045,
+  "theme": "dreams",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos sueña en secreto con salir en un reality?",
+  "name": "¿Quién de los dos sueña en secreto con salir en un reality?"
+ },
+ {
+  "id": 1046,
+  "theme": "dreams",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos nunca se atreverá a perseguir su mayor sueño?",
+  "name": "¿Quién de los dos nunca se atreverá a perseguir su mayor sueño?"
+ },
+ {
+  "id": 1047,
+  "theme": "dreams",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ya ha ensayado su discurso de agradecimiento para un premio imaginario?",
+  "name": "¿Quién de los dos ya ha ensayado su discurso de agradecimiento para un premio imaginario?"
+ },
+ {
+  "id": 1048,
+  "theme": "dreams",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos montaría una granja de alpacas en un arrebato?",
+  "name": "¿Quién de los dos montaría una granja de alpacas en un arrebato?"
+ },
+ {
+  "id": 1049,
+  "theme": "dreams",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos acabará siendo más cascarrabias de mayor?",
+  "name": "¿Quién de los dos acabará siendo más cascarrabias de mayor?"
+ },
+ {
+  "id": 1050,
+  "theme": "dreams",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos renunciaría a un sueño de infancia por un contrato fijo?",
+  "name": "¿Quién de los dos renunciaría a un sueño de infancia por un contrato fijo?"
+ },
+ {
+  "id": 1051,
+  "theme": "dreams",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos sueña en secreto con brillar más que su pareja?",
+  "name": "¿Quién de los dos sueña en secreto con brillar más que su pareja?"
+ },
+ {
+  "id": 1052,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha escondido comida para no tener que compartirla?",
+  "name": "¿Quién de los dos ha escondido comida para no tener que compartirla?"
+ },
+ {
+  "id": 1053,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha fingido disfrutar de un plato que a su pareja le salió fatal?",
+  "name": "¿Quién de los dos ha fingido disfrutar de un plato que a su pareja le salió fatal?"
+ },
+ {
+  "id": 1054,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha arruinado una cena con invitados hasta tener que pedir pizzas de urgencia?",
+  "name": "¿Quién de los dos ha arruinado una cena con invitados hasta tener que pedir pizzas de urgencia?"
+ },
+ {
+  "id": 1055,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se levanta de noche para asaltar la nevera?",
+  "name": "¿Quién de los dos se levanta de noche para asaltar la nevera?"
+ },
+ {
+  "id": 1056,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos da consejos que nadie ha pedido cuando su pareja cocina?",
+  "name": "¿Quién de los dos da consejos que nadie ha pedido cuando su pareja cocina?"
+ },
+ {
+  "id": 1057,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos cuenta las patatas fritas cuando toca compartir?",
+  "name": "¿Quién de los dos cuenta las patatas fritas cuando toca compartir?"
+ },
+ {
+  "id": 1058,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se ha intoxicado alguna vez con su propia comida?",
+  "name": "¿Quién de los dos se ha intoxicado alguna vez con su propia comida?"
+ },
+ {
+  "id": 1059,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos pediría un segundo postre a escondidas?",
+  "name": "¿Quién de los dos pediría un segundo postre a escondidas?"
+ },
+ {
+  "id": 1060,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha bailado alguna vez encima de una mesa en una fiesta?",
+  "name": "¿Quién de los dos ha bailado alguna vez encima de una mesa en una fiesta?"
+ },
+ {
+  "id": 1061,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha fingido conocer a alguien durante toda una fiesta?",
+  "name": "¿Quién de los dos ha fingido conocer a alguien durante toda una fiesta?"
+ },
+ {
+  "id": 1062,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos dice “la última y nos vamos” y acaba a las 6 de la mañana?",
+  "name": "¿Quién de los dos dice “la última y nos vamos” y acaba a las 6 de la mañana?"
+ },
+ {
+  "id": 1063,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos le tiraría la caña al camarero para conseguir copas gratis?",
+  "name": "¿Quién de los dos le tiraría la caña al camarero para conseguir copas gratis?"
+ },
+ {
+  "id": 1064,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos tiene más lagunas al día siguiente de una fiesta?",
+  "name": "¿Quién de los dos tiene más lagunas al día siguiente de una fiesta?"
+ },
+ {
+  "id": 1065,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se ha inventado una llamada urgente para escapar de una fiesta?",
+  "name": "¿Quién de los dos se ha inventado una llamada urgente para escapar de una fiesta?"
+ },
+ {
+  "id": 1066,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos tiene más pretendientes en las fiestas sin darse ni cuenta?",
+  "name": "¿Quién de los dos tiene más pretendientes en las fiestas sin darse ni cuenta?"
+ },
+ {
+  "id": 1067,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos montaría un escándalo si un portero no le dejara entrar?",
+  "name": "¿Quién de los dos montaría un escándalo si un portero no le dejara entrar?"
+ },
+ {
+  "id": 1068,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se ha colado en una fiesta sin invitación?",
+  "name": "¿Quién de los dos se ha colado en una fiesta sin invitación?"
+ },
+ {
+  "id": 1069,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se ha comprado todo el equipo para una afición y la ha dejado a las dos semanas?",
+  "name": "¿Quién de los dos se ha comprado todo el equipo para una afición y la ha dejado a las dos semanas?"
+ },
+ {
+  "id": 1070,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos destriparía el final de una serie solo para fastidiar a su pareja?",
+  "name": "¿Quién de los dos destriparía el final de una serie solo para fastidiar a su pareja?"
+ },
+ {
+  "id": 1071,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos tiene una playlist vergonzosa que solo escucha cuando está a solas?",
+  "name": "¿Quién de los dos tiene una playlist vergonzosa que solo escucha cuando está a solas?"
+ },
+ {
+  "id": 1072,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos hace trampas en los juegos de mesa sin ningún remordimiento?",
+  "name": "¿Quién de los dos hace trampas en los juegos de mesa sin ningún remordimiento?"
+ },
+ {
+  "id": 1073,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos sería el lastre del equipo en un escape room?",
+  "name": "¿Quién de los dos sería el lastre del equipo en un escape room?"
+ },
+ {
+  "id": 1074,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ve realities a escondidas y lo niega?",
+  "name": "¿Quién de los dos ve realities a escondidas y lo niega?"
+ },
+ {
+  "id": 1075,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se ha pasado la noche en vela viendo una serie y luego ha jurado que durmió bien?",
+  "name": "¿Quién de los dos se ha pasado la noche en vela viendo una serie y luego ha jurado que durmió bien?"
+ },
+ {
+  "id": 1076,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se ha pasado una noche entera cotilleando las redes de una persona desconocida?",
+  "name": "¿Quién de los dos se ha pasado una noche entera cotilleando las redes de una persona desconocida?"
+ },
+ {
+  "id": 1077,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se queda bajo el edredón y manda a su pareja a investigar un ruido raro?",
+  "name": "¿Quién de los dos se queda bajo el edredón y manda a su pareja a investigar un ruido raro?"
+ },
+ {
+  "id": 1078,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos cambia las sábanas con menos frecuencia, y lo negaría?",
+  "name": "¿Quién de los dos cambia las sábanas con menos frecuencia, y lo negaría?"
+ },
+ {
+  "id": 1079,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha dejado los platos “en remojo” tres días?",
+  "name": "¿Quién de los dos ha dejado los platos “en remojo” tres días?"
+ },
+ {
+  "id": 1080,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos deja de oír por arte de magia en cuanto hay una tarea pendiente?",
+  "name": "¿Quién de los dos deja de oír por arte de magia en cuanto hay una tarea pendiente?"
+ },
+ {
+  "id": 1081,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos fingiría no estar en casa si alguien llamara al timbre por sorpresa?",
+  "name": "¿Quién de los dos fingiría no estar en casa si alguien llamara al timbre por sorpresa?"
+ },
+ {
+  "id": 1082,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos mete todo el desorden en un armario antes de que lleguen los invitados?",
+  "name": "¿Quién de los dos mete todo el desorden en un armario antes de que lleguen los invitados?"
+ },
+ {
+  "id": 1083,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos bebe a morro de la botella de la nevera cuando su pareja no mira?",
+  "name": "¿Quién de los dos bebe a morro de la botella de la nevera cuando su pareja no mira?"
+ },
+ {
+  "id": 1084,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha tirado “sin querer” algo de su pareja?",
+  "name": "¿Quién de los dos ha tirado “sin querer” algo de su pareja?"
+ },
+ {
+  "id": 1085,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha fingido dormir para esquivar una conversación seria?",
+  "name": "¿Quién de los dos ha fingido dormir para esquivar una conversación seria?"
+ },
+ {
+  "id": 1086,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos relee a escondidas los primeros mensajes que se mandaron?",
+  "name": "¿Quién de los dos relee a escondidas los primeros mensajes que se mandaron?"
+ },
+ {
+  "id": 1087,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos montaría una escena de celos por un simple like?",
+  "name": "¿Quién de los dos montaría una escena de celos por un simple like?"
+ },
+ {
+  "id": 1088,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se corta más al decir “te quiero” delante de gente?",
+  "name": "¿Quién de los dos se corta más al decir “te quiero” delante de gente?"
+ },
+ {
+  "id": 1089,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha olvidado una fecha importante y ha disimulado como si nada?",
+  "name": "¿Quién de los dos ha olvidado una fecha importante y ha disimulado como si nada?"
+ },
+ {
+  "id": 1090,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se ha enfurruñado solo para que le hicieran mimos?",
+  "name": "¿Quién de los dos se ha enfurruñado solo para que le hicieran mimos?"
+ },
+ {
+  "id": 1091,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos consigue el perdón poniendo ojitos de cachorro?",
+  "name": "¿Quién de los dos consigue el perdón poniendo ojitos de cachorro?"
+ },
+ {
+  "id": 1092,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos le robó un jersey a su pareja y nunca se lo devolvió?",
+  "name": "¿Quién de los dos le robó un jersey a su pareja y nunca se lo devolvió?"
+ },
+ {
+  "id": 1093,
+  "theme": "money",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha quitado la etiqueta de algo nuevo para decir “uy, si lo tengo desde hace siglos”?",
+  "name": "¿Quién de los dos ha quitado la etiqueta de algo nuevo para decir “uy, si lo tengo desde hace siglos”?"
+ },
+ {
+  "id": 1094,
+  "theme": "money",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos no tiene ni idea de cuánto dinero tiene en el banco?",
+  "name": "¿Quién de los dos no tiene ni idea de cuánto dinero tiene en el banco?"
+ },
+ {
+  "id": 1095,
+  "theme": "money",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se ha “olvidado” de devolverle dinero a un amigo?",
+  "name": "¿Quién de los dos se ha “olvidado” de devolverle dinero a un amigo?"
+ },
+ {
+  "id": 1096,
+  "theme": "money",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos tarda sospechosamente en encontrar la cartera cuando llega la cuenta?",
+  "name": "¿Quién de los dos tarda sospechosamente en encontrar la cartera cuando llega la cuenta?"
+ },
+ {
+  "id": 1097,
+  "theme": "money",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos revendería un regalo en una app de segunda mano?",
+  "name": "¿Quién de los dos revendería un regalo en una app de segunda mano?"
+ },
+ {
+  "id": 1098,
+  "theme": "money",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos deja las propinas más rácanas?",
+  "name": "¿Quién de los dos deja las propinas más rácanas?"
+ },
+ {
+  "id": 1099,
+  "theme": "money",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos pediría un préstamo para un capricho sin contárselo a su pareja?",
+  "name": "¿Quién de los dos pediría un préstamo para un capricho sin contárselo a su pareja?"
+ },
+ {
+  "id": 1100,
+  "theme": "money",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se jugaría todos los ahorros de la pareja por el chivatazo de un amigo?",
+  "name": "¿Quién de los dos se jugaría todos los ahorros de la pareja por el chivatazo de un amigo?"
+ },
+ {
+  "id": 1101,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos mentiría mejor sin pestañear?",
+  "name": "¿Quién de los dos mentiría mejor sin pestañear?"
+ },
+ {
+  "id": 1102,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos guarda más rencor?",
+  "name": "¿Quién de los dos guarda más rencor?"
+ },
+ {
+  "id": 1103,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos asiente sin haber escuchado ni una palabra?",
+  "name": "¿Quién de los dos asiente sin haber escuchado ni una palabra?"
+ },
+ {
+  "id": 1104,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha llorado por algo completamente ridículo?",
+  "name": "¿Quién de los dos ha llorado por algo completamente ridículo?"
+ },
+ {
+  "id": 1105,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos tiene el peor defecto, lo admita o no?",
+  "name": "¿Quién de los dos tiene el peor defecto, lo admita o no?"
+ },
+ {
+  "id": 1106,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos no aguanta un secreto más de cinco minutos?",
+  "name": "¿Quién de los dos no aguanta un secreto más de cinco minutos?"
+ },
+ {
+  "id": 1107,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha fingido que le encantaba un regalo?",
+  "name": "¿Quién de los dos ha fingido que le encantaba un regalo?"
+ },
+ {
+  "id": 1108,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos dice “estoy bien” cuando nada va bien?",
+  "name": "¿Quién de los dos dice “estoy bien” cuando nada va bien?"
+ },
+ {
+  "id": 1109,
+  "theme": "personality",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos prefiere pelearse horas con algo antes que pedir ayuda?",
+  "name": "¿Quién de los dos prefiere pelearse horas con algo antes que pedir ayuda?"
+ },
+ {
+  "id": 1110,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos sacrificaría a su pareja para salvar el pellejo en un apocalipsis zombi?",
+  "name": "¿Quién de los dos sacrificaría a su pareja para salvar el pellejo en un apocalipsis zombi?"
+ },
+ {
+  "id": 1111,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos fingiría un desmayo para escapar de una situación incómoda?",
+  "name": "¿Quién de los dos fingiría un desmayo para escapar de una situación incómoda?"
+ },
+ {
+  "id": 1112,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos usaría la invisibilidad con fines muy dudosos?",
+  "name": "¿Quién de los dos usaría la invisibilidad con fines muy dudosos?"
+ },
+ {
+  "id": 1113,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos tendría más que esconder si su pareja le leyera la mente durante 24 horas?",
+  "name": "¿Quién de los dos tendría más que esconder si su pareja le leyera la mente durante 24 horas?"
+ },
+ {
+  "id": 1114,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos picaría con la estafa del falso asesor bancario?",
+  "name": "¿Quién de los dos picaría con la estafa del falso asesor bancario?"
+ },
+ {
+  "id": 1115,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos sería el cerebro de un atraco perfecto?",
+  "name": "¿Quién de los dos sería el cerebro de un atraco perfecto?"
+ },
+ {
+  "id": 1116,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos fingiría no conocer a su pareja si hiciera el ridículo en público?",
+  "name": "¿Quién de los dos fingiría no conocer a su pareja si hiciera el ridículo en público?"
+ },
+ {
+  "id": 1117,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos vendería su alma al diablo por un año de streaming gratis?",
+  "name": "¿Quién de los dos vendería su alma al diablo por un año de streaming gratis?"
+ },
+ {
+  "id": 1118,
+  "theme": "random",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos haría más destrozos con un día entero sin consecuencias?",
+  "name": "¿Quién de los dos haría más destrozos con un día entero sin consecuencias?"
+ },
+ {
+  "id": 1119,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos le haría perder el avión a su pareja por llegar tarde?",
+  "name": "¿Quién de los dos le haría perder el avión a su pareja por llegar tarde?"
+ },
+ {
+  "id": 1120,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos tendría problemas en la aduana por una tontería?",
+  "name": "¿Quién de los dos tendría problemas en la aduana por una tontería?"
+ },
+ {
+  "id": 1121,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos sería la primera víctima de un carterista?",
+  "name": "¿Quién de los dos sería la primera víctima de un carterista?"
+ },
+ {
+  "id": 1122,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos tendría un ataque de nervios en mitad del aeropuerto?",
+  "name": "¿Quién de los dos tendría un ataque de nervios en mitad del aeropuerto?"
+ },
+ {
+  "id": 1123,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se tragaría un plato típico asqueroso jurando que está buenísimo?",
+  "name": "¿Quién de los dos se tragaría un plato típico asqueroso jurando que está buenísimo?"
+ },
+ {
+  "id": 1124,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos chapurrea un idioma extranjero con total seguridad sin entender nada?",
+  "name": "¿Quién de los dos chapurrea un idioma extranjero con total seguridad sin entender nada?"
+ },
+ {
+  "id": 1125,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se iría de un hotel con las toallas en la maleta?",
+  "name": "¿Quién de los dos se iría de un hotel con las toallas en la maleta?"
+ },
+ {
+  "id": 1126,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos convertiría unas vacaciones románticas en una bronca al segundo día?",
+  "name": "¿Quién de los dos convertiría unas vacaciones románticas en una bronca al segundo día?"
+ },
+ {
+  "id": 1127,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos abandonaría la ruta de senderismo a los veinte minutos jurando que era una pésima idea?",
+  "name": "¿Quién de los dos abandonaría la ruta de senderismo a los veinte minutos jurando que era una pésima idea?"
+ },
+ {
+  "id": 1128,
+  "theme": "workAmbition",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos enviaría un correo incendiario a la persona equivocada?",
+  "name": "¿Quién de los dos enviaría un correo incendiario a la persona equivocada?"
+ },
+ {
+  "id": 1129,
+  "theme": "workAmbition",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos le cantaría las cuarenta a su jefe el día que dimitiera?",
+  "name": "¿Quién de los dos le cantaría las cuarenta a su jefe el día que dimitiera?"
+ },
+ {
+  "id": 1130,
+  "theme": "workAmbition",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha inflado más su currículum?",
+  "name": "¿Quién de los dos ha inflado más su currículum?"
+ },
+ {
+  "id": 1131,
+  "theme": "workAmbition",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos se apuntaría el tanto por la idea de un compañero delante del jefe?",
+  "name": "¿Quién de los dos se apuntaría el tanto por la idea de un compañero delante del jefe?"
+ },
+ {
+  "id": 1132,
+  "theme": "workAmbition",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos ha llorado alguna vez en el baño de la oficina?",
+  "name": "¿Quién de los dos ha llorado alguna vez en el baño de la oficina?"
+ },
+ {
+  "id": 1133,
+  "theme": "workAmbition",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos domina mejor el arte de aparentar que trabaja sin hacer nada?",
+  "name": "¿Quién de los dos domina mejor el arte de aparentar que trabaja sin hacer nada?"
+ },
+ {
+  "id": 1134,
+  "theme": "workAmbition",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos gobernaría la oficina con mano de hierro si fuera quien manda?",
+  "name": "¿Quién de los dos gobernaría la oficina con mano de hierro si fuera quien manda?"
+ },
+ {
+  "id": 1135,
+  "theme": "workAmbition",
+  "difficulty": "hard",
+  "type": "who_of_two",
+  "you": "¿Quién de los dos la liaría más en la cena de Navidad de la empresa?",
+  "name": "¿Quién de los dos la liaría más en la cena de Navidad de la empresa?"
  }
 ]

@@ -106,7 +106,7 @@ describe('persisted bounds — a tampered record is rejected, a real one passes'
   });
 
   it('seen question ids: the whole real pool passes, an oversized list is rejected', () => {
-    const pool = Array.from({ length: 1035 }, (_, i) => i + 1);
+    const pool = Array.from({ length: 1135 }, (_, i) => i + 1);
     expect(ZSeenQuestionIdsSchema.safeParse(pool).success).toBe(true);
     const huge = Array.from({ length: SEEN_QUESTION_IDS_MAX + 1 }, (_, i) => i + 1);
     expect(ZSeenQuestionIdsSchema.safeParse(huge).success).toBe(false);

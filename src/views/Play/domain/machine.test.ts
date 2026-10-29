@@ -730,7 +730,7 @@ function realRoster(n: number): TRoster {
   }));
 }
 
-/** Catalog-like ids (the real catalog tops out at 1035). */
+/** Catalog-like ids (the real catalog tops out at 1135). */
 function realDeck(mode: TMode, size: number): TQuestion[] {
   return Array.from({ length: size }, (_, i) => ({
     id: 1000 + i,
