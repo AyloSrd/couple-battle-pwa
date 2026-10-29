@@ -23,7 +23,7 @@ export const ZSettingsSchema = z.object({
 export type TSettings = z.infer<typeof ZSettingsSchema>;
 
 /** Global set of already-seen question ids (language-independent). Bounded well above
- *  the real pool (1,035 ids) so a tampered record cannot grow without limit. */
+ *  the real pool (1,135 ids) so a tampered record cannot grow without limit. */
 export const SEEN_QUESTION_IDS_MAX = 10_000;
 export const ZSeenQuestionIdsSchema = z.array(z.number().int().positive()).max(SEEN_QUESTION_IDS_MAX);
 export type TSeenQuestionIds = z.infer<typeof ZSeenQuestionIdsSchema>;
