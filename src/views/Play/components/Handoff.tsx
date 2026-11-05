@@ -3,13 +3,13 @@ import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelButton } from '@/shared/Chrome';
 import { actorOf } from '../domain/actor';
-import type { TGameState } from '../domain/machine';
+import type { TGameAt } from '../domain/machine';
 import { ActorBadge } from './ActorBadge';
 import '../flash.css';
 
 type TProps = {
   /** The next answerer takes the phone. */
-  state: Extract<TGameState, { kind: 'handoff' }>;
+  game: TGameAt<'handoff'>;
   onConfirm: () => void;
 };
 
@@ -18,10 +18,10 @@ type TProps = {
  * are shared inside the answerers' group, so this is just "your turn, pass it
  * over" — deliberately NOT the strict no-peek pass-phone gate.
  */
-export const Handoff: FC<TProps> = ({ state, onConfirm }) => {
+export const Handoff: FC<TProps> = ({ game, onConfirm }) => {
   const t = useT();
   const sound = useSoundApi();
-  const actor = actorOf(state);
+  const actor = actorOf(game);
   const name = actor.kind === 'player' ? actor.team.players[actor.playerIdx] : '';
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export const Handoff: FC<TProps> = ({ state, onConfirm }) => {
   return (
     <div className="cb-v-flash cb-v-flash--handoff">
       <div className="cb-flash-hero">
-        <ActorBadge state={state} variant="hero" showName={false} />
+        <ActorBadge game={game} variant="hero" showName={false} />
         <h2 className="cb-h2">{t('flash.side.next', { name })}</h2>
       </div>
       <PixelButton onClick={onConfirm}>{t('pass.secret.confirm', { name })}</PixelButton>

@@ -3,21 +3,25 @@ import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton, Field } from '@/shared/Chrome';
 import { ActorBadge } from './ActorBadge';
 import '../flash.css';
-import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
+import { SECRET_MAX } from '@/shared/game';
+import type { TQuestion } from '@/shared/questions';
+import { cardOf, questionText, segmentLength, teamOf, type TGameAt } from '../domain/machine';
 
 type TProps = {
-  state: Extract<TGameState, { kind: 'secretInput' }>;
+  game: TGameAt<'secret'>;
+  question: TQuestion | undefined;
+  /** Locks the answer: typed text, or a closed token ('yes' | 'no', 'p0' | 'p1'). */
   onLock: (answer: string) => void;
 };
 
 /** V-SecretAnswers — the answerer privately answers, then locks. No going back. */
-export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
+export const SecretAnswers: FC<TProps> = ({ game, question, onLock }) => {
   const t = useT();
   const [text, setText] = useState('');
-  const question = flashQuestion(state);
-  const isYesNo = question?.type === 'yes_no';
-  // who_of_two answers are one of the couple's two names (roster order).
-  const twoNames = question?.type === 'who_of_two' ? state.roster[state.coupleIdx]?.players : undefined;
+  const type = cardOf(game)?.type;
+  const isYesNo = type === 'yes_no';
+  // who_of_two answers are one of the couple's two names (roster order), locked as p0 | p1.
+  const twoNames = type === 'who_of_two' ? teamOf(game)?.players : undefined;
 
   const lock = (answer: string) => {
     setText('');
@@ -26,8 +30,10 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
   const handleSubmitText = () => {
     if (text.trim()) lock(text.trim());
   };
-  const handleYes = () => lock(t('common.yes'));
-  const handleNo = () => lock(t('common.no'));
+  const handleYes = () => lock('yes');
+  const handleNo = () => lock('no');
+  const handleFirst = () => lock('p0');
+  const handleSecond = () => lock('p1');
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
 
   return (
@@ -36,18 +42,18 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
           only the OTHER side must not look. */}
       <div className="cb-topbar">
         <Chip>{t('flash.side.chip.answerers')}</Chip>
-        <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
+        <ProgressDots total={segmentLength(game.ctx)} current={game.step.q} />
       </div>
 
       <PixelPanel className="cb-flash-card cb-flash-card--player">
-        <ActorBadge state={state} variant="card" />
+        <ActorBadge game={game} variant="card" />
         <p className="cb-question">{questionText(question, 'you') || '—'}</p>
       </PixelPanel>
 
       {twoNames ? (
         <div className="cb-answers">
-          <AnswerButton label={twoNames[0]} tone="p1" onClick={() => lock(twoNames[0])} />
-          <AnswerButton label={twoNames[1]} tone="p2" onClick={() => lock(twoNames[1])} />
+          <AnswerButton label={twoNames[0]} tone="p1" onClick={handleFirst} />
+          <AnswerButton label={twoNames[1]} tone="p2" onClick={handleSecond} />
         </div>
       ) : isYesNo ? (
         <div className="cb-answers">
@@ -60,7 +66,7 @@ export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
             placeholder={t('secret.placeholder')}
             value={text}
             onChange={handleChange}
-            maxLength={40}
+            maxLength={SECRET_MAX}
             autoCapitalize="off"
             autoFocus
             autoComplete="off"

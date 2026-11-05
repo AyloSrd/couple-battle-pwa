@@ -12,9 +12,8 @@ export {
   type TSoloBest,
   type TGameSnapshot,
   type THistoryEntry,
-  type TCursor,
   type TSaveShape,
   type TSaveKey,
 } from './domain/types';
-export { newGameSnapshot, type TNewGameConfig } from './domain/services';
+export { newGameSnapshot } from './domain/services';
 export type { TSaveApi } from './api';

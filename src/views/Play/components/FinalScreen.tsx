@@ -2,7 +2,7 @@ import { useEffect, type FC } from 'react';
 import { useLang, useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
-import { rankTeams, type TGameState } from '../domain/machine';
+import { rankTeams, type TGameAt } from '../domain/machine';
 import { joinNames, resolveOutcome } from '../domain/outcome';
 import { gameStats } from '../domain/stats';
 import { TeamStats } from './TeamStats';
@@ -12,25 +12,26 @@ import '../results.css';
 export type TSoloResult = { isBest: boolean; points: number; best: number };
 
 type TFinalScreenProps = {
-  state: Extract<TGameState, { kind: 'final' }>;
+  game: TGameAt<'final'>;
   onRematch: () => void;
   onNewGame: () => void;
   solo?: TSoloResult | undefined;
 };
 
 /** V-FinalResults — the winner on the sunburst (burst). Fanfare once on mount. */
-export const FinalScreen: FC<TFinalScreenProps> = ({ state, onRematch, onNewGame, solo }) => {
+export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame, solo }) => {
   const t = useT();
   const { lang } = useLang();
   const sound = useSoundApi();
-  const ranked = rankTeams(state);
+  const { history } = game.ctx;
+  const ranked = rankTeams(game.ctx);
   const outcome = resolveOutcome(ranked);
   const winner = outcome?.kind === 'winner' ? outcome.winner : undefined;
   const allTied = ranked.every((r) => r.isWinner);
   // A game resumed from a snapshot saved before history existed has none — or only the
   // questions played after the resume. Chart only when every team's history adds up to
   // its score (always true for a game played start to finish), never a partial picture.
-  const allStats = state.history.length > 0 ? gameStats(state.history, ranked.map((r) => r.team.teamId)) : [];
+  const allStats = history.length > 0 ? gameStats(history, ranked.map((r) => r.team.teamId)) : [];
   const stats = ranked.every((r) => allStats.find((s) => s.teamId === r.team.teamId)?.earned === r.score) ? allStats : [];
   const teamLabel = (avatarId: string) => t(`team.${avatarId}` as TStringKey);
   const headline = !outcome

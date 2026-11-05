@@ -2,11 +2,11 @@ import type { FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { PlayerAvatar, TeamArt } from '@/shared/Chrome';
 import { actorOf, playerSlot } from '../domain/actor';
-import type { TGameState } from '../domain/machine';
+import type { TGame } from '@/shared/game';
 import '../actor.css';
 
 type TProps = {
-  state: TGameState;
+  game: TGame;
   /**
    * card — a player's round bust + first name, centred on top of a question card
    * hero — a player's big bust (gates); for a couple just its names (the screen shows the hero art)
@@ -21,9 +21,9 @@ type TProps = {
  * WHO ACTS on this screen (see `actorOf`): one player → their bust and name; a couple →
  * its portrait, team name and names; the whole table → nothing. Decorative art, real text.
  */
-export const ActorBadge: FC<TProps> = ({ state, variant, showName = true }) => {
+export const ActorBadge: FC<TProps> = ({ game, variant, showName = true }) => {
   const t = useT();
-  const actor = actorOf(state);
+  const actor = actorOf(game);
   if (actor.kind === 'table') return null;
   const { team } = actor;
   const teamName = t(`team.${team.avatarId}` as TStringKey);

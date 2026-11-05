@@ -1,4 +1,4 @@
-import type { THistoryEntry, TStage } from './machine';
+import type { THistoryEntry, TStage } from '@/shared/game/domain/game';
 
 /** One scored question as a heart: full = every point, half = some, empty = none. */
 export type THeart = 'full' | 'half' | 'empty';

@@ -5,9 +5,10 @@ import { LangProvider } from '@/shared/i18n';
 import { SoundApiProvider } from '@/shared/sound';
 import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import type { TSoundApi } from '@/shared/sound';
-import { initGame, type TGameState } from '../domain/machine';
+import { isAt, type TGameAt } from '../domain/machine';
 import type { TQuestion } from '@/shared/questions/domain/types';
 import type { TRoster } from '@/shared/game/domain/types';
+import { newGame } from '@/shared/game/domain/game';
 import { DilemmaQuestion } from './DilemmaQuestion';
 
 const roster: TRoster = [
@@ -23,10 +24,10 @@ const deck: TQuestion[] = Array.from({ length: 3 }, (_, i) => ({
   name: `q${i + 1}`,
 }));
 
-function questionState(): Extract<TGameState, { kind: 'question' }> {
-  const s = initGame({ roster, mode: 'dilemma', difficulty: 'mix', themes: [], deck });
-  if (s.kind !== 'question') throw new Error('expected a question state');
-  return s;
+function askGame(): TGameAt<'ask'> {
+  const g = newGame({ roster, mode: 'dilemma', difficulty: 'mix', themes: [], deck });
+  if (!isAt(g, 'ask')) throw new Error('expected an ask step');
+  return g;
 }
 
 describe('DilemmaQuestion — leaks', () => {
@@ -46,7 +47,7 @@ describe('DilemmaQuestion — leaks', () => {
       <StrictMode>
         <LangProvider initialLang="fr">
           <SoundApiProvider api={sound}>
-            <DilemmaQuestion state={questionState()} onReady={() => {}} />
+            <DilemmaQuestion game={askGame()} question={deck[0]} onReady={() => {}} />
           </SoundApiProvider>
         </LangProvider>
       </StrictMode>,

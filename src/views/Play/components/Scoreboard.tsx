@@ -2,19 +2,19 @@ import { useEffect, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
-import { rankTeams, type TGameState } from '../domain/machine';
+import { rankTeams, type TGameAt } from '../domain/machine';
 import '../results.css';
 
 type TProps = {
-  state: Extract<TGameState, { kind: 'scoreboard' }>;
+  game: TGameAt<'scoreboard'>;
   onNext: () => void;
 };
 
 /** V-Scoreboard — between-rounds standings, on the sunburst (burst). */
-export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
+export const Scoreboard: FC<TProps> = ({ game, onNext }) => {
   const t = useT();
   const sound = useSoundApi();
-  const ranked = rankTeams(state);
+  const ranked = rankTeams(game.ctx);
   const allTied = ranked.every((r) => r.isWinner);
   const leader = ranked[0];
 
@@ -24,7 +24,7 @@ export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
 
   return (
     <div className="cb-v-score">
-      <h1 className="cb-title cb-score-title">{t('score.title', { n: state.round + 1 })}</h1>
+      <h1 className="cb-title cb-score-title">{t('score.title', { n: game.ctx.seg + 1 })}</h1>
 
       <div className="cb-rows">
         {ranked.map((row) => {
@@ -42,7 +42,7 @@ export const Scoreboard: FC<TProps> = ({ state, onNext }) => {
         })}
       </div>
 
-      {state.roster.length > 1 && (
+      {game.ctx.roster.length > 1 && (
         <p className="cb-score-note">
           {allTied
             ? t('score.tied')

@@ -3,19 +3,19 @@ import { useT, type TStringKey } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelButton } from '@/shared/Chrome';
 import { actorOf } from '../domain/actor';
-import type { TGameState } from '../domain/machine';
+import type { TGameAt } from '../domain/machine';
 import { ActorBadge } from './ActorBadge';
 import '../flash.css';
 
 type TProps = {
   variant: 'secret' | 'back';
-  /** Solo only: `sideAnswerers` (the answerer takes the phone) or `sideGuessers` (the guesser does). */
-  state: Extract<TGameState, { kind: 'sideAnswerers' | 'sideGuessers' }>;
+  /** Solo only: the answerers gate (the answerer takes the phone) or the guessers gate (the guesser does). */
+  game: TGameAt<'gate'>;
   onConfirm: () => void;
 };
 
 /** V-PassPhone — privacy gate before/after secret input. */
-export const PassPhone: FC<TProps> = ({ variant, state, onConfirm }) => {
+export const PassPhone: FC<TProps> = ({ variant, game, onConfirm }) => {
   const t = useT();
   const sound = useSoundApi();
 
@@ -24,7 +24,7 @@ export const PassPhone: FC<TProps> = ({ variant, state, onConfirm }) => {
   }, [sound]);
 
   const isSecret = variant === 'secret';
-  const actor = actorOf(state);
+  const actor = actorOf(game);
   const name = actor.kind === 'player' ? actor.team.players[actor.playerIdx] : '';
   const teamName = actor.kind === 'player' ? t(`team.${actor.team.avatarId}` as TStringKey) : '';
 
@@ -32,7 +32,7 @@ export const PassPhone: FC<TProps> = ({ variant, state, onConfirm }) => {
     <div className="cb-v-flash cb-v-flash--passphone">
       <div className="cb-flash-hero">
         {/* the secret title already carries the name; the back gate has none, so the badge names the guesser */}
-        <ActorBadge state={state} variant="hero" showName={!isSecret} />
+        <ActorBadge game={game} variant="hero" showName={!isSecret} />
         <h1 className="cb-title">
           {isSecret ? t('pass.secret.title', { name }) : t('pass.back.title')}
         </h1>

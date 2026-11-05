@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { gameStats, heartOf, teamStats } from './stats';
-import type { THistoryEntry } from './machine';
+import type { THistoryEntry } from '@/shared/game/domain/game';
 
 const e = (
   teamId: string,

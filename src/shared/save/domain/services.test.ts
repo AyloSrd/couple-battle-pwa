@@ -15,19 +15,20 @@ const roster: TRoster = [
 describe('newGameSnapshot', () => {
   it('opens dilemma on the first question with everyone at zero', () => {
     const snap = newGameSnapshot({ roster, mode: 'dilemma', difficulty: 'mix', themes: [], deck: [] });
-    expect(snap.cursor).toEqual({ phase: 'question', round: 0, coupleIdx: 0, questionIdx: 0 });
-    expect(snap.scores).toEqual({ t1: 0, t2: 0 });
-    expect(snap.secretAnswers).toEqual({});
+    expect(snap.game.step).toEqual({ kind: 'ask', q: 0 });
+    expect(snap.game.ctx.scores).toEqual({ t1: 0, t2: 0 });
+    expect(snap.game.ctx).toMatchObject({ seg: 0, seq: 0, history: [] });
   });
 
-  it('opens flash on the answerers group gate', () => {
+  it('opens flash on the answerers group gate, with no secret yet', () => {
     const snap = newGameSnapshot({ roster, mode: 'flash', difficulty: 'mix', themes: [], deck: [] });
-    expect(snap.cursor.phase).toBe('sideAnswerers');
+    expect(snap.game.step).toEqual({ kind: 'gate', side: 'answerers', secrets: {} });
   });
 
   it('opens ultime on its flash segment too (not the dilemma slice)', () => {
     const snap = newGameSnapshot({ roster, mode: 'ultime', difficulty: 'mix', themes: [], deck: [] });
-    expect(snap.cursor.phase).toBe('sideAnswerers');
+    expect(snap.game.step).toMatchObject({ kind: 'gate', side: 'answerers' });
+    expect(snap.game.ctx.seg).toBe(0);
   });
 });
 

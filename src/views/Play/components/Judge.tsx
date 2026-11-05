@@ -3,20 +3,22 @@ import { useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { PixelPanel, PixelButton, Chip, ProgressDots } from '@/shared/Chrome';
 import '../flash.css';
-import { flashQuestion, flashSetSize, flashTruth, questionText, type TGameState, type TVerdict } from '../domain/machine';
+import type { TQuestion } from '@/shared/questions';
+import { cardOf, questionText, secretOf, segmentLength, teamOf, type TGameAt, type TVerdict } from '../domain/machine';
+import { answerLabel } from './answerLabel';
 
 type TProps = {
-  state: Extract<TGameState, { kind: 'judge' }>;
+  game: TGameAt<'judge'>;
+  question: TQuestion | undefined;
   answererName: string;
   onJudge: (verdict: TVerdict) => void;
 };
 
 /** V-Judge — the revealed answer, scored by the table (exact / close / miss). */
-export const Judge: FC<TProps> = ({ state, answererName, onJudge }) => {
+export const Judge: FC<TProps> = ({ game, question, answererName, onJudge }) => {
   const t = useT();
   const sound = useSoundApi();
-  const question = flashQuestion(state);
-  const answer = flashTruth(state);
+  const answer = answerLabel(secretOf(game), cardOf(game)?.type, teamOf(game), t);
 
   // The reveal / card-flip moment.
   useEffect(() => {
@@ -29,7 +31,7 @@ export const Judge: FC<TProps> = ({ state, answererName, onJudge }) => {
     <div className="cb-v-flash cb-v-flash--judge">
       <div className="cb-topbar">
         <Chip>{t('flash.side.chip.guessers')}</Chip>
-        <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
+        <ProgressDots total={segmentLength(game.ctx)} current={game.step.q} />
       </div>
       <h2 className="cb-h2 cb-flash-lead">{questionText(question, 'name', answererName) || '—'}</h2>
       <p className="cb-muted cb-flash-hint">

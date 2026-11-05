@@ -1,13 +1,8 @@
 import { z } from 'zod';
-import {
-  ZModeSchema,
-  ZGameDifficultySchema,
-  ZThemeIdSchema,
-  ZRosterSchema,
-  THEME_IDS,
-} from '@/shared/game/domain/types';
-import { ZQuestionSchema } from '@/shared/questions/domain/types';
+import { ZGameSchema, isGameConsistent, type TGame } from '@/shared/game/domain/game';
 import { Lang } from '@/shared/i18n/domain/types';
+
+export { ZHistoryEntrySchema, type THistoryEntry } from '@/shared/game/domain/game';
 
 /**
  * User settings. `vibration` (haptics on the countdown) was added after launch: a save written
@@ -45,87 +40,24 @@ export const ZSoloBestSchema = z.object({
 export type TSoloBest = z.infer<typeof ZSoloBestSchema>;
 
 /**
- * Where we are inside a running game. `phase` is left as a string here — the
- * Play machine (Phase 2) owns the canonical phase union and maps its in-memory
- * state to/from this persisted snapshot.
- */
-export const ZCursorSchema = z.object({
-  phase: z.string(),
-  round: z.number().int().nonnegative(),
-  coupleIdx: z.number().int().nonnegative(),
-  questionIdx: z.number().int().nonnegative(),
-});
-export type TCursor = z.infer<typeof ZCursorSchema>;
-
-/**
- * Full session state, written on every transition and cleared on game end.
- * Powers crash/refresh resume (views-spec §2).
+ * The running game, written on every transition and cleared on game end. Powers crash/refresh
+ * resume (views-spec §2). The game itself is the shared `ZGameSchema` (bounds set just above
+ * what a real game can produce, so a tampered record is rejected without ever rejecting a real
+ * one); on top of the schema, a stored game must be consistent (indices inside the roster and
+ * the plan, team ids from the roster), else it self-heals away on read like a corrupt one.
  *
- * Bounds are set just above what a real game can produce, so they reject a
- * tampered/corrupt record (which then self-heals away on read) without ever
- * rejecting a real machine state:
- *  - deck ≤ 64 (largest real draw: Ultime with 4 couples = 4 + 5 + 4×5 = 29);
- *  - secretAnswers keys are `answerKey(teamId, questionId)` (e.g. `t4|1035`),
- *    values are typed answers (input `maxLength` 40), yes/no, or a player name;
- *  - scores are keyed by roster teamIds (`t1`..`t4`);
- *  - themes ⊆ THEME_IDS; secretAnswers ≤ 4 couples × 64 questions entries;
- *  - confirmed is keyed by roster teamIds, like scores;
- *  - cursor: coupleIdx indexes the roster, round ≤ 3 (Ultime's last round),
- *    questionIdx ≤ 64. `questionIdx < deck.length` is deliberately NOT checked:
- *    a short draw (small pool) legitimately runs past the deck.
+ * TEMPORARY bridge (refactor R1): R2 replaces this key with the versioned `cb.game` envelope.
+ * A record in the pre-redesign shape (cursor/phase + full-question deck) simply fails to parse.
  */
-const SECRET_ANSWERS_MAX = 4 * 64;
-
-/**
- * One scored question, appended by the Play machine on every scoring decision (a
- * zero-point outcome counts). `max` is what the question could have been worth, so
- * the final screen can chart how in sync a team was. `history` is bounded to
- * 4 couples × 64 questions; a snapshot saved before it existed parses to [].
- */
-const HISTORY_MAX = 4 * 64;
-export const ZHistoryEntrySchema = z
+export const ZGameSnapshotSchema = z
   .object({
-    teamId: z.string().regex(/^t[1-4]$/),
-    stage: z.enum(['flash', 'dilemma', 'rapid']),
-    round: z.number().int().min(0).max(3),
-    points: z.number().int().min(0).max(9),
-    max: z.number().int().min(0).max(9),
+    game: ZGameSchema,
+    // Epoch ms of the write. A snapshot older than the resume window (or dated implausibly in
+    // the future) is dropped on read — see `isSnapshotStale`.
+    savedAt: z.number().int().nonnegative(),
   })
-  .refine((e) => e.points <= e.max, { message: 'points exceed max' });
-export type THistoryEntry = z.infer<typeof ZHistoryEntrySchema>;
-export const ZGameSnapshotSchema = z.object({
-  roster: ZRosterSchema,
-  mode: ZModeSchema,
-  difficulty: ZGameDifficultySchema,
-  themes: z.array(ZThemeIdSchema).max(THEME_IDS.length),
-  deck: z.array(ZQuestionSchema).max(64),
-  cursor: ZCursorSchema,
-  scores: z.record(z.string().regex(/^t[1-4]$/), z.number().int()),
-  secretAnswers: z.record(z.string().max(32), z.string().max(40)),
-  // Dilemma resolve: per-couple match/miss for the current question (so a
-  // mid-resolve refresh restores the confirmed couples' badges).
-  confirmed: z.record(z.string().regex(/^t[1-4]$/), z.enum(['match', 'miss'])).default({}),
-  // Every scored question so far, for the final screen's per-team charts.
-  history: z.array(ZHistoryEntrySchema).max(HISTORY_MAX).default([]),
-  // Epoch ms of the write. A snapshot older than the resume window (or dated
-  // implausibly in the future) is dropped on read — see `isSnapshotStale`.
-  // Required: a pre-`savedAt` record fails the schema and self-heals away.
-  savedAt: z.number().int().nonnegative(),
-}).superRefine((s, ctx) => {
-  if (s.cursor.coupleIdx >= s.roster.length) {
-    ctx.addIssue({ code: 'custom', path: ['cursor', 'coupleIdx'], message: 'coupleIdx out of roster range' });
-  }
-  if (s.cursor.round > 3) {
-    ctx.addIssue({ code: 'custom', path: ['cursor', 'round'], message: 'round out of range' });
-  }
-  if (s.cursor.questionIdx > 64) {
-    ctx.addIssue({ code: 'custom', path: ['cursor', 'questionIdx'], message: 'questionIdx out of range' });
-  }
-  if (Object.keys(s.secretAnswers).length > SECRET_ANSWERS_MAX) {
-    ctx.addIssue({ code: 'custom', path: ['secretAnswers'], message: 'too many secret answers' });
-  }
-});
-export type TGameSnapshot = z.infer<typeof ZGameSnapshotSchema>;
+  .refine((s) => isGameConsistent(s.game as TGame), { message: 'inconsistent game', path: ['game'] });
+export type TGameSnapshot = { game: TGame; savedAt: number };
 
 /**
  * The whole persisted save, one object store keyed by these names. Each key has

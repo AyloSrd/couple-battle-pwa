@@ -1,19 +1,20 @@
-import { useEffect, useState, type FC } from 'react';
+import { useEffect, useMemo, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useT } from '@/shared/i18n';
+import { useLang, useT } from '@/shared/i18n';
 import { useSoundApi } from '@/shared/sound';
 import { useWakeLockApi } from '@/shared/wakeLock';
 import { useGetSave, usePutSave } from '@/shared/save';
 import { useDraftGame } from '@/shared/session';
 import { Screen, PixelButton } from '@/shared/Chrome';
+import { newGame, type TGame, type TResult } from '@/shared/game';
+import { useListQuestions, type TQuestion } from '@/shared/questions';
 import {
   reduce,
-  toSnapshot,
-  fromSnapshot,
-  initGame,
-  answererIndex,
-  type TGameState,
-  type TResult,
+  isAt,
+  cardOf,
+  flashNames,
+  RAPID_KINDS,
+  type TGameEventBody,
   type TVerdict,
 } from './domain/machine';
 import { DilemmaQuestion } from './components/DilemmaQuestion';
@@ -36,6 +37,7 @@ export const PlayView: FC = () => {
   const sound = useSoundApi();
   const wakeLock = useWakeLockApi();
   const { reset } = useDraftGame();
+  const { lang } = useLang();
 
   const snapshotQuery = useGetSave('gameSnapshot');
   const seenQuery = useGetSave('seenQuestionIds');
@@ -43,14 +45,20 @@ export const PlayView: FC = () => {
   const putSnapshot = usePutSave('gameSnapshot');
   const putSeen = usePutSave('seenQuestionIds');
   const putSolo = usePutSave('soloBest');
+  // The deck holds ids only: the text comes from the active language's bank.
+  const bankQuery = useListQuestions({ lang });
+  const bank = useMemo(() => new Map((bankQuery.data ?? []).map((q) => [q.id, q])), [bankQuery.data]);
 
-  const [game, setGame] = useState<TGameState | null>(null);
+  const [game, setGame] = useState<TGame | null>(null);
   const [paused, setPaused] = useState(false);
   const [soloResult, setSoloResult] = useState<TSoloResult | null>(null);
+  // The READY countdown is a UI beat, not a step: it runs while the game is still at the
+  // `seq` it started on (any transition ends it), then dispatches `next`.
+  const [countdownSeq, setCountdownSeq] = useState<number | null>(null);
 
   // Initialize the machine from the snapshot once it loads (resume or new game).
   useEffect(() => {
-    if (game === null && snapshotQuery.data) setGame(fromSnapshot(snapshotQuery.data));
+    if (game === null && snapshotQuery.data) setGame(snapshotQuery.data.game);
   }, [game, snapshotQuery.data]);
 
   // No game to play → back to Home (only once the query has genuinely settled).
@@ -69,15 +77,15 @@ export const PlayView: FC = () => {
   }, [wakeLock]);
 
   // Tense loop during the rapid-fire finale; silent otherwise.
-  const kind = game?.kind;
+  const kind = game?.step.kind;
   useEffect(() => {
-    if (kind && kind.startsWith('rapid')) sound.music('mus.final');
+    if (kind && RAPID_KINDS.has(kind)) sound.music('mus.final');
     else sound.music(null);
     return () => sound.music(null);
   }, [kind, sound]);
 
-  const commitFinal = (final: Extract<TGameState, { kind: 'final' }>) => {
-    const ids = final.deck.map((q) => q.id);
+  const commitFinal = ({ ctx: final }: TGame) => {
+    const ids = final.deck.map((card) => card.id);
     const seen = seenQuery.data ?? [];
     putSeen.mutate(Array.from(new Set([...seen, ...ids])));
     putSnapshot.mutate(null);
@@ -92,22 +100,29 @@ export const PlayView: FC = () => {
     }
   };
 
-  const dispatch = (event: Parameters<typeof reduce>[1]) => {
+  /** The only way the game moves: the event carries the seq THIS render showed, so a double
+   *  tap or a late timer is ignored by the reducer (same object → no render, no write). */
+  const dispatch = (event: TGameEventBody) => {
     if (!game) return;
-    const next = reduce(game, event);
+    const next = reduce(game, { ...event, seq: game.ctx.seq });
+    if (next === game) return;
     setGame(next);
-    if (next.kind === 'final') commitFinal(next);
-    else putSnapshot.mutate(toSnapshot(next));
+    if (next.step.kind === 'final') commitFinal(next);
+    else putSnapshot.mutate({ game: next, savedAt: Date.now() });
   };
 
   const handleReady = () => {
+    if (!game) return;
     sound.play('sfx.tap');
-    dispatch({ type: 'ready' });
+    setCountdownSeq(game.ctx.seq);
   };
-  const handleCountdownDone = () => dispatch({ type: 'countdownDone' });
+  const handleCountdownDone = () => {
+    setCountdownSeq(null);
+    dispatch({ type: 'next' });
+  };
   const handleConfirm = (result: TResult) => {
     sound.play(result === 'match' ? 'sfx.point.exact' : 'sfx.point.miss');
-    dispatch({ type: 'confirm', result });
+    dispatch({ type: 'verdict', v: result === 'match' ? 'exact' : 'miss' });
   };
   const handleNext = () => {
     sound.play('sfx.select');
@@ -117,23 +132,23 @@ export const PlayView: FC = () => {
   // --- Flash handlers ---
   const handlePassConfirm = () => {
     sound.play('sfx.tap');
-    dispatch({ type: 'passConfirm' });
+    dispatch({ type: 'next' });
   };
-  const handleLock = (answer: string) => {
+  const handleLock = (value: string) => {
     sound.play('sfx.lock');
-    dispatch({ type: 'lockAnswer', answer });
+    dispatch({ type: 'answer', value });
   };
   const handleReveal = () => {
     sound.play('sfx.tap');
-    dispatch({ type: 'reveal' }); // the riser plays on the Judge (flip) mount
+    dispatch({ type: 'next' }); // the riser plays on the Judge (flip) mount
   };
-  const handleAutoGuess = (guess: string) => {
+  const handleAutoGuess = (value: string) => {
     sound.play('sfx.tap'); // the match/miss sound played on the pick, with the reveal
-    dispatch({ type: 'autoGuess', guess });
+    dispatch({ type: 'guess', value });
   };
-  const handleJudge = (verdict: TVerdict) => {
-    sound.play(verdict === 'exact' ? 'sfx.point.exact' : verdict === 'close' ? 'sfx.point.close' : 'sfx.point.miss');
-    dispatch({ type: 'judge', verdict });
+  const handleJudge = (v: TVerdict) => {
+    sound.play(v === 'exact' ? 'sfx.point.exact' : v === 'close' ? 'sfx.point.close' : 'sfx.point.miss');
+    dispatch({ type: 'verdict', v });
   };
 
   // --- Rapid-fire handlers ---
@@ -141,13 +156,9 @@ export const PlayView: FC = () => {
     sound.play('sfx.tap');
     dispatch({ type: 'next' });
   };
-  const handleRapidReady = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'ready' });
-  };
   const handleRapidJudge = (synchro: boolean) => {
     sound.play(synchro ? 'sfx.synchro' : 'sfx.mismatch');
-    dispatch({ type: 'rapidJudge', synchro });
+    dispatch({ type: 'verdict', v: synchro ? 'exact' : 'miss' });
   };
 
   const handlePause = () => {
@@ -162,15 +173,11 @@ export const PlayView: FC = () => {
   };
   const handleRestart = () => {
     if (!game) return;
-    const fresh = initGame({
-      roster: game.roster,
-      mode: game.mode,
-      difficulty: game.difficulty,
-      themes: game.themes,
-      deck: game.deck,
-    });
+    const { roster, mode, difficulty, themes, deck } = game.ctx;
+    const fresh = newGame({ roster, mode, difficulty, themes, deck }); // same deck
     setGame(fresh);
-    putSnapshot.mutate(toSnapshot(fresh));
+    setCountdownSeq(null);
+    putSnapshot.mutate({ game: fresh, savedAt: Date.now() });
     sound.duck(false);
     setPaused(false);
   };
@@ -191,29 +198,28 @@ export const PlayView: FC = () => {
     navigate({ to: '/' });
   };
 
-  if (snapshotQuery.isPending || !game) return null;
+  if (snapshotQuery.isPending || bankQuery.isPending || !game) return null;
+
+  const card = cardOf(game);
+  const question: TQuestion | undefined = card ? bank.get(card.id) : undefined;
 
   // The countdown owns the whole sunburst screen: 3 ticks → "POINTEZ !" for
   // Dilemma; 2 ticks → "RÉPONDEZ !" for the rapid-fire (nobody points there).
-  if (game.kind === 'countdown') return <Countdown onDone={handleCountdownDone} />;
-  if (game.kind === 'rapidCountdown') return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
+  if (countdownSeq === game.ctx.seq && game.step.kind === 'ask') return <Countdown onDone={handleCountdownDone} />;
+  if (countdownSeq === game.ctx.seq && game.step.kind === 'rapidAsk') {
+    return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
+  }
 
-  const showPause = game.kind !== 'final';
-  const solo = game.roster.length === 1;
+  const { step } = game;
+  const showPause = step.kind !== 'final';
+  const solo = game.ctx.roster.length === 1;
   // Sunburst (burst) background ONLY for the theatrical beats: the rapid-fire
   // finale, the between-rounds scoreboard and the final results. Countdowns
   // render their own burst screen above. Everything else is calm Paper.
-  const burst = game.kind.startsWith('rapid') || game.kind === 'scoreboard' || game.kind === 'final';
-
+  const burst = RAPID_KINDS.has(step.kind) || step.kind === 'scoreboard' || step.kind === 'final';
   /** Names for the couple currently in the Flash spotlight. */
-  const namesFor = (round: number, coupleIdx: number) => {
-    const team = game.roster[coupleIdx];
-    const aIdx = answererIndex(round);
-    return {
-      answererName: team?.players[aIdx] ?? '',
-      guesserName: team?.players[1 - aIdx] ?? '',
-    };
-  };
+  const names = flashNames(game);
+  const slotKey = 'q' in step && 'couple' in step ? `${game.ctx.seg}-${step.q}-${step.couple}` : '';
 
   return (
     <Screen burst={burst} className={showPause ? 'cb-page--with-pause' : undefined}>
@@ -225,69 +231,46 @@ export const PlayView: FC = () => {
         </div>
       )}
 
-      {game.kind === 'question' && <DilemmaQuestion state={game} onReady={handleReady} />}
-      {game.kind === 'resolve' && <DilemmaResolve state={game} onConfirm={handleConfirm} />}
+      {isAt(game, 'ask') && <DilemmaQuestion game={game} question={question} onReady={handleReady} />}
+      {isAt(game, 'resolve') && <DilemmaResolve game={game} question={question} onConfirm={handleConfirm} />}
 
       {/* Flash "sofa sides": group gates for ≥2 couples; solo has no group to
           share with, so its gates are the strict no-peek pass-phone screens. */}
-      {game.kind === 'sideAnswerers' &&
+      {isAt(game, 'gate') &&
         (solo ? (
-          <PassPhone variant="secret" state={game} onConfirm={handlePassConfirm} />
+          <PassPhone
+            key={game.step.side}
+            variant={game.step.side === 'answerers' ? 'secret' : 'back'}
+            game={game}
+            onConfirm={handlePassConfirm}
+          />
         ) : (
-          <SideGate side="answerers" onConfirm={handlePassConfirm} />
+          <SideGate key={game.step.side} side={game.step.side} onConfirm={handlePassConfirm} />
         ))}
-      {game.kind === 'handoff' && <Handoff state={game} onConfirm={handlePassConfirm} />}
-      {game.kind === 'secretInput' && (
-        <SecretAnswers key={`${game.questionIdx}-${game.coupleIdx}`} state={game} onLock={handleLock} />
-      )}
-      {game.kind === 'sideGuessers' &&
-        (solo ? (
-          <PassPhone variant="back" state={game} onConfirm={handlePassConfirm} />
-        ) : (
-          <SideGate side="guessers" onConfirm={handlePassConfirm} />
-        ))}
-      {game.kind === 'guess' &&
-        (() => {
-          const n = namesFor(game.round, game.coupleIdx);
-          return (
-            <GuessReveal
-              key={`${game.round}-${game.questionIdx}-${game.coupleIdx}`}
-              state={game}
-              guesserName={n.guesserName}
-              partnerName={n.answererName}
-              onReveal={handleReveal}
-              onAutoGuess={handleAutoGuess}
-            />
-          );
-        })()}
-      {game.kind === 'judge' && (
-        <Judge
-          state={game}
-          answererName={namesFor(game.round, game.coupleIdx).answererName}
-          onJudge={handleJudge}
+      {isAt(game, 'handoff') && <Handoff game={game} onConfirm={handlePassConfirm} />}
+      {isAt(game, 'secret') && <SecretAnswers key={slotKey} game={game} question={question} onLock={handleLock} />}
+      {isAt(game, 'guess') && (
+        <GuessReveal
+          key={slotKey}
+          game={game}
+          question={question}
+          guesserName={names.guesserName}
+          partnerName={names.answererName}
+          onReveal={handleReveal}
+          onAutoGuess={handleAutoGuess}
         />
+      )}
+      {isAt(game, 'judge') && (
+        <Judge game={game} question={question} answererName={names.answererName} onJudge={handleJudge} />
       )}
 
-      {(game.kind === 'rapidIntro' ||
-        game.kind === 'rapidTurn' ||
-        game.kind === 'rapidQuestion' ||
-        game.kind === 'rapidJudge') && (
-        <RapidFire
-          state={game}
-          onNext={handleRapidNext}
-          onReady={handleRapidReady}
-          onJudge={handleRapidJudge}
-        />
+      {isAt(game, 'rapidIntro', 'rapidTurn', 'rapidAsk', 'rapidJudge') && (
+        <RapidFire game={game} question={question} onNext={handleRapidNext} onReady={handleReady} onJudge={handleRapidJudge} />
       )}
 
-      {game.kind === 'scoreboard' && <Scoreboard state={game} onNext={handleNext} />}
-      {game.kind === 'final' && (
-        <FinalScreen
-          state={game}
-          onRematch={handleRematch}
-          onNewGame={handleNewGame}
-          solo={soloResult ?? undefined}
-        />
+      {isAt(game, 'scoreboard') && <Scoreboard game={game} onNext={handleNext} />}
+      {isAt(game, 'final') && (
+        <FinalScreen game={game} onRematch={handleRematch} onNewGame={handleNewGame} solo={soloResult ?? undefined} />
       )}
 
       {paused && (
