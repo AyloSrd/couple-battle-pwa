@@ -9,9 +9,15 @@
 }
 
 html,
-body,
-#root {
+body {
   height: 100%;
+}
+
+/* Grows with the page, but clips the screen-in slide (`cb-screen-in`): a transform still counts
+   as scrollable overflow, so the 6px offset would flash a scrollbar on every route change. */
+#root {
+  min-height: 100%;
+  overflow: clip;
 }
 
 body {
