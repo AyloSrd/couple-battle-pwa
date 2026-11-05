@@ -1,19 +1,19 @@
-/* Flash screens (PassPhone, SideGate, Handoff, SecretAnswers, GuessReveal, Judge) —
-   "Colored" refont: everything bigger, the whole page used. Every rule is scoped under
-   `.cb-v-flash` (the root of each of these views) so nothing leaks to other screens.
-   Tokens only (rgba shadows / glass aside). Cards and heroes flex to fill the page; the only
-   fixed pixel sizes are touch-target minimums (buttons, answers, field) and small chrome
-   (chip, dots). */
-
+/* Flash screens (Gate, Secret, Guess, Judge), scoped under `.cb-v-flash`: cards and heroes fill
+   the page; the column itself (and its --flash-gap) is in results.css. */
 .cb-v-flash {
   --flash-gap: var(--cb-s4);
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--flash-gap);
+  --flash-disc: 96px;
+  --flash-tab-rise: 18px;
+  --flash-actor-name: 24px; /* height of the name label under the disc */
+  --flash-flip-delay: 320ms; /* the riser (sfx.reveal) */
+  --flash-flip: 500ms;
 }
-
+/* question screens + Judge: tighter rhythm so card + answers fit ~640px */
+.cb-v-flash--secret,
+.cb-v-flash--guess,
+.cb-v-flash--judge {
+  --flash-gap: var(--cb-s3);
+}
 /* ---------- top bar: bigger chip, readable dots ---------- */
 .cb-v-flash .cb-chip {
   height: 40px;
@@ -32,10 +32,8 @@
 }
 .cb-v-flash .cb-dots i.on {
   background: var(--cb-pink);
-  box-shadow: 0 0 0 2px #FFFFFF;
 }
-
-/* ---------- gates (PassPhone, SideGate, Handoff): one big hero, one big CTA ---------- */
+/* ---------- gates: one big hero, one big CTA ---------- */
 .cb-v-flash .cb-flash-hero {
   flex: 1;
   min-height: 0;
@@ -46,13 +44,6 @@
   gap: var(--cb-s5);
   text-align: center;
 }
-.cb-v-flash .cb-flash-hero .cb-avatar--lg {
-  width: min(52vw, 24dvh, 200px);
-  height: min(52vw, 24dvh, 200px);
-  border-radius: var(--cb-r-xl);
-  font-size: 72px;
-  box-shadow: 0 0 0 4px var(--cb-gold), 0 0 36px rgba(255, 63, 164, 0.55), var(--cb-e2);
-}
 .cb-v-flash .cb-flash-hero .cb-chip {
   height: 44px;
   font-size: var(--cb-fs-caption);
@@ -62,8 +53,11 @@
   font-size: clamp(var(--cb-fs-h1), 11vw, 42px);
   line-height: 1.08;
 }
-.cb-v-flash .cb-flash-hero .cb-h2 {
+.cb-v-flash .cb-flash-hero .cb-h2,
+.cb-v-flash .cb-flash-hero .cb-actor-name {
   font-size: clamp(var(--cb-fs-h2), 9vw, 36px);
+}
+.cb-v-flash .cb-flash-hero .cb-h2 {
   line-height: 1.12;
 }
 /* the sub-line sits in a dark glass pill so it reads as a real element, not leftover space */
@@ -77,19 +71,20 @@
   font: 600 var(--cb-fs-body-lg) / var(--cb-lh-body-lg) var(--cb-font-ui);
   text-wrap: balance;
 }
-
-/* ---------- big buttons everywhere on these screens ---------- */
-.cb-v-flash .cb-btn {
-  min-height: 76px;
-  font-size: clamp(20px, 6vw, 24px);
-  line-height: 1.15;
+/* the actor's bust is the hero */
+.cb-v-flash .cb-flash-hero .cb-actor--hero .cb-player-avatar {
+  width: min(44vw, 20dvh, 180px);
+  height: min(44vw, 20dvh, 180px);
+  font-size: 64px;
+  box-shadow: 0 0 0 4px var(--cb-gold), 0 0 36px rgba(255, 63, 164, 0.55), var(--cb-e2);
 }
-.cb-v-flash .cb-btn--positive,
-.cb-v-flash .cb-btn--negative,
-.cb-v-flash .cb-btn--win {
-  min-height: clamp(56px, 10dvh, 72px);
+.cb-v-flash .cb-flash-hero .cb-actor-name {
+  text-shadow: var(--cb-title-shadow);
 }
-
+.cb-v-flash .cb-flash-hero .cb-actor-names {
+  color: var(--cb-text);
+  font-weight: 700;
+}
 /* ---------- question card: takes all the free height, text big and centred ---------- */
 .cb-v-flash .cb-flash-card {
   flex: 1 1 auto;
@@ -106,22 +101,16 @@
 }
 .cb-v-flash .cb-flash-card--reveal {
   border-color: var(--cb-gold-lo);
-  box-shadow:
-    0 0 0 3px var(--cb-gold),
-    0 0 28px rgba(255, 194, 31, 0.5),
-    var(--cb-e2);
+  box-shadow: 0 0 0 3px var(--cb-gold), 0 0 28px rgba(255, 194, 31, 0.5), var(--cb-e2);
 }
 .cb-v-flash .cb-flash-card--reveal .cb-question {
   font-size: clamp(28px, min(11vw, 6.5dvh), 44px);
   line-height: 1.1;
 }
-
-/* ---------- actor card (SecretAnswers, GuessReveal): who acts — bust + name, on a cream tab ---------- */
-.cb-v-flash {
-  --flash-disc: 96px;
-  --flash-tab-rise: 18px;
-  --flash-actor-name: 24px; /* height of the name label under the disc */
+.cb-v-flash--judge .cb-flash-card {
+  min-height: 96px;
 }
+/* ---------- actor card (Secret, Guess): bust + name on a cream tab ---------- */
 .cb-v-flash .cb-actor .cb-player-avatar {
   width: var(--flash-disc);
   height: var(--flash-disc);
@@ -164,65 +153,7 @@
   border-bottom: 0;
   border-radius: var(--cb-r-md) var(--cb-r-md) 0 0;
 }
-/* shorter phones: a smaller disc first … */
-@media (max-height: 850px) {
-  .cb-v-flash {
-    --flash-disc: 80px;
-    --flash-tab-rise: 16px;
-    --flash-actor-name: 22px;
-  }
-  .cb-v-flash .cb-flash-card--player {
-    padding-bottom: var(--cb-s3);
-  }
-  .cb-v-flash.cb-v-flash--secret .cb-answer,
-  .cb-v-flash.cb-v-flash--guess .cb-answer {
-    min-height: 72px;
-  }
-  .cb-v-flash .cb-flash-card--player .cb-actor-name {
-    font-size: 20px;
-  }
-}
-/* … then a smaller question and lead: the longest real question + two stacked answers still have to fit */
-@media (max-height: 800px) {
-  .cb-v-flash {
-    --flash-disc: 64px;
-    --flash-tab-rise: 14px;
-  }
-  .cb-v-flash--secret .cb-flash-card .cb-question,
-  .cb-v-flash--guess .cb-flash-card .cb-question {
-    font-size: clamp(22px, min(8vw, 4.2dvh), 36px);
-  }
-  .cb-v-flash.cb-v-flash--guess .cb-flash-lead {
-    font-size: 22px;
-  }
-}
-@media (max-height: 700px) {
-  .cb-v-flash {
-    --flash-disc: 56px;
-    --flash-tab-rise: 12px;
-  }
-}
-
-/* gates: the actor's bust is the hero (replaces the team portrait) */
-.cb-v-flash .cb-flash-hero .cb-actor--hero .cb-player-avatar {
-  width: min(44vw, 20dvh, 180px);
-  height: min(44vw, 20dvh, 180px);
-  font-size: 64px;
-  box-shadow: 0 0 0 4px var(--cb-gold), 0 0 36px rgba(255, 63, 164, 0.55), var(--cb-e2);
-}
-.cb-v-flash .cb-flash-hero .cb-actor-name {
-  font-size: clamp(var(--cb-fs-h2), 9vw, 36px);
-  text-shadow: var(--cb-title-shadow);
-}
-.cb-v-flash .cb-flash-hero .cb-actor-names {
-  color: var(--cb-text);
-  font-weight: 700;
-}
-
 /* ---------- answers (yes/no, two names): big, heavy, thumb-sized ---------- */
-.cb-v-flash .cb-answers {
-  gap: var(--cb-s3);
-}
 .cb-v-flash .cb-answer {
   min-height: 88px;
   padding: 0 var(--cb-s5);
@@ -236,12 +167,18 @@
   border-radius: var(--cb-r-sm);
   font-size: 24px;
 }
-
+.cb-v-flash .cb-field {
+  height: 68px;
+}
 /* ---------- headings / small text ---------- */
 .cb-v-flash .cb-flash-lead {
   font-size: var(--cb-fs-h2);
   line-height: 1.15;
   text-align: center;
+}
+.cb-v-flash--judge .cb-flash-lead {
+  font-size: 24px;
+  overflow-wrap: anywhere;
 }
 .cb-v-flash .cb-flash-hint {
   margin: 0;
@@ -260,7 +197,6 @@
 .cb-v-flash .cb-flash-verdicts {
   gap: var(--cb-s2);
 }
-
 /* ---------- auto-judged reveal (yes/no, two names): the real answer under the question ---------- */
 .cb-v-flash .cb-flash-card--auto {
   min-height: 72px;
@@ -274,23 +210,73 @@
   border-color: var(--cb-rose);
   box-shadow: 0 0 0 3px var(--cb-rose-hi), 0 0 28px rgba(255, 111, 152, 0.5), var(--cb-e2);
 }
-
-/* ---------- question screens + Judge: tighter vertical rhythm so card + answers fit ~640px ---------- */
-.cb-v-flash--secret,
-.cb-v-flash--guess,
-.cb-v-flash--judge {
-  --flash-gap: var(--cb-s3);
+/* ---------- GF4: face down while the riser plays, a ~500 ms flip, the answer lands ---------- */
+.cb-v-flash .cb-flash-card--flip {
+  position: relative;
+  animation: cb-card-flip var(--flash-flip) ease-in-out var(--flash-flip-delay) both;
 }
-.cb-v-flash--judge .cb-flash-card {
-  min-height: 96px;
+/* the card's back: hidden at the flip's halfway point, when the card is edge-on */
+.cb-v-flash .cb-flash-card--flip::after {
+  content: '?';
+  content: '?' / '';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: var(--cb-action-grad);
+  color: var(--cb-eggplant);
+  font: 800 64px / 1 var(--cb-font-display);
+  animation: cb-card-back var(--flash-flip) var(--flash-flip-delay) both;
 }
-.cb-v-flash--judge .cb-flash-lead {
-  font-size: 24px;
-  overflow-wrap: anywhere;
+@keyframes cb-card-flip {
+  0%, 100% { transform: perspective(800px) rotateY(0); }
+  50% { transform: perspective(800px) rotateY(90deg); }
 }
-
-/* very short phones: the worst-case Judge (long question + 3-line answer) still fits */
+@keyframes cb-card-back {
+  0%, 49% { visibility: visible; }
+  50%, 100% { visibility: hidden; }
+}
+.cb-v-flash .cb-flash-verdict--landed {
+  animation: cb-pop var(--cb-t-reveal) var(--cb-ease-overshoot) calc(var(--flash-flip-delay) + var(--flash-flip)) both;
+}
+/* ---------- shorter phones: a smaller disc first, then a smaller question and lead (the longest
+   real question + two stacked answers, or the worst-case Judge, still fit) ---------- */
+@media (max-height: 850px) {
+  .cb-v-flash {
+    --flash-disc: 80px;
+    --flash-tab-rise: 16px;
+    --flash-actor-name: 22px;
+  }
+  .cb-v-flash .cb-flash-card--player {
+    padding-bottom: var(--cb-s3);
+  }
+  .cb-v-flash.cb-v-flash--secret .cb-answer,
+  .cb-v-flash.cb-v-flash--guess .cb-answer {
+    min-height: 72px;
+  }
+  .cb-v-flash .cb-flash-card--player .cb-actor-name {
+    font-size: 20px;
+  }
+}
+@media (max-height: 800px) {
+  .cb-v-flash {
+    --flash-disc: 64px;
+    --flash-tab-rise: 14px;
+  }
+  .cb-v-flash--secret .cb-flash-card .cb-question,
+  .cb-v-flash--guess .cb-flash-card .cb-question {
+    font-size: clamp(22px, min(8vw, 4.2dvh), 36px);
+  }
+  .cb-v-flash.cb-v-flash--guess .cb-flash-lead {
+    font-size: 22px;
+  }
+}
 @media (max-height: 700px) {
+  .cb-v-flash {
+    --flash-disc: 56px;
+    --flash-tab-rise: 12px;
+  }
   .cb-v-flash--judge {
     --flash-gap: var(--cb-s2);
   }
@@ -300,16 +286,4 @@
   .cb-v-flash--judge .cb-flash-card--reveal .cb-question {
     font-size: clamp(26px, min(9vw, 5.2dvh), 34px);
   }
-  .cb-v-flash--judge .cb-btn--positive,
-  .cb-v-flash--judge .cb-btn--negative,
-  .cb-v-flash--judge .cb-btn--win {
-    min-height: 56px;
-  }
-}
-
-/* ---------- open-text answer field ---------- */
-.cb-v-flash .cb-field {
-  height: 68px;
-  font-size: var(--cb-fs-body-lg);
-  border-radius: var(--cb-r-md);
 }

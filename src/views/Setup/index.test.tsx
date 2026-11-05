@@ -9,28 +9,23 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router';
-import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import { DraftGameProvider, useDraftGame } from '@/shared/session';
+import { useDraft } from '@/shared/session';
+import { fr } from '@/data/strings.fr';
+import { createTestApp, TestProviders, type TTestApp } from '@/test/renderApp';
 import { SetupView } from './index';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const DraftProbe = () => <p data-testid="roster">{useDraftGame().draft.roster?.length ?? 'none'}</p>;
+const DraftProbe = () => <p data-testid="roster">{useDraft().draft.roster?.length ?? 'none'}</p>;
 
 /** Setup → Mode where the Mode route takes a while to resolve (a lazy chunk, in the real app). */
-function mountSetup() {
+function mountSetup(app: TTestApp = createTestApp({ lang: 'fr' })) {
   const root = createRootRoute({
     component: () => (
-      <LangProvider initialLang="fr">
-        <SoundApiProvider api={createSoundNoopApi()}>
-          <DraftGameProvider>
-            <DraftProbe />
-            <Outlet />
-          </DraftGameProvider>
-        </SoundApiProvider>
-      </LangProvider>
+      <TestProviders app={app}>
+        <DraftProbe />
+        <Outlet />
+      </TestProviders>
     ),
   });
   const routeTree = root.addChildren([
@@ -60,7 +55,7 @@ describe('V-Setup → Mode hand-off', () => {
     mountSetup();
 
     fireEvent.click(await screen.findByRole('button', { name: '1' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'lions' }));
+    fireEvent.click(await screen.findByRole('button', { name: fr['team.lions'] }));
     fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
     const [first, second] = await screen.findAllByRole('textbox');
     fireEvent.change(first as HTMLElement, { target: { value: 'Ana' } });
@@ -77,5 +72,19 @@ describe('V-Setup → Mode hand-off', () => {
     expect(messages.filter((m) => m.includes('Maximum update depth'))).toEqual([]);
     expect(await screen.findByText('mode screen')).toBeInTheDocument();
     expect(screen.getByTestId('roster')).toHaveTextContent('1');
+  });
+});
+
+describe('V-Setup — seeded from the draft', () => {
+  it('Back from Mode reopens on the last couple with every name kept', async () => {
+    const roster = [
+      { teamId: 't1', avatarId: 'otters' as const, players: ['Ana', 'Bo'] as [string, string] },
+      { teamId: 't2', avatarId: 'lions' as const, players: ['Cy', 'Di'] as [string, string] },
+    ];
+    mountSetup(createTestApp({ lang: 'fr', draft: { roster, mode: 'flash' } }));
+    const [first, second] = await screen.findAllByRole('textbox');
+    expect(first).toHaveValue('Cy');
+    expect(second).toHaveValue('Di');
+    expect(screen.getByTestId('roster')).toHaveTextContent('2');
   });
 });

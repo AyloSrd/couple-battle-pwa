@@ -1,20 +1,13 @@
-import type { TRoster, TMode, TGameDifficulty, TThemeId } from '@/shared/game/domain/types';
+import type { TRoster, TMode } from '@/shared/game/domain/types';
 
 /**
- * The in-progress new-game selection, built across Setup → Mode → Difficulty
- * and consumed when the game starts. Not persisted — once the game begins it
- * becomes a `gameSnapshot` in save.
+ * The new-game selection carried across Setup → Mode → Difficulty, memory only (never
+ * persisted). Setup seeds its wizard from `roster`, so Back from Mode keeps every name; Rematch
+ * fills it from the finished game.
  */
-export type TDraftGame = {
+export type TDraft = {
   roster: TRoster | null;
   mode: TMode | null;
-  difficulty: TGameDifficulty | null;
-  themes: TThemeId[];
 };
 
-export const EMPTY_DRAFT: TDraftGame = {
-  roster: null,
-  mode: null,
-  difficulty: null,
-  themes: [],
-};
+export const EMPTY_DRAFT: TDraft = { roster: null, mode: null };

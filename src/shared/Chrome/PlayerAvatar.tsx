@@ -1,9 +1,9 @@
 import type { FC } from 'react';
 import { playerArtUrl, type TPlayerSlot } from './teamArtResolver';
+import { cx } from './kit';
 import './chrome.css';
 
 type TPlayerAvatarProps = {
-  /** Team (avatar) id from the registry. */
   teamId: string;
   /** Which of the couple's two characters (fixed art order). */
   slot: TPlayerSlot;
@@ -21,7 +21,7 @@ export const PlayerAvatar: FC<TPlayerAvatarProps> = ({ teamId, slot, name, teamL
   const first = (text: string) => Array.from(text.trim())[0] ?? '';
   const initial = (first(name) || first(teamLabel) || first(teamId)).toUpperCase();
   return (
-    <span className={['cb-player-avatar', className ?? ''].filter(Boolean).join(' ')} aria-hidden="true">
+    <span className={cx('cb-player-avatar', className)} aria-hidden="true">
       {src ? <img src={src} alt="" draggable={false} /> : initial}
     </span>
   );

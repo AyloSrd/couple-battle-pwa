@@ -3,12 +3,8 @@ import { vi } from 'vitest';
 type TTarget = Window | Document;
 type TAny = (this: TTarget, type: string, ...rest: unknown[]) => void;
 
-/**
- * Counts add/removeEventListener calls on `window` and `document`, per event type, so a
- * leak test can assert they balance once the component under test is unmounted.
- * Install it AFTER a warm-up render: React registers its own one-time document listeners
- * (e.g. `selectionchange`) on first use and never removes them.
- */
+/** Counts add/removeEventListener on `window` and `document` per type, to assert they balance after
+ *  unmount. Install it AFTER a warm-up render (React's own one-time `selectionchange`). */
 export function probeListeners() {
   const balance = new Map<string, number>();
   const bump = (type: string, by: number) => balance.set(type, (balance.get(type) ?? 0) + by);

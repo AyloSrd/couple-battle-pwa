@@ -1,24 +1,18 @@
-import type { TAvatarId, TTeam } from '@/shared/game/domain/types';
+import type { TAvatarId, TRoster, TTeam } from '@/shared/game/domain/types';
+import { NAME_MAX } from '@/shared/game/domain/game';
+import { normalizeText } from '@/shared/game/domain/text';
 
 /**
- * The roster-building wizard as a pure sub-machine (same idea as Play's
- * domain machine). The /setup route stays one view; this drives which step it
- * shows and holds every couple's entry so back-navigation never loses data.
+ * The roster-building wizard as a pure sub-machine: the /setup route stays one view; this drives
+ * its step and holds every couple's entry so Back never loses data. Count, then per couple TEAM →
+ * NAMES → PASS (only BETWEEN couples); after the LAST couple's NAMES, `done` (the view goes to Mode).
  *
- * Per couple, in order: TEAM (pick avatar) → NAMES (two players) → PASS
- * (hand-off interstitial, only BETWEEN couples). The very first screen is the
- * couple-count picker. After the LAST couple's NAMES we go straight to mode
- * select (surfaced as the `done` step for the view to act on).
- *
- * Invariant: `teams.length === coupleIdx` — completed couples always equal the
- * index of the couple currently being built (during PASS the just-finished
- * couple has already been folded in and coupleIdx advanced to the next).
+ * Invariant: `teams.length === coupleIdx` (during PASS the finished couple is already folded in).
  */
 
 export type TSetupStep = 'count' | 'team' | 'names' | 'pass' | 'done';
 
-/** Validation error on the NAMES step (null = none). Avatar "already taken" is
- *  a transient toast handled by the view, not a blocking step error. */
+/** NAMES validation error. "Avatar taken" is a transient toast in the view, not a step error. */
 export type TSetupError = 'required' | 'duplicate' | null;
 
 export type TSetupState = {
@@ -41,17 +35,15 @@ export type TSetupEvent =
   | { type: 'confirmPass' }
   | { type: 'back' };
 
-export function initSetup(): TSetupState {
-  return {
-    step: 'count',
-    count: null,
-    coupleIdx: 0,
-    teams: [],
-    avatar: null,
-    name1: '',
-    name2: '',
-    error: null,
-  };
+const START: TSetupState = { step: 'count', count: null, coupleIdx: 0, teams: [], avatar: null, name1: '', name2: '', error: null };
+
+/**
+ * The wizard's first state. With a roster (the draft: Back from Mode, or Rematch then Back) it
+ * reopens on the last couple's NAMES step with every couple kept, as Back from `done` would.
+ */
+export function initSetup(roster?: TRoster | null): TSetupState {
+  if (!roster?.length) return START;
+  return editPrevious({ ...START, count: roster.length, coupleIdx: roster.length, teams: roster });
 }
 
 /** Avatars already claimed by completed couples — non-selectable in TEAM. */
@@ -59,15 +51,15 @@ export function takenAvatars(state: TSetupState): Set<TAvatarId> {
   return new Set(state.teams.map((team) => team.avatarId));
 }
 
-/** True once `names` holds a repeat, trimmed and compared case-insensitively. */
+/** A player name as it enters the roster (S10): NFC, no invisible / bidi characters, trimmed, capped. */
+export function cleanName(raw: string): string {
+  return normalizeText(raw, NAME_MAX);
+}
+
+/** True once `names` holds a repeat, cleaned and compared case-insensitively. */
 export function hasDuplicateName(names: string[]): boolean {
-  const seen = new Set<string>();
-  for (const raw of names) {
-    const key = raw.trim().toLocaleLowerCase();
-    if (seen.has(key)) return true;
-    seen.add(key);
-  }
-  return false;
+  const keys = names.map((name) => cleanName(name).toLocaleLowerCase());
+  return new Set(keys).size !== keys.length;
 }
 
 /** Is the couple being built the final one? (drives NAMES button + no interstitial) */
@@ -75,10 +67,7 @@ export function isLastCouple(state: TSetupState): boolean {
   return state.count !== null && state.coupleIdx + 1 >= state.count;
 }
 
-const emptyDraft = { avatar: null, name1: '', name2: '', error: null } as const;
-
-/** Pop the last completed couple back into the draft for editing (used by back
- *  from TEAM/PASS of a later couple). */
+/** Pop the last completed couple back into the draft for editing (Back from a later couple). */
 function editPrevious(state: TSetupState): TSetupState {
   const prev = state.teams[state.teams.length - 1];
   if (!prev) return state;
@@ -97,13 +86,11 @@ function editPrevious(state: TSetupState): TSetupState {
 export function reduceSetup(state: TSetupState, event: TSetupEvent): TSetupState {
   switch (event.type) {
     case 'pickCount':
-      return { ...initSetup(), step: 'team', count: event.count };
+      return { ...START, step: 'team', count: event.count };
 
     case 'selectAvatar': {
       if (state.step !== 'team') return state;
-      // Taken avatars are non-selectable; leave the current selection intact.
       if (takenAvatars(state).has(event.avatarId)) return state;
-      // Re-tapping a free tile moves the selection.
       return { ...state, avatar: event.avatarId };
     }
 
@@ -119,27 +106,17 @@ export function reduceSetup(state: TSetupState, event: TSetupEvent): TSetupState
 
     case 'confirmNames': {
       if (state.step !== 'names' || state.avatar === null) return state;
-      if (!state.name1.trim() || !state.name2.trim()) {
-        return { ...state, error: 'required' };
-      }
-      const rosterNames = state.teams
-        .flatMap((team) => team.players)
-        .concat(state.name1, state.name2);
-      if (hasDuplicateName(rosterNames)) {
+      const name1 = cleanName(state.name1);
+      const name2 = cleanName(state.name2);
+      if (!name1 || !name2) return { ...state, error: 'required' };
+      if (hasDuplicateName([...state.teams.flatMap((team) => team.players), name1, name2])) {
         return { ...state, error: 'duplicate' };
       }
-      const team: TTeam = {
-        teamId: `t${state.coupleIdx + 1}`,
-        avatarId: state.avatar,
-        players: [state.name1.trim(), state.name2.trim()],
-      };
+      const team: TTeam = { teamId: `t${state.coupleIdx + 1}`, avatarId: state.avatar, players: [name1, name2] };
       const teams = [...state.teams, team];
-      // Last couple → hand off to mode select. Otherwise → pass interstitial for
-      // the next couple.
-      if (isLastCouple(state)) {
-        return { ...state, teams, step: 'done', error: null };
-      }
-      return { ...state, teams, coupleIdx: state.coupleIdx + 1, step: 'pass', ...emptyDraft };
+      // Last couple → hand off to mode select; otherwise the pass interstitial for the next one.
+      if (isLastCouple(state)) return { ...state, teams, step: 'done', error: null };
+      return { ...state, teams, coupleIdx: state.coupleIdx + 1, step: 'pass', avatar: null, name1: '', name2: '', error: null };
     }
 
     case 'confirmPass':
@@ -149,7 +126,6 @@ export function reduceSetup(state: TSetupState, event: TSetupEvent): TSetupState
     case 'back': {
       switch (state.step) {
         case 'names':
-          // Back to TEAM, keeping any typed names + the chosen avatar.
           return { ...state, step: 'team', error: null };
         case 'team':
           if (state.coupleIdx === 0) return { ...state, step: 'count' };

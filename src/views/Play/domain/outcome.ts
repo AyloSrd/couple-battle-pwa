@@ -5,11 +5,7 @@ export type TOutcome =
   | { kind: 'winner'; winner: TRankedTeam }
   | { kind: 'tie'; teams: TRankedTeam[]; score: number };
 
-/**
- * Resolve the outcome from the ranked scores. A tie means 2+ teams share the top
- * score — including every team at 0-0. A single team (solo) is always the winner.
- * Returns null for an empty ranking.
- */
+/** A tie = 2+ teams share the top score (0-0 included); solo always wins; null when empty. */
 export function resolveOutcome(ranked: readonly TRankedTeam[]): TOutcome | null {
   const first = ranked[0];
   if (!first) return null;

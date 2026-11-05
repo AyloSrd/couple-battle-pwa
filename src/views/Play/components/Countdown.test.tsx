@@ -1,31 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SaveApiProvider, saveKeys } from '@/shared/save';
-import { createSaveMemoryApi } from '@/shared/save/api/memory';
-import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
+import { soundEngine } from '@/shared/sound';
+import { renderWithApp } from '@/test/renderApp';
 import { Countdown } from './Countdown';
 
 const STEP_MS = 700;
 
 function mount(ui: ReactElement, lang: 'fr' | 'en' = 'fr', vibration = true) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const settings = { lang, sound: true, vibration };
-  const save = createSaveMemoryApi({ settings });
-  // The app gate has read the settings before any game screen mounts: start with a warm cache.
-  qc.setQueryData(saveKeys.byKey('settings'), settings);
-  return render(
-    <QueryClientProvider client={qc}>
-      <SaveApiProvider api={save}>
-        <LangProvider initialLang={lang}>
-          <SoundApiProvider api={createSoundNoopApi()}>{ui}</SoundApiProvider>
-        </LangProvider>
-      </SaveApiProvider>
-    </QueryClientProvider>,
-  );
+  // The save store is booted before any game screen mounts, and the shell has passed the
+  // vibration setting to the sound engine (the haptics ride on the cues).
+  soundEngine.setHaptics(vibration);
+  return renderWithApp(ui, { lang, seed: { profile: { settings: { lang, sound: true, vibration } } } });
 }
 
 /** Jump the timed sequence to the GO beat (after `ticks` digit steps). */
@@ -111,5 +97,30 @@ describe('Countdown — vibration setting', () => {
       vi.advanceTimersByTime(2 * STEP_MS + 1500);
     });
     expect(vibrate).not.toHaveBeenCalled();
+  });
+});
+
+describe('Countdown — screen readers (S11)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('one live region: "get ready" at the start, the GO word at GO, never a tick', () => {
+    const { container } = mount(<Countdown onDone={() => {}} />);
+    const live = screen.getByRole('status');
+    expect(live).toHaveTextContent('Tout le monde est prêt ?');
+    expect(container.querySelectorAll('[aria-live], [role="status"], [role="alert"]')).toHaveLength(1);
+    act(() => {
+      vi.advanceTimersByTime(STEP_MS); // tick 2: the region does not change
+    });
+    expect(screen.getByRole('status')).toBe(live);
+    expect(live).toHaveTextContent('Tout le monde est prêt ?');
+    expect(live).not.toHaveTextContent('2');
+    reachGo(2);
+    expect(screen.getByRole('status')).toBe(live);
+    expect(live).toHaveTextContent('POINTEZ !');
   });
 });

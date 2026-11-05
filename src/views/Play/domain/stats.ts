@@ -1,4 +1,4 @@
-import type { THistoryEntry, TStage } from './machine';
+import type { THistoryEntry, TStage } from '@/shared/game/domain/game';
 
 /** One scored question as a heart: full = every point, half = some, empty = none. */
 export type THeart = 'full' | 'half' | 'empty';
@@ -11,7 +11,7 @@ export type TTeamStats = {
   teamId: string;
   earned: number;
   possible: number;
-  /** earned / possible as an integer 0–100 (0 when nothing was scored). */
+  /** earned / possible, 0–100. */
   syncPct: number;
   /** Only the stages that occurred, in play order (flash, dilemma, rapid). */
   byStage: TStageStat[];

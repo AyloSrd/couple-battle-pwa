@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { AVATAR_IDS } from '@/shared/game';
 import { playerArtUrl, teamArtUrl, teamsWithArt } from '@/shared/Chrome';
 import { fr } from '@/data/strings.fr';
@@ -13,10 +11,8 @@ import { TeamPick } from './TeamPick';
 function mountGrid() {
   const state = reduceSetup(initSetup(), { type: 'pickCount', count: 2 });
   return render(
-    <LangProvider initialLang="fr">
-      <SoundApiProvider api={createSoundNoopApi()}>
-        <TeamPick state={state} onSelect={vi.fn()} onNext={vi.fn()} />
-      </SoundApiProvider>
+    <LangProvider lang="fr">
+      <TeamPick state={state} onSelect={vi.fn()} onNext={vi.fn()} />
     </LangProvider>,
   );
 }
@@ -25,12 +21,12 @@ describe('V-Setup Step A — team grid', () => {
   it('renders exactly one tile per picker team (6, all on one page), none extra', () => {
     mountGrid();
     expect(PICKER_TEAMS).toEqual(['otters', 'lions', 'foxes', 'squirrels', 'raccoons', 'mice']);
-    const tiles = PICKER_TEAMS.map((id) => screen.getByRole('button', { name: id }));
+    const tiles = PICKER_TEAMS.map((id) => screen.getByRole('button', { name: fr[`team.${id}`] }));
     expect(tiles).toHaveLength(6);
-    const avatarButtons = screen
-      .getAllByRole('button')
-      .filter((b) => b.getAttribute('aria-label') && (AVATAR_IDS as readonly string[]).includes(b.getAttribute('aria-label')!));
-    expect(avatarButtons).toHaveLength(6);
+    // a tile's accessible name is the translated team name (what is shown under the picture), never the raw id
+    const tileButtons = screen.getAllByRole('button').filter((b) => b.classList.contains('cb-team'));
+    expect(tileButtons.map((b) => b.getAttribute('aria-label'))).toEqual(PICKER_TEAMS.map((id) => fr[`team.${id}`]));
+    for (const id of PICKER_TEAMS) expect(screen.queryByRole('button', { name: id })).toBeNull();
   });
 
   it('only offers registry teams, and leaves the registry itself untouched (12)', () => {
@@ -41,7 +37,7 @@ describe('V-Setup Step A — team grid', () => {
   it('each tile shows its team name and either its art (by id) or the placeholder initial', () => {
     mountGrid();
     for (const id of PICKER_TEAMS) {
-      const tile = screen.getByRole('button', { name: id });
+      const tile = screen.getByRole('button', { name: fr[`team.${id}`] });
       const name = fr[`team.${id}`];
       expect(tile).toHaveTextContent(name);
       const art = teamArtUrl(id, 'portrait', 256);
@@ -62,7 +58,7 @@ describe('V-Setup Step A — team grid', () => {
   it('team-name labels are the Inter label class (accents intact: É, not a display-font glyph)', () => {
     mountGrid();
     for (const id of PICKER_TEAMS) {
-      const tile = screen.getByRole('button', { name: id });
+      const tile = screen.getByRole('button', { name: fr[`team.${id}`] });
       const label = tile.querySelector('.cb-team-name');
       expect(label, `label for ${id}`).not.toBeNull();
       expect(label!.textContent).toBe(fr[`team.${id}`]);
@@ -82,7 +78,7 @@ describe('V-Setup Step A — team grid', () => {
     mountGrid();
     for (const id of ['penguins', 'pandas']) {
       expect(PICKER_TEAMS as readonly string[]).not.toContain(id);
-      expect(screen.queryByRole('button', { name: id })).toBeNull();
+      expect(screen.queryByRole('button', { name: fr[`team.${id as 'penguins' | 'pandas'}`] })).toBeNull();
       expect(teamArtUrl(id, 'portrait')).toBeUndefined();
       expect(teamArtUrl(id, 'portrait', 256)).toBeUndefined();
       expect(teamArtUrl(id, 'full')).toBeUndefined();

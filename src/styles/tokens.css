@@ -1,19 +1,13 @@
-/* Couple Battle — design tokens, "Colored" system (refont v3, from the Oct 7 keyart):
-   deep violet stage with light rays, cream cards with a chunky dark-violet outline,
-   glossy gold CTAs. Components reference --cb-* tokens ONLY.
-
-   Text colours are SCOPED: the page sets the "on stage" set (white), and every
-   surface (card, tile, row, field, sheet) re-declares the "on surface" set
-   (eggplant) — see chrome.css. A component just uses --cb-text / --cb-text-muted. */
+/* Couple Battle design tokens, "Colored" system (refont v3). Text colours are SCOPED: the page
+   sets the "on stage" set (white), every surface re-declares the "on surface" set (eggplant) in
+   chrome.css; a component just uses --cb-text / --cb-text-muted. */
 
 :root {
   color-scheme: dark;
 
   /* ---------- brand palette ---------- */
   --cb-violet-950: #14054A;          /* outlines, lips, darkest stage */
-  --cb-violet-900: #1E0868;
   --cb-violet-800: #2A0B8F;
-  --cb-violet-700: #3712B8;
   --cb-violet-600: #5420E8;
   --cb-violet-500: #6E3BFF;
   --cb-violet-200: #DCCBFF;
@@ -78,7 +72,6 @@
   --cb-p2: #FF8CC0;                                /* player 2 / partner B (also "Non") */
   --cb-p2-text: var(--cb-eggplant);
   --cb-win-grad: var(--cb-action-grad);
-  --cb-points: var(--cb-gold);
 
   --cb-chip-bg: var(--cb-pink-deep);                /* white text 4.8:1 (pink #FF3FA4 was 3.2:1) */
   --cb-chip-text: #FFFFFF;
@@ -100,7 +93,7 @@
   --cb-font-display: 'Bricolage Grotesque', 'SF Pro Display', Roboto, Arial, sans-serif;
   --cb-font-ui: 'Inter', 'SF Pro Text', Roboto, Arial, sans-serif;
   /* scale — bigger than v2: read across a table, one-handed */
-  --cb-fs-display-xl: 52px;  --cb-lh-display-xl: 56px;   /* 800 · final result */
+  --cb-fs-display-xl: 52px;                              /* 800 · final result */
   --cb-fs-display-lg: 44px;  --cb-lh-display-lg: 48px;   /* 800 · score, "+2" */
   --cb-fs-h1: 36px;          --cb-lh-h1: 40px;           /* 800 · screen title */
   --cb-fs-h2: 28px;          --cb-lh-h2: 32px;           /* 800 */
@@ -116,7 +109,7 @@
 
   /* ---------- space (4px base) ---------- */
   --cb-s1: 4px;  --cb-s2: 8px;  --cb-s3: 12px; --cb-s4: 16px;
-  --cb-s5: 20px; --cb-s6: 24px; --cb-s7: 32px; --cb-s8: 48px;
+  --cb-s5: 20px; --cb-s6: 24px; --cb-s7: 32px;
   --cb-page-x: 16px;            /* horizontal page padding (+ safe-area inset) */
 
   /* ---------- radius ---------- */
@@ -127,7 +120,6 @@
   --cb-r-pill: 999px;
 
   /* ---------- elevation (outline + hard lip + soft drop) ---------- */
-  --cb-e0: none;
   --cb-e1: 0 3px 0 var(--cb-outline), 0 6px 12px rgba(20, 5, 74, .30);
   --cb-e2: 0 5px 0 var(--cb-outline), 0 12px 24px rgba(20, 5, 74, .38);
   --cb-e3: 0 24px 48px rgba(10, 2, 40, .55);
@@ -148,10 +140,4 @@
   --cb-t-screen: 260ms;
   --cb-t-count: 700ms;        /* per numeral — also drives the ring drain */
   --cb-t-reveal: 550ms;
-  --cb-t-score: 420ms;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root { --cb-t-tap: 0ms; --cb-t-screen: 0ms; --cb-t-reveal: 0ms; --cb-t-score: 0ms;
-          --cb-ease-overshoot: linear; }
 }

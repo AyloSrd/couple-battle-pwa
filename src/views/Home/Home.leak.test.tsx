@@ -9,33 +9,18 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LangProvider } from '@/shared/i18n';
-import { SAVE_DEFAULTS, SaveApiProvider } from '@/shared/save';
-import { createSaveMemoryApi } from '@/shared/save/api/memory';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import { DraftGameProvider } from '@/shared/session';
+import { soundEngine } from '@/shared/sound';
+import { createTestApp, TestProviders } from '@/test/renderApp';
 import { probeListeners } from '@/test/listenerProbe';
 import { HomeView } from './index';
 
 function setup() {
-  const sound = createSoundNoopApi();
-  const music = vi.spyOn(sound, 'music');
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const saveApi = createSaveMemoryApi({ settings: { ...SAVE_DEFAULTS.settings, lang: 'en', sound: true } });
+  const music = vi.spyOn(soundEngine, 'music');
+  const app = createTestApp({ lang: 'en' });
   const Root: FC = () => (
-    <QueryClientProvider client={qc}>
-      <SaveApiProvider api={saveApi}>
-        <SoundApiProvider api={sound}>
-          <LangProvider initialLang="en">
-            <DraftGameProvider>
-              <Outlet />
-            </DraftGameProvider>
-          </LangProvider>
-        </SoundApiProvider>
-      </SaveApiProvider>
-    </QueryClientProvider>
+    <TestProviders app={app}>
+      <Outlet />
+    </TestProviders>
   );
   const rootRoute = createRootRoute({ component: Root });
   const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: HomeView });
@@ -73,10 +58,7 @@ describe('Home leaks (StrictMode)', () => {
     const { ui, music } = setup();
     const { unmount } = render(ui);
     await screen.findByRole('button', { name: 'PLAY' });
-    // settings resolve → music starts
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(50);
-    });
+    // sound is on in the saved settings → the menu music starts
     expect(music).toHaveBeenCalledWith('mus.menu');
 
     unmount();

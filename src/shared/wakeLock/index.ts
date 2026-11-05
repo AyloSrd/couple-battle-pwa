@@ -1,2 +1,1 @@
-export { WakeLockApiProvider, useWakeLockApi } from './provider';
-export type { TWakeLockApi } from './api';
+export { useKeepAwake } from './components/useKeepAwake';

@@ -1,13 +1,9 @@
 import type { TTeam } from '@/shared/game/domain/types';
-import { answererIndex, type TGameState } from './machine';
+import { answererIndex, type TGame } from '@/shared/game/domain/game';
+import { flashRound } from './machine';
 
-/**
- * WHO ACTS on a screen — so it is never ambiguous whose turn it is.
- *  - `player` — one named person (an answerer, a guesser, whoever takes the phone);
- *    `playerIdx` indexes `team.players` (0 ↔ art p1, 1 ↔ art p2).
- *  - `couple` — the couple acts together (Dilemma self-confirm, rapid-fire).
- *  - `table`  — the whole table acts (points, judges, sides, scoreboards): no single face.
- */
+/** WHO ACTS on a screen, so whose turn it is is never ambiguous: one named `player`
+ *  (`playerIdx` into `team.players`), a `couple` together, or the whole `table` (no face). */
 export type TActor =
   | { kind: 'player'; team: TTeam; playerIdx: 0 | 1 }
   | { kind: 'couple'; team: TTeam }
@@ -25,31 +21,30 @@ function guesserIndex(round: number): 0 | 1 {
   return (1 - answererIndex(round)) as 0 | 1;
 }
 
-/** Who the screen for `state` asks to act. Solo games have no table to share with:
+/** Who the screen for `game` asks to act. Solo games have no table to share with:
  *  their side gates are addressed to the one couple's answerer / guesser. */
-export function actorOf(state: TGameState): TActor {
-  const team = 'coupleIdx' in state ? state.roster[state.coupleIdx] : undefined;
-  switch (state.kind) {
+export function actorOf(game: TGame): TActor {
+  const { ctx, step } = game;
+  const team = 'couple' in step ? ctx.roster[step.couple] : undefined;
+  const round = flashRound(ctx);
+  switch (step.kind) {
     case 'handoff':
-    case 'secretInput':
-      return team ? { kind: 'player', team, playerIdx: answererIndex(state.round) } : TABLE;
+    case 'secret':
+      return team ? { kind: 'player', team, playerIdx: answererIndex(round) } : TABLE;
     case 'guess':
-      return team ? { kind: 'player', team, playerIdx: guesserIndex(state.round) } : TABLE;
-    case 'sideAnswerers':
-    case 'sideGuessers': {
-      const solo = state.roster.length === 1 ? state.roster[0] : undefined;
+      return team ? { kind: 'player', team, playerIdx: guesserIndex(round) } : TABLE;
+    case 'gate': {
+      const solo = ctx.roster.length === 1 ? ctx.roster[0] : undefined;
       if (!solo) return TABLE;
-      const playerIdx = state.kind === 'sideAnswerers' ? answererIndex(state.round) : guesserIndex(state.round);
+      const playerIdx = step.side === 'answerers' ? answererIndex(round) : guesserIndex(round);
       return { kind: 'player', team: solo, playerIdx };
     }
     case 'resolve':
     case 'rapidTurn':
-    case 'rapidQuestion':
-    case 'rapidCountdown':
+    case 'rapidAsk':
       return team ? { kind: 'couple', team } : TABLE;
     // the table points / judges / reads: no single actor
-    case 'question':
-    case 'countdown':
+    case 'ask':
     case 'judge':
     case 'rapidIntro':
     case 'rapidJudge':

@@ -1,5 +1,4 @@
-/* V-Setup — layout for the four steps (count, team, names, pass).
-   Every rule is scoped under .cb-v-setup so nothing leaks to other screens. */
+/* V-Setup — layout for the four steps (count, team, names, pass). */
 
 /* count + team must fit one page, no scroll: pin the page to the viewport and let the
    flexible blocks (hero / grid) absorb the remaining height */
@@ -28,10 +27,7 @@
 }
 .cb-v-setup .cb-v-setup__lead {
   text-align: center;
-  font-family: var(--cb-font-display);
-  font-weight: 800;
-  font-size: var(--cb-fs-body-lg);
-  line-height: var(--cb-lh-body-lg);
+  font: 800 var(--cb-fs-body-lg) / var(--cb-lh-body-lg) var(--cb-font-display);
   letter-spacing: var(--cb-tracking-display);
   text-shadow: var(--cb-title-shadow);
   margin: 0;
@@ -47,9 +43,7 @@
 .cb-v-setup .cb-v-setup__hero .cb-char-placeholder {
   position: absolute;
   inset: auto 0 0;
-  margin: 0 auto;
   height: 100%;
-  width: auto;
   max-width: 100%;
 }
 .cb-v-setup .cb-v-setup__hero .cb-char-placeholder {
@@ -89,20 +83,41 @@
   gap: var(--cb-s4);
 }
 .cb-v-setup .cb-v-setup__teams {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--cb-s3) var(--cb-s2);
   padding-bottom: var(--cb-s2); /* room for the tiles' hard lip */
 }
 .cb-v-setup .cb-team {
+  appearance: none;
+  position: relative;
   min-width: 0;
-  padding: var(--cb-s1) var(--cb-s1) var(--cb-s2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: var(--cb-s1);
+  padding: var(--cb-s1) var(--cb-s1) var(--cb-s2);
+  border: var(--cb-outline-w) solid var(--cb-outline);
   border-radius: var(--cb-r-md);
+  background: var(--cb-surface);
+  box-shadow: var(--cb-e1);
+  color: var(--cb-text);
+  font-family: var(--cb-font-ui);
+  cursor: pointer;
+  transition: transform var(--cb-t-tap) var(--cb-ease-out), box-shadow var(--cb-t-tap);
+}
+.cb-v-setup .cb-team[aria-pressed='true'] {
+  border-color: var(--cb-gold-lo);
+  box-shadow: 0 0 0 3px var(--cb-gold), 0 0 24px rgba(255, 194, 31, 0.55), var(--cb-e1);
+  transform: translateY(-2px);
+}
+.cb-v-setup .cb-team:disabled {
+  opacity: 0.45;
+  filter: grayscale(1);
+  cursor: default;
 }
 .cb-v-setup .cb-team-art {
   flex: none;
-  width: 100%;
-  aspect-ratio: 1;
   border-radius: var(--cb-r-sm);
 }
 /* the faces sit in the upper half of the portrait: anchor there if the box is ever not square */
@@ -113,15 +128,24 @@
 .cb-v-setup .cb-team-name {
   flex: none;
   text-align: center;
-  font-size: 14px;
+  font: 800 14px / 1.2 var(--cb-font-display);
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
 .cb-v-setup .cb-team[aria-pressed='true']::after {
+  content: '✓';
+  position: absolute;
   top: 4px;
   right: 4px;
   width: 26px;
   height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--cb-pink);
+  border: 2px solid #FFFFFF;
+  color: var(--cb-text-on-color);
+  font: 800 15px / 1 var(--cb-font-ui);
 }
 .cb-v-setup .cb-v-setup__toast {
   position: fixed;
@@ -138,12 +162,6 @@
 .cb-v-setup .cb-v-setup__form {
   gap: var(--cb-s4);
 }
-.cb-v-setup .cb-v-setup__form .cb-field {
-  height: calc(var(--cb-h-field) + var(--cb-s2));
-  font-size: var(--cb-fs-body-lg);
-  font-weight: 700;
-  border-radius: var(--cb-r-md);
-}
 .cb-v-setup .cb-v-setup__form .cb-field-error {
   font-size: var(--cb-fs-body);
   line-height: var(--cb-lh-body);
@@ -156,6 +174,8 @@
   gap: var(--cb-s3);
 }
 .cb-v-setup .cb-v-setup__player .cb-field {
+  height: calc(var(--cb-h-field) + var(--cb-s2));
+  font-weight: 700;
   flex: 1 1 0;
   min-width: 0;
   overflow: hidden;

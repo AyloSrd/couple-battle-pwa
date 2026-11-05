@@ -1,4 +1,6 @@
 import type { ComponentProps, FC, ReactNode } from 'react';
+import type { TSoundId } from '@/shared/sound';
+import { cx, useSfxClick } from './kit';
 import './chrome.css';
 
 type TChipProps = {
@@ -10,15 +12,20 @@ type TChipProps = {
 
 /** Overline chip: uppercase Inter, pink on pink-tint paper, on every background. */
 export const Chip: FC<TChipProps> = ({ children, icon, className }) => (
-  <span className={['cb-chip', className ?? ''].filter(Boolean).join(' ')}>
+  <span className={cx('cb-chip', className)}>
     {icon && <img src={icon} alt="" />}
     {children}
   </span>
 );
 
+type TChipButtonProps = ComponentProps<'button'> & {
+  sfx?: TSoundId | null;
+};
+
 /** Tappable chip (language toggle etc.) — same look, ≥ 48px hit area via padding. */
-export const ChipButton: FC<ComponentProps<'button'>> = ({ className, children, ...rest }) => (
-  <button type="button" className={['cb-chip', className ?? ''].filter(Boolean).join(' ')} {...rest}>
-    {children}
-  </button>
-);
+export const ChipButton: FC<TChipButtonProps> = ({ className, children, sfx = 'sfx.tap', onClick, ...rest }) => {
+  const handleClick = useSfxClick(sfx, onClick);
+  return (
+    <button type="button" className={cx('cb-chip', className)} onClick={handleClick} {...rest}>{children}</button>
+  );
+};

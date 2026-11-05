@@ -1,13 +1,8 @@
-/* How to play — full-page swipe carousel. Every rule is scoped under .cb-v-howto
-   so nothing leaks to other screens. */
-
-/* One page: the stage fills the viewport and the card takes all the free height. */
+/* How to play — one-page swipe carousel: the card takes all the free height. */
 .cb-v-howto {
   height: 100dvh;
-  min-height: 0;
   gap: var(--cb-s3);
 }
-
 .cb-v-howto .cb-title {
   text-align: center;
 }
@@ -48,7 +43,6 @@
   flex-direction: column;
   align-items: center;
   gap: var(--cb-s4);
-  padding: var(--cb-s6) var(--cb-s5);
   text-align: center;
   overflow-y: auto; /* safety net on very short screens */
 }
@@ -69,12 +63,10 @@
   aspect-ratio: 1;
   object-fit: contain;
 }
-
 .cb-v-howto .cb-howto-slide .cb-h2 {
   font-size: var(--cb-fs-h1);
   line-height: var(--cb-lh-h1);
 }
-
 .cb-v-howto .cb-howto-body {
   margin: 0;
   font: 600 clamp(var(--cb-fs-body-lg), 3.1dvh, 24px) / 1.38 var(--cb-font-ui);
@@ -103,16 +95,13 @@
   height: 14px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.35);
-  transition:
-    transform var(--cb-t-tap) var(--cb-ease-out),
-    background-color var(--cb-t-tap) var(--cb-ease-out);
+  transition: transform var(--cb-t-tap) var(--cb-ease-out), background-color var(--cb-t-tap) var(--cb-ease-out);
 }
 .cb-v-howto .cb-howto-dot[aria-current='true']::before {
   background: var(--cb-pink);
   box-shadow: 0 0 0 2px #ffffff;
   transform: scale(1.2);
 }
-
 .cb-v-howto .cb-howto-hint {
   margin: 0;
   font-size: var(--cb-fs-body);

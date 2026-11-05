@@ -2,8 +2,6 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { fr } from '@/data/strings.fr';
 import { initSetup, reduceSetup, type TSetupState } from '../domain/machine';
 import { TeamPick } from './TeamPick';
@@ -44,23 +42,21 @@ describe('TeamPick — leaks (StrictMode, fake timers)', () => {
 
     const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={createSoundNoopApi()}>
-            <TeamPick state={secondCoupleState()} onSelect={vi.fn()} onNext={vi.fn()} />
-          </SoundApiProvider>
+        <LangProvider lang="fr">
+          <TeamPick state={secondCoupleState()} onSelect={vi.fn()} onNext={vi.fn()} />
         </LangProvider>
       </StrictMode>,
     );
 
     // A taken tile is disabled, so tapping it can never raise the toast (and so never arms its timer).
-    const taken = screen.getByRole('button', { name: 'lions' });
+    const taken = screen.getByRole('button', { name: fr['team.lions'] });
     expect(taken).toBeDisabled();
     fireEvent.click(taken);
     expect(screen.queryByText(fr['setup.team.taken'])).toBeNull();
     expect(vi.getTimerCount()).toBe(0);
 
     // a free tile selects through the parent callback only: no timers either
-    fireEvent.click(screen.getByRole('button', { name: 'otters' }));
+    fireEvent.click(screen.getByRole('button', { name: fr['team.otters'] }));
     act(() => vi.advanceTimersByTime(5000));
     expect(vi.getTimerCount()).toBe(0);
 

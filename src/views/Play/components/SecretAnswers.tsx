@@ -1,73 +1,54 @@
 import { useState, type ChangeEvent, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton, Field } from '@/shared/Chrome';
+import { PixelPanel, PixelButton, Chip, ProgressDots, Field } from '@/shared/Chrome';
+import { normalizeText, SECRET_MAX } from '@/shared/game';
+import type { TScreenProps } from '../application/game';
+import { questionText, segmentLength } from '../domain/machine';
 import { ActorBadge } from './ActorBadge';
+import { closedChoices } from './answerLabel';
+import { ClosedAnswers } from './ClosedAnswers';
 import '../flash.css';
-import { flashQuestion, flashSetSize, questionText, type TGameState } from '../domain/machine';
 
-type TProps = {
-  state: Extract<TGameState, { kind: 'secretInput' }>;
-  onLock: (answer: string) => void;
-};
-
-/** V-SecretAnswers — the answerer privately answers, then locks. No going back. */
-export const SecretAnswers: FC<TProps> = ({ state, onLock }) => {
+/** V-SecretAnswers — the answerer answers privately and locks; no way back. Keyed per slot. */
+export const SecretAnswers: FC<TScreenProps<'secret'>> = ({ game, question, dispatch }) => {
   const t = useT();
   const [text, setText] = useState('');
-  const question = flashQuestion(state);
-  const isYesNo = question?.type === 'yes_no';
-  // who_of_two answers are one of the couple's two names (roster order).
-  const twoNames = question?.type === 'who_of_two' ? state.roster[state.coupleIdx]?.players : undefined;
-
-  const lock = (answer: string) => {
-    setText('');
-    onLock(answer);
-  };
+  const choices = closedChoices(game, t);
+  // What the machine will store (it normalises again): blank or invisible-only text can't lock.
+  const typed = normalizeText(text, SECRET_MAX);
+  const handleLock = (value: string) => dispatch({ type: 'answer', value });
   const handleSubmitText = () => {
-    if (text.trim()) lock(text.trim());
+    if (typed) handleLock(typed);
   };
-  const handleYes = () => lock(t('common.yes'));
-  const handleNo = () => lock(t('common.no'));
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
 
   return (
     <div className="cb-v-flash cb-v-flash--secret">
-      {/* "Answerers' side" chip — the questions are shared within this group;
-          only the OTHER side must not look. */}
+      {/* the questions are shared within the answerers' side; only the OTHER side must not look */}
       <div className="cb-topbar">
         <Chip>{t('flash.side.chip.answerers')}</Chip>
-        <ProgressDots total={flashSetSize(state.mode)} current={state.questionIdx} />
+        <ProgressDots total={segmentLength(game.ctx)} current={game.step.q} />
       </div>
-
       <PixelPanel className="cb-flash-card cb-flash-card--player">
-        <ActorBadge state={state} variant="card" />
+        <ActorBadge game={game} variant="card" />
         <p className="cb-question">{questionText(question, 'you') || '—'}</p>
       </PixelPanel>
-
-      {twoNames ? (
-        <div className="cb-answers">
-          <AnswerButton label={twoNames[0]} tone="p1" onClick={() => lock(twoNames[0])} />
-          <AnswerButton label={twoNames[1]} tone="p2" onClick={() => lock(twoNames[1])} />
-        </div>
-      ) : isYesNo ? (
-        <div className="cb-answers">
-          <AnswerButton label={t('common.yes')} tone="p1" onClick={handleYes} />
-          <AnswerButton label={t('common.no')} tone="p2" onClick={handleNo} />
-        </div>
+      {choices ? (
+        <ClosedAnswers choices={choices} sfx="sfx.lock" onPick={handleLock} />
       ) : (
         <>
           <Field
             placeholder={t('secret.placeholder')}
             value={text}
             onChange={handleChange}
-            maxLength={40}
+            maxLength={SECRET_MAX}
             autoCapitalize="off"
             autoFocus
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
           />
-          <PixelButton onClick={handleSubmitText} disabled={!text.trim()}>
+          <PixelButton size="lg" sfx="sfx.lock" onClick={handleSubmitText} disabled={!typed}>
             {t('secret.submit')}
           </PixelButton>
         </>

@@ -9,9 +9,15 @@
 }
 
 html,
-body,
-#root {
+body {
   height: 100%;
+}
+
+/* Grows with the page, but clips the screen-in slide (`cb-screen-in`): a transform still counts
+   as scrollable overflow, so the 6px offset would flash a scrollbar on every route change. */
+#root {
+  min-height: 100%;
+  overflow: clip;
 }
 
 body {
@@ -25,10 +31,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-}
-
-/* One-handed party game: never rubber-band or accidental-select the UI. */
-body {
+  /* one-handed party game: never rubber-band or accidental-select the UI */
   overscroll-behavior: none;
   -webkit-user-select: none;
   user-select: none;

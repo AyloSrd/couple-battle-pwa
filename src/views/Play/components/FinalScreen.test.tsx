@@ -1,18 +1,13 @@
-import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import type { THistoryEntry, TGameState } from '../domain/machine';
+import type { THistoryEntry, TMode } from '@/shared/game';
+import type { TGameAt } from '../domain/machine';
 import { FinalScreen } from './FinalScreen';
 
 function mount(ui: ReactElement, lang: 'fr' | 'en' = 'fr') {
-  return render(
-    <LangProvider initialLang={lang}>
-      <SoundApiProvider api={createSoundNoopApi()}>{ui}</SoundApiProvider>
-    </LangProvider>,
-  );
+  return render(<LangProvider lang={lang}>{ui}</LangProvider>);
 }
 
 const roster = [
@@ -25,31 +20,35 @@ function finalState(
   scores: Record<string, number>,
   teams = 3,
   history: THistoryEntry[] = [],
-  mode: TGameState['mode'] = 'dilemma',
-): Extract<TGameState, { kind: 'final' }> {
+  mode: TMode = 'dilemma',
+): TGameAt<'final'> {
   return {
-    kind: 'final',
-    roster: roster.slice(0, teams).map((r) => ({ ...r, players: [...r.players] as [string, string] })),
-    mode,
-    difficulty: 'easy',
-    themes: [],
-    deck: [],
-    scores,
-    history,
-  } as unknown as Extract<TGameState, { kind: 'final' }>;
+    ctx: {
+      roster: roster.slice(0, teams).map((r) => ({ ...r, players: [...r.players] as [string, string] })),
+      mode,
+      difficulty: 'easy',
+      themes: [],
+      deck: [],
+      scores,
+      history,
+      seg: 0,
+      seq: 0,
+    },
+    step: { kind: 'final' },
+  } as unknown as TGameAt<'final'>;
 }
 
 const noop = () => {};
 
 describe('FinalScreen — headline', () => {
   it('crowns a single winner', () => {
-    mount(<FinalScreen state={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />);
+    mount(<FinalScreen game={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Les Lions remporte la bataille');
     expect(screen.queryByText(/Ex æquo/)).toBeNull();
   });
 
   it('names every tied team on a 2-way tie (FR)', () => {
-    mount(<FinalScreen state={finalState({ t1: 4, t2: 4, t3: 1 })} onRematch={noop} onNewGame={noop} />);
+    mount(<FinalScreen game={finalState({ t1: 4, t2: 4, t3: 1 })} onRematch={noop} onNewGame={noop} />);
     const h1 = screen.getByRole('heading', { level: 1 });
     expect(h1).toHaveTextContent('Ex æquo');
     expect(h1).toHaveTextContent('Les Lions');
@@ -60,7 +59,7 @@ describe('FinalScreen — headline', () => {
   });
 
   it('names all three teams on a 3-way tie (EN)', () => {
-    mount(<FinalScreen state={finalState({ t1: 2, t2: 2, t3: 2 })} onRematch={noop} onNewGame={noop} />, 'en');
+    mount(<FinalScreen game={finalState({ t1: 2, t2: 2, t3: 2 })} onRematch={noop} onNewGame={noop} />, 'en');
     const h1 = screen.getByRole('heading', { level: 1 });
     expect(h1).toHaveTextContent("It's a tie");
     for (const name of ['The Lions', 'The Bears', 'The Owls']) expect(h1).toHaveTextContent(name);
@@ -69,7 +68,7 @@ describe('FinalScreen — headline', () => {
   it('keeps the solo headline', () => {
     mount(
       <FinalScreen
-        state={finalState({ t1: 0 }, 1)}
+        game={finalState({ t1: 0 }, 1)}
         solo={{ isBest: true, points: 0, best: 0 }}
         onRematch={noop}
         onNewGame={noop}
@@ -82,7 +81,7 @@ describe('FinalScreen — headline', () => {
 describe('FinalScreen — hero slot', () => {
   it('shows the full-body hero for a single winner, no tie portraits', () => {
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelector('.cb-char, .cb-char-placeholder')).not.toBeNull();
     expect(container.querySelector('.cb-final-tied')).toBeNull();
@@ -90,7 +89,7 @@ describe('FinalScreen — hero slot', () => {
 
   it('shows one portrait per tied team instead of the hero', () => {
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 4, t2: 4, t3: 1 })} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 4, t2: 4, t3: 1 })} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelector('.cb-char, .cb-char-placeholder')).toBeNull();
     expect(container.querySelectorAll('.cb-final-tied .cb-team-art')).toHaveLength(2);
@@ -98,7 +97,7 @@ describe('FinalScreen — hero slot', () => {
 
   it('shows all three portraits on a 3-way tie', () => {
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 2, t2: 2, t3: 2 })} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 2, t2: 2, t3: 2 })} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelectorAll('.cb-final-tied .cb-team-art')).toHaveLength(3);
   });
@@ -127,7 +126,7 @@ describe('FinalScreen — per-team charts', () => {
   it('shows one chart block per team, in ranked order, with sync % and a heart summary', () => {
     const { container } = mount(
       <FinalScreen
-        state={finalState({ t1: 3, t2: 1 }, 2, dilemmaHistory)}
+        game={finalState({ t1: 3, t2: 1 }, 2, dilemmaHistory)}
         onRematch={noop}
         onNewGame={noop}
       />,
@@ -145,14 +144,14 @@ describe('FinalScreen — per-team charts', () => {
 
   it('puts the best team first even when the roster order differs', () => {
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 1, t2: 3 }, 2, [h('t1', 'dilemma', 1, 1), h('t2', 'dilemma', 1, 1)])} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 1, t2: 3 }, 2, [h('t1', 'dilemma', 1, 1), h('t2', 'dilemma', 1, 1)])} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelectorAll('.cb-row')[0]).toHaveTextContent('Cleo');
   });
 
   it('single-stage games show no stage bars', () => {
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 3, t2: 1 }, 2, dilemmaHistory)} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 3, t2: 1 }, 2, dilemmaHistory)} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelector('.cb-stages')).toBeNull();
     expect(container.querySelector('.cb-vsbest')).toBeNull();
@@ -161,7 +160,7 @@ describe('FinalScreen — per-team charts', () => {
   it('standalone Flash splits the two rounds and shows a half heart for a close answer', () => {
     const history = [h('t1', 'flash', 2, 2, 0), h('t1', 'flash', 1, 2, 0), h('t1', 'flash', 0, 2, 1), h('t1', 'flash', 2, 2, 1)];
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 5 }, 2, history, 'flash')} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 5 }, 2, history, 'flash')} onRematch={noop} onNewGame={noop} />,
       'en',
     );
     const stages = container.querySelectorAll('.cb-stage');
@@ -175,7 +174,7 @@ describe('FinalScreen — per-team charts', () => {
   it('Ultime shows a bar per stage: Flash, Dilemma, Rapid-fire', () => {
     const history = [h('t1', 'flash', 2, 2, 0), h('t1', 'flash', 0, 2, 1), h('t1', 'dilemma', 1, 1), h('t1', 'rapid', 2, 2)];
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 5 }, 2, history, 'ultime')} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 5 }, 2, history, 'ultime')} onRematch={noop} onNewGame={noop} />,
       'en',
     );
     const labels = [...container.querySelectorAll('.cb-stage')].map((el) => el.textContent);
@@ -185,7 +184,7 @@ describe('FinalScreen — per-team charts', () => {
   it('solo shows this game against the best, scaled to the larger of the two', () => {
     const { container } = mount(
       <FinalScreen
-        state={finalState({ t1: 2 }, 1, [h('t1', 'dilemma', 1, 1), h('t1', 'dilemma', 1, 1), h('t1', 'dilemma', 0, 1)])}
+        game={finalState({ t1: 2 }, 1, [h('t1', 'dilemma', 1, 1), h('t1', 'dilemma', 1, 1), h('t1', 'dilemma', 0, 1)])}
         solo={{ isBest: false, points: 2, best: 8 }}
         onRematch={noop}
         onNewGame={noop}
@@ -205,14 +204,14 @@ describe('FinalScreen — per-team charts', () => {
 
   it('a multi-team game never shows the vs-best bars', () => {
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 3, t2: 1 }, 2, dilemmaHistory)} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 3, t2: 1 }, 2, dilemmaHistory)} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelector('.cb-vsbest')).toBeNull();
   });
 
   it('empty history (a resumed old snapshot) renders exactly the plain score rows, no charts', () => {
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelector('.cb-stats')).toBeNull();
     expect(container.querySelector('.cb-hearts')).toBeNull();
@@ -224,7 +223,7 @@ describe('FinalScreen — per-team charts', () => {
     // t1 scored 5 before the resume, only the post-resume 1 point was recorded
     const partial = [h('t1', 'dilemma', 1, 1), h('t2', 'dilemma', 0, 1)];
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 5, t2: 1 }, 2, partial)} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 5, t2: 1 }, 2, partial)} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelector('.cb-stats')).toBeNull();
     expect(container.querySelectorAll('.cb-row')).toHaveLength(2);
@@ -232,7 +231,7 @@ describe('FinalScreen — per-team charts', () => {
 
   it('empty history in solo keeps just the headline', () => {
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 2 }, 1)} solo={{ isBest: true, points: 2, best: 2 }} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 2 }, 1)} solo={{ isBest: true, points: 2, best: 2 }} onRematch={noop} onNewGame={noop} />,
     );
     expect(container.querySelector('.cb-vsbest')).toBeNull();
   });
@@ -240,10 +239,47 @@ describe('FinalScreen — per-team charts', () => {
   it('a tie draws identical charts for the tied teams (FR labels)', () => {
     const history = [h('t1', 'dilemma', 1, 1), h('t2', 'dilemma', 1, 1)];
     const { container } = mount(
-      <FinalScreen state={finalState({ t1: 1, t2: 1 }, 2, history)} onRematch={noop} onNewGame={noop} />,
+      <FinalScreen game={finalState({ t1: 1, t2: 1 }, 2, history)} onRematch={noop} onNewGame={noop} />,
     );
     const pcts = [...container.querySelectorAll('.cb-stats-sync .cb-stats-pct')].map((n) => n.textContent);
     expect(pcts).toEqual(['100%', '100%']);
     expect(container.querySelectorAll('.cb-row')[0]).toHaveTextContent('Synchro');
+  });
+});
+
+describe('FinalScreen — GF5 payoff', () => {
+  const scoresOf = (c: HTMLElement) => [...c.querySelectorAll('.cb-row .cb-score')].map((n) => n.textContent);
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('confetti canvas and the crown on mount; the scores count up from 0 and land on the real ones', () => {
+    const { container } = mount(<FinalScreen game={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />);
+    expect(container.querySelector('canvas.cb-confetti')).not.toBeNull();
+    expect(container.querySelector('.cb-final-crown')).not.toBeNull();
+    expect(scoresOf(container)).toEqual(['0', '0', '0']);
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(scoresOf(container)).toEqual(['5', '3', '1']);
+  });
+
+  it('reduced motion: no confetti, the final scores at once (the crown still shows, without motion)', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('reduce'), media: query }));
+    const { container } = mount(<FinalScreen game={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />);
+    expect(container.querySelector('canvas')).toBeNull();
+    expect(scoresOf(container)).toEqual(['5', '3', '1']);
+  });
+
+  it('solo: the crown only for a new best', () => {
+    const best = mount(<FinalScreen game={finalState({ t1: 2 }, 1)} solo={{ isBest: true, points: 2, best: 2 }} onRematch={noop} onNewGame={noop} />);
+    expect(best.container.querySelector('.cb-final-crown')).not.toBeNull();
+    const not = mount(<FinalScreen game={finalState({ t1: 2 }, 1)} solo={{ isBest: false, points: 2, best: 8 }} onRematch={noop} onNewGame={noop} />);
+    expect(not.container.querySelector('.cb-final-crown')).toBeNull();
   });
 });

@@ -2,9 +2,7 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import type { TGameState } from '../domain/machine';
+import type { TGameAt } from '../domain/machine';
 import { FinalScreen } from './FinalScreen';
 
 const roster = [
@@ -12,19 +10,23 @@ const roster = [
   { teamId: 't2', avatarId: 'bears', players: ['Cleo', 'Dan'] },
 ] as const;
 
-const state = {
-  kind: 'final',
-  roster: roster.map((r) => ({ ...r, players: [...r.players] as [string, string] })),
-  mode: 'dilemma',
-  difficulty: 'easy',
-  themes: [],
-  deck: [],
-  scores: { t1: 3, t2: 3 },
-  history: [
-    { teamId: 't1', stage: 'dilemma', round: 0, points: 1, max: 1 },
-    { teamId: 't2', stage: 'dilemma', round: 0, points: 0, max: 1 },
-  ],
-} as unknown as Extract<TGameState, { kind: 'final' }>;
+const game = {
+  ctx: {
+    roster: roster.map((r) => ({ ...r, players: [...r.players] as [string, string] })),
+    mode: 'dilemma',
+    difficulty: 'easy',
+    themes: [],
+    deck: [],
+    scores: { t1: 3, t2: 3 },
+    history: [
+      { teamId: 't1', stage: 'dilemma', round: 0, points: 1, max: 1 },
+      { teamId: 't2', stage: 'dilemma', round: 0, points: 0, max: 1 },
+    ],
+    seg: 0,
+    seq: 20,
+  },
+  step: { kind: 'final' },
+} as unknown as TGameAt<'final'>;
 
 /** Per-event add/remove counts. React DOM registers one permanent `selectionchange`
  *  listener on the document per root (its own, never removed) — not the component's. */
@@ -54,10 +56,8 @@ describe('FinalScreen — leaks', () => {
 
     const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={createSoundNoopApi()}>
-            <FinalScreen state={state} onRematch={() => {}} onNewGame={() => {}} />
-          </SoundApiProvider>
+        <LangProvider lang="fr">
+          <FinalScreen game={game} onRematch={() => {}} onNewGame={() => {}} />
         </LangProvider>
       </StrictMode>,
     );

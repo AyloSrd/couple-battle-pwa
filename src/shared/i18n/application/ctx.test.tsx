@@ -1,55 +1,44 @@
 import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { FC } from 'react';
 import { LangProvider, useLang, useT } from './ctx';
+import type { TLang } from '../domain/types';
 
 const Probe: FC = () => {
   const t = useT();
-  const { lang, setLang } = useLang();
+  const { lang } = useLang();
   return (
     <div>
       <span data-testid="value">{t('common.yes')}</span>
       <span data-testid="interp">{t('common.question', { n: 2, total: 5 })}</span>
       <span data-testid="lang">{lang}</span>
-      <button onClick={() => setLang('en')}>to-en</button>
-      <button onClick={() => setLang('fr')}>to-fr</button>
-      <button onClick={() => setLang('es')}>to-es</button>
     </div>
   );
 };
 
-describe('useT / LangProvider', () => {
-  it('renders the seeded language and flips instantly on setLang', () => {
-    render(
-      <LangProvider initialLang="fr">
-        <Probe />
-      </LangProvider>,
-    );
+const tree = (lang: TLang) => (
+  <LangProvider lang={lang}>
+    <Probe />
+  </LangProvider>
+);
 
+describe('useT / LangProvider', () => {
+  it('renders the given language and flips as soon as its owner passes another one', () => {
+    const { rerender } = render(tree('fr'));
     expect(screen.getByTestId('value')).toHaveTextContent('Oui');
     expect(screen.getByTestId('interp')).toHaveTextContent('Question 2/5');
 
-    fireEvent.click(screen.getByText('to-en'));
+    rerender(tree('en'));
     expect(screen.getByTestId('lang')).toHaveTextContent('en');
     expect(screen.getByTestId('value')).toHaveTextContent('Yes');
 
-    fireEvent.click(screen.getByText('to-es'));
+    rerender(tree('es'));
     expect(screen.getByTestId('lang')).toHaveTextContent('es');
     expect(screen.getByTestId('value')).toHaveTextContent('Sí');
     expect(document.documentElement.lang).toBe('es');
 
-    fireEvent.click(screen.getByText('to-fr'));
+    rerender(tree('fr'));
     expect(screen.getByTestId('value')).toHaveTextContent('Oui');
-  });
-
-  it('calls onLangChange when the language changes', () => {
-    const seen: string[] = [];
-    render(
-      <LangProvider initialLang="fr" onLangChange={(l) => seen.push(l)}>
-        <Probe />
-      </LangProvider>,
-    );
-    fireEvent.click(screen.getByText('to-en'));
-    expect(seen).toEqual(['en']);
+    expect(document.documentElement.lang).toBe('fr');
   });
 });

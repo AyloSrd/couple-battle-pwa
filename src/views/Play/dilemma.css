@@ -1,19 +1,5 @@
-/* Dilemma screens (V-DilemmaQuestion, V-Countdown, V-DilemmaResolve) — "Colored" skin, bigger and
-   fuller than v2 ("use the whole page, more gaming"). Every rule is scoped under `.cb-v-dilemma`
-   so nothing leaks to other screens; tokens only (rgba shadows aside). The text colours follow
-   the scoped tokens: white on the stage, eggplant inside .cb-card. */
-
-/* the view fills the Screen column (Question / Resolve render inside Play's shell) */
-.cb-v-dilemma--question,
-.cb-v-dilemma--resolve {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--cb-s4);
-}
-
-/* ---------- V-DilemmaQuestion ---------- */
+/* Dilemma screens (Question, Countdown, Resolve), scoped under `.cb-v-dilemma`. */
+/* ---------- Question ---------- */
 /* (also on Resolve) up to 10 dots + the mode chip must clear the fixed pause button at 360 px */
 .cb-v-dilemma .cb-topbar .cb-chip {
   flex: none;
@@ -53,8 +39,8 @@
   color: var(--cb-text);
   text-shadow: 0 2px 0 var(--cb-violet-950);
 }
-.cb-v-dilemma .cb-v-cta {
-  min-height: 80px;
+/* READY is a `size="lg"` button with a bigger shout (.cb-btn in the selector: beats the kit's size font) */
+.cb-v-dilemma .cb-v-cta.cb-btn {
   font-size: clamp(var(--cb-fs-label), 7.5vw, 30px);
   letter-spacing: 0.02em;
 }
@@ -63,8 +49,7 @@
     display: none;
   }
 }
-
-/* ---------- V-Countdown (burst stage) ---------- */
+/* ---------- Countdown (burst stage) ---------- */
 /* the bigger bloom (130vw) is wider than a phone: clip it to the page box, or the document
    becomes horizontally pannable during the countdown */
 .cb-v-dilemma--count {
@@ -93,8 +78,8 @@
   animation: cb-v-ring var(--cb-t-count) var(--cb-ease-out) both;
 }
 @keyframes cb-v-ring {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(1.35); opacity: 0; }
+  from { transform: scale(0.6); opacity: 0.9; }
+  to { transform: scale(1.35); opacity: 0; }
 }
 .cb-v-dilemma .cb-v-get-ready {
   margin: var(--cb-s6) 0 0;
@@ -109,14 +94,7 @@
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
-@media (prefers-reduced-motion: reduce) {
-  .cb-v-dilemma .cb-v-ring {
-    animation: none;
-    display: none;
-  }
-}
-
-/* ---------- V-DilemmaResolve ---------- */
+/* ---------- Resolve ---------- */
 /* one row, never taller than one badge: with 3+ duos done it scrolls inside itself, not the page */
 .cb-v-dilemma .cb-v-confirmed {
   display: flex;
@@ -156,7 +134,7 @@
 .cb-v-dilemma .cb-v-hero {
   position: relative;
   align-self: stretch;
-  flex: 1 1 56px; /* the minimum (the couple's "Name & Name" line takes its room from the portrait); grows into whatever height the screen has left */
+  flex: 1 1 56px;
   min-height: 56px;
   max-height: 300px;
 }
@@ -199,11 +177,10 @@
   width: 100%;
   margin-top: var(--cb-s2);
 }
+/* two `size="lg"` verdicts side by side: tighter padding and the label font so long words fit */
 .cb-v-dilemma .cb-v-verdicts .cb-btn {
-  min-height: 84px;
   padding: 0 var(--cb-s2);
   font-size: var(--cb-fs-label);
-  line-height: 1.15;
   text-align: center;
 }
 .cb-v-dilemma .cb-v-liar {
@@ -211,9 +188,6 @@
   text-align: center;
 }
 @media (max-height: 700px) {
-  .cb-v-dilemma .cb-v-verdicts .cb-btn {
-    min-height: 72px;
-  }
   .cb-v-dilemma .cb-v-resolve-card {
     padding-block: var(--cb-s4);
     gap: var(--cb-s2);

@@ -2,25 +2,26 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import type { TGameState } from '../domain/machine';
+import type { TGameAt } from '../domain/machine';
 import { Scoreboard } from './Scoreboard';
 
-const state = {
-  kind: 'scoreboard',
-  round: 0,
-  questionIdx: 0,
-  roster: [
-    { teamId: 't1', avatarId: 'lions', players: ['Ana', 'Bob'] },
-    { teamId: 't2', avatarId: 'bears', players: ['Cleo', 'Dan'] },
-  ],
-  mode: 'dilemma',
-  difficulty: 'easy',
-  themes: [],
-  deck: [],
-  scores: { t1: 2, t2: 1 },
-} as unknown as Extract<TGameState, { kind: 'scoreboard' }>;
+const game = {
+  ctx: {
+    roster: [
+      { teamId: 't1', avatarId: 'lions', players: ['Ana', 'Bob'] },
+      { teamId: 't2', avatarId: 'bears', players: ['Cleo', 'Dan'] },
+    ],
+    mode: 'dilemma',
+    difficulty: 'easy',
+    themes: [],
+    deck: [],
+    scores: { t1: 2, t2: 1 },
+    history: [],
+    seg: 0,
+    seq: 10,
+  },
+  step: { kind: 'scoreboard', resumeQ: 5 },
+} as unknown as TGameAt<'scoreboard'>;
 
 /** Per-event add/remove counts. React DOM registers one permanent `selectionchange`
  *  listener on the document per root (its own, never removed) — not the component's. */
@@ -50,10 +51,8 @@ describe('Scoreboard — leaks', () => {
 
     const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={createSoundNoopApi()}>
-            <Scoreboard state={state} onNext={() => {}} />
-          </SoundApiProvider>
+        <LangProvider lang="fr">
+          <Scoreboard game={game} dispatch={() => {}} />
         </LangProvider>
       </StrictMode>,
     );

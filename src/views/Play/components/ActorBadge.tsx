@@ -1,33 +1,25 @@
 import type { FC } from 'react';
-import { useT, type TStringKey } from '@/shared/i18n';
+import { useT } from '@/shared/i18n';
 import { PlayerAvatar, TeamArt } from '@/shared/Chrome';
 import { actorOf, playerSlot } from '../domain/actor';
-import type { TGameState } from '../domain/machine';
+import type { TGame } from '@/shared/game';
 import '../actor.css';
 
 type TProps = {
-  state: TGameState;
-  /**
-   * card — a player's round bust + first name, centred on top of a question card
-   * hero — a player's big bust (gates); for a couple just its names (the screen shows the hero art)
-   * row  — a couple's compact portrait + team name + names
-   */
+  game: TGame;
+  /** card: bust + name on a question card · hero: big bust (gates), a couple's names only ·
+   *  row: a couple's portrait + team name + names */
   variant: 'card' | 'hero' | 'row';
-  /** Gates whose title already carries the name can leave it out of the badge. */
-  showName?: boolean;
+  showName?: boolean; // gates whose title already carries the name leave it out
 };
 
-/**
- * WHO ACTS on this screen (see `actorOf`): one player → their bust and name; a couple →
- * its portrait, team name and names; the whole table → nothing. Decorative art, real text.
- */
-export const ActorBadge: FC<TProps> = ({ state, variant, showName = true }) => {
+/** WHO ACTS on this screen (`actorOf`): a player, a couple, or nobody (the table). */
+export const ActorBadge: FC<TProps> = ({ game, variant, showName = true }) => {
   const t = useT();
-  const actor = actorOf(state);
+  const actor = actorOf(game);
   if (actor.kind === 'table') return null;
   const { team } = actor;
-  const teamName = t(`team.${team.avatarId}` as TStringKey);
-
+  const teamName = t(`team.${team.avatarId}`);
   if (actor.kind === 'player') {
     const name = team.players[actor.playerIdx];
     return (
@@ -37,7 +29,6 @@ export const ActorBadge: FC<TProps> = ({ state, variant, showName = true }) => {
       </span>
     );
   }
-
   const names = `${team.players[0]} & ${team.players[1]}`;
   if (variant === 'hero') return <p className="cb-actor-names">{names}</p>;
   return (

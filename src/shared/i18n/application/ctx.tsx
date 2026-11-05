@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type FC,
-  type PropsWithChildren,
-} from 'react';
+import { createContext, useContext, useEffect, type FC, type PropsWithChildren } from 'react';
 import { fr } from '@/data/strings.fr';
 import { en } from '@/data/strings.en';
 import { es } from '@/data/strings.es';
@@ -14,43 +7,23 @@ import { Lang, type TLang, type TStringKey, type TStringVars } from '../domain/t
 
 const DICTS: Record<TLang, Record<TStringKey, string>> = { fr, en, es };
 
-type TLangContext = {
-  lang: TLang;
-  setLang: (lang: TLang) => void;
-};
+type TLangContext = { lang: TLang };
 
 const LangCtx = createContext<TLangContext | null>(null);
 
 type TLangProviderProps = PropsWithChildren<{
-  /** Initial language (seeded from persisted settings). */
-  initialLang: TLang;
-  /** Called whenever the language changes — the shell persists it to settings. */
-  onLangChange?: (lang: TLang) => void;
+  /** The active language: the shell passes `settings.lang` from the save store. */
+  lang: TLang;
 }>;
 
-/**
- * Holds the active language in memory. Seeding from and persisting to settings
- * is the shell's job (via `initialLang` / `onLangChange`), so i18n never depends
- * on the save port.
- */
-export const LangProvider: FC<TLangProviderProps> = ({
-  initialLang,
-  onLangChange,
-  children,
-}) => {
-  const [lang, setLangState] = useState<TLang>(initialLang);
-
+/** Controlled and read-only: the language has one owner (the saved settings). A pick goes to the
+ *  save store (`LanguagePicker`); `lang` follows. */
+export const LangProvider: FC<TLangProviderProps> = ({ lang, children }) => {
   // Keep <html lang> in sync for screen readers / correct hyphenation.
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
-
-  const setLang = (next: TLang) => {
-    setLangState(next);
-    onLangChange?.(next);
-  };
-
-  return <LangCtx.Provider value={{ lang, setLang }}>{children}</LangCtx.Provider>;
+  return <LangCtx.Provider value={{ lang }}>{children}</LangCtx.Provider>;
 };
 
 export function useLang(): TLangContext {

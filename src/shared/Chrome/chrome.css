@@ -1,9 +1,5 @@
-/* Shared chrome — the "Colored" recipes (refont v3): violet stage, cream cards with a
-   chunky dark-violet outline and hard lip, glossy gold CTAs, white display titles.
-   Tokens only (rgba whites / violets for shadows and glows aside).
-
-   Ownership: this file is the shared component library. Views never edit it; a view's
-   own layout goes in its own `view.css`, scoped under the view's root class. */
+/* The shared kit ("Colored", refont v3). Views never edit it: a view's layout goes in its own
+   `view.css`, scoped under the view's root class. Tokens only (shadow / glow rgba aside). */
 
 /* ---------- surfaces re-scope the text colours (see tokens.css) ---------- */
 .cb-card,
@@ -23,10 +19,8 @@
   --cb-error: var(--cb-error-ink);
   color: var(--cb-text-body);
 }
-/* Focus ring: an outline is drawn OUTSIDE the element, so it must contrast with what is
-   behind it. Only containers whose children sit on cream re-scope it to violet. The
-   interactive surfaces themselves (.cb-mode, .cb-team, .cb-btn--secondary, ...) keep the
-   inherited ring: gold on the stage, violet when nested in a card. */
+/* The focus ring is drawn OUTSIDE the element: only containers whose children sit on cream
+   re-scope it to violet; interactive surfaces keep the inherited one (gold on the stage). */
 .cb-card,
 .cb-row,
 .cb-sheet {
@@ -45,10 +39,6 @@
   flex-direction: column;
   gap: var(--cb-s4);
   background: var(--cb-bg-calm) var(--cb-bg);
-  color: var(--cb-text-body);
-  font-family: var(--cb-font-ui);
-  font-size: var(--cb-fs-body);
-  line-height: var(--cb-lh-body);
   position: relative;
   isolation: isolate;
   animation: cb-screen-in var(--cb-t-screen) var(--cb-ease-out) both;
@@ -102,7 +92,6 @@
 }
 button.cb-chip {
   cursor: pointer;
-  min-height: var(--cb-h-chip);
 }
 .cb-dots {
   display: inline-flex;
@@ -151,7 +140,6 @@ button.cb-chip {
   transform: translateY(2px);
 }
 
-/* ---------- type ---------- */
 .cb-title {
   font: 800 var(--cb-fs-h1) / var(--cb-lh-h1) var(--cb-font-display);
   letter-spacing: var(--cb-tracking-display);
@@ -200,13 +188,21 @@ button.cb-chip {
   box-shadow: inset 0 -4px 0 rgba(42, 11, 143, 0.07), var(--cb-e2);
 }
 
-/* ---------- buttons: glossy, outlined, pressable lip ---------- */
-.cb-btn {
-  --btn-bg: var(--cb-action-grad);
-  --btn-fg: var(--cb-action-text);
+/* ---------- buttons: glossy, outlined, pressable lip (the lip's room is reserved below) ---------- */
+.cb-btn,
+.cb-answer {
   appearance: none;
   border: var(--cb-outline-w) solid var(--cb-outline);
   width: 100%;
+  align-items: center;
+  margin-bottom: var(--cb-lip);
+  flex: none;
+  cursor: pointer;
+  transition: transform var(--cb-t-tap) var(--cb-ease-out), box-shadow var(--cb-t-tap) var(--cb-ease-out);
+}
+.cb-btn {
+  --btn-bg: var(--cb-action-grad);
+  --btn-fg: var(--cb-action-text);
   min-height: var(--cb-h-btn);
   padding: 0 var(--cb-s5);
   border-radius: var(--cb-r-pill);
@@ -214,37 +210,22 @@ button.cb-chip {
   color: var(--btn-fg);
   font: 800 var(--cb-fs-label) / var(--cb-lh-label) var(--cb-font-display);
   letter-spacing: -0.01em;
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.5),
-    0 var(--cb-lip) 0 var(--cb-outline),
-    0 10px 18px rgba(20, 5, 74, 0.35);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 var(--cb-lip) 0 var(--cb-outline), 0 10px 18px rgba(20, 5, 74, 0.35);
   transform: translateY(0);
-  transition:
-    transform var(--cb-t-tap) var(--cb-ease-out),
-    box-shadow var(--cb-t-tap) var(--cb-ease-out);
-  cursor: pointer;
   display: inline-flex;
-  align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: var(--cb-lip); /* reserve room for the lip */
-  flex: none;
 }
 .cb-btn:active:not(:disabled) {
   transform: translateY(calc(var(--cb-lip) - 1px));
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.5),
-    0 1px 0 var(--cb-outline);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 1px 0 var(--cb-outline);
 }
 .cb-btn--inline {
   width: auto;
   padding: 0 22px;
 }
 .cb-btn--win {
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.5),
-    0 var(--cb-lip) 0 var(--cb-outline),
-    0 0 28px rgba(255, 194, 31, 0.55);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 var(--cb-lip) 0 var(--cb-outline), 0 0 28px rgba(255, 194, 31, 0.55);
 }
 .cb-btn--secondary {
   --btn-bg: var(--cb-surface);
@@ -293,9 +274,6 @@ button.cb-chip {
 .cb-answer {
   --a-bg: var(--cb-p1);
   --a-fg: var(--cb-p1-text);
-  appearance: none;
-  border: var(--cb-outline-w) solid var(--cb-outline);
-  width: 100%;
   min-height: var(--cb-h-answer);
   padding: 0 var(--cb-s4);
   border-radius: var(--cb-r-md);
@@ -303,24 +281,13 @@ button.cb-chip {
   color: var(--a-fg);
   text-align: left;
   display: flex;
-  align-items: center;
   gap: 14px;
-  cursor: pointer;
   font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.25),
-    0 var(--cb-lip) 0 var(--cb-outline);
-  margin-bottom: var(--cb-lip);
-  transition:
-    transform var(--cb-t-tap) var(--cb-ease-out),
-    box-shadow var(--cb-t-tap) var(--cb-ease-out);
-  flex: none;
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.25), 0 var(--cb-lip) 0 var(--cb-outline);
 }
 .cb-answer:active {
   transform: translateY(4px);
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.25),
-    0 1px 0 var(--cb-outline);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.25), 0 1px 0 var(--cb-outline);
 }
 .cb-answer--p2 {
   --a-bg: var(--cb-p2);
@@ -356,7 +323,6 @@ button.cb-chip {
   cursor: default;
 }
 
-/* ---------- text field ---------- */
 .cb-field {
   width: 100%;
   height: var(--cb-h-field);
@@ -406,112 +372,47 @@ button.cb-chip {
 .cb-mode:active {
   transform: scale(0.98);
 }
-.cb-mode img {
-  width: 72px;
-  height: 72px;
-  flex: none;
-}
 .cb-mode h3 {
   margin: 0;
   font: 800 24px / 1.1 var(--cb-font-display);
-  color: var(--cb-text);
   letter-spacing: -0.01em;
 }
 .cb-mode p {
-  margin: 4px 0 0;
+  margin: 0;
   color: var(--cb-text-muted);
-  font: 500 15px / 1.4 var(--cb-font-ui);
-}
-.cb-mode .cb-dur {
-  margin-left: auto;
-  align-self: flex-start;
-  font: 800 12px / 1 var(--cb-font-ui);
-  color: var(--cb-violet-600);
-  background: var(--cb-surface-sunk);
-  padding: 7px 10px;
-  border-radius: var(--cb-r-pill);
-  white-space: nowrap;
 }
 /* selectable option card (difficulty) — chosen = gold outline + glow */
 .cb-mode[aria-pressed='true'] {
   border-color: var(--cb-gold-lo);
-  box-shadow:
-    0 0 0 3px var(--cb-gold),
-    0 0 24px rgba(255, 194, 31, 0.5),
-    var(--cb-e2);
+  box-shadow: 0 0 0 3px var(--cb-gold), 0 0 24px rgba(255, 194, 31, 0.5), var(--cb-e2);
 }
 
-/* ---------- team tile (V-Setup step A) ---------- */
-.cb-teams {
+/* ---------- team art boxes: the art fills the box, else the team's initial ---------- */
+.cb-team-art,
+.cb-avatar,
+.cb-player-avatar,
+.cb-char-placeholder {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--cb-s3);
+  place-items: center;
+  overflow: hidden;
+  background: var(--cb-team-art-bg);
+  color: var(--cb-violet-600);
 }
-.cb-team {
-  appearance: none;
-  border: var(--cb-outline-w) solid var(--cb-outline);
-  cursor: pointer;
-  padding: var(--cb-s2) var(--cb-s2) var(--cb-s3);
-  background: var(--cb-surface);
-  border-radius: var(--cb-r-lg);
-  box-shadow: var(--cb-e1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-  color: var(--cb-text);
-  font-family: var(--cb-font-ui);
-  transition:
-    transform var(--cb-t-tap) var(--cb-ease-out),
-    box-shadow var(--cb-t-tap);
+.cb-team-art img,
+.cb-avatar img,
+.cb-player-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
+/* portrait tile (Setup picker, final ties) */
 .cb-team-art {
   width: 100%;
   aspect-ratio: 1;
   border-radius: var(--cb-r-md);
-  background: var(--cb-team-art-bg);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
 }
 .cb-team-art img {
-  width: 100%;
-  height: 100%;
   object-fit: contain;
-}
-.cb-team-name {
-  font: 800 15px / 1.2 var(--cb-font-display);
-  color: var(--cb-text);
-}
-.cb-team[aria-pressed='true'] {
-  border-color: var(--cb-gold-lo);
-  box-shadow:
-    0 0 0 3px var(--cb-gold),
-    0 0 24px rgba(255, 194, 31, 0.55),
-    var(--cb-e1);
-  transform: translateY(-2px);
-}
-.cb-team[aria-pressed='true']::after {
-  content: '✓';
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--cb-pink);
-  border: 2px solid #FFFFFF;
-  color: var(--cb-text-on-color);
-  display: grid;
-  place-items: center;
-  font: 800 15px / 1 var(--cb-font-ui);
-}
-.cb-team:disabled,
-.cb-team[aria-disabled='true'] {
-  opacity: 0.45;
-  filter: grayscale(1);
-  cursor: default;
 }
 /* placeholder art for teams whose render isn't delivered yet: tinted tile + big initial */
 .cb-team-placeholder {
@@ -525,19 +426,11 @@ button.cb-chip {
   width: 44px;
   height: 44px;
   border-radius: var(--cb-r-sm);
-  background: var(--cb-team-art-bg);
   border: 2px solid var(--cb-outline);
-  overflow: hidden;
   flex: none;
-  display: grid;
-  place-items: center;
   font: 800 16px / 1 var(--cb-font-display);
-  color: var(--cb-violet-600);
 }
 .cb-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   object-position: 50% 15%; /* faces sit in the upper third of the portraits */
 }
 .cb-avatar--lg {
@@ -555,21 +448,13 @@ button.cb-chip {
   border-radius: 50%;
   background: var(--cb-cream);
   border: var(--cb-outline-w) solid var(--cb-outline);
-  overflow: hidden;
   flex: none;
-  display: grid;
-  place-items: center;
   font: 800 28px / 1 var(--cb-font-display);
-  color: var(--cb-violet-600);
 }
 .cb-player-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   object-position: 50% 20%;
 }
 
-/* ---------- score rows ---------- */
 .cb-rows {
   display: flex;
   flex-direction: column;
@@ -633,27 +518,12 @@ button.cb-chip {
   text-shadow: var(--cb-title-shadow);
   margin: 0;
 }
-.cb-verdict--miss {
-  color: var(--cb-error);
-}
-.cb-points {
-  font: 800 72px / 1 var(--cb-font-display);
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-  color: var(--cb-points);
-  text-shadow: var(--cb-glow-light);
-  text-align: center;
-}
-.cb-points.is-in,
 .cb-reveal-in {
   animation: cb-pop var(--cb-t-reveal) var(--cb-ease-overshoot) both;
 }
 @keyframes cb-pop {
   from { transform: scale(0.4); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cb-points.is-in, .cb-reveal-in { animation: none; }
 }
 .cb-badge {
   display: inline-flex;
@@ -665,10 +535,6 @@ button.cb-chip {
   background: var(--cb-success-bg);
   color: var(--cb-success-ink);
   font: 800 14px / 1 var(--cb-font-ui);
-}
-.cb-badge--miss {
-  background: var(--cb-error-bg);
-  color: var(--cb-error-ink);
 }
 
 /* ---------- character slot (full-body duo renders, 2:3) ---------- */
@@ -688,12 +554,8 @@ button.cb-chip {
   aspect-ratio: 1;
   margin: 0 auto;
   border-radius: var(--cb-r-xl);
-  background: var(--cb-team-art-bg);
   border: var(--cb-outline-w) solid var(--cb-outline);
-  display: grid;
-  place-items: center;
   font: 800 96px / 1 var(--cb-font-display);
-  color: var(--cb-violet-600);
   opacity: 0.8;
 }
 /* soft light bloom behind a hero element (burst screens) */
@@ -710,7 +572,6 @@ button.cb-chip {
   pointer-events: none;
 }
 
-/* ---------- logo ---------- */
 .cb-logo {
   display: block;
   width: min(86%, 380px);
@@ -735,9 +596,10 @@ button.cb-chip {
 }
 .cb-sheet {
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   display: grid;
-  gap: var(--cb-s3);
+  gap: var(--cb-s4);
+  padding: var(--cb-s7) var(--cb-s5) var(--cb-s6);
   border-radius: var(--cb-r-xl);
   box-shadow: var(--cb-e3);
 }
@@ -746,7 +608,6 @@ button.cb-chip {
   to { opacity: 1; }
 }
 
-/* ---------- toast ---------- */
 .cb-toast {
   border-radius: var(--cb-r-md);
   border: 2px solid var(--cb-outline);
@@ -756,9 +617,41 @@ button.cb-chip {
   font: 700 var(--cb-fs-caption) / var(--cb-lh-caption) var(--cb-font-ui);
   text-align: center;
 }
-.cb-toast--error {
+.cb-toast--error,
+.cb-badge--miss {
   background: var(--cb-error-bg);
   color: var(--cb-error-ink);
+}
+/* pinned status line (save status, boot issues): bottom-centred, above the page */
+.cb-notice {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--cb-s4) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(calc(100% - 2 * var(--cb-page-x)), 440px);
+  z-index: 40;
+  animation: cb-fade var(--cb-t-screen) var(--cb-ease-out) both;
+}
+.cb-notice .cb-toast {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cb-s3);
+  box-shadow: var(--cb-e3);
+}
+.cb-notice-action {
+  border: 0;
+  padding: var(--cb-s1) var(--cb-s2);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cb-crash {
+  justify-content: center;
+  text-align: center;
 }
 
 /* ---------- misc layout helpers ---------- */
@@ -797,4 +690,87 @@ button.cb-chip {
 /* in-game: the fixed pause control lives top-right — keep the top bar clear of it */
 .cb-page--with-pause .cb-topbar {
   padding-right: calc(var(--cb-target-min) + var(--cb-s2));
+}
+
+/* ---------- button size scale: md = the variant's token height, lg = verdict / answer / start ---------- */
+.cb-btn.cb-btn--lg {
+  min-height: var(--cb-h-answer);
+  font-size: clamp(20px, 6vw, 24px);
+  line-height: 1.15;
+}
+/* short phones: the lg scale steps down once, for every view (three Flash verdicts must fit) */
+@media (max-height: 700px) {
+  .cb-btn.cb-btn--lg {
+    min-height: var(--cb-h-btn-sec);
+  }
+}
+
+/* ---------- Sheet: modal dialog (pause, discard confirm, deck empty) ---------- */
+.cb-dialog .cb-h2 {
+  font-size: var(--cb-fs-h1);
+  line-height: var(--cb-lh-h1);
+}
+.cb-dialog .cb-sheet .cb-btn:not(.cb-btn--ghost) {
+  min-height: var(--cb-h-btn);
+}
+.cb-dialog .cb-btn--ghost {
+  font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
+}
+.cb-dialog .cb-dialog__text {
+  margin: 0;
+  text-align: center;
+  font: 800 var(--cb-fs-h2) / var(--cb-lh-h2) var(--cb-font-display);
+  letter-spacing: var(--cb-tracking-display);
+  text-wrap: balance;
+}
+
+/* ---------- LanguagePicker ---------- */
+/* row: FR / EN / ES pills, gold = current; one height for both variants, lip drawn by the shadow */
+.cb-btn.cb-lang-pill {
+  min-height: var(--cb-h-btn-sec);
+  min-width: 64px;
+  padding: 0 var(--cb-s4);
+  margin-bottom: 0;
+  border-radius: var(--cb-r-md);
+}
+/* menu: the list drops under the chip, right-aligned, over whatever is behind */
+.cb-lang {
+  position: relative;
+}
+.cb-lang-menu {
+  --cb-text: var(--cb-on-surface);
+  position: absolute;
+  top: calc(100% + var(--cb-s2));
+  right: 0;
+  margin: 0;
+  padding: var(--cb-s1);
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  background: var(--cb-surface);
+  border: var(--cb-outline-w) solid var(--cb-outline);
+  border-radius: var(--cb-r-sm);
+  box-shadow: var(--cb-e1);
+}
+.cb-lang-menu button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--cb-s3);
+  border: 0;
+  border-radius: calc(var(--cb-r-sm) - 4px);
+  background: transparent;
+  color: var(--cb-text);
+  font: 700 var(--cb-fs-body) / 1 var(--cb-font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+.cb-lang-menu button[aria-pressed='true'] {
+  background: var(--cb-surface-sunk);
+}
+.cb-lang-menu button:focus-visible {
+  outline: 3px solid var(--cb-violet-600);
+  outline-offset: -3px;
 }

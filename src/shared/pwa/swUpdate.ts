@@ -7,8 +7,8 @@
  *  - only armed when a controller already exists at load (so it never fires on
  *    the very first visit, where clientsClaim triggers the initial control), and
  *  - a `refreshing` latch so it reloads at most once.
- * The reload lands on the current route (an in-progress game resumes from its
- * snapshot).
+ * The reload lands on the current route: a game in progress resumes from `cb.game` (a
+ * pre-refactor one cannot, and Home says so).
  */
 if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
   if (navigator.serviceWorker.controller) {

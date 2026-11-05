@@ -11,7 +11,7 @@ type TInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
-export type TInstallPlatform = 'android' | 'ios' | 'none';
+type TInstallPlatform = 'android' | 'ios' | 'none';
 
 let deferred: TInstallPromptEvent | null = null;
 const listeners = new Set<() => void>();
@@ -29,20 +29,12 @@ if (typeof window !== 'undefined') {
   });
 }
 
-function isIos(): boolean {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-
-function isStandalone(): boolean {
-  const nav = navigator as Navigator & { standalone?: boolean };
-  return window.matchMedia('(display-mode: standalone)').matches || nav.standalone === true;
-}
+const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = () =>
+  window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 
 /** Reactive install state for the Home hint. */
-export function useInstallPrompt(): {
-  platform: TInstallPlatform;
-  promptInstall: () => Promise<void>;
-} {
+export function useInstallPrompt() {
   const [, force] = useState(0);
   useEffect(() => {
     const l = () => force((n) => n + 1);
@@ -52,13 +44,8 @@ export function useInstallPrompt(): {
     };
   }, []);
 
-  const platform: TInstallPlatform = isStandalone()
-    ? 'none'
-    : deferred
-      ? 'android'
-      : isIos()
-        ? 'ios'
-        : 'none';
+  const installable = !isStandalone();
+  const platform: TInstallPlatform = installable && deferred ? 'android' : installable && isIos() ? 'ios' : 'none';
 
   const promptInstall = async () => {
     if (!deferred) return;

@@ -1,10 +1,8 @@
-/* V-Mode layout — everything scoped under .cb-v-mode so nothing leaks to other screens.
-   The three cards share the whole page height (flex), never shrinking below their content. */
+/* V-Mode — the three cards share the page height, never shrinking below their content. */
 
 .cb-v-mode {
   gap: var(--cb-s3);
 }
-
 .cb-v-mode .cb-modes {
   flex: 1;
   display: flex;
@@ -13,7 +11,6 @@
   gap: var(--cb-s5);
   padding-top: var(--cb-s2);
 }
-
 .cb-v-mode .cb-mode {
   position: relative;
   flex: 1 1 0;
@@ -23,13 +20,13 @@
 }
 .cb-v-mode .cb-mode img {
   /* grows with the screen height: 80px on a short phone, up to 128px on a tall one */
+  flex: none;
   width: clamp(72px, 14dvh, 128px);
   height: clamp(72px, 14dvh, 128px);
 }
 .cb-v-mode .cb-mode h3 {
   /* grows a little on tall screens, floors at the h2 token */
   font-size: clamp(var(--cb-fs-h2), 4dvh, 36px);
-  line-height: 1.1;
 }
 .cb-v-mode .cb-mode p {
   margin-top: var(--cb-s1);
@@ -41,8 +38,9 @@
   position: absolute;
   top: calc(var(--cb-s4) * -1);
   right: var(--cb-s4);
-  margin: 0;
   padding: 7px 14px;
+  border-radius: var(--cb-r-pill);
+  white-space: nowrap;
   background: var(--cb-chip-bg);
   color: var(--cb-chip-text);
   border: 2px solid var(--cb-outline);

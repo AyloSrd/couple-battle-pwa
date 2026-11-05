@@ -2,12 +2,11 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import type { TSoundApi } from '@/shared/sound';
-import { initGame, type TGameState } from '../domain/machine';
+import { soundEngine } from '@/shared/sound';
+import { isAt, type TGameAt } from '../domain/machine';
 import type { TQuestion } from '@/shared/questions/domain/types';
 import type { TRoster } from '@/shared/game/domain/types';
+import { newGame } from '@/shared/game/domain/game';
 import { DilemmaQuestion } from './DilemmaQuestion';
 
 const roster: TRoster = [
@@ -23,10 +22,10 @@ const deck: TQuestion[] = Array.from({ length: 3 }, (_, i) => ({
   name: `q${i + 1}`,
 }));
 
-function questionState(): Extract<TGameState, { kind: 'question' }> {
-  const s = initGame({ roster, mode: 'dilemma', difficulty: 'mix', themes: [], deck });
-  if (s.kind !== 'question') throw new Error('expected a question state');
-  return s;
+function askGame(): TGameAt<'ask'> {
+  const g = newGame({ roster, mode: 'dilemma', difficulty: 'mix', themes: [], deck });
+  if (!isAt(g, 'ask')) throw new Error('expected an ask step');
+  return g;
 }
 
 describe('DilemmaQuestion — leaks', () => {
@@ -41,13 +40,11 @@ describe('DilemmaQuestion — leaks', () => {
   it('only a one-shot whoosh: no timers, no window/document listeners left behind', () => {
     const add = [vi.spyOn(window, 'addEventListener'), vi.spyOn(document, 'addEventListener')];
     const remove = [vi.spyOn(window, 'removeEventListener'), vi.spyOn(document, 'removeEventListener')];
-    const sound: TSoundApi = { ...createSoundNoopApi(), play: vi.fn() };
+    const play = vi.spyOn(soundEngine, 'play');
     const view = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={sound}>
-            <DilemmaQuestion state={questionState()} onReady={() => {}} />
-          </SoundApiProvider>
+        <LangProvider lang="fr">
+          <DilemmaQuestion game={askGame()} question={deck[0]} onReady={() => {}} />
         </LangProvider>
       </StrictMode>,
     );
@@ -55,7 +52,7 @@ describe('DilemmaQuestion — leaks', () => {
       vi.advanceTimersByTime(10_000);
     });
     expect(vi.getTimerCount()).toBe(0);
-    expect(sound.play).toHaveBeenCalledWith('sfx.whoosh');
+    expect(play).toHaveBeenCalledWith('sfx.whoosh');
     view.unmount();
     expect(vi.getTimerCount()).toBe(0);
 

@@ -1,14 +1,8 @@
 import type { ReactElement } from 'react';
-import { render } from '@testing-library/react';
-import { LangProvider, type TLang } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
+import type { TLang } from '@/shared/i18n';
+import { renderWithApp } from './renderApp';
 
-/** Render a screen with the real language provider and the no-op sound port. */
+/** Render a screen with the real language provider and a memory save store (sound is silent in jsdom). */
 export function renderScreen(ui: ReactElement, lang: TLang = 'en') {
-  return render(
-    <LangProvider initialLang={lang}>
-      <SoundApiProvider api={createSoundNoopApi()}>{ui}</SoundApiProvider>
-    </LangProvider>,
-  );
+  return renderWithApp(ui, { lang });
 }

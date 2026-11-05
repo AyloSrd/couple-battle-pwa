@@ -14,22 +14,18 @@ const ZQuestionArray = z.array(ZQuestionSchema);
 type TRawByLang = { fr: unknown; en: unknown; es: unknown };
 
 /**
- * Catalog backed by the bundled question JSON. Every language is Zod-parsed
- * once at construction (data crosses the boundary here); `list` then picks the
- * language array and applies the pure filter.
+ * Catalog backed by the bundled question JSON. A language is Zod-parsed the first time it is
+ * asked for (data crosses the boundary here), then kept: one parse per language per session.
  */
 export function createQuestionsJsonApi(
   raw: TRawByLang = { fr: questionsFr, en: questionsEn, es: questionsEs },
 ): TQuestionsApi {
-  const byLang: Record<keyof TRawByLang, TQuestion[]> = {
-    fr: ZQuestionArray.parse(raw.fr),
-    en: ZQuestionArray.parse(raw.en),
-    es: ZQuestionArray.parse(raw.es),
-  };
+  const parsed: Partial<Record<keyof TRawByLang, TQuestion[]>> = {};
+  const bank = (lang: keyof TRawByLang) => (parsed[lang] ??= ZQuestionArray.parse(raw[lang]));
 
   return {
-    async list({ lang, ...rest }) {
-      return filterQuestions(byLang[lang], rest);
+    list({ lang, ...rest }) {
+      return filterQuestions(bank(lang), rest);
     },
   };
 }

@@ -1,42 +1,16 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  type FC,
-  type PropsWithChildren,
-} from 'react';
-import type { TRoster, TMode, TGameDifficulty, TThemeId } from '@/shared/game';
-import { EMPTY_DRAFT, type TDraftGame } from '../domain/types';
+import { createContext, useContext, useSyncExternalStore, type FC, type PropsWithChildren } from 'react';
+import type { TDraft } from '../domain/types';
+import type { TDraftStore } from './draft';
 
-type TDraftGameContext = {
-  draft: TDraftGame;
-  setRoster: (roster: TRoster) => void;
-  setMode: (mode: TMode) => void;
-  setDifficulty: (difficulty: TGameDifficulty) => void;
-  setThemes: (themes: TThemeId[]) => void;
-  reset: () => void;
-};
+const DraftCtx = createContext<TDraftStore | null>(null);
 
-const DraftGameCtx = createContext<TDraftGameContext | null>(null);
+export const DraftProvider: FC<PropsWithChildren<{ store: TDraftStore }>> = ({ store, children }) => (
+  <DraftCtx.Provider value={store}>{children}</DraftCtx.Provider>
+);
 
-/** Holds the new-game selection while the player moves through the setup flow. */
-export const DraftGameProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [draft, setDraft] = useState<TDraftGame>(EMPTY_DRAFT);
-
-  const value: TDraftGameContext = {
-    draft,
-    setRoster: (roster) => setDraft((d) => ({ ...d, roster })),
-    setMode: (mode) => setDraft((d) => ({ ...d, mode })),
-    setDifficulty: (difficulty) => setDraft((d) => ({ ...d, difficulty })),
-    setThemes: (themes) => setDraft((d) => ({ ...d, themes })),
-    reset: () => setDraft(EMPTY_DRAFT),
-  };
-
-  return <DraftGameCtx.Provider value={value}>{children}</DraftGameCtx.Provider>;
-};
-
-export function useDraftGame(): TDraftGameContext {
-  const ctx = useContext(DraftGameCtx);
-  if (!ctx) throw new Error('DraftGameProvider not found in tree');
-  return ctx;
+export function useDraft(): { draft: TDraft; draftStore: TDraftStore } {
+  const store = useContext(DraftCtx);
+  if (!store) throw new Error('DraftProvider not found in tree');
+  const draft = useSyncExternalStore(store.subscribe, store.get);
+  return { draft, draftStore: store };
 }

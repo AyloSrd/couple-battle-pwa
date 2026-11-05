@@ -1,98 +1,72 @@
-import { useEffect, useState, type FC } from 'react';
+import { useEffect, useEffectEvent, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
-import { useGetSave } from '@/shared/save';
+import { useSound } from '@/shared/sound';
 import { Screen } from '@/shared/Chrome';
 import '../dilemma.css';
 
 const STEP_MS = 700;
 const GO_MS = 1500;
 
-function stepOf(digit: string): 3 | 2 | 1 {
-  return digit === '3' ? 3 : digit === '2' ? 2 : 1;
-}
-
-/** What the GO beat shouts — the mechanic differs per context. */
-export type TCountdownGo = 'point' | 'answer';
-
 const GO_KEY = {
   point: 'count.go', // Dilemma: everyone points at someone → "POINTEZ !"
   answer: 'count.go.answer', // rapid-fire: partners answer out loud → "RÉPONDEZ !"
-} as const satisfies Record<TCountdownGo, TStringKey>;
+} as const satisfies Record<string, TStringKey>;
 
-/**
- * V-Countdown — the game's signature beat, on the sunburst (burst). Numerals slam
- * in with rising ticks + haptics, then the GO word. Auto-advances (dispatches
- * countdownDone) ~1.5s after GO. `ticks` = 3 (Dilemma) or 2 (rapid-fire); `go`
- * picks the GO word for the mechanic (default: point). Ticks, haptics and
- * timing are identical in every context. Runs once on mount.
- */
-export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdownGo }> = ({
+/** V-Countdown — the signature beat: numerals slam in with rising ticks, then the GO word for
+ *  the mechanic; `onDone` ~1.5 s after GO. Runs once on mount. */
+export const Countdown: FC<{ onDone: () => void; ticks?: 3 | 2; go?: keyof typeof GO_KEY }> = ({
   onDone,
   ticks = 3,
   go = 'point',
 }) => {
   const t = useT();
-  const sound = useSoundApi();
-  // Settings are already cached by the app gate when a game runs; default on until read.
-  const vibrationOn = useGetSave('settings').data?.vibration ?? true;
-  const vibrate = (pattern: number | number[]) => {
-    if (vibrationOn) navigator.vibrate?.(pattern);
-  };
-  const digits = ticks === 2 ? ['2', '1'] : ['3', '2', '1'];
+  const sound = useSound();
+  const digits: (3 | 2 | 1)[] = ticks === 2 ? [2, 1] : [3, 2, 1];
   const [phase, setPhase] = useState(0); // 0..digits.length-1 = digit, digits.length = go
-
-  useEffect(() => {
+  // The timed sequence runs once, from mount (an effect event: it reads this render's props).
+  const start = useEffectEvent(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
-    const first = digits[0] ?? '1';
-    sound.play('sfx.countdown.tick', { step: stepOf(first) });
-    vibrate(50);
-    for (let idx = 1; idx < digits.length; idx++) {
-      const d = digits[idx] ?? '1';
-      timers.push(
-        setTimeout(() => {
-          setPhase(idx);
-          sound.play('sfx.countdown.tick', { step: stepOf(d) });
-          vibrate(50);
-        }, idx * STEP_MS),
-      );
-    }
+    digits.forEach((step, idx) => {
+      const tick = () => {
+        setPhase(idx);
+        sound.play('sfx.countdown.tick', { step });
+      };
+      if (idx === 0) sound.play('sfx.countdown.tick', { step });
+      else timers.push(setTimeout(tick, idx * STEP_MS));
+    });
     const goAt = digits.length * STEP_MS;
     timers.push(
       setTimeout(() => {
         setPhase(digits.length);
         sound.play('sfx.countdown.go');
-        vibrate([60, 40, 60]);
       }, goAt),
     );
     timers.push(setTimeout(() => onDone(), goAt + GO_MS));
     return () => timers.forEach(clearTimeout);
-    // Mount-only timed sequence; onDone is stable while the countdown is shown.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  });
+  useEffect(() => start(), []);
   const isGo = phase >= digits.length;
-  const digit = digits[phase] ?? '1';
+  const digit = digits[phase] ?? 1;
 
   return (
     <Screen burst center className="cb-v-dilemma cb-v-dilemma--count">
       <div className="cb-glow" aria-hidden="true" />
-      {isGo ? (
-        <div className="cb-go cb-reveal-in" role="status">
-          {t(GO_KEY[go])}
+      {!isGo && (
+        // key re-mounts the numeral (and its ring) so the slam replays per tick
+        <div key={digit} className="cb-v-count-stage">
+          <span className="cb-v-ring" aria-hidden="true" />
+          <div className="cb-numeral is-in">{digit}</div>
         </div>
-      ) : (
-        <>
-          {/* key re-mounts the numeral (and its ring) so the slam replays per tick */}
-          <div key={digit} className="cb-v-count-stage">
-            <span className="cb-v-ring" aria-hidden="true" />
-            <div className="cb-numeral is-in" aria-live="assertive">
-              {digit}
-            </div>
-          </div>
-          <p className="cb-v-get-ready">{t('dilemma.getready')}</p>
-        </>
       )}
+      {/* One live region for the whole beat: screen readers hear "get ready" at the start and
+          the GO word once — never every tick (S11). A plain box: the page centres it like its child. */}
+      <div role="status">
+        {isGo ? (
+          <div className="cb-go cb-reveal-in">{t(GO_KEY[go])}</div>
+        ) : (
+          <p className="cb-v-get-ready">{t('dilemma.getready')}</p>
+        )}
+      </div>
     </Screen>
   );
 };

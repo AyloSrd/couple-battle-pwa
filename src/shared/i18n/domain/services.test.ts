@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { interpolate } from './services';
+import { AVATAR_IDS } from '@/shared/game/domain/types';
+import { fr } from '@/data/strings.fr';
+import { interpolate, teamKey } from './services';
 
 describe('interpolate', () => {
   it('replaces a single placeholder', () => {
@@ -32,5 +34,12 @@ describe('interpolate', () => {
 
   it('is a no-op without vars', () => {
     expect(interpolate('plain text')).toBe('plain text');
+  });
+});
+
+describe('teamKey', () => {
+  it('names every avatar with an existing team string', () => {
+    for (const id of AVATAR_IDS) expect(fr[teamKey(id)]).toBeTruthy();
+    expect(teamKey('otters')).toBe('team.otters');
   });
 });

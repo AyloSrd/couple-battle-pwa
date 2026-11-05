@@ -1,4 +1,6 @@
 import type { ButtonHTMLAttributes, FC } from 'react';
+import type { TSoundId } from '@/shared/sound';
+import { cx, useSfxClick } from './kit';
 import './chrome.css';
 
 type TAnswerButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -8,21 +10,24 @@ type TAnswerButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Leading initial tile; defaults to the label's first letter. Pass `null` for none. */
   initial?: string | null;
   locked?: boolean;
+  sfx?: TSoundId | null;
 };
 
-/** 66px answer / partner-name button with the initial tile. */
-export const AnswerButton: FC<TAnswerButtonProps> = ({ label, tone = 'p1', initial, locked = false, className, ...rest }) => {
+export const AnswerButton: FC<TAnswerButtonProps> = ({
+  label,
+  tone = 'p1',
+  initial,
+  locked = false,
+  className,
+  sfx = 'sfx.tap',
+  onClick,
+  ...rest
+}) => {
+  const handleClick = useSfxClick(sfx, onClick);
   const shown = initial === undefined ? label.trim().charAt(0).toUpperCase() : initial;
-  const classes = [
-    'cb-answer',
-    tone === 'p2' ? 'cb-answer--p2' : tone === 'neutral' ? 'cb-answer--neutral' : '',
-    locked ? 'cb-answer--locked' : '',
-    className ?? '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const classes = cx('cb-answer', tone !== 'p1' && `cb-answer--${tone}`, locked && 'cb-answer--locked', className);
   return (
-    <button type="button" className={classes} {...rest}>
+    <button type="button" className={classes} onClick={handleClick} {...rest}>
       {shown && <span className="cb-initial">{shown}</span>}
       {label}
     </button>

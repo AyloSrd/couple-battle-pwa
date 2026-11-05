@@ -1,23 +1,17 @@
 import { useEffect, useEffectEvent, useRef, useState, type FC } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
-import { Screen, PixelPanel, ModeIcon, type TModeIconMode, BackButton } from '@/shared/Chrome';
+import { useSound } from '@/shared/sound';
+import { Mode, type TMode } from '@/shared/game';
+import { Screen, PixelPanel, ModeIcon, TopBar } from '@/shared/Chrome';
 import { clampIndex, indexFromKey, indexFromScroll } from './domain/carousel';
 import './view.css';
 
-type TSlide = { nameKey: TStringKey; bodyKey: TStringKey; mode: TModeIconMode };
-
-const SLIDES: TSlide[] = [
-  { nameKey: 'howto.flash.name', bodyKey: 'howto.flash.body', mode: 'flash' },
-  { nameKey: 'howto.dilemma.name', bodyKey: 'howto.dilemma.body', mode: 'dilemma' },
-  { nameKey: 'howto.ultime.name', bodyKey: 'howto.ultime.body', mode: 'ultime' },
-];
+const SLIDES = Object.values(Mode);
+const slideKey = (mode: TMode, part: 'name' | 'body'): TStringKey => `howto.${mode}.${part}`;
 
 export const HowToPlayView: FC = () => {
   const t = useT();
-  const navigate = useNavigate();
-  const sound = useSoundApi();
+  const sound = useSound();
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
 
@@ -44,18 +38,13 @@ export const HowToPlayView: FC = () => {
     return () => window.removeEventListener('keydown', listener);
   }, []);
 
-  const handleBack = () => {
-    sound.play('sfx.back');
-    navigate({ to: '/' });
-  };
-
   const handleScroll = () => {
     const el = trackRef.current;
     if (!el) return;
     setIndex(indexFromScroll(el.scrollLeft, el.clientWidth, SLIDES.length));
   };
 
-  const handleDot = (target: number) => {
+  const makeDot = (target: number) => () => {
     if (target === index) return;
     sound.play('sfx.tap');
     goTo(target);
@@ -63,39 +52,30 @@ export const HowToPlayView: FC = () => {
 
   return (
     <Screen className="cb-v-howto">
-      <div className="cb-topbar">
-        <BackButton label={t('common.back')} onClick={handleBack} />
-      </div>
+      <TopBar back="/" />
       <h1 className="cb-title">{t('howto.title')}</h1>
 
-      <div
-        ref={trackRef}
-        className="cb-howto-track"
-        onScroll={handleScroll}
-        role="region"
-        aria-label={t('howto.title')}
-        tabIndex={0}
-      >
-        {SLIDES.map((slide) => (
-          <PixelPanel key={slide.nameKey} className="cb-howto-slide" role="group" aria-label={t(slide.nameKey)}>
+      <div ref={trackRef} className="cb-howto-track" onScroll={handleScroll} role="region" aria-label={t('howto.title')} tabIndex={0}>
+        {SLIDES.map((mode) => (
+          <PixelPanel key={mode} className="cb-howto-slide" role="group" aria-label={t(slideKey(mode, 'name'))}>
             <div className="cb-howto-art">
-              <ModeIcon mode={slide.mode} size={192} />
+              <ModeIcon mode={mode} size={192} />
             </div>
-            <h2 className="cb-h2">{t(slide.nameKey)}</h2>
-            <p className="cb-howto-body">{t(slide.bodyKey)}</p>
+            <h2 className="cb-h2">{t(slideKey(mode, 'name'))}</h2>
+            <p className="cb-howto-body">{t(slideKey(mode, 'body'))}</p>
           </PixelPanel>
         ))}
       </div>
 
       <div className="cb-howto-dots">
-        {SLIDES.map((slide, i) => (
+        {SLIDES.map((mode, i) => (
           <button
-            key={slide.nameKey}
+            key={mode}
             type="button"
             className="cb-howto-dot"
-            aria-label={t(slide.nameKey)}
+            aria-label={t(slideKey(mode, 'name'))}
             aria-current={i === index ? 'true' : undefined}
-            onClick={() => handleDot(i)}
+            onClick={makeDot(i)}
           />
         ))}
       </div>

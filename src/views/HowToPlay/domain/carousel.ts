@@ -1,5 +1,3 @@
-/** Pure helpers for the How-to-play swipe carousel (no DOM, no React). */
-
 /** Keep `index` inside `[0, total - 1]` (0 when the carousel is empty). */
 export function clampIndex(index: number, total: number): number {
   if (total <= 0) return 0;
@@ -12,28 +10,17 @@ export function indexFromScroll(scrollLeft: number, slideWidth: number, total: n
   return clampIndex(Math.round(scrollLeft / slideWidth), total);
 }
 
-/**
- * Slide to go to for a key press, or `null` when the key is not a carousel key
- * (or the move would not change the slide). Arrow keys step, Home/End jump.
- */
+const KEY_TARGET: Record<string, (current: number, total: number) => number> = {
+  ArrowRight: (current) => current + 1,
+  ArrowLeft: (current) => current - 1,
+  Home: () => 0,
+  End: (_, total) => total - 1,
+};
+
+/** Slide to go to for a key press, or `null` when the key is not a carousel key (or the move would not change the slide). */
 export function indexFromKey(key: string, current: number, total: number): number | null {
-  let target: number;
-  switch (key) {
-    case 'ArrowRight':
-      target = current + 1;
-      break;
-    case 'ArrowLeft':
-      target = current - 1;
-      break;
-    case 'Home':
-      target = 0;
-      break;
-    case 'End':
-      target = total - 1;
-      break;
-    default:
-      return null;
-  }
-  const next = clampIndex(target, total);
+  const target = Object.hasOwn(KEY_TARGET, key) ? KEY_TARGET[key] : undefined;
+  if (!target) return null;
+  const next = clampIndex(target(current, total), total);
   return next === current ? null : next;
 }

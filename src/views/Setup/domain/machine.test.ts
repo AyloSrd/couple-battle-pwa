@@ -113,6 +113,27 @@ describe('setup wizard — NAMES validation per step', () => {
     expect(s.error).toBe('duplicate');
   });
 
+  it('S10: a name made only of invisible characters counts as empty', () => {
+    let s = reduceSetup(onNames, { type: 'setName', which: 1, value: 'Luca' });
+    s = reduceSetup(s, { type: 'setName', which: 2, value: ' \u200b\u202e\u2066 ' });
+    s = reduceSetup(s, { type: 'confirmNames' });
+    expect(s.error).toBe('required');
+  });
+
+  it('S10: invisible / bidi characters cannot disguise a duplicate', () => {
+    let s = reduceSetup(onNames, { type: 'setName', which: 1, value: 'Luca' });
+    s = reduceSetup(s, { type: 'setName', which: 2, value: 'Lu\u200bca' });
+    s = reduceSetup(s, { type: 'confirmNames' });
+    expect(s.error).toBe('duplicate');
+  });
+
+  it('S10: names enter the roster normalised (NFC, invisibles stripped, trimmed, capped)', () => {
+    const start = reduceSetup(initSetup(), { type: 'pickCount', count: 1 });
+    const done = buildCouple(start, 'otters', '  Ame\u0301lie\u200d ', 'Bartholomew-Alexander');
+    expect(done.step).toBe('done');
+    expect(done.teams[0]?.players).toEqual(['Amélie', 'Bartholomew-Alex']);
+  });
+
   it('editing a name clears a standing error', () => {
     let s = reduceSetup(onNames, { type: 'confirmNames' }); // required
     expect(s.error).toBe('required');
@@ -205,5 +226,38 @@ describe('hasDuplicateName', () => {
     expect(hasDuplicateName(['Luca', 'Morgane'])).toBe(false);
     expect(hasDuplicateName(['Luca', ' luca '])).toBe(true);
     expect(hasDuplicateName(['A', 'B', 'C', 'a'])).toBe(true);
+  });
+});
+
+describe('setup wizard — seeded from the draft roster (Back from Mode keeps every name)', () => {
+  const roster = [
+    { teamId: 't1', avatarId: 'otters' as const, players: ['Ana', 'Bo'] as [string, string] },
+    { teamId: 't2', avatarId: 'lions' as const, players: ['Cy', 'Di'] as [string, string] },
+  ];
+
+  it('no roster (or an empty one) starts on the count step', () => {
+    expect(initSetup(null)).toEqual(initSetup());
+    expect(initSetup([])).toEqual(initSetup());
+  });
+
+  it("reopens on the last couple's names, the earlier couples kept", () => {
+    expect(initSetup(roster)).toEqual({
+      step: 'names',
+      count: 2,
+      coupleIdx: 1,
+      teams: [roster[0]],
+      avatar: 'lions',
+      name1: 'Cy',
+      name2: 'Di',
+      error: null,
+    });
+  });
+
+  it('confirming again gives back the same roster; Back walks into the earlier couple', () => {
+    const seeded = initSetup(roster);
+    expect(reduceSetup(seeded, { type: 'confirmNames' })).toMatchObject({ step: 'done', teams: roster });
+    const team = reduceSetup(seeded, { type: 'back' });
+    expect(team).toMatchObject({ step: 'team', avatar: 'lions' });
+    expect(reduceSetup(team, { type: 'back' })).toMatchObject({ step: 'names', coupleIdx: 0, name1: 'Ana', name2: 'Bo', teams: [] });
   });
 });

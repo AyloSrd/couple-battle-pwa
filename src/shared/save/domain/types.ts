@@ -1,159 +1,54 @@
 import { z } from 'zod';
-import {
-  ZModeSchema,
-  ZGameDifficultySchema,
-  ZThemeIdSchema,
-  ZRosterSchema,
-  THEME_IDS,
-} from '@/shared/game/domain/types';
-import { ZQuestionSchema } from '@/shared/questions/domain/types';
 import { Lang } from '@/shared/i18n/domain/types';
+import type { TGame } from '@/shared/game/domain/game';
 
 /**
- * User settings. `vibration` (haptics on the countdown) was added after launch: a save written
- * before it existed has no such field and must keep parsing — it defaults to on. A non-boolean
- * value also falls back to on, so one bad field never costs the player their language/sound
- * (the idb adapter would otherwise drop the whole settings record on a parse failure).
+ * The persisted profile: everything about the player that outlives a game. Every field parses
+ * with its own `.catch(default)`, so one bad field (an unknown language, a corrupt flag, a
+ * stray id) resets only that field and never the whole profile (S2).
  */
-export const ZSettingsSchema = z.object({
-  lang: z.enum([Lang.Fr, Lang.En, Lang.Es]),
-  sound: z.boolean(),
+
+/** An object whose fields fall back one by one; a non-object reads as all defaults. */
+const lenient = <S extends z.ZodRawShape>(shape: S) => z.object(shape).catch(() => z.object(shape).parse({}));
+
+/** `vibration` (haptics on the countdown) was added after launch: a save without it reads as on. */
+export const ZSettingsSchema = lenient({
+  lang: z.enum([Lang.Fr, Lang.En, Lang.Es]).catch(Lang.Fr),
+  sound: z.boolean().catch(true),
   vibration: z.boolean().catch(true),
 });
 export type TSettings = z.infer<typeof ZSettingsSchema>;
 
-/** Global set of already-seen question ids (language-independent). Bounded well above
- *  the real pool (1,135 ids) so a tampered record cannot grow without limit. */
-export const SEEN_QUESTION_IDS_MAX = 10_000;
-export const ZSeenQuestionIdsSchema = z.array(z.number().int().positive()).max(SEEN_QUESTION_IDS_MAX);
-export type TSeenQuestionIds = z.infer<typeof ZSeenQuestionIdsSchema>;
+/** Bound well above the real pool (1,135 ids) so a tampered record cannot grow without limit. */
+export const SEEN_IDS_MAX = 10_000;
+const isQuestionId = (id: unknown): id is number => Number.isInteger(id) && (id as number) > 0;
+const flag = z.boolean().catch(false);
+const best = z.number().int().nonnegative().catch(0);
 
-/** Which per-mode guideline screens the player has dismissed. */
-export const ZGuidelinesSeenSchema = z.object({
-  flash: z.boolean(),
-  dilemma: z.boolean(),
-  ultime: z.boolean(),
-});
-export type TGuidelinesSeen = z.infer<typeof ZGuidelinesSeenSchema>;
-
-/** Best solo scores per mode. */
-export const ZSoloBestSchema = z.object({
-  flash: z.number().int().nonnegative(),
-  dilemma: z.number().int().nonnegative(),
-  ultime: z.number().int().nonnegative(),
-});
-export type TSoloBest = z.infer<typeof ZSoloBestSchema>;
-
-/**
- * Where we are inside a running game. `phase` is left as a string here — the
- * Play machine (Phase 2) owns the canonical phase union and maps its in-memory
- * state to/from this persisted snapshot.
- */
-export const ZCursorSchema = z.object({
-  phase: z.string(),
-  round: z.number().int().nonnegative(),
-  coupleIdx: z.number().int().nonnegative(),
-  questionIdx: z.number().int().nonnegative(),
-});
-export type TCursor = z.infer<typeof ZCursorSchema>;
-
-/**
- * Full session state, written on every transition and cleared on game end.
- * Powers crash/refresh resume (views-spec §2).
- *
- * Bounds are set just above what a real game can produce, so they reject a
- * tampered/corrupt record (which then self-heals away on read) without ever
- * rejecting a real machine state:
- *  - deck ≤ 64 (largest real draw: Ultime with 4 couples = 4 + 5 + 4×5 = 29);
- *  - secretAnswers keys are `answerKey(teamId, questionId)` (e.g. `t4|1035`),
- *    values are typed answers (input `maxLength` 40), yes/no, or a player name;
- *  - scores are keyed by roster teamIds (`t1`..`t4`);
- *  - themes ⊆ THEME_IDS; secretAnswers ≤ 4 couples × 64 questions entries;
- *  - confirmed is keyed by roster teamIds, like scores;
- *  - cursor: coupleIdx indexes the roster, round ≤ 3 (Ultime's last round),
- *    questionIdx ≤ 64. `questionIdx < deck.length` is deliberately NOT checked:
- *    a short draw (small pool) legitimately runs past the deck.
- */
-const SECRET_ANSWERS_MAX = 4 * 64;
-
-/**
- * One scored question, appended by the Play machine on every scoring decision (a
- * zero-point outcome counts). `max` is what the question could have been worth, so
- * the final screen can chart how in sync a team was. `history` is bounded to
- * 4 couples × 64 questions; a snapshot saved before it existed parses to [].
- */
-const HISTORY_MAX = 4 * 64;
-export const ZHistoryEntrySchema = z
-  .object({
-    teamId: z.string().regex(/^t[1-4]$/),
-    stage: z.enum(['flash', 'dilemma', 'rapid']),
-    round: z.number().int().min(0).max(3),
-    points: z.number().int().min(0).max(9),
-    max: z.number().int().min(0).max(9),
-  })
-  .refine((e) => e.points <= e.max, { message: 'points exceed max' });
-export type THistoryEntry = z.infer<typeof ZHistoryEntrySchema>;
-export const ZGameSnapshotSchema = z.object({
-  roster: ZRosterSchema,
-  mode: ZModeSchema,
-  difficulty: ZGameDifficultySchema,
-  themes: z.array(ZThemeIdSchema).max(THEME_IDS.length),
-  deck: z.array(ZQuestionSchema).max(64),
-  cursor: ZCursorSchema,
-  scores: z.record(z.string().regex(/^t[1-4]$/), z.number().int()),
-  secretAnswers: z.record(z.string().max(32), z.string().max(40)),
-  // Dilemma resolve: per-couple match/miss for the current question (so a
-  // mid-resolve refresh restores the confirmed couples' badges).
-  confirmed: z.record(z.string().regex(/^t[1-4]$/), z.enum(['match', 'miss'])).default({}),
-  // Every scored question so far, for the final screen's per-team charts.
-  history: z.array(ZHistoryEntrySchema).max(HISTORY_MAX).default([]),
-  // Epoch ms of the write. A snapshot older than the resume window (or dated
-  // implausibly in the future) is dropped on read — see `isSnapshotStale`.
-  // Required: a pre-`savedAt` record fails the schema and self-heals away.
-  savedAt: z.number().int().nonnegative(),
-}).superRefine((s, ctx) => {
-  if (s.cursor.coupleIdx >= s.roster.length) {
-    ctx.addIssue({ code: 'custom', path: ['cursor', 'coupleIdx'], message: 'coupleIdx out of roster range' });
-  }
-  if (s.cursor.round > 3) {
-    ctx.addIssue({ code: 'custom', path: ['cursor', 'round'], message: 'round out of range' });
-  }
-  if (s.cursor.questionIdx > 64) {
-    ctx.addIssue({ code: 'custom', path: ['cursor', 'questionIdx'], message: 'questionIdx out of range' });
-  }
-  if (Object.keys(s.secretAnswers).length > SECRET_ANSWERS_MAX) {
-    ctx.addIssue({ code: 'custom', path: ['secretAnswers'], message: 'too many secret answers' });
-  }
-});
-export type TGameSnapshot = z.infer<typeof ZGameSnapshotSchema>;
-
-/**
- * The whole persisted save, one object store keyed by these names. Each key has
- * its own schema and default.
- */
-export type TSaveShape = {
-  settings: TSettings;
-  seenQuestionIds: TSeenQuestionIds;
-  guidelinesSeen: TGuidelinesSeen;
-  soloBest: TSoloBest;
-  gameSnapshot: TGameSnapshot | null;
-};
-export type TSaveKey = keyof TSaveShape;
-
-/** Per-key validators, used by every adapter as data crosses the boundary. */
-export const SAVE_SCHEMAS = {
+export const ZProfileSchema = z.object({
   settings: ZSettingsSchema,
-  seenQuestionIds: ZSeenQuestionIdsSchema,
-  guidelinesSeen: ZGuidelinesSeenSchema,
-  soloBest: ZSoloBestSchema,
-  gameSnapshot: ZGameSnapshotSchema.nullable(),
-} as const satisfies Record<TSaveKey, z.ZodType>;
+  /** Already-seen question ids (language-independent). An invalid id is dropped, the rest kept. */
+  seenIds: z
+    .array(z.unknown())
+    .max(SEEN_IDS_MAX)
+    .transform((ids) => [...new Set(ids.filter(isQuestionId))])
+    .catch(() => []),
+  /** Which per-mode guideline screens the player has dismissed. */
+  guidelinesSeen: lenient({ flash: flag, dilemma: flag, ultime: flag }),
+  /** Best solo score per mode. */
+  soloBest: lenient({ flash: best, dilemma: best, ultime: best }),
+});
+export type TProfile = z.infer<typeof ZProfileSchema>;
 
-/** Defaults returned when a key has never been written. */
-export const SAVE_DEFAULTS: TSaveShape = {
-  settings: { lang: Lang.Fr, sound: true, vibration: true },
-  seenQuestionIds: [],
-  guidelinesSeen: { flash: false, dilemma: false, ultime: false },
-  soloBest: { flash: 0, dilemma: 0, ultime: 0 },
-  gameSnapshot: null,
-};
+/** A fresh profile (nothing saved yet): every field at its default, new objects each call. */
+export const defaultProfile = (): TProfile => ZProfileSchema.parse({});
+
+/** The two persisted values. `profile` → storage key `cb.profile`, `game` → `cb.game`. */
+export type TSaveValues = { profile: TProfile; game: TGame };
+export type TSaveKey = keyof TSaveValues;
+
+/** Something the player must be told about after boot. */
+export type TSaveIssue = 'profileReset' | 'gameDiscarded';
+
+/** The Final screen's solo line, computed from the best read BEFORE the merge. */
+export type TSoloResult = { isBest: boolean; points: number; best: number };

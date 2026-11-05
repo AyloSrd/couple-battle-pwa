@@ -1,298 +1,161 @@
-import { useEffect, useState, type FC } from 'react';
+import { useEffect, useMemo, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
-import { useWakeLockApi } from '@/shared/wakeLock';
-import { useGetSave, usePutSave } from '@/shared/save';
-import { useDraftGame } from '@/shared/session';
+import { useLang, useT } from '@/shared/i18n';
+import { useSound } from '@/shared/sound';
+import { useKeepAwake } from '@/shared/wakeLock';
+import { useSaveStore, type TSoloResult } from '@/shared/save';
+import { useDraft } from '@/shared/session';
 import { Screen, PixelButton } from '@/shared/Chrome';
-import {
-  reduce,
-  toSnapshot,
-  fromSnapshot,
-  initGame,
-  answererIndex,
-  type TGameState,
-  type TResult,
-  type TVerdict,
-} from './domain/machine';
+import { newGame, type TGame } from '@/shared/game';
+import { useQuestionsApi, type TQuestion } from '@/shared/questions';
+import { useGame, type TDispatch } from './application/game';
+import { countdownTicks } from './domain/beats';
+import { isAt, cardOf, RAPID_KINDS } from './domain/machine';
 import { DilemmaQuestion } from './components/DilemmaQuestion';
 import { Countdown } from './components/Countdown';
 import { DilemmaResolve } from './components/DilemmaResolve';
 import { Scoreboard } from './components/Scoreboard';
-import { FinalScreen, type TSoloResult } from './components/FinalScreen';
+import { FinalScreen } from './components/FinalScreen';
 import { PauseSheet } from './components/PauseSheet';
-import { PassPhone } from './components/PassPhone';
-import { SideGate } from './components/SideGate';
-import { Handoff } from './components/Handoff';
+import { Gate } from './components/Gate';
 import { SecretAnswers } from './components/SecretAnswers';
 import { GuessReveal } from './components/GuessReveal';
 import { Judge } from './components/Judge';
 import { RapidFire } from './components/RapidFire';
+import { ScorePop } from './components/ScorePop';
 
+type TStepScreenProps = {
+  game: TGame;
+  question: TQuestion | undefined;
+  dispatch: TDispatch;
+  onReady: () => void;
+  onRematch: () => void;
+  onNewGame: () => void;
+  solo: TSoloResult | null;
+};
+
+/** The screen for the game's step. Each screen owns its handlers and sounds. */
+const StepScreen: FC<TStepScreenProps> = ({ game, question, dispatch, onReady, onRematch, onNewGame, solo }) => {
+  // A key per slot (or gate) remounts the screen: fresh input, and its mount cue plays again.
+  const slot = 'q' in game.step && 'couple' in game.step ? `${game.ctx.seg}-${game.step.q}-${game.step.couple}` : '';
+  if (isAt(game, 'ask')) return <DilemmaQuestion game={game} question={question} onReady={onReady} />;
+  if (isAt(game, 'resolve')) return <DilemmaResolve game={game} question={question} dispatch={dispatch} />;
+  if (isAt(game, 'gate', 'handoff')) {
+    const gateKey = `${game.step.kind}-${game.step.kind === 'gate' ? game.step.side : slot}`;
+    return <Gate key={gateKey} game={game} dispatch={dispatch} />;
+  }
+  if (isAt(game, 'secret')) return <SecretAnswers key={slot} game={game} question={question} dispatch={dispatch} />;
+  if (isAt(game, 'guess')) return <GuessReveal key={slot} game={game} question={question} dispatch={dispatch} />;
+  if (isAt(game, 'judge')) return <Judge game={game} question={question} dispatch={dispatch} />;
+  if (isAt(game, 'rapidIntro', 'rapidTurn', 'rapidAsk', 'rapidJudge')) {
+    return <RapidFire game={game} question={question} dispatch={dispatch} onReady={onReady} />;
+  }
+  if (isAt(game, 'scoreboard')) return <Scoreboard game={game} dispatch={dispatch} />;
+  if (isAt(game, 'final')) return <FinalScreen game={game} onRematch={onRematch} onNewGame={onNewGame} solo={solo ?? undefined} />;
+  return null;
+};
+
+/** `/play`: step → screen, plus what spans screens (pause, background, countdown, pop, music). */
 export const PlayView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
-  const sound = useSoundApi();
-  const wakeLock = useWakeLockApi();
-  const { reset } = useDraftGame();
-
-  const snapshotQuery = useGetSave('gameSnapshot');
-  const seenQuery = useGetSave('seenQuestionIds');
-  const soloBestQuery = useGetSave('soloBest');
-  const putSnapshot = usePutSave('gameSnapshot');
-  const putSeen = usePutSave('seenQuestionIds');
-  const putSolo = usePutSave('soloBest');
-
-  const [game, setGame] = useState<TGameState | null>(null);
+  const sound = useSound();
+  const store = useSaveStore();
+  const { draftStore } = useDraft();
+  const { lang } = useLang();
+  const questionsApi = useQuestionsApi();
+  const { game, dispatch, soloResult, scorePop } = useGame();
+  // The deck holds ids only: the text comes from the active language's bank.
+  const bank = useMemo(() => new Map(questionsApi.list({ lang }).map((q) => [q.id, q])), [questionsApi, lang]);
   const [paused, setPaused] = useState(false);
-  const [soloResult, setSoloResult] = useState<TSoloResult | null>(null);
-
-  // Initialize the machine from the snapshot once it loads (resume or new game).
-  useEffect(() => {
-    if (game === null && snapshotQuery.data) setGame(fromSnapshot(snapshotQuery.data));
-  }, [game, snapshotQuery.data]);
-
-  // No game to play → back to Home (only once the query has genuinely settled).
-  useEffect(() => {
-    if (game === null && snapshotQuery.isSuccess && !snapshotQuery.isFetching && !snapshotQuery.data) {
-      navigate({ to: '/' });
-    }
-  }, [game, snapshotQuery.isSuccess, snapshotQuery.isFetching, snapshotQuery.data, navigate]);
-
-  // Keep the screen awake while in-game.
-  useEffect(() => {
-    void wakeLock.request();
-    return () => {
-      void wakeLock.release();
-    };
-  }, [wakeLock]);
-
+  // The READY countdown is a UI beat, not a step: it runs while the game stays at its `seq`.
+  const [countdownSeq, setCountdownSeq] = useState<number | null>(null);
+  useKeepAwake();
   // Tense loop during the rapid-fire finale; silent otherwise.
-  const kind = game?.kind;
+  const kind = game?.step.kind;
   useEffect(() => {
-    if (kind && kind.startsWith('rapid')) sound.music('mus.final');
+    if (kind && RAPID_KINDS.has(kind)) sound.music('mus.final');
     else sound.music(null);
     return () => sound.music(null);
   }, [kind, sound]);
-
-  const commitFinal = (final: Extract<TGameState, { kind: 'final' }>) => {
-    const ids = final.deck.map((q) => q.id);
-    const seen = seenQuery.data ?? [];
-    putSeen.mutate(Array.from(new Set([...seen, ...ids])));
-    putSnapshot.mutate(null);
-
-    if (final.roster.length === 1) {
-      const team = final.roster[0];
-      const solo = soloBestQuery.data ?? { flash: 0, dilemma: 0, ultime: 0 };
-      const score = team ? (final.scores[team.teamId] ?? 0) : 0;
-      const prevBest = solo[final.mode];
-      setSoloResult({ isBest: score > prevBest, points: score, best: Math.max(prevBest, score) });
-      if (score > prevBest) putSolo.mutate({ ...solo, [final.mode]: score });
-    }
-  };
-
-  const dispatch = (event: Parameters<typeof reduce>[1]) => {
-    if (!game) return;
-    const next = reduce(game, event);
-    setGame(next);
-    if (next.kind === 'final') commitFinal(next);
-    else putSnapshot.mutate(toSnapshot(next));
-  };
-
   const handleReady = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'ready' });
+    if (game) setCountdownSeq(game.ctx.seq);
   };
-  const handleCountdownDone = () => dispatch({ type: 'countdownDone' });
-  const handleConfirm = (result: TResult) => {
-    sound.play(result === 'match' ? 'sfx.point.exact' : 'sfx.point.miss');
-    dispatch({ type: 'confirm', result });
-  };
-  const handleNext = () => {
-    sound.play('sfx.select');
+  const handleCountdownDone = () => {
+    setCountdownSeq(null);
     dispatch({ type: 'next' });
   };
-
-  // --- Flash handlers ---
-  const handlePassConfirm = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'passConfirm' });
+  const setPause = (on: boolean) => {
+    sound.duck(on);
+    setPaused(on);
   };
-  const handleLock = (answer: string) => {
-    sound.play('sfx.lock');
-    dispatch({ type: 'lockAnswer', answer });
-  };
-  const handleReveal = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'reveal' }); // the riser plays on the Judge (flip) mount
-  };
-  const handleAutoGuess = (guess: string) => {
-    sound.play('sfx.tap'); // the match/miss sound played on the pick, with the reveal
-    dispatch({ type: 'autoGuess', guess });
-  };
-  const handleJudge = (verdict: TVerdict) => {
-    sound.play(verdict === 'exact' ? 'sfx.point.exact' : verdict === 'close' ? 'sfx.point.close' : 'sfx.point.miss');
-    dispatch({ type: 'judge', verdict });
-  };
-
-  // --- Rapid-fire handlers ---
-  const handleRapidNext = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'next' });
-  };
-  const handleRapidReady = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'ready' });
-  };
-  const handleRapidJudge = (synchro: boolean) => {
-    sound.play(synchro ? 'sfx.synchro' : 'sfx.mismatch');
-    dispatch({ type: 'rapidJudge', synchro });
-  };
-
-  const handlePause = () => {
-    sound.play('sfx.tap');
-    sound.duck(true);
-    setPaused(true);
-  };
-  const handleResume = () => {
-    sound.play('sfx.tap');
-    sound.duck(false);
-    setPaused(false);
-  };
+  const handlePause = () => setPause(true);
+  const handleResume = () => setPause(false);
   const handleRestart = () => {
     if (!game) return;
-    const fresh = initGame({
-      roster: game.roster,
-      mode: game.mode,
-      difficulty: game.difficulty,
-      themes: game.themes,
-      deck: game.deck,
-    });
-    setGame(fresh);
-    putSnapshot.mutate(toSnapshot(fresh));
-    sound.duck(false);
-    setPaused(false);
+    const { roster, mode, difficulty, themes, deck, seq } = game.ctx;
+    const fresh = newGame({ roster, mode, difficulty, themes, deck }); // same deck
+    // seq stays monotonic, so no event from the old game can become legal again
+    store.startGame({ ...fresh, ctx: { ...fresh.ctx, seq: seq + 1 } });
+    setCountdownSeq(null);
+    setPause(false);
   };
   const handleQuit = () => {
-    sound.play('sfx.back');
     sound.duck(false);
-    putSnapshot.mutate(null);
+    store.quitGame();
     navigate({ to: '/' });
   };
-
   const handleRematch = () => {
-    sound.play('sfx.select');
-    navigate({ to: '/mode' }); // same roster still in the draft
+    if (!game) return;
+    // From the game itself, so Rematch also works after a cold-start resume.
+    draftStore.set({ roster: game.ctx.roster, mode: null });
+    store.leaveGame();
+    navigate({ to: '/mode' });
   };
   const handleNewGame = () => {
-    sound.play('sfx.tap');
-    reset();
+    draftStore.clear();
+    store.leaveGame();
     navigate({ to: '/' });
   };
 
-  if (snapshotQuery.isPending || !game) return null;
-
-  // The countdown owns the whole sunburst screen: 3 ticks → "POINTEZ !" for
-  // Dilemma; 2 ticks → "RÉPONDEZ !" for the rapid-fire (nobody points there).
-  if (game.kind === 'countdown') return <Countdown onDone={handleCountdownDone} />;
-  if (game.kind === 'rapidCountdown') return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
-
-  const showPause = game.kind !== 'final';
-  const solo = game.roster.length === 1;
-  // Sunburst (burst) background ONLY for the theatrical beats: the rapid-fire
-  // finale, the between-rounds scoreboard and the final results. Countdowns
-  // render their own burst screen above. Everything else is calm Paper.
-  const burst = game.kind.startsWith('rapid') || game.kind === 'scoreboard' || game.kind === 'final';
-
-  /** Names for the couple currently in the Flash spotlight. */
-  const namesFor = (round: number, coupleIdx: number) => {
-    const team = game.roster[coupleIdx];
-    const aIdx = answererIndex(round);
-    return {
-      answererName: team?.players[aIdx] ?? '',
-      guesserName: team?.players[1 - aIdx] ?? '',
-    };
-  };
+  if (!game) return null;
+  // The countdown owns the whole screen; the rapid-fire one says "answer" (nobody points there).
+  if (countdownSeq === game.ctx.seq && isAt(game, 'ask')) {
+    return <Countdown ticks={countdownTicks(game)} onDone={handleCountdownDone} />;
+  }
+  if (countdownSeq === game.ctx.seq && isAt(game, 'rapidAsk')) {
+    return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
+  }
+  const { step } = game;
+  const showPause = step.kind !== 'final';
+  // The sunburst only for the theatrical beats (the countdown draws its own); the rest is calm.
+  const burst = RAPID_KINDS.has(step.kind) || step.kind === 'scoreboard' || step.kind === 'final';
+  const card = cardOf(game);
+  const pop = scorePop?.seq === game.ctx.seq ? scorePop : null;
+  const popTeam = pop ? game.ctx.roster.find((team) => team.teamId === pop.entry.teamId) : undefined;
 
   return (
     <Screen burst={burst} className={showPause ? 'cb-page--with-pause' : undefined}>
       {showPause && (
         <div style={{ position: 'fixed', top: 'calc(var(--cb-s3) + env(safe-area-inset-top))', right: 'var(--cb-s3)', zIndex: 20 }}>
-          <PixelButton variant="ghost" block={false} onClick={handlePause} aria-label={t('pause.title')} className="cb-icon-btn">
+          <PixelButton variant="ghost" block={false} onClick={handlePause} aria-label={t('pause.button')} className="cb-icon-btn">
             ⏸
           </PixelButton>
         </div>
       )}
-
-      {game.kind === 'question' && <DilemmaQuestion state={game} onReady={handleReady} />}
-      {game.kind === 'resolve' && <DilemmaResolve state={game} onConfirm={handleConfirm} />}
-
-      {/* Flash "sofa sides": group gates for ≥2 couples; solo has no group to
-          share with, so its gates are the strict no-peek pass-phone screens. */}
-      {game.kind === 'sideAnswerers' &&
-        (solo ? (
-          <PassPhone variant="secret" state={game} onConfirm={handlePassConfirm} />
-        ) : (
-          <SideGate side="answerers" onConfirm={handlePassConfirm} />
-        ))}
-      {game.kind === 'handoff' && <Handoff state={game} onConfirm={handlePassConfirm} />}
-      {game.kind === 'secretInput' && (
-        <SecretAnswers key={`${game.questionIdx}-${game.coupleIdx}`} state={game} onLock={handleLock} />
-      )}
-      {game.kind === 'sideGuessers' &&
-        (solo ? (
-          <PassPhone variant="back" state={game} onConfirm={handlePassConfirm} />
-        ) : (
-          <SideGate side="guessers" onConfirm={handlePassConfirm} />
-        ))}
-      {game.kind === 'guess' &&
-        (() => {
-          const n = namesFor(game.round, game.coupleIdx);
-          return (
-            <GuessReveal
-              key={`${game.round}-${game.questionIdx}-${game.coupleIdx}`}
-              state={game}
-              guesserName={n.guesserName}
-              partnerName={n.answererName}
-              onReveal={handleReveal}
-              onAutoGuess={handleAutoGuess}
-            />
-          );
-        })()}
-      {game.kind === 'judge' && (
-        <Judge
-          state={game}
-          answererName={namesFor(game.round, game.coupleIdx).answererName}
-          onJudge={handleJudge}
-        />
-      )}
-
-      {(game.kind === 'rapidIntro' ||
-        game.kind === 'rapidTurn' ||
-        game.kind === 'rapidQuestion' ||
-        game.kind === 'rapidJudge') && (
-        <RapidFire
-          state={game}
-          onNext={handleRapidNext}
-          onReady={handleRapidReady}
-          onJudge={handleRapidJudge}
-        />
-      )}
-
-      {game.kind === 'scoreboard' && <Scoreboard state={game} onNext={handleNext} />}
-      {game.kind === 'final' && (
-        <FinalScreen
-          state={game}
-          onRematch={handleRematch}
-          onNewGame={handleNewGame}
-          solo={soloResult ?? undefined}
-        />
-      )}
-
-      {paused && (
-        <PauseSheet onResume={handleResume} onRestart={handleRestart} onQuit={handleQuit} />
-      )}
+      <StepScreen
+        game={game}
+        question={card ? bank.get(card.id) : undefined}
+        dispatch={dispatch}
+        onReady={handleReady}
+        onRematch={handleRematch}
+        onNewGame={handleNewGame}
+        solo={soloResult}
+      />
+      {pop && popTeam && <ScorePop key={pop.id} team={popTeam} points={pop.entry.points} />}
+      {paused && <PauseSheet onResume={handleResume} onRestart={handleRestart} onQuit={handleQuit} />}
     </Screen>
   );
 };
+
+export { PlayCrash } from './components/PlayCrash';

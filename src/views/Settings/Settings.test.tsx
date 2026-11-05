@@ -1,31 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fireEvent, screen } from '@testing-library/react';
 import { es } from '@/data/strings.es';
-import { LangProvider } from '@/shared/i18n';
-import { SaveApiProvider, type TSaveApi } from '@/shared/save';
-import { createSaveMemoryApi } from '@/shared/save/api/memory';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
+import { renderWithApp } from '@/test/renderApp';
+import { expectSynced } from '@/test/expectSynced';
 import { SettingsView } from './index';
 
 const navigate = vi.fn();
 vi.mock('@tanstack/react-router', () => ({ useNavigate: () => navigate }));
 
-function mount(api: TSaveApi = createSaveMemoryApi()) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  render(
-    <QueryClientProvider client={qc}>
-      <SaveApiProvider api={api}>
-        <SoundApiProvider api={createSoundNoopApi()}>
-          <LangProvider initialLang="en">
-            <SettingsView />
-          </LangProvider>
-        </SoundApiProvider>
-      </SaveApiProvider>
-    </QueryClientProvider>,
-  );
-  return api;
+function mount() {
+  const { app } = renderWithApp(<SettingsView />, { seed: { profile: { seenIds: [4, 8] } } });
+  expectSynced(app.store, app.api);
+  return app;
 }
 
 describe('SettingsView', () => {
@@ -33,30 +19,44 @@ describe('SettingsView', () => {
     navigate.mockClear();
   });
 
-  it('shows vibration on by default and switches it off, persisting the choice', async () => {
-    const api = mount();
-    const toggle = await screen.findByRole('switch', { name: 'Vibration' });
-    await waitFor(() => expect(toggle).toBeEnabled());
+  it('shows vibration on by default and switches it off, saving the choice', () => {
+    const app = mount();
+    const toggle = screen.getByRole('switch', { name: 'Vibration' });
     expect(toggle).toHaveAttribute('aria-checked', 'true');
 
     fireEvent.click(toggle);
 
-    await waitFor(() => expect(toggle).toHaveAttribute('aria-checked', 'false'));
-    expect(await api.get('settings')).toEqual({ lang: 'fr', sound: true, vibration: false });
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(app.store.get().profile.settings).toEqual({ lang: 'en', sound: true, vibration: false });
+    expectSynced(app.store, app.api);
   });
 
-  it('leaves the sound switch independent of the vibration one', async () => {
-    const api = mount();
-    const sound = await screen.findByRole('switch', { name: 'Sound' });
-    await waitFor(() => expect(sound).toBeEnabled());
+  it('leaves the sound switch independent of the vibration one', () => {
+    const app = mount();
+    const sound = screen.getByRole('switch', { name: 'Sound' });
     fireEvent.click(sound);
-    await waitFor(() => expect(sound).toHaveAttribute('aria-checked', 'false'));
-    expect(await api.get('settings')).toMatchObject({ sound: false, vibration: true });
+    expect(sound).toHaveAttribute('aria-checked', 'false');
+    expect(app.store.get().profile.settings).toMatchObject({ sound: false, vibration: true });
+    expectSynced(app.store, app.api);
   });
 
-  it('offers every language and switches the screen to the one picked', async () => {
-    mount();
-    const spanish = await screen.findByRole('button', { name: 'Español' });
+  it('toggles from a tap on the row text, once (no double fire), with one switch per setting', () => {
+    const app = mount();
+    expect(screen.getAllByRole('switch')).toHaveLength(2);
+    fireEvent.click(screen.getByText('Vibration'));
+    expect(screen.getByRole('switch', { name: 'Vibration' })).toHaveAttribute('aria-checked', 'false');
+    expect(app.store.get().profile.settings.vibration).toBe(false);
+    fireEvent.click(screen.getByText('On')); // the hint under "Sound" is part of the row too
+    expect(screen.getByRole('switch', { name: 'Sound' })).toHaveAttribute('aria-checked', 'false');
+    expect(app.store.get().profile.settings).toMatchObject({ sound: false, vibration: false });
+    fireEvent.click(screen.getByText('Sound')); // and back on: toggled exactly once per tap
+    expect(screen.getByRole('switch', { name: 'Sound' })).toHaveAttribute('aria-checked', 'true');
+    expectSynced(app.store, app.api);
+  });
+
+  it('offers every language and switches the screen to the one picked (saved)', () => {
+    const app = mount();
+    const spanish = screen.getByRole('button', { name: 'Español' });
     expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Français' })).toHaveAttribute('aria-pressed', 'false');
 
@@ -64,13 +64,27 @@ describe('SettingsView', () => {
 
     expect(spanish).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('heading', { name: es['settings.title'] })).toBeInTheDocument();
+    expect(app.store.get().profile.settings.lang).toBe('es');
+    expect(document.documentElement.lang).toBe('es');
+    expectSynced(app.store, app.api);
   });
 
-  it('opens Legal and About from their list rows', async () => {
-    mount();
-    fireEvent.click(await screen.findByRole('button', { name: 'Legal notice' }));
+  it('resets the seen questions after a confirm', () => {
+    const app = mount();
+    fireEvent.click(screen.getByRole('button', { name: 'Reset seen questions' }));
+    expect(app.store.get().profile.seenIds).toEqual([4, 8]); // nothing before the confirm
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    expect(app.store.get().profile.seenIds).toEqual([]);
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expectSynced(app.store, app.api);
+  });
+
+  it('opens Legal and About from their list rows', () => {
+    const app = mount();
+    fireEvent.click(screen.getByRole('button', { name: 'Legal notice' }));
     expect(navigate).toHaveBeenLastCalledWith({ to: '/legal' });
     fireEvent.click(screen.getByRole('button', { name: 'About' }));
     expect(navigate).toHaveBeenLastCalledWith({ to: '/about' });
+    expectSynced(app.store, app.api);
   });
 });

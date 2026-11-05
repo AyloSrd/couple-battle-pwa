@@ -1,4 +1,4 @@
-/** Ids playable via `play()` (all sfx.* plus the one-shot mus.fanfare). */
+/** Cues for `play()`: the sfx, the one-shot fanfare and the pre-rendered round stinger. */
 export type TSoundId =
   | 'sfx.tap'
   | 'sfx.back'
@@ -19,12 +19,10 @@ export type TSoundId =
   | 'sfx.synchro'
   | 'sfx.mismatch'
   | 'sfx.confetti'
-  | 'sfx.splash.clash'
-  | 'mus.birthday'
+  | 'mus.round'
   | 'mus.fanfare';
 
-/** Looping music, driven by `music()`. */
 export type TMusicId = 'mus.menu' | 'mus.final';
 
-/** Per-play options. `step` pitches the countdown tick (3 → 2 → 1). */
+/** `step` pitches the countdown tick (3 → 2 → 1). */
 export type TPlayOpts = { step?: 3 | 2 | 1 };

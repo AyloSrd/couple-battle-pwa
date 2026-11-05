@@ -1,14 +1,8 @@
 export {
   Mode,
-  ZModeSchema,
   GameDifficulty,
-  ZGameDifficultySchema,
   THEME_IDS,
-  ZThemeIdSchema,
   AVATAR_IDS,
-  ZAvatarIdSchema,
-  ZTeamSchema,
-  ZRosterSchema,
   type TMode,
   type TGameDifficulty,
   type TThemeId,
@@ -16,3 +10,16 @@ export {
   type TTeam,
   type TRoster,
 } from './domain/types';
+export {
+  FLASH_SET,
+  CLOSED_TOKENS,
+  SECRET_MAX,
+  NAME_MAX,
+  newGame,
+  segmentOf,
+  answerKey,
+  type TGame,
+  type TGameCtx,
+  type THistoryEntry,
+} from './domain/game';
+export { normalizeText } from './domain/text';

@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent } from '@testing-library/react';
 import { playerArtUrl } from '@/shared/Chrome';
-import { gameState } from '@/test/gameStates';
+import { gameAt, questionFor } from '@/test/gameStates';
 import { renderScreen } from '@/test/renderScreen';
 import { SecretAnswers } from './SecretAnswers';
 
 function mount(round: number, coupleIdx: number) {
-  return renderScreen(<SecretAnswers state={gameState('secretInput', { round, coupleIdx })} onLock={() => {}} />);
+  const game = gameAt('secret', { round: round as 0 | 1, couple: coupleIdx });
+  return renderScreen(<SecretAnswers game={game} question={questionFor(game)} dispatch={() => {}} />);
 }
 const badge = (c: HTMLElement) => c.querySelector('.cb-flash-card .cb-actor');
 
@@ -37,37 +38,60 @@ describe('SecretAnswers — who acts: the round’s answerer', () => {
 });
 
 describe('SecretAnswers — the badge changed nothing about answering', () => {
-  const typed = (type: 'open' | 'yes_no' | 'who_of_two') => ({
-    ...gameState('secretInput'),
-    deck: [{ id: 1, theme: 'childhood' as const, difficulty: 'easy' as const, type, you: 'Q?', name: 'Q de {name}?' }],
-  });
+  const typed = (type: 'open' | 'yes_no' | 'who_of_two') => {
+    const base = gameAt('secret');
+    return {
+      game: { ...base, ctx: { ...base.ctx, deck: [{ id: 1, type }] } },
+      question: { id: 1, theme: 'childhood' as const, difficulty: 'easy' as const, type, you: 'Q?', name: 'Q de {name}?' },
+    };
+  };
 
   it('open: the lock button stays disabled until there is text, then locks the trimmed answer', () => {
-    const onLock = vi.fn();
-    const { getByRole, getByPlaceholderText } = renderScreen(<SecretAnswers state={typed('open')} onLock={onLock} />);
+    const dispatch = vi.fn();
+    const { getByRole, getByPlaceholderText } = renderScreen(<SecretAnswers {...typed('open')} dispatch={dispatch} />);
     const lock = getByRole('button', { name: /lock my answer/i });
     expect(lock).toBeDisabled();
     fireEvent.change(getByPlaceholderText(/your answer/i), { target: { value: '  pasta ' } });
     fireEvent.click(lock);
-    expect(onLock).toHaveBeenCalledWith('pasta');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', value: 'pasta' });
   });
 
-  it('yes/no: the two answer buttons lock their label', () => {
-    const onLock = vi.fn();
-    const { getByRole } = renderScreen(<SecretAnswers state={typed('yes_no')} onLock={onLock} />);
+  it('open: invisible-only text (zero-width, bidi controls, spaces) cannot lock; the lock sends the normalised text', () => {
+    const dispatch = vi.fn();
+    const { getByRole, getByPlaceholderText } = renderScreen(<SecretAnswers {...typed('open')} dispatch={dispatch} />);
+    const field = getByPlaceholderText(/your answer/i);
+    const lock = getByRole('button', { name: /lock my answer/i });
+    fireEvent.change(field, { target: { value: ' \u200B\u202E\u2066 ' } });
+    expect(lock).toBeDisabled();
+    fireEvent.click(lock);
+    expect(dispatch).not.toHaveBeenCalled();
+    fireEvent.change(field, { target: { value: ' Ky\u200Boto\u202E ' } });
+    expect(lock).toBeEnabled();
+    fireEvent.click(lock);
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', value: 'Kyoto' });
+  });
+
+  it('yes/no: the two answer buttons show the localized word and lock the language-free token', () => {
+    const dispatch = vi.fn();
+    const { getByRole } = renderScreen(<SecretAnswers {...typed('yes_no')} dispatch={dispatch} />);
     fireEvent.click(getByRole('button', { name: /yes/i }));
-    expect(onLock).toHaveBeenCalledWith('Yes');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', value: 'yes' });
+    const fr = vi.fn();
+    renderScreen(<SecretAnswers {...typed('yes_no')} dispatch={fr} />, 'fr').getByRole('button', { name: /non/i }).click();
+    expect(fr).toHaveBeenCalledWith({ type: 'answer', value: 'no' });
   });
 
-  it('who_of_two: the buttons are the couple’s names and lock the picked one', () => {
-    const onLock = vi.fn();
-    const { getByRole } = renderScreen(<SecretAnswers state={typed('who_of_two')} onLock={onLock} />);
+  it('who_of_two: the buttons are the couple’s names and lock the picked player’s index', () => {
+    const dispatch = vi.fn();
+    const { getByRole } = renderScreen(<SecretAnswers {...typed('who_of_two')} dispatch={dispatch} />);
     fireEvent.click(getByRole('button', { name: /Bo/ }));
-    expect(onLock).toHaveBeenCalledWith('Bo');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', value: 'p1' });
+    fireEvent.click(getByRole('button', { name: /Ana/ }));
+    expect(dispatch).toHaveBeenLastCalledWith({ type: 'answer', value: 'p0' });
   });
 
   it('no way back: the screen offers no back / cancel control', () => {
-    const { queryByRole } = renderScreen(<SecretAnswers state={typed('open')} onLock={() => {}} />);
+    const { queryByRole } = renderScreen(<SecretAnswers {...typed('open')} dispatch={() => {}} />);
     expect(queryByRole('button', { name: /back|cancel/i })).toBeNull();
   });
 });

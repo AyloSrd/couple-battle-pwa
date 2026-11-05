@@ -1,5 +1,4 @@
-/* ActorBadge — who acts on a screen. Own classes (`.cb-actor*`), so it can sit in any Play view;
-   per-screen placement (on a card, in a hero) is set in that screen's stylesheet. */
+/* ActorBadge — who acts on a screen. Placement (on a card, in a hero) is in each screen's sheet. */
 .cb-actor {
   display: inline-flex;
   min-width: 0;
@@ -35,18 +34,15 @@
   flex-direction: column;
   min-width: 0;
 }
+/* a compact row never wraps: long names are cut, the dots beside it keep their room */
 .cb-actor--row .cb-actor-name,
 .cb-actor--row .cb-actor-names {
   font-size: var(--cb-fs-body);
   text-align: start;
-}
-.cb-actor--row .cb-actor-name {
-  line-height: 1.15;
-}
-/* a compact row never wraps: long names are cut, the dots beside it keep their room */
-.cb-actor--row .cb-actor-name,
-.cb-actor--row .cb-actor-names {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.cb-actor--row .cb-actor-name {
+  line-height: 1.15;
 }
