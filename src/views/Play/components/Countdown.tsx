@@ -7,47 +7,32 @@ import '../dilemma.css';
 const STEP_MS = 700;
 const GO_MS = 1500;
 
-function stepOf(digit: string): 3 | 2 | 1 {
-  return digit === '3' ? 3 : digit === '2' ? 2 : 1;
-}
-
-/** What the GO beat shouts — the mechanic differs per context. */
-type TCountdownGo = 'point' | 'answer';
-
 const GO_KEY = {
   point: 'count.go', // Dilemma: everyone points at someone → "POINTEZ !"
   answer: 'count.go.answer', // rapid-fire: partners answer out loud → "RÉPONDEZ !"
-} as const satisfies Record<TCountdownGo, TStringKey>;
+} as const satisfies Record<string, TStringKey>;
 
-/**
- * V-Countdown — the game's signature beat, on the sunburst (burst). Numerals slam in with
- * rising ticks (their haptics ride on the cues), then the GO word. Calls `onDone` ~1.5s after
- * GO. `ticks` = 3 (a segment's first Dilemma question) or 2 (the following ones, and the
- * rapid-fire); `go` picks the GO word for the mechanic (default: point). Runs once on mount.
- */
-export const Countdown: FC<{ onDone: () => void; ticks?: 3 | 2; go?: TCountdownGo }> = ({
+/** V-Countdown — the signature beat: numerals slam in with rising ticks, then the GO word for
+ *  the mechanic; `onDone` ~1.5 s after GO. Runs once on mount. */
+export const Countdown: FC<{ onDone: () => void; ticks?: 3 | 2; go?: keyof typeof GO_KEY }> = ({
   onDone,
   ticks = 3,
   go = 'point',
 }) => {
   const t = useT();
   const sound = useSound();
-  const digits = ticks === 2 ? ['2', '1'] : ['3', '2', '1'];
+  const digits: (3 | 2 | 1)[] = ticks === 2 ? [2, 1] : [3, 2, 1];
   const [phase, setPhase] = useState(0); // 0..digits.length-1 = digit, digits.length = go
-
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
-    const first = digits[0] ?? '1';
-    sound.play('sfx.countdown.tick', { step: stepOf(first) });
-    for (let idx = 1; idx < digits.length; idx++) {
-      const d = digits[idx] ?? '1';
-      timers.push(
-        setTimeout(() => {
-          setPhase(idx);
-          sound.play('sfx.countdown.tick', { step: stepOf(d) });
-        }, idx * STEP_MS),
-      );
-    }
+    digits.forEach((step, idx) => {
+      const tick = () => {
+        setPhase(idx);
+        sound.play('sfx.countdown.tick', { step });
+      };
+      if (idx === 0) sound.play('sfx.countdown.tick', { step });
+      else timers.push(setTimeout(tick, idx * STEP_MS));
+    });
     const goAt = digits.length * STEP_MS;
     timers.push(
       setTimeout(() => {
@@ -60,9 +45,8 @@ export const Countdown: FC<{ onDone: () => void; ticks?: 3 | 2; go?: TCountdownG
     // Mount-only timed sequence; onDone is stable while the countdown is shown.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const isGo = phase >= digits.length;
-  const digit = digits[phase] ?? '1';
+  const digit = digits[phase] ?? 1;
 
   return (
     <Screen burst center className="cb-v-dilemma cb-v-dilemma--count">

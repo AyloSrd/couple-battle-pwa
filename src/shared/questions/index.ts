@@ -1,19 +1,4 @@
 export { QuestionsApiProvider, useQuestionsApi } from './provider';
-export {
-  QuestionType,
-  ZQuestionSchema,
-  ZQuestionTypeSchema,
-  ZQuestionDifficultySchema,
-  type TQuestion,
-  type TQuestionType,
-  type TQuestionDifficulty,
-  type TQuestionFilter,
-} from './domain/types';
-export {
-  filterQuestions,
-  drawDeck,
-  modeQuestionTypes,
-  deckSizeFor,
-  type TDrawDeckOptions,
-} from './domain/services';
+export type { TQuestion, TQuestionType } from './domain/types';
+export { drawDeck, deckSizeFor } from './domain/services';
 export type { TQuestionsApi } from './api';

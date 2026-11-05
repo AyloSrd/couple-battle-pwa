@@ -7,11 +7,8 @@ import { createSaveStore } from '@/shared/save/application/store';
 import type { TGame } from '@/shared/game';
 import type { TProfile } from '@/shared/save';
 
-/**
- * The save store's contract (ARCHITECTURE "Data safety"): what storage holds decodes to exactly
- * what the store shows. A missing profile reads as defaults; a finished (final) game is no
- * longer stored. Call it after every action.
- */
+/** The store's contract: storage decodes to exactly what it shows (a missing profile = defaults; a
+ *  finished game is no longer stored). Call it after every action. */
 export function expectSynced(store: TSaveStore, api: TSaveApi): void {
   const { profile, game } = store.get();
   const storedProfile = decode('profile', api.raw('profile'));

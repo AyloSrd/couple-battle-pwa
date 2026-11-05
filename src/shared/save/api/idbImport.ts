@@ -67,21 +67,22 @@ async function run(api: TSaveApi, idb: IDBFactory, timedOut: () => boolean): Pro
  * One-time move of a pre-refactor player's profile (settings, seen ids, guideline flags, solo
  * bests) from the old IndexedDB save into `cb.profile`, then the old database is deleted. The old
  * in-progress game is dropped: it holds Flash secrets in a shape that cannot be resumed.
- * Runs before `load()`, only while no `cb.profile` exists, and never throws: IndexedDB missing,
- * blocked or failing just skips it (the old DB stays for a later launch).
+ * Runs before `load()`, only while no `cb.profile` exists, and never throws or rejects: IndexedDB
+ * missing, blocked or failing just skips it (the old DB stays for a later launch).
  */
-export async function importLegacyIdb(api: TSaveApi, idb: IDBFactory | undefined = globalThis.indexedDB): Promise<void> {
-  if (!idb) return;
+export async function importLegacyIdb(api: TSaveApi, idb?: IDBFactory): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let timedOut = false;
-  const timeout = new Promise<void>((resolve) => {
-    timer = setTimeout(() => {
-      timedOut = true;
-      resolve();
-    }, TIMEOUT_MS);
-  });
   try {
-    await Promise.race([run(api, idb, () => timedOut), timeout]);
+    const factory = idb ?? globalThis.indexedDB; // reading it can throw (sandboxed frames)
+    if (!factory) return;
+    const timeout = new Promise<void>((resolve) => {
+      timer = setTimeout(() => {
+        timedOut = true;
+        resolve();
+      }, TIMEOUT_MS);
+    });
+    await Promise.race([run(api, factory, () => timedOut), timeout]);
   } catch {
     // skipped: keep the old DB, start on defaults
   } finally {

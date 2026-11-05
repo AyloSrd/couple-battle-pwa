@@ -1,25 +1,13 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 
-type TCountUpOpts = {
-  /** Steps to count (one point each); 0 = already there. */
-  steps: number;
-  /** Total length of the count; each step lasts `durationMs / steps`, clamped to 40–160 ms. */
-  durationMs: number;
-  /** Every step but the last (the tally tick). */
-  onTick?: () => void;
-  /** Once, when the count lands (at mount when there is nothing to count). */
-  onDone?: () => void;
-};
+type TCountUpOpts = { steps: number; durationMs: number; onTick?: () => void; onDone?: () => void };
 
-/**
- * A count-up on an interval timer (an external clock: the one effect). Returns the steps
- * counted so far; mount the owner with a `key` to count again.
- */
+/** Count `steps` over `durationMs` (40–160 ms a step) and return the steps counted; `onTick` on
+ *  every step but the last, `onDone` once when it lands (at mount if there is nothing to count). */
 export function useCountUp({ steps, durationMs, onTick, onDone }: TCountUpOpts): number {
   const [k, setK] = useState(0);
   const tick = useEffectEvent(() => onTick?.());
   const done = useEffectEvent(() => onDone?.());
-
   useEffect(() => {
     if (steps <= 0) {
       done();
@@ -39,6 +27,5 @@ export function useCountUp({ steps, durationMs, onTick, onDone }: TCountUpOpts):
     }, stepMs);
     return () => clearInterval(id);
   }, [steps, durationMs]);
-
   return Math.min(k, Math.max(steps, 0));
 }

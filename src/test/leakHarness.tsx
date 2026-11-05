@@ -4,15 +4,10 @@ import { render } from '@testing-library/react';
 import { soundEngine } from '@/shared/sound';
 import { renderWithApp } from './renderApp';
 
-/**
- * Shared harness for the `*.leak.test.tsx` files: mounts a component under
- * StrictMode with the app providers (French) and a spied sound engine,
- * then checks nothing outlives the unmount (timers, window/document listeners).
- */
+/** Leak tests: mount under StrictMode (app providers, French, spied sound), then check nothing
+ *  outlives the unmount (timers, window/document listeners). */
 export function mountLeakChecked(ui: ReactElement) {
-  // react-dom registers a few permanent document listeners (e.g. selectionchange)
-  // on its first render in a document. Warm that up so the spies below only see
-  // what the component under test adds.
+  // Warm-up: react-dom's first render adds permanent document listeners (selectionchange).
   render(<span />).unmount();
   vi.useFakeTimers();
   const play = vi.spyOn(soundEngine, 'play');

@@ -1,26 +1,18 @@
 import type { FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, TeamArt, Chip, ProgressDots, modeIconSmall } from '@/shared/Chrome';
-import type { TQuestion } from '@/shared/questions';
-import type { TDispatch } from '../application/game';
-import { questionText, segmentLength, type TGameAt } from '../domain/machine';
+import type { TScreenProps } from '../application/game';
+import { questionText, segmentLength } from '../domain/machine';
 import { ActorBadge } from './ActorBadge';
 import '../dilemma.css';
 
-type TProps = {
-  game: TGameAt<'resolve'>;
-  question: TQuestion | undefined;
-  dispatch: TDispatch;
-};
-
 /** V-DilemmaResolve — couples self-confirm match/miss, one at a time. */
-export const DilemmaResolve: FC<TProps> = ({ game, question, dispatch }) => {
+export const DilemmaResolve: FC<TScreenProps<'resolve'>> = ({ game, question, dispatch }) => {
   const t = useT();
   const { ctx, step } = game;
   const active = ctx.roster[step.couple];
   const total = segmentLength(ctx);
   const confirmedTeams = ctx.roster.slice(0, step.couple);
-
   const handleMatch = () => dispatch({ type: 'verdict', v: 'exact' });
   const handleMiss = () => dispatch({ type: 'verdict', v: 'miss' });
 
@@ -30,7 +22,6 @@ export const DilemmaResolve: FC<TProps> = ({ game, question, dispatch }) => {
         <Chip icon={modeIconSmall('dilemma')}>{t('mode.dilemma.name')}</Chip>
         <ProgressDots total={total} current={step.q} />
       </div>
-
       {confirmedTeams.length > 0 && (
         <div className="cb-v-confirmed">
           <span className="cb-muted">{t('resolve.confirmed')}</span>
@@ -47,7 +38,6 @@ export const DilemmaResolve: FC<TProps> = ({ game, question, dispatch }) => {
           </div>
         </div>
       )}
-
       {active && (
         <PixelPanel className="cb-v-resolve-card">
           <div className="cb-v-hero">
@@ -67,7 +57,6 @@ export const DilemmaResolve: FC<TProps> = ({ game, question, dispatch }) => {
           </div>
         </PixelPanel>
       )}
-
       <p className="cb-muted cb-v-liar">{t('resolve.liarStrip')}</p>
     </div>
   );

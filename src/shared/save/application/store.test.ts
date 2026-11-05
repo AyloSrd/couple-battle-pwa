@@ -77,11 +77,6 @@ describe('save store — write, then publish', () => {
     expect(store.get().profile.settings).toEqual({ lang: 'es', sound: true, vibration: false });
     expect(write).toHaveBeenCalledTimes(1);
     expectSynced(store, api);
-    store.markGuidelineSeen('flash');
-    expectSynced(store, api);
-    store.markGuidelineSeen('flash');
-    expect(write).toHaveBeenCalledTimes(2);
-    expect(store.get().profile.guidelinesSeen).toEqual({ flash: true, dilemma: false, ultime: false });
   });
 
   it('reset seen ids empties them and saves', () => {

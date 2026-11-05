@@ -1,10 +1,7 @@
 import { FLASH_SET, segmentOf, type TGameCtx } from '@/shared/game';
 import type { TGameAt } from './machine';
 
-/**
- * Pure helpers for the UI beats (countdown length, scoreboard tally). Nothing here changes the
- * rules: they read the game the machine produced.
- */
+// Pure helpers for the UI beats (countdown length, scoreboard tally): they read, never rule.
 
 /** GF6: the full 3-2-1 opens a Dilemma block — a segment's first question, and the first one
  *  after the halfway board (play resumed after a break); the questions in between get 2-1. */
@@ -35,11 +32,8 @@ export function boardBlockLength(game: TGameAt<'scoreboard'>): number {
   }
 }
 
-/**
- * Each team's total at the previous board: today's scores minus the last `entries` history
- * entries. `null` when the history cannot tell (a game resumed from a snapshot older than the
- * history): it must add up to the scores, team by team.
- */
+/** Each team's total at the previous board (scores minus the last `entries` entries); `null`
+ *  when the history does not add up to the scores (a resumed older snapshot). */
 export function previousScores(ctx: Pick<TGameCtx, 'roster' | 'scores' | 'history'>, entries: number): Record<string, number> | null {
   const { roster, scores, history } = ctx;
   if (entries > history.length) return null;
@@ -54,7 +48,7 @@ export function previousScores(ctx: Pick<TGameCtx, 'roster' | 'scores' | 'histor
   return previous;
 }
 
-/** Shown value of a count-up `from` → `to` after `k` steps of one point. */
+/** A count-up `from` → `to` after `k` one-point steps. */
 export function countedValue(from: number, to: number, k: number): number {
   return Math.min(to, from + k);
 }

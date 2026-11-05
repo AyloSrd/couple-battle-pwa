@@ -1,2 +1,2 @@
-export { useInstallPrompt, type TInstallPlatform } from './installPrompt';
+export { useInstallPrompt } from './installPrompt';
 export { readIosHintSeen, markIosHintSeen } from './iosHint';

@@ -15,6 +15,9 @@ const ERROR_KEY = {
   duplicate: 'setup.names.duplicate',
 } as const satisfies Record<Exclude<TSetupError, null>, TStringKey>;
 
+/** Both name fields: the roster's cap, no autocorrect on names. */
+const NAME_FIELD = { maxLength: NAME_MAX, autoComplete: 'off', autoCorrect: 'off', spellCheck: false } as const;
+
 /** Step B — NAMES. Chosen team small on top, two fields (autofocus first;
  *  Enter jumps to the second; Enter again submits). */
 export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
@@ -44,9 +47,7 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
 
       <PixelPanel className="cb-stack cb-v-setup__form">
         <div className="cb-v-setup__player">
-          {state.avatar && (
-            <PlayerAvatar teamId={state.avatar} slot={1} name={state.name1} teamLabel={teamName} />
-          )}
+          {state.avatar && <PlayerAvatar teamId={state.avatar} slot={1} name={state.name1} teamLabel={teamName} />}
           <Field
             placeholder={t('setup.names.p1')}
             value={state.name1}
@@ -54,16 +55,11 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
             onKeyDown={handleKey1}
             aria-invalid={state.error === 'required' && !cleanName(state.name1) ? true : undefined}
             autoFocus
-            maxLength={NAME_MAX}
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
+            {...NAME_FIELD}
           />
         </div>
         <div className="cb-v-setup__player">
-          {state.avatar && (
-            <PlayerAvatar teamId={state.avatar} slot={2} name={state.name2} teamLabel={teamName} />
-          )}
+          {state.avatar && <PlayerAvatar teamId={state.avatar} slot={2} name={state.name2} teamLabel={teamName} />}
           <Field
             ref={secondRef}
             placeholder={t('setup.names.p2')}
@@ -71,10 +67,7 @@ export const NameEntry: FC<TProps> = ({ state, onChangeName, onConfirm }) => {
             onChange={handleName2}
             onKeyDown={handleKey2}
             aria-invalid={state.error !== null ? true : undefined}
-            maxLength={NAME_MAX}
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
+            {...NAME_FIELD}
           />
         </div>
         {state.error && <p className="cb-field-error">{t(ERROR_KEY[state.error])}</p>}

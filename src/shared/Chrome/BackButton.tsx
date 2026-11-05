@@ -1,5 +1,6 @@
-import type { ButtonHTMLAttributes, FC, MouseEvent } from 'react';
-import { useSound, type TSoundId } from '@/shared/sound';
+import type { ButtonHTMLAttributes, FC } from 'react';
+import type { TSoundId } from '@/shared/sound';
+import { cx, useSfxClick } from './kit';
 import './chrome.css';
 
 type TBackButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
@@ -11,16 +12,10 @@ type TBackButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'
 
 /** Top-bar back control: gold round arrow + label. */
 export const BackButton: FC<TBackButtonProps> = ({ label, className, type = 'button', sfx = 'sfx.back', onClick, ...rest }) => {
-  const sound = useSound();
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    if (sfx) sound.play(sfx);
-    onClick?.(event);
-  };
+  const handleClick = useSfxClick(sfx, onClick);
   return (
-    <button type={type} className={['cb-back', className ?? ''].filter(Boolean).join(' ')} onClick={handleClick} {...rest}>
-      <span className="cb-back-icon" aria-hidden="true">
-        ←
-      </span>
+    <button type={type} className={cx('cb-back', className)} onClick={handleClick} {...rest}>
+      <span className="cb-back-icon" aria-hidden="true">←</span>
       {label}
     </button>
   );

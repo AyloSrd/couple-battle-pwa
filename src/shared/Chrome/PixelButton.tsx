@@ -1,5 +1,6 @@
-import type { ButtonHTMLAttributes, FC, MouseEvent } from 'react';
-import { useSound, type TSoundId } from '@/shared/sound';
+import type { ButtonHTMLAttributes, FC } from 'react';
+import type { TSoundId } from '@/shared/sound';
+import { cx, useSfxClick } from './kit';
 import './chrome.css';
 
 /**
@@ -20,15 +21,6 @@ type TPixelButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   sfx?: TSoundId | null;
 };
 
-const VARIANT_CLASS: Record<TPixelButtonVariant, string> = {
-  primary: '',
-  secondary: 'cb-btn--secondary',
-  ghost: 'cb-btn--ghost',
-  win: 'cb-btn--win',
-  positive: 'cb-btn--positive',
-  negative: 'cb-btn--negative',
-};
-
 export const PixelButton: FC<TPixelButtonProps> = ({
   variant = 'primary',
   block = true,
@@ -40,17 +32,9 @@ export const PixelButton: FC<TPixelButtonProps> = ({
   onClick,
   ...rest
 }) => {
-  const sound = useSound();
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    if (sfx) sound.play(sfx);
-    onClick?.(event);
-  };
-  const classes = ['cb-btn', VARIANT_CLASS[variant], block ? '' : 'cb-btn--inline', size === 'lg' ? 'cb-btn--lg' : '', className ?? '']
-    .filter(Boolean)
-    .join(' ');
+  const handleClick = useSfxClick(sfx, onClick);
+  const classes = cx('cb-btn', variant !== 'primary' && `cb-btn--${variant}`, !block && 'cb-btn--inline', size === 'lg' && 'cb-btn--lg', className);
   return (
-    <button type={type} className={classes} onClick={handleClick} {...rest}>
-      {children}
-    </button>
+    <button type={type} className={classes} onClick={handleClick} {...rest}>{children}</button>
   );
 };

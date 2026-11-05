@@ -7,11 +7,8 @@ const handleHome = () => {
   window.location.reload();
 };
 
-/**
- * The root route's error screen. It renders outside the app providers, so it uses none: copy
- * from the strings files by browser language, plain buttons. Saved data is untouched; Retry
- * reloads (the save store reloads exactly what was last written).
- */
+/** The root route's error screen: outside the app providers, so it uses none. Saved data is
+ *  untouched; Retry reloads (the store reloads exactly what was last written). */
 export const CrashScreen: FC = () => {
   const copy = crashCopy();
   return (

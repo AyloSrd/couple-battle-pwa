@@ -64,10 +64,8 @@ const SaveNotices: FC = () => {
   return null;
 };
 
-/**
- * App-wide UI around every route: sound and haptics follow `settings.sound` / `settings.vibration`; dirty saves are re-sent when
- * the page is hidden (the OS may kill it next); the save notices.
- */
+/** Around every route: sound and haptics follow the settings; dirty saves are re-sent when the page
+ *  is hidden (the OS may kill it next); the save notices. */
 export const Shell: FC<PropsWithChildren> = ({ children }) => {
   const store = useSaveStore();
   const { sound, vibration } = useSave(selectSettings);
@@ -83,12 +81,11 @@ export const Shell: FC<PropsWithChildren> = ({ children }) => {
     const onHidden = () => {
       if (document.visibilityState === 'hidden') store.retry();
     };
-    const onPageHide = () => store.retry();
     document.addEventListener('visibilitychange', onHidden);
-    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pagehide', store.retry);
     return () => {
       document.removeEventListener('visibilitychange', onHidden);
-      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('pagehide', store.retry);
     };
   }, [store]);
 

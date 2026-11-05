@@ -1,4 +1,4 @@
-import type { TGame, TMode } from '@/shared/game';
+import type { TGame } from '@/shared/game';
 import type { TLoaded, TLoadedGame, TSaveApi } from '../api';
 import { decode, sameData } from '../domain/codec';
 import { mergeFinish, recoveryOf } from '../domain/services';
@@ -20,10 +20,9 @@ export type TSaveStore = ReturnType<typeof createSaveStore>;
 const KEY_ORDER: readonly TSaveKey[] = ['profile', 'game'];
 
 /**
- * The single owner of persisted data (ARCHITECTURE "Data safety"). Every action computes the
- * next state, writes storage synchronously, THEN publishes: what the player sees is what a
- * relaunch reloads. A failed write marks its key dirty (status `failing`, memory goes on) and is
- * retried on the next action, when the page is hidden, or from the banner's Retry.
+ * The single owner of persisted data (ARCHITECTURE "Data safety"). Every action writes storage
+ * synchronously, THEN publishes: what the player sees is what a relaunch reloads. A failed write
+ * marks its key dirty (`failing`, memory goes on), retried on the next action, page hide, Retry.
  */
 export function createSaveStore(api: TSaveApi, loaded: TLoaded) {
   let state: TSaveState = {
@@ -131,10 +130,6 @@ export function createSaveStore(api: TSaveApi, loaded: TLoaded) {
       if (sameData(settings, state.profile.settings)) return;
       setProfile({ ...state.profile, settings });
     },
-    markGuidelineSeen(mode: TMode) {
-      if (state.profile.guidelinesSeen[mode]) return;
-      setProfile({ ...state.profile, guidelinesSeen: { ...state.profile.guidelinesSeen, [mode]: true } });
-    },
     resetSeenIds() {
       setProfile({ ...state.profile, seenIds: [] });
     },
@@ -151,26 +146,18 @@ export function createSaveStore(api: TSaveApi, loaded: TLoaded) {
       const loadedGame = pending;
       pending = null;
       if (loadedGame === null) return;
-      if (loadedGame === 'invalid') {
-        commit({ issues: [...state.issues, 'gameDiscarded'] }, 'game');
-        return;
-      }
+      const discarded = { issues: [...state.issues, 'gameDiscarded' as const] };
+      if (loadedGame === 'invalid') return commit(discarded, 'game');
       const { game, savedAt } = loadedGame;
-      switch (recoveryOf(game, savedAt, { now, hasQuestion })) {
-        case 'finish':
-          // replay the merge; nothing to show (that game's Final screen is gone with the crash)
-          commit({ profile: mergeFinish(state.profile, game).profile }, 'profile', 'game');
-          return;
-        case 'stale':
-          commit({}, 'game');
-          return;
-        case 'discard':
-          commit({ issues: [...state.issues, 'gameDiscarded'] }, 'game');
-          return;
-        case 'resume':
-          state = { ...state, game }; // already in storage as-is: nothing to write
-          publish({});
-          return;
+      const verdict = recoveryOf(game, savedAt, { now, hasQuestion });
+      if (verdict === 'resume') {
+        state = { ...state, game }; // already in storage as-is: nothing to write
+        publish({});
+      } else if (verdict === 'finish') {
+        // replay the merge; nothing to show (that game's Final screen is gone with the crash)
+        commit({ profile: mergeFinish(state.profile, game).profile }, 'profile', 'game');
+      } else {
+        commit(verdict === 'discard' ? discarded : {}, 'game'); // stale: removed quietly
       }
     },
 

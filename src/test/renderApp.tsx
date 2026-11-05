@@ -17,10 +17,7 @@ type TTestAppOptions = {
   draft?: Partial<TDraft>;
 };
 
-/**
- * The app as `boot()` builds it, over memory storage and a fixture bank: a real save store
- * (so tests can `expectSynced`), a draft, the questions port.
- */
+/** The app as `boot()` builds it, over memory storage and a fixture bank (a real save store). */
 export function createTestApp({ seed = {}, lang = 'en', questions = [], draft = {} }: TTestAppOptions = {}) {
   const profile = { ...seed.profile, settings: { lang, sound: true, vibration: true, ...seed.profile?.settings } };
   const { api, store, storage } = bootTestSave({ ...seed, profile });
@@ -34,9 +31,7 @@ export type TTestApp = ReturnType<typeof createTestApp>;
 
 /** The app's provider stack around `children` (no router). */
 export const TestProviders: FC<{ app: TTestApp; children: ReactNode }> = ({ app, children }) => (
-  <AppProviders container={app.container} store={app.store} draft={app.draft}>
-    {children}
-  </AppProviders>
+  <AppProviders {...app}>{children}</AppProviders>
 );
 
 /** Render a screen inside the app providers; StrictMode on request (leak tests). */

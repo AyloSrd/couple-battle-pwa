@@ -4,12 +4,10 @@ import type { TQuestionType } from '@/shared/questions/domain/types';
 import { deckSizeFor } from '@/shared/questions/domain/services';
 
 /**
- * Golden traces: the pre-refactor machine (17 states, 10 events) was played with a scripted
- * policy and every screen it showed was recorded in `goldenTraces.json`. The new reducer must
- * reproduce those lines exactly from the same policy. This module holds what both drivers
- * share: the cases, the policy and the line format. Legacy names were mapped to the new ones
- * when recording (question → ask, sideAnswerers/sideGuessers → gate, secretInput → secret,
- * rapidQuestion → rapidAsk); countdown / rapidCountdown were UI beats and are not recorded.
+ * Golden traces: the pre-refactor machine played this scripted policy and every screen was
+ * recorded in `goldenTraces.json`; the new reducer must reproduce the lines exactly. Legacy names
+ * were mapped when recording (question → ask, side* → gate, secretInput → secret, rapidQuestion →
+ * rapidAsk); the countdowns were UI beats and are not recorded.
  */
 
 export type TGoldenCase = { name: string; mode: TMode; couples: number; deck: TDeckCard[] };
@@ -106,23 +104,11 @@ export function policy(step: TNormStep, n: number): TAction {
 }
 
 function actionText(a: TAction): string {
-  switch (a.type) {
-    case 'next':
-      return 'next';
-    case 'answer':
-      return `answer:${a.value}`;
-    case 'guess':
-      return `guess:${a.value}`;
-    case 'verdict':
-      return `verdict:${a.v}`;
-  }
+  if (a.type === 'next') return 'next';
+  return a.type === 'verdict' ? `verdict:${a.v}` : `${a.type}:${a.value}`;
 }
 
-const entries = (r: Record<string, string | number>) =>
-  Object.keys(r)
-    .sort()
-    .map((k) => `${k}=${r[k]}`)
-    .join(',');
+const entries = (r: Record<string, string | number>) => Object.keys(r).sort().map((k) => `${k}=${r[k]}`).join(',');
 
 /** One recorded screen, as a single comparable line. `added` = history appended since the last screen. */
 export function traceLine(step: TNormStep, added: readonly THistoryEntry[], action: TAction | undefined): string {

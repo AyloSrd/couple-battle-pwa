@@ -1,5 +1,6 @@
-import type { ComponentProps, FC, MouseEvent, ReactNode } from 'react';
-import { useSound, type TSoundId } from '@/shared/sound';
+import type { ComponentProps, FC, ReactNode } from 'react';
+import type { TSoundId } from '@/shared/sound';
+import { cx, useSfxClick } from './kit';
 import './chrome.css';
 
 type TChipProps = {
@@ -11,7 +12,7 @@ type TChipProps = {
 
 /** Overline chip: uppercase Inter, pink on pink-tint paper, on every background. */
 export const Chip: FC<TChipProps> = ({ children, icon, className }) => (
-  <span className={['cb-chip', className ?? ''].filter(Boolean).join(' ')}>
+  <span className={cx('cb-chip', className)}>
     {icon && <img src={icon} alt="" />}
     {children}
   </span>
@@ -24,14 +25,8 @@ type TChipButtonProps = ComponentProps<'button'> & {
 
 /** Tappable chip (language toggle etc.) — same look, ≥ 48px hit area via padding. */
 export const ChipButton: FC<TChipButtonProps> = ({ className, children, sfx = 'sfx.tap', onClick, ...rest }) => {
-  const sound = useSound();
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    if (sfx) sound.play(sfx);
-    onClick?.(event);
-  };
+  const handleClick = useSfxClick(sfx, onClick);
   return (
-    <button type="button" className={['cb-chip', className ?? ''].filter(Boolean).join(' ')} onClick={handleClick} {...rest}>
-      {children}
-    </button>
+    <button type="button" className={cx('cb-chip', className)} onClick={handleClick} {...rest}>{children}</button>
   );
 };

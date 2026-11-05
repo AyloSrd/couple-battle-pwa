@@ -51,13 +51,9 @@ export const HomeView: FC = () => {
     store.leaveGame();
     navigate({ to: '/setup' });
   };
-  const handleHowto = () => {
+  const makeOpen = (to: '/how-to-play' | '/settings') => () => {
     sound.play('sfx.tap');
-    navigate({ to: '/how-to-play' });
-  };
-  const handleSettings = () => {
-    sound.play('sfx.tap');
-    navigate({ to: '/settings' });
+    navigate({ to });
   };
   const handleResume = () => navigate({ to: '/play' });
   // S13: throwing a saved game away asks first.
@@ -99,12 +95,8 @@ export const HomeView: FC = () => {
         <PixelPanel className="cb-stack cb-v-home-panel">
           <strong className="cb-h2">{t('common.resume.title')}</strong>
           <p>{t('common.resume.body')}</p>
-          <PixelButton sfx="sfx.select" onClick={handleResume}>
-            {t('common.resume.yes')}
-          </PixelButton>
-          <PixelButton variant="ghost" onClick={handleAskDiscard}>
-            {t('common.resume.no')}
-          </PixelButton>
+          <PixelButton sfx="sfx.select" onClick={handleResume}>{t('common.resume.yes')}</PixelButton>
+          <PixelButton variant="ghost" onClick={handleAskDiscard}>{t('common.resume.no')}</PixelButton>
         </PixelPanel>
       )}
 
@@ -113,31 +105,23 @@ export const HomeView: FC = () => {
       </PixelButton>
 
       <div className="cb-v-home-links">
-        <button type="button" className="cb-v-home-howto" onClick={handleHowto}>
-          <span className="cb-v-home-round" aria-hidden="true">
-            ?
-          </span>
+        <button type="button" className="cb-v-home-howto" onClick={makeOpen('/how-to-play')}>
+          <span className="cb-v-home-round" aria-hidden="true">?</span>
           <span className="cb-v-home-howto-label">{t('home.howto')}</span>
         </button>
         <span className="cb-v-home-divider" aria-hidden="true" />
-        <button type="button" className="cb-v-home-round" aria-label={t('home.settings')} onClick={handleSettings}>
+        <button type="button" className="cb-v-home-round" aria-label={t('home.settings')} onClick={makeOpen('/settings')}>
           <GearIcon />
         </button>
       </div>
 
-      {showAndroidInstall && (
+      {(showAndroidInstall || showIosInstall) && (
         <PixelPanel className="cb-stack cb-v-home-panel">
-          <PixelButton variant="secondary" onClick={handleInstall}>
-            {t('home.install.android')}
-          </PixelButton>
-          <PixelButton variant="ghost" sfx="sfx.back" onClick={handleDismissInstall}>
-            {t('home.install.dismiss')}
-          </PixelButton>
-        </PixelPanel>
-      )}
-      {showIosInstall && (
-        <PixelPanel className="cb-stack cb-v-home-panel">
-          <p className="cb-muted">{t('home.install.ios')}</p>
+          {showAndroidInstall ? (
+            <PixelButton variant="secondary" onClick={handleInstall}>{t('home.install.android')}</PixelButton>
+          ) : (
+            <p className="cb-muted">{t('home.install.ios')}</p>
+          )}
           <PixelButton variant="ghost" sfx="sfx.back" onClick={handleDismissInstall}>
             {t('home.install.dismiss')}
           </PixelButton>
@@ -151,9 +135,7 @@ export const HomeView: FC = () => {
             <PixelButton variant="secondary" sfx="sfx.back" onClick={handleCancelDiscard}>
               {t('common.cancel')}
             </PixelButton>
-            <PixelButton variant="negative" sfx="sfx.back" onClick={handleDiscard}>
-              {t('home.discard.yes')}
-            </PixelButton>
+            <PixelButton variant="negative" sfx="sfx.back" onClick={handleDiscard}>{t('home.discard.yes')}</PixelButton>
           </div>
         </Sheet>
       )}

@@ -17,12 +17,8 @@ type TSplashGateProps = PropsWithChildren<{
   lang: TLang;
 }>;
 
-/**
- * Plays the Ninou splash ahead of the router on a genuine cold start (new tab / installed
- * icon). Gated to once per browser session, so a reload or the auto-update reload
- * mid-game goes straight back to the current route instead of replaying the clip.
- * The app (children) mounts only when the splash is done — it never blocks on it.
- */
+/** The Ninou splash ahead of the router, once per browser session: a reload (or the auto-update
+ *  reload mid-game) goes straight back to the route. Children mount when it ends; it never blocks. */
 export const SplashGate: FC<TSplashGateProps> = ({ lang, children }) => {
   const [done, setDone] = useState(readSplashSeen);
 

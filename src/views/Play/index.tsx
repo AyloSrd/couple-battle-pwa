@@ -26,10 +26,8 @@ import { ScorePop } from './components/ScorePop';
 
 type TStepScreenProps = {
   game: TGame;
-  /** The card's text in the active language (undefined: no card, or past a short deck). */
   question: TQuestion | undefined;
   dispatch: TDispatch;
-  /** READY (Dilemma, rapid-fire question): start the countdown beat. */
   onReady: () => void;
   onRematch: () => void;
   onNewGame: () => void;
@@ -40,7 +38,6 @@ type TStepScreenProps = {
 const StepScreen: FC<TStepScreenProps> = ({ game, question, dispatch, onReady, onRematch, onNewGame, solo }) => {
   // A key per slot (or gate) remounts the screen: fresh input, and its mount cue plays again.
   const slot = 'q' in game.step && 'couple' in game.step ? `${game.ctx.seg}-${game.step.q}-${game.step.couple}` : '';
-
   if (isAt(game, 'ask')) return <DilemmaQuestion game={game} question={question} onReady={onReady} />;
   if (isAt(game, 'resolve')) return <DilemmaResolve game={game} question={question} dispatch={dispatch} />;
   if (isAt(game, 'gate', 'handoff')) {
@@ -58,7 +55,7 @@ const StepScreen: FC<TStepScreenProps> = ({ game, question, dispatch, onReady, o
   return null;
 };
 
-/** `/play`: step → screen, plus what spans screens — pause, background, countdown beat, score pop, music. */
+/** `/play`: step → screen, plus what spans screens (pause, background, countdown, pop, music). */
 export const PlayView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
@@ -68,17 +65,12 @@ export const PlayView: FC = () => {
   const { lang } = useLang();
   const questionsApi = useQuestionsApi();
   const { game, dispatch, soloResult, scorePop } = useGame();
-
   // The deck holds ids only: the text comes from the active language's bank.
   const bank = useMemo(() => new Map(questionsApi.list({ lang }).map((q) => [q.id, q])), [questionsApi, lang]);
-
   const [paused, setPaused] = useState(false);
-  // The READY countdown is a UI beat, not a step: it runs while the game is still at the
-  // `seq` it started on (any transition ends it), then dispatches `next`.
+  // The READY countdown is a UI beat, not a step: it runs while the game stays at its `seq`.
   const [countdownSeq, setCountdownSeq] = useState<number | null>(null);
-
   useKeepAwake();
-
   // Tense loop during the rapid-fire finale; silent otherwise.
   const kind = game?.step.kind;
   useEffect(() => {
@@ -86,7 +78,6 @@ export const PlayView: FC = () => {
     else sound.music(null);
     return () => sound.music(null);
   }, [kind, sound]);
-
   const handleReady = () => {
     if (game) setCountdownSeq(game.ctx.seq);
   };
@@ -94,29 +85,24 @@ export const PlayView: FC = () => {
     setCountdownSeq(null);
     dispatch({ type: 'next' });
   };
-
-  const handlePause = () => {
-    sound.duck(true);
-    setPaused(true);
+  const setPause = (on: boolean) => {
+    sound.duck(on);
+    setPaused(on);
   };
-  const handleResume = () => {
-    sound.duck(false);
-    setPaused(false);
-  };
+  const handlePause = () => setPause(true);
+  const handleResume = () => setPause(false);
   const handleRestart = () => {
     if (!game) return;
     const { roster, mode, difficulty, themes, deck } = game.ctx;
     store.startGame(newGame({ roster, mode, difficulty, themes, deck })); // same deck
     setCountdownSeq(null);
-    sound.duck(false);
-    setPaused(false);
+    setPause(false);
   };
   const handleQuit = () => {
     sound.duck(false);
     store.quitGame();
     navigate({ to: '/' });
   };
-
   const handleRematch = () => {
     if (!game) return;
     // From the game itself, so Rematch also works after a cold-start resume.
@@ -131,21 +117,16 @@ export const PlayView: FC = () => {
   };
 
   if (!game) return null;
-
-  // The countdown owns the whole sunburst screen: "POINTEZ !" for Dilemma (3-2-1 to open a
-  // block, then 2-1); 2-1 → "RÉPONDEZ !" for the rapid-fire (nobody points there).
+  // The countdown owns the whole screen; the rapid-fire one says "answer" (nobody points there).
   if (countdownSeq === game.ctx.seq && isAt(game, 'ask')) {
     return <Countdown ticks={countdownTicks(game)} onDone={handleCountdownDone} />;
   }
   if (countdownSeq === game.ctx.seq && isAt(game, 'rapidAsk')) {
     return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
   }
-
   const { step } = game;
   const showPause = step.kind !== 'final';
-  // Sunburst (burst) background ONLY for the theatrical beats: the rapid-fire
-  // finale, the between-rounds scoreboard and the final results. Countdowns
-  // render their own burst screen above. Everything else is calm Paper.
+  // The sunburst only for the theatrical beats (the countdown draws its own); the rest is calm.
   const burst = RAPID_KINDS.has(step.kind) || step.kind === 'scoreboard' || step.kind === 'final';
   const card = cardOf(game);
   const popTeam = scorePop ? game.ctx.roster.find((team) => team.teamId === scorePop.entry.teamId) : undefined;
@@ -159,7 +140,6 @@ export const PlayView: FC = () => {
           </PixelButton>
         </div>
       )}
-
       <StepScreen
         game={game}
         question={card ? bank.get(card.id) : undefined}
@@ -169,9 +149,7 @@ export const PlayView: FC = () => {
         onNewGame={handleNewGame}
         solo={soloResult}
       />
-
       {scorePop && popTeam && <ScorePop key={scorePop.id} team={popTeam} points={scorePop.entry.points} />}
-
       {paused && <PauseSheet onResume={handleResume} onRestart={handleRestart} onQuit={handleQuit} />}
     </Screen>
   );

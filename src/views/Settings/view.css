@@ -1,6 +1,4 @@
-/* V-Settings — one cream card per row, big switches, list rows with chevrons. Every rule is
-   scoped under `.cb-v-settings`; tokens only (rgba shadows aside). Text colours follow the scoped
-   tokens: white on the stage, eggplant inside cards. */
+/* V-Settings — one cream card per row, big switches, list rows with chevrons. */
 
 .cb-v-settings.cb-page {
   gap: var(--cb-s3);
@@ -28,10 +26,6 @@
   gap: 2px;
   min-width: 0;
 }
-.cb-v-settings .cb-v-row .cb-label {
-  font-size: 22px;
-  line-height: 26px;
-}
 .cb-v-settings .cb-v-row-ctl {
   display: flex;
   gap: var(--cb-s2);
@@ -56,10 +50,6 @@
 }
 .cb-v-settings .cb-v-switch[aria-checked='true'] {
   background: var(--cb-positive-grad);
-}
-.cb-v-settings .cb-v-switch:disabled {
-  background: var(--cb-disabled);
-  cursor: default;
 }
 .cb-v-settings .cb-v-switch-thumb {
   position: absolute;
@@ -92,17 +82,11 @@
   padding: var(--cb-s3) var(--cb-s5);
   box-shadow: var(--cb-e1);
 }
-.cb-v-settings .cb-v-nav .cb-label {
+.cb-v-settings .cb-label {
   font-size: 22px;
+  line-height: 26px;
 }
 .cb-v-settings .cb-v-chevron {
   flex: none;
   color: var(--cb-violet-600);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cb-v-settings .cb-v-switch,
-  .cb-v-settings .cb-v-switch-thumb {
-    transition: none;
-  }
 }

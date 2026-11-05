@@ -9,11 +9,8 @@ export const STORAGE_KEYS = { profile: 'cb.profile', game: 'cb.game' } as const 
 /** The first profile that failed to decode, kept as-is and never overwritten (S2). */
 export const PROFILE_BAD_KEY = 'cb.profile.bad';
 
-/**
- * Save port over Web Storage (`localStorage`: synchronous, ≈ 5 MB, the values are a few KB).
- * `storage` is a getter so a browser that forbids storage access throws inside `load()` (boot
- * then falls back to memory), never while the container is built.
- */
+/** Save port over `localStorage` (synchronous; values of a few KB). `storage` is a getter: a browser
+ *  forbidding storage throws inside `load()` (boot falls back to memory), never at build time. */
 export function createSaveLocalStorageApi(storage: () => TStringStorage = () => window.localStorage): TSaveApi {
   return {
     load(): TLoaded {
@@ -38,13 +35,7 @@ export function createSaveLocalStorageApi(storage: () => TStringStorage = () => 
       if (game.kind === 'newer') persistent = false;
       const loadedGame: TLoadedGame =
         game.kind === 'ok' ? { game: game.data, savedAt: game.savedAt } : game.kind === 'invalid' ? 'invalid' : null;
-
-      return {
-        profile: profile.kind === 'ok' ? profile.data : defaultProfile(),
-        game: loadedGame,
-        issues,
-        persistent,
-      };
+      return { profile: profile.kind === 'ok' ? profile.data : defaultProfile(), game: loadedGame, issues, persistent };
     },
     write(key, value) {
       storage().setItem(STORAGE_KEYS[key], encode(key, value, Date.now()));

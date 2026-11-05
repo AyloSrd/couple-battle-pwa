@@ -3,24 +3,11 @@ import { useNavigate } from '@tanstack/react-router';
 import { useT, useLang, type TStringKey } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import { useDraft } from '@/shared/session';
-import {
-  GameDifficulty,
-  THEME_IDS,
-  newGame,
-  type TGameDifficulty,
-  type TThemeId,
-} from '@/shared/game';
+import { GameDifficulty, THEME_IDS, newGame, type TGameDifficulty, type TThemeId } from '@/shared/game';
 import { useQuestionsApi, drawDeck, deckSizeFor } from '@/shared/questions';
 import { selectProfile, useSave, useSaveStore } from '@/shared/save';
 import { Screen, PixelPanel, PixelButton, ProgressDots, Sheet, TopBar } from '@/shared/Chrome';
 import './view.css';
-
-const DIFFS = [
-  { id: GameDifficulty.Mix, nameKey: 'diff.mix.name', descKey: 'diff.mix.desc' },
-  { id: GameDifficulty.Easy, nameKey: 'diff.easy.name', descKey: 'diff.easy.desc' },
-  { id: GameDifficulty.Medium, nameKey: 'diff.medium.name', descKey: 'diff.medium.desc' },
-  { id: GameDifficulty.Hard, nameKey: 'diff.hard.name', descKey: 'diff.hard.desc' },
-] as const satisfies readonly { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey }[];
 
 // Emojis live here (by id), not in the question data or the strings.
 const DIFF_EMOJI: Record<TGameDifficulty, string> = {
@@ -29,6 +16,7 @@ const DIFF_EMOJI: Record<TGameDifficulty, string> = {
   [GameDifficulty.Medium]: '⚡',
   [GameDifficulty.Hard]: '🔥',
 };
+const DIFFS = Object.values(GameDifficulty);
 
 const THEME_EMOJI: Record<TThemeId, string> = {
   homeDaily: '🏠',
@@ -45,20 +33,8 @@ const THEME_EMOJI: Record<TThemeId, string> = {
   random: '🎲',
 };
 
-const THEME_KEY = {
-  homeDaily: 'theme.homeDaily',
-  foodDrinks: 'theme.foodDrinks',
-  travel: 'theme.travel',
-  workAmbition: 'theme.workAmbition',
-  hobbies: 'theme.hobbies',
-  goingOut: 'theme.goingOut',
-  money: 'theme.money',
-  childhood: 'theme.childhood',
-  personality: 'theme.personality',
-  dreams: 'theme.dreams',
-  loveIntimacy: 'theme.loveIntimacy',
-  random: 'theme.random',
-} as const satisfies Record<TThemeId, TStringKey>;
+const diffKey = (id: TGameDifficulty, part: 'name' | 'desc'): TStringKey => `diff.${id}.${part}`;
+const themeKey = (id: TThemeId): TStringKey => `theme.${id}`;
 
 /** All themes on; Love & Intimacy off by default in a group (>1 couple). */
 function defaultThemes(coupleCount: number): TThemeId[] {
@@ -94,20 +70,13 @@ export const DifficultyView: FC = () => {
 
   const makeToggleTheme = (id: TThemeId) => () => {
     sound.play(themes.includes(id) ? 'sfx.toggle.off' : 'sfx.toggle.on');
-    setLocalThemes((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
+    setLocalThemes((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const startWith = (excludeIds: number[]) => {
     if (starting.current) return;
-    const deck = drawDeck(questionsApi.list({ lang }), {
-      mode,
-      difficulty,
-      themes,
-      seenIds: excludeIds,
-      size: deckSizeFor(mode, coupleCount),
-    });
+    const size = deckSizeFor(mode, coupleCount);
+    const deck = drawDeck(questionsApi.list({ lang }), { mode, difficulty, themes, seenIds: excludeIds, size });
     if (deck.length === 0) {
       setDeckEmpty(true);
       return;
@@ -136,39 +105,29 @@ export const DifficultyView: FC = () => {
       <h1 className="cb-title">{t('diff.title')}</h1>
 
       <div className="cb-diffs" role="radiogroup" aria-label={t('diff.title')}>
-        {DIFFS.map((d) => (
+        {DIFFS.map((id) => (
           <button
-            key={d.id}
+            key={id}
             type="button"
             className="cb-mode"
             role="radio"
-            aria-checked={difficulty === d.id}
-            aria-pressed={difficulty === d.id}
-            onClick={makePickDifficulty(d.id)}
+            aria-checked={difficulty === id}
+            aria-pressed={difficulty === id}
+            onClick={makePickDifficulty(id)}
           >
-            <span className="cb-emoji" aria-hidden="true">
-              {DIFF_EMOJI[d.id]}
-            </span>
+            <span className="cb-emoji" aria-hidden="true">{DIFF_EMOJI[id]}</span>
             <div>
-              <h3>{t(d.nameKey)}</h3>
-              <p>{t(d.descKey)}</p>
+              <h3>{t(diffKey(id, 'name'))}</h3>
+              <p>{t(diffKey(id, 'desc'))}</p>
             </div>
           </button>
         ))}
       </div>
 
-      <PixelButton
-        variant="ghost"
-        sfx={null}
-        className="cb-themes-toggle"
-        onClick={handleToggleThemes}
-        aria-expanded={themesOpen}
-      >
+      <PixelButton variant="ghost" sfx={null} className="cb-themes-toggle" onClick={handleToggleThemes} aria-expanded={themesOpen}>
         <span aria-hidden="true">🏷️</span>
         <span className="cb-themes-toggle-label">{t('themes.title')}</span>
-        <span className="cb-chevron" aria-hidden="true">
-          {themesOpen ? '▲' : '▼'}
-        </span>
+        <span className="cb-chevron" aria-hidden="true">{themesOpen ? '▲' : '▼'}</span>
       </PixelButton>
 
       {themesOpen && (
@@ -184,10 +143,8 @@ export const DifficultyView: FC = () => {
                 aria-pressed={themes.includes(id)}
                 onClick={makeToggleTheme(id)}
               >
-                <span className="cb-emoji" aria-hidden="true">
-                  {THEME_EMOJI[id]}
-                </span>
-                <span>{t(THEME_KEY[id])}</span>
+                <span className="cb-emoji" aria-hidden="true">{THEME_EMOJI[id]}</span>
+                <span>{t(themeKey(id))}</span>
               </PixelButton>
             ))}
           </div>
@@ -195,9 +152,7 @@ export const DifficultyView: FC = () => {
         </PixelPanel>
       )}
 
-      <PixelButton size="lg" sfx={null} onClick={handleStart}>
-        {t('common.start')}
-      </PixelButton>
+      <PixelButton size="lg" sfx={null} onClick={handleStart}>{t('common.start')}</PixelButton>
 
       {deckEmpty && (
         <Sheet label={t('error.deckEmpty')}>
@@ -206,9 +161,7 @@ export const DifficultyView: FC = () => {
             <PixelButton variant="secondary" sfx={null} onClick={handleCloseDeckEmpty}>
               {t('common.cancel')}
             </PixelButton>
-            <PixelButton sfx={null} onClick={handleReshuffle}>
-              {t('common.confirm')}
-            </PixelButton>
+            <PixelButton sfx={null} onClick={handleReshuffle}>{t('common.confirm')}</PixelButton>
           </div>
         </Sheet>
       )}

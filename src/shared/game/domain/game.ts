@@ -1,25 +1,11 @@
 import { z } from 'zod';
-import {
-  ZModeSchema,
-  ZGameDifficultySchema,
-  ZThemeIdSchema,
-  ZRosterSchema,
-  THEME_IDS,
-  type TMode,
-  type TRoster,
-  type TGameDifficulty,
-  type TThemeId,
-} from './types';
+import { ZModeSchema, ZGameDifficultySchema, ZThemeIdSchema, ZRosterSchema, THEME_IDS, type TMode } from './types';
 import { ZQuestionTypeSchema, type TQuestionType } from '@/shared/questions/domain/types';
 
-/**
- * The persisted shape of a running game: `{ ctx, step }`. It lives in shared/game (not in
- * views/Play) so the save store can Zod-validate a stored game; the transitions themselves
- * live in `views/Play/domain/machine.ts`.
- */
+/** The persisted shape of a running game, `{ ctx, step }`: here (not in views/Play) so the save
+ *  can Zod-validate it. The transitions live in `views/Play/domain/machine.ts`. */
 
 const ZTeamIdSchema = z.string().regex(/^t[1-4]$/);
-export type TTeamId = string;
 
 /** Upper bounds just above what a real game produces (Ultime, 4 couples = 4 + 5 + 4 × 5 = 29
  *  cards), so a tampered record is rejected without ever rejecting a real game. */
@@ -30,13 +16,8 @@ export const SECRET_MAX = 40;
 /** Max length of a player name (the Setup inputs' `maxLength`). */
 export const NAME_MAX = 16;
 
-// ---- History (moved here from save: the game owns it) ------------------------
-
-/**
- * One scored question, appended on every scoring decision (a zero-point outcome counts). `max`
- * is what the question could have been worth, so the final screen can chart how in sync a team
- * was. `round` is the Flash round (0 | 1); Dilemma and rapid-fire entries use 0.
- */
+/** One scoring decision (zero points included). `max` = what it could have been worth (the final
+ *  screen's sync chart); `round` = the Flash round, 0 elsewhere. */
 export const ZHistoryEntrySchema = z
   .object({
     teamId: ZTeamIdSchema,
@@ -48,8 +29,6 @@ export const ZHistoryEntrySchema = z
   .refine((e) => e.points <= e.max, { message: 'points exceed max' });
 export type THistoryEntry = z.infer<typeof ZHistoryEntrySchema>;
 export type TStage = THistoryEntry['stage'];
-
-// ---- Plan: the segments a mode plays, in order -------------------------------
 
 export type TSegment =
   | { kind: 'flash'; round: 0 | 1 }
@@ -63,10 +42,7 @@ const FLASH_1: TSegment = { kind: 'flash', round: 1 };
 const ULTIME_DILEMMA: TSegment = { kind: 'dilemma', from: 2 * FLASH_SET, count: 5, halfway: false };
 const ULTIME_RAPID: TSegment = { kind: 'rapid', from: 2 * FLASH_SET + 5, perCouple: 5 };
 
-/**
- * The segments of a game. A scoreboard follows every segment but the last, plus the Dilemma
- * halfway board (standalone Dilemma only).
- */
+/** The segments of a game. A scoreboard follows each but the last, plus standalone Dilemma's halfway. */
 export function planOf(mode: TMode, deckLength: number): TSegment[] {
   switch (mode) {
     case 'flash':
@@ -95,14 +71,12 @@ export function answerKey(teamId: string, questionId: number): string {
   return `${teamId}|${questionId}`;
 }
 
-// ---- Step + context -------------------------------------------------------------
-
 /** One drawn card: language-free (the text is looked up in the active bank), with its type so
  *  the reducer can tell open from closed questions. */
-export const ZDeckCardSchema = z.object({ id: z.number().int().positive(), type: ZQuestionTypeSchema });
-export type TDeckCard = { id: number; type: TQuestionType };
+const ZDeckCardSchema = z.object({ id: z.number().int().positive(), type: ZQuestionTypeSchema });
+export type TDeckCard = z.infer<typeof ZDeckCardSchema>;
 
-export const ZResultSchema = z.enum(['match', 'miss']);
+const ZResultSchema = z.enum(['match', 'miss']);
 export type TResult = z.infer<typeof ZResultSchema>;
 
 /** Canonical closed-answer tokens: yes_no → 'yes' | 'no'; who_of_two → 'p0' | 'p1' (player
@@ -144,31 +118,13 @@ export const ZStepSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('final') }),
 ]);
 
-type TSlot = { q: number; couple: number };
-type TSecrets = { secrets: Record<string, string> };
-/**
- * Where the game is. `q` is the question index INSIDE the current segment (rapid: per couple,
- * 0–4); `couple` indexes the roster. A countdown is a UI beat, not a step: resume lands on
- * `ask` / `rapidAsk` (READY again).
- */
-export type TStep =
-  | { kind: 'ask'; q: number }
-  | { kind: 'resolve'; q: number; couple: number; results: Record<TTeamId, TResult> }
-  | ({ kind: 'gate'; side: 'answerers' | 'guessers' } & TSecrets)
-  | ({ kind: 'handoff' } & TSlot & TSecrets)
-  | ({ kind: 'secret' } & TSlot & TSecrets)
-  | ({ kind: 'guess' } & TSlot & TSecrets)
-  | ({ kind: 'judge' } & TSlot & TSecrets)
-  | { kind: 'rapidIntro' }
-  | { kind: 'rapidTurn'; couple: number }
-  | ({ kind: 'rapidAsk' } & TSlot)
-  | ({ kind: 'rapidJudge' } & TSlot)
-  | { kind: 'scoreboard'; resumeQ?: number }
-  | { kind: 'final' };
+/** Where the game is. `q` indexes INSIDE the segment (rapid: per couple); `couple` the roster. A
+ *  countdown is a UI beat, not a step: resume lands on `ask` / `rapidAsk` (READY again). */
+export type TStep = z.infer<typeof ZStepSchema>;
 export type TStepKind = TStep['kind'];
 export type TStepOf<K extends TStepKind> = Extract<TStep, { kind: K }>;
 
-export const ZGameCtxSchema = z.object({
+const ZGameCtxSchema = z.object({
   roster: ZRosterSchema,
   mode: ZModeSchema,
   difficulty: ZGameDifficultySchema,
@@ -181,22 +137,10 @@ export const ZGameCtxSchema = z.object({
   /** +1 on every legal transition; events carry the seq the screen rendered (double-tap guard). */
   seq: z.number().int().nonnegative(),
 });
-export type TGameCtx = {
-  roster: TRoster;
-  mode: TMode;
-  difficulty: TGameDifficulty;
-  themes: TThemeId[];
-  deck: TDeckCard[];
-  scores: Record<TTeamId, number>;
-  history: THistoryEntry[];
-  seg: number;
-  seq: number;
-};
+export type TGameCtx = z.infer<typeof ZGameCtxSchema>;
 
 export const ZGameSchema = z.object({ ctx: ZGameCtxSchema, step: ZStepSchema });
-export type TGame = { ctx: TGameCtx; step: TStep };
-
-// ---- Start + consistency --------------------------------------------------------
+export type TGame = z.infer<typeof ZGameSchema>;
 
 /** The step a segment opens on. */
 export function firstStepOf(segment: TSegment): TStep {
@@ -210,33 +154,17 @@ export function firstStepOf(segment: TSegment): TStep {
   }
 }
 
-export type TNewGameConfig = {
-  roster: TRoster;
-  mode: TMode;
-  difficulty: TGameDifficulty;
-  themes: TThemeId[];
-  /** The drawn deck (`drawDeck`): any objects with `id` + `type`; only those two are kept. */
-  deck: readonly TDeckCard[];
-};
+/** `deck`: the drawn questions (`drawDeck`); only `id` + `type` are kept. */
+export type TNewGameConfig = Pick<TGameCtx, 'roster' | 'mode' | 'difficulty' | 'themes'> & { deck: readonly TDeckCard[] };
 
 /** A fresh game at its first step, every team at 0. */
 export function newGame(config: TNewGameConfig): TGame {
-  const scores: Record<TTeamId, number> = {};
-  for (const team of config.roster) scores[team.teamId] = 0;
+  const { roster, mode, difficulty, themes } = config;
+  const scores = Object.fromEntries(roster.map((team) => [team.teamId, 0]));
   const deck = config.deck.map(({ id, type }) => ({ id, type }));
-  const [first] = planOf(config.mode, deck.length);
+  const [first] = planOf(mode, deck.length);
   return {
-    ctx: {
-      roster: config.roster,
-      mode: config.mode,
-      difficulty: config.difficulty,
-      themes: config.themes,
-      deck,
-      scores,
-      history: [],
-      seg: 0,
-      seq: 0,
-    },
+    ctx: { roster, mode, difficulty, themes, deck, scores, history: [], seg: 0, seq: 0 },
     step: first ? firstStepOf(first) : { kind: 'final' },
   };
 }
@@ -253,12 +181,8 @@ const STEPS_BY_SEGMENT: Record<TSegment['kind'], readonly TStepKind[]> = {
   rapid: ['rapidIntro', 'rapidTurn', 'rapidAsk', 'rapidJudge'],
 };
 
-/**
- * Cross-field checks Zod alone cannot express: the segment exists, the step belongs to it,
- * indices fit the roster and the segment, scores are keyed by roster teams. A stored game that
- * fails this is discarded (never silently restarted). `hasQuestion` optionally checks every
- * deck id against the bank.
- */
+/** Cross-field checks Zod cannot express (segment, step, indices, team ids; deck ids against the
+ *  bank with `hasQuestion`). A stored game failing this is discarded, never silently restarted. */
 export function isGameConsistent(game: TGame, hasQuestion?: (id: number) => boolean): boolean {
   const { ctx, step } = game;
   const segment = segmentOf(ctx);

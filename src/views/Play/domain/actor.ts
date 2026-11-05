@@ -2,13 +2,8 @@ import type { TTeam } from '@/shared/game/domain/types';
 import { answererIndex, type TGame } from '@/shared/game/domain/game';
 import { flashRound } from './machine';
 
-/**
- * WHO ACTS on a screen — so it is never ambiguous whose turn it is.
- *  - `player` — one named person (an answerer, a guesser, whoever takes the phone);
- *    `playerIdx` indexes `team.players` (0 ↔ art p1, 1 ↔ art p2).
- *  - `couple` — the couple acts together (Dilemma self-confirm, rapid-fire).
- *  - `table`  — the whole table acts (points, judges, sides, scoreboards): no single face.
- */
+/** WHO ACTS on a screen, so whose turn it is is never ambiguous: one named `player`
+ *  (`playerIdx` into `team.players`), a `couple` together, or the whole `table` (no face). */
 export type TActor =
   | { kind: 'player'; team: TTeam; playerIdx: 0 | 1 }
   | { kind: 'couple'; team: TTeam }

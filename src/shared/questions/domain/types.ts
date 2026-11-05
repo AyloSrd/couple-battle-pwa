@@ -17,15 +17,8 @@ export const ZQuestionTypeSchema = z.enum(['open', 'this_or_that', 'yes_no', 'wh
 export const ZQuestionDifficultySchema = z.enum(['easy', 'medium', 'hard']);
 export type TQuestionDifficulty = z.infer<typeof ZQuestionDifficultySchema>;
 
-/**
- * Ids are language-independent (same id across fr/en). Each question carries two
- * addressee variants of the same prompt:
- *  - `you`  — addressed to the person answering about themselves
- *    ("C'est quoi ton petit-déj classique ?").
- *  - `name` — addressed to the table/partner, with a literal `{name}` slot filled
- *    from the roster ("C'est quoi le petit-déj de {name} ?"). For `who_of_two`,
- *    `you` and `name` are identical group phrasings and carry no placeholder.
- */
+/** Ids are language-independent. `you` addresses the answerer ("ton petit-déj ?"); `name` the table,
+ *  with a `{name}` slot ("le petit-déj de {name} ?"). `who_of_two`: both the same, no slot. */
 export const ZQuestionSchema = z.object({
   id: z.number().int().positive(),
   theme: ZThemeIdSchema,

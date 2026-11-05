@@ -1,18 +1,13 @@
 import { z } from 'zod';
-import { ZGameSchema, isGameConsistent, type TGame } from '@/shared/game/domain/game';
+import { ZGameSchema, isGameConsistent } from '@/shared/game/domain/game';
 import { ZProfileSchema, type TSaveKey, type TSaveValues } from './types';
 
-/**
- * The one codec between the save store and storage. Every stored value is an envelope
- * `{ v, savedAt, data }` serialised as JSON; `encode` and `decode` are exact inverses for every
- * value the store can hold (round-trip tested), so what a relaunch reads is what was shown.
- */
-
+/** The one codec between store and storage: JSON envelopes `{ v, savedAt, data }`. `encode` and
+ *  `decode` are exact inverses (round-trip tested): what a relaunch reads is what was shown. */
 /** Current version of each stored value. Bump it together with a `MIGRATIONS` entry. */
 export const SAVE_VERSION = { profile: 1, game: 1 } as const satisfies Record<TSaveKey, number>;
 
-type TMigration = (data: unknown) => unknown;
-export type TMigrations = Record<number, TMigration>;
+type TMigrations = Record<number, (data: unknown) => unknown>;
 
 /**
  * `MIGRATIONS[key][v]` upgrades data written at version `v` to `v + 1`. Empty today; every
@@ -23,7 +18,7 @@ export const MIGRATIONS: Record<TSaveKey, TMigrations> = { profile: {}, game: {}
 
 const SCHEMAS = {
   profile: ZProfileSchema,
-  game: ZGameSchema.refine((game) => isGameConsistent(game as TGame), { message: 'inconsistent game' }),
+  game: ZGameSchema.refine((game) => isGameConsistent(game), { message: 'inconsistent game' }),
 } as const satisfies Record<TSaveKey, z.ZodType>;
 
 const ZEnvelopeSchema = z.object({
@@ -32,14 +27,9 @@ const ZEnvelopeSchema = z.object({
   data: z.unknown(),
 });
 
-export type TDecoded<T> =
-  | { kind: 'ok'; data: T; savedAt: number }
-  /** nothing stored */
-  | { kind: 'missing' }
-  /** not JSON, not an envelope, no migration path, or data that fails its schema */
-  | { kind: 'invalid' }
-  /** written by a newer app (downgrade): never overwrite it */
-  | { kind: 'newer' };
+/** `invalid`: not JSON, not an envelope, no migration path, or failing its schema.
+ *  `newer`: written by a newer app (downgrade) — never overwrite it. */
+export type TDecoded<T> = { kind: 'ok'; data: T; savedAt: number } | { kind: 'missing' | 'invalid' | 'newer' };
 
 export function encode<K extends TSaveKey>(key: K, data: TSaveValues[K], savedAt: number): string {
   return JSON.stringify({ v: SAVE_VERSION[key], savedAt, data });

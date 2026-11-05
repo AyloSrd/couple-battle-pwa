@@ -6,9 +6,7 @@ import '../results.css';
 
 type TProps = {
   ranked: readonly TRankedTeam[];
-  /** Extra content at the end of a team's row (the Final screen's charts). */
   renderExtra?: (row: TRankedTeam) => ReactNode;
-  /** The leader's row lands with a bump (after a tally). */
   settle?: boolean;
 };
 

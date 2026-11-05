@@ -1,22 +1,15 @@
-/* Home — the keyart: lightning stage, logo, the four characters, a big gold PLAY, then
-   "? How to play | gear". Every rule is scoped under .cb-v-home so nothing leaks to other
-   screens. Tokens only (rgba shadows aside). Fits one page down to ~640px tall; the stack
-   (logo / characters) flexes, the controls keep their size. */
+/* Home — the keyart. Fits one page down to ~640px tall: logo + characters flex, controls don't. */
 
 /* ---------- stage: the lightning art, full-bleed over the violet fallback ---------- */
 .cb-v-home.cb-page {
-  background:
-    url('../../assets/art/bg-home-720.webp') center bottom / cover no-repeat,
-    var(--cb-bg-calm) var(--cb-bg);
+  background: url('../../assets/art/bg-home-720.webp') center bottom / cover no-repeat, var(--cb-bg-calm) var(--cb-bg);
   gap: var(--cb-s3);
   padding-top: calc(var(--cb-s5) + env(safe-area-inset-top));
   overflow-x: clip;
 }
 @media (min-width: 481px), (min-resolution: 1.5dppx) {
   .cb-v-home.cb-page {
-    background:
-      url('../../assets/art/bg-home-1024.webp') center bottom / cover no-repeat,
-      var(--cb-bg-calm) var(--cb-bg);
+    background: url('../../assets/art/bg-home-1024.webp') center bottom / cover no-repeat, var(--cb-bg-calm) var(--cb-bg);
   }
 }
 
@@ -68,9 +61,7 @@
     0 12px 20px rgba(20, 5, 74, 0.4);
 }
 .cb-v-home .cb-v-home-play:active:not(:disabled) {
-  box-shadow:
-    inset 0 4px 0 rgba(255, 255, 255, 0.55),
-    0 1px 0 var(--cb-outline);
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.55), 0 1px 0 var(--cb-outline);
 }
 
 /* ---------- "? How to play | gear" ---------- */
@@ -95,9 +86,7 @@
   background: rgba(20, 5, 74, 0.45);
   color: var(--cb-text);
   font: 800 28px / 1 var(--cb-font-display);
-  box-shadow:
-    0 3px 0 var(--cb-outline),
-    0 8px 14px rgba(20, 5, 74, 0.35);
+  box-shadow: 0 3px 0 var(--cb-outline), 0 8px 14px rgba(20, 5, 74, 0.35);
   cursor: pointer;
   transition: transform var(--cb-t-tap) var(--cb-ease-out);
 }

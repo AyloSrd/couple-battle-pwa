@@ -3,18 +3,9 @@ import type { TMode, TGameDifficulty, TThemeId } from '@/shared/game/domain/type
 import { QuestionType } from './types';
 import type { TQuestion, TQuestionFilter, TQuestionType } from './types';
 
-/**
- * Pure filter shared by every adapter. `lang` is handled by the adapter (it
- * picks the source array); everything else is applied here.
- *
- * - `difficulty: 'mix'` (or omitted) → no difficulty constraint
- * - `types` / `themes` empty or omitted → no constraint on that axis
- * - `excludeIds` removes already-seen questions
- */
-export function filterQuestions(
-  questions: TQuestion[],
-  filter: Omit<TQuestionFilter, 'lang'>,
-): TQuestion[] {
+/** Pure filter shared by every adapter (`lang` picks the adapter's array). `mix`, an empty or
+ *  omitted list → no constraint on that axis; `excludeIds` drops already-seen questions. */
+export function filterQuestions(questions: TQuestion[], filter: Omit<TQuestionFilter, 'lang'>): TQuestion[] {
   const { types, difficulty, themes, excludeIds } = filter;
   const typeSet = types && types.length > 0 ? new Set(types) : null;
   const themeSet = themes && themes.length > 0 ? new Set(themes) : null;
@@ -41,12 +32,8 @@ const FLASH_SHARED = 2 * 2;
 const ULTIME_DILEMMA = 5;
 const ULTIME_RAPID_PER_COUPLE = 5;
 
-/**
- * Deck size to draw at game start (mirrors the Play machine's layout).
- * - dilemma: 10 shared questions
- * - flash: the shared block — 2 questions × 2 rounds, whatever the couple count
- * - ultime: shared Flash block + 5 Dilemma + 5 rapid-fire per couple
- */
+/** Deck size to draw (mirrors `planOf`): Dilemma 10; Flash 2 × 2 rounds whatever the couple
+ *  count; Ultime the Flash block + 5 Dilemma + 5 rapid-fire per couple. */
 export function deckSizeFor(mode: TMode, coupleCount: number): number {
   if (mode === Mode.Flash) return FLASH_SHARED;
   if (mode === Mode.Ultime) return FLASH_SHARED + ULTIME_DILEMMA + ULTIME_RAPID_PER_COUPLE * coupleCount;
@@ -61,14 +48,8 @@ export type TDrawDeckOptions = {
   size: number;
 };
 
-/**
- * Draw a deck at game start: filter by mode-compatible types + difficulty +
- * themes, exclude already-seen ids, shuffle, take `size`. `rng` is injectable
- * for deterministic tests. May return fewer than `size` if the pool is small
- * (caller decides how to handle an empty pool — see error.deckEmpty).
- *
- * Ultime is drawn segment by segment (see `drawUltimeDeck`).
- */
+/** Draw a deck at game start: mode-compatible, unseen, shuffled, `size` at most (fewer when the
+ *  pool is small; empty → error.deckEmpty). Ultime is drawn segment by segment. */
 export function drawDeck(
   questions: TQuestion[],
   options: TDrawDeckOptions,
@@ -76,28 +57,16 @@ export function drawDeck(
 ): TQuestion[] {
   if (options.mode === Mode.Ultime) return drawUltimeDeck(questions, options, rng);
   const { mode, difficulty, themes, seenIds, size } = options;
-  const pool = filterQuestions(questions, {
-    types: modeQuestionTypes(mode),
-    difficulty,
-    themes,
-    excludeIds: seenIds,
-  });
+  const pool = filterQuestions(questions, { types: modeQuestionTypes(mode), difficulty, themes, excludeIds: seenIds });
   return shuffle(pool, rng).slice(0, size);
 }
 
 /**
- * Ultime reads its deck by fixed offsets (Flash block, then Dilemma, then
- * Rapid-fire), so each segment is drawn from its own pool and a short segment
- * would shift the next one into the wrong round: any short segment → empty
- * deck (error.deckEmpty). Later segments exclude ids drawn by earlier ones.
- *
- * Rapid-fire draws `open` easy/medium only; a Hard game falls back to both.
+ * Ultime reads its deck by fixed offsets (Flash, Dilemma, rapid-fire), so each segment is drawn
+ * from its own pool: a short segment would shift the next into the wrong round, so it empties
+ * the deck (error.deckEmpty). Rapid-fire draws `open` easy/medium only (Hard falls back to both).
  */
-function drawUltimeDeck(
-  questions: TQuestion[],
-  options: TDrawDeckOptions,
-  rng: () => number,
-): TQuestion[] {
+function drawUltimeDeck(questions: TQuestion[], options: TDrawDeckOptions, rng: () => number): TQuestion[] {
   const { difficulty, themes, seenIds, size } = options;
   const deck: TQuestion[] = [];
   const take = (

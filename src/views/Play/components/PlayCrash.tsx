@@ -4,15 +4,12 @@ import { useT } from '@/shared/i18n';
 import { useSaveStore } from '@/shared/save';
 import { PixelButton, Screen } from '@/shared/Chrome';
 
-/**
- * `/play`'s error screen. Retry remounts Play, which resumes from the last write; Quit game
- * throws the game away, so a step that keeps crashing can never trap the players.
- */
+/** `/play`'s error screen: Retry resumes from the last write; Quit throws the game away, so a
+ *  step that keeps crashing can never trap the players. */
 export const PlayCrash: FC<{ onRetry: () => void }> = ({ onRetry }) => {
   const t = useT();
   const store = useSaveStore();
   const navigate = useNavigate();
-
   const handleQuit = () => {
     store.quitGame();
     navigate({ to: '/', replace: true });

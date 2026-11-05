@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, type FC, type ReactNode } from 'react';
+import { cx } from './kit';
 import './chrome.css';
 
 type TNoticeProps = {
@@ -26,13 +27,9 @@ export const Notice: FC<TNoticeProps> = ({ children, tone = 'info', action, auto
 
   return (
     <div className="cb-notice" role="status">
-      <div className={['cb-toast', tone === 'error' ? 'cb-toast--error' : ''].filter(Boolean).join(' ')}>
+      <div className={cx('cb-toast', tone === 'error' && 'cb-toast--error')}>
         <span>{children}</span>
-        {action && (
-          <button type="button" className="cb-notice-action" onClick={action.onClick}>
-            {action.label}
-          </button>
-        )}
+        {action && <button type="button" className="cb-notice-action" onClick={action.onClick}>{action.label}</button>}
       </div>
     </div>
   );

@@ -8,8 +8,7 @@ type TPauseSheetProps = {
   onQuit: () => void;
 };
 
-/** Pause overlay (game dimmed behind). Quit asks for confirmation. Resume taps, the confirmed
- *  quit plays the back blip; restart, quit and cancel are silent. */
+/** Pause overlay; Quit asks first. Restart, quit and cancel are silent (as they always were). */
 export const PauseSheet: FC<TPauseSheetProps> = ({ onResume, onRestart, onQuit }) => {
   const t = useT();
   const [confirmQuit, setConfirmQuit] = useState(false);

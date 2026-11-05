@@ -1,9 +1,5 @@
-/* Shared chrome — the "Colored" recipes (refont v3): violet stage, cream cards with a
-   chunky dark-violet outline and hard lip, glossy gold CTAs, white display titles.
-   Tokens only (rgba whites / violets for shadows and glows aside).
-
-   Ownership: this file is the shared component library. Views never edit it; a view's
-   own layout goes in its own `view.css`, scoped under the view's root class. */
+/* The shared kit ("Colored", refont v3). Views never edit it: a view's layout goes in its own
+   `view.css`, scoped under the view's root class. Tokens only (shadow / glow rgba aside). */
 
 /* ---------- surfaces re-scope the text colours (see tokens.css) ---------- */
 .cb-card,
@@ -23,10 +19,8 @@
   --cb-error: var(--cb-error-ink);
   color: var(--cb-text-body);
 }
-/* Focus ring: an outline is drawn OUTSIDE the element, so it must contrast with what is
-   behind it. Only containers whose children sit on cream re-scope it to violet. The
-   interactive surfaces themselves (.cb-mode, .cb-team, .cb-btn--secondary, ...) keep the
-   inherited ring: gold on the stage, violet when nested in a card. */
+/* The focus ring is drawn OUTSIDE the element: only containers whose children sit on cream
+   re-scope it to violet; interactive surfaces keep the inherited one (gold on the stage). */
 .cb-card,
 .cb-row,
 .cb-sheet {
@@ -45,10 +39,6 @@
   flex-direction: column;
   gap: var(--cb-s4);
   background: var(--cb-bg-calm) var(--cb-bg);
-  color: var(--cb-text-body);
-  font-family: var(--cb-font-ui);
-  font-size: var(--cb-fs-body);
-  line-height: var(--cb-lh-body);
   position: relative;
   isolation: isolate;
   animation: cb-screen-in var(--cb-t-screen) var(--cb-ease-out) both;
@@ -102,7 +92,6 @@
 }
 button.cb-chip {
   cursor: pointer;
-  min-height: var(--cb-h-chip);
 }
 .cb-dots {
   display: inline-flex;
@@ -214,14 +203,9 @@ button.cb-chip {
   color: var(--btn-fg);
   font: 800 var(--cb-fs-label) / var(--cb-lh-label) var(--cb-font-display);
   letter-spacing: -0.01em;
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.5),
-    0 var(--cb-lip) 0 var(--cb-outline),
-    0 10px 18px rgba(20, 5, 74, 0.35);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 var(--cb-lip) 0 var(--cb-outline), 0 10px 18px rgba(20, 5, 74, 0.35);
   transform: translateY(0);
-  transition:
-    transform var(--cb-t-tap) var(--cb-ease-out),
-    box-shadow var(--cb-t-tap) var(--cb-ease-out);
+  transition: transform var(--cb-t-tap) var(--cb-ease-out), box-shadow var(--cb-t-tap) var(--cb-ease-out);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -232,19 +216,14 @@ button.cb-chip {
 }
 .cb-btn:active:not(:disabled) {
   transform: translateY(calc(var(--cb-lip) - 1px));
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.5),
-    0 1px 0 var(--cb-outline);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 1px 0 var(--cb-outline);
 }
 .cb-btn--inline {
   width: auto;
   padding: 0 22px;
 }
 .cb-btn--win {
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.5),
-    0 var(--cb-lip) 0 var(--cb-outline),
-    0 0 28px rgba(255, 194, 31, 0.55);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 var(--cb-lip) 0 var(--cb-outline), 0 0 28px rgba(255, 194, 31, 0.55);
 }
 .cb-btn--secondary {
   --btn-bg: var(--cb-surface);
@@ -307,20 +286,14 @@ button.cb-chip {
   gap: 14px;
   cursor: pointer;
   font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.25),
-    0 var(--cb-lip) 0 var(--cb-outline);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.25), 0 var(--cb-lip) 0 var(--cb-outline);
   margin-bottom: var(--cb-lip);
-  transition:
-    transform var(--cb-t-tap) var(--cb-ease-out),
-    box-shadow var(--cb-t-tap) var(--cb-ease-out);
+  transition: transform var(--cb-t-tap) var(--cb-ease-out), box-shadow var(--cb-t-tap) var(--cb-ease-out);
   flex: none;
 }
 .cb-answer:active {
   transform: translateY(4px);
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.25),
-    0 1px 0 var(--cb-outline);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.25), 0 1px 0 var(--cb-outline);
 }
 .cb-answer--p2 {
   --a-bg: var(--cb-p2);
@@ -406,11 +379,6 @@ button.cb-chip {
 .cb-mode:active {
   transform: scale(0.98);
 }
-.cb-mode img {
-  width: 72px;
-  height: 72px;
-  flex: none;
-}
 .cb-mode h3 {
   margin: 0;
   font: 800 24px / 1.1 var(--cb-font-display);
@@ -418,54 +386,16 @@ button.cb-chip {
   letter-spacing: -0.01em;
 }
 .cb-mode p {
-  margin: 4px 0 0;
+  margin: 0;
   color: var(--cb-text-muted);
-  font: 500 15px / 1.4 var(--cb-font-ui);
-}
-.cb-mode .cb-dur {
-  margin-left: auto;
-  align-self: flex-start;
-  font: 800 12px / 1 var(--cb-font-ui);
-  color: var(--cb-violet-600);
-  background: var(--cb-surface-sunk);
-  padding: 7px 10px;
-  border-radius: var(--cb-r-pill);
-  white-space: nowrap;
 }
 /* selectable option card (difficulty) — chosen = gold outline + glow */
 .cb-mode[aria-pressed='true'] {
   border-color: var(--cb-gold-lo);
-  box-shadow:
-    0 0 0 3px var(--cb-gold),
-    0 0 24px rgba(255, 194, 31, 0.5),
-    var(--cb-e2);
+  box-shadow: 0 0 0 3px var(--cb-gold), 0 0 24px rgba(255, 194, 31, 0.5), var(--cb-e2);
 }
 
-/* ---------- team tile (V-Setup step A) ---------- */
-.cb-teams {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--cb-s3);
-}
-.cb-team {
-  appearance: none;
-  border: var(--cb-outline-w) solid var(--cb-outline);
-  cursor: pointer;
-  padding: var(--cb-s2) var(--cb-s2) var(--cb-s3);
-  background: var(--cb-surface);
-  border-radius: var(--cb-r-lg);
-  box-shadow: var(--cb-e1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-  color: var(--cb-text);
-  font-family: var(--cb-font-ui);
-  transition:
-    transform var(--cb-t-tap) var(--cb-ease-out),
-    box-shadow var(--cb-t-tap);
-}
+/* ---------- team portrait tile (Setup picker, final ties) ---------- */
 .cb-team-art {
   width: 100%;
   aspect-ratio: 1;
@@ -479,39 +409,6 @@ button.cb-chip {
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-.cb-team-name {
-  font: 800 15px / 1.2 var(--cb-font-display);
-  color: var(--cb-text);
-}
-.cb-team[aria-pressed='true'] {
-  border-color: var(--cb-gold-lo);
-  box-shadow:
-    0 0 0 3px var(--cb-gold),
-    0 0 24px rgba(255, 194, 31, 0.55),
-    var(--cb-e1);
-  transform: translateY(-2px);
-}
-.cb-team[aria-pressed='true']::after {
-  content: '✓';
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--cb-pink);
-  border: 2px solid #FFFFFF;
-  color: var(--cb-text-on-color);
-  display: grid;
-  place-items: center;
-  font: 800 15px / 1 var(--cb-font-ui);
-}
-.cb-team:disabled,
-.cb-team[aria-disabled='true'] {
-  opacity: 0.45;
-  filter: grayscale(1);
-  cursor: default;
 }
 /* placeholder art for teams whose render isn't delivered yet: tinted tile + big initial */
 .cb-team-placeholder {
@@ -640,9 +537,6 @@ button.cb-chip {
   from { transform: scale(0.4); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .cb-reveal-in { animation: none; }
-}
 .cb-badge {
   display: inline-flex;
   align-items: center;
@@ -723,9 +617,10 @@ button.cb-chip {
 }
 .cb-sheet {
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   display: grid;
-  gap: var(--cb-s3);
+  gap: var(--cb-s4);
+  padding: var(--cb-s7) var(--cb-s5) var(--cb-s6);
   border-radius: var(--cb-r-xl);
   box-shadow: var(--cb-e3);
 }
@@ -833,11 +728,6 @@ button.cb-chip {
 }
 
 /* ---------- Sheet: modal dialog (pause, discard confirm, deck empty) ---------- */
-.cb-dialog .cb-sheet {
-  max-width: 420px;
-  gap: var(--cb-s4);
-  padding: var(--cb-s7) var(--cb-s5) var(--cb-s6);
-}
 .cb-dialog .cb-h2 {
   font-size: var(--cb-fs-h1);
   line-height: var(--cb-lh-h1);
@@ -854,9 +744,6 @@ button.cb-chip {
   font: 800 var(--cb-fs-h2) / var(--cb-lh-h2) var(--cb-font-display);
   letter-spacing: var(--cb-tracking-display);
   text-wrap: balance;
-}
-.cb-dialog .cb-row-2 {
-  gap: var(--cb-s3);
 }
 
 /* ---------- LanguagePicker ---------- */

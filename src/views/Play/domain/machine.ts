@@ -25,12 +25,8 @@ import type { TQuestion } from '@/shared/questions/domain/types';
 import { interpolate } from '@/shared/i18n/domain/services';
 
 /**
- * The in-game rule book (ARCHITECTURE's one sanctioned deviation from 1-route-1-view): a pure
- * reducer over `TGame = { ctx, step }`. The game is a plan of segments (`planOf`): Flash
- * rounds ("sofa sides"), a Dilemma block, the rapid-fire finale; a scoreboard follows every
- * segment but the last, plus the standalone-Dilemma halfway board.
- *
- * Four events. An event that is illegal for the step, or that carries a `seq` other than
+ * The in-game rule book: a pure reducer over `TGame = { ctx, step }`, playing a plan of segments
+ * (`planOf`). Four events; one that is illegal for the step, or carries a `seq` other than
  * `ctx.seq` (a double tap, a timer racing a tap), returns THE SAME OBJECT: no render, no write.
  * Every legal transition bumps `ctx.seq` by one.
  */
@@ -119,10 +115,7 @@ export function rapidSubjectIndex(q: number): 0 | 1 {
   return (q % 2) as 0 | 1;
 }
 
-/**
- * Which addressee variant a screen renders: `you` — the person answering about themselves;
- * `name` — the table / partner, with `{name}` filled from the roster.
- */
+/** `you`: the person answering about themselves; `name`: the table / partner, `{name}` filled in. */
 export type TAddressee = 'you' | 'name';
 
 /** Render a question for a screen role (same interpolation as the string templates). */
@@ -137,10 +130,7 @@ export type TRankedTeam = { team: TTeam; score: number; isWinner: boolean };
 export function rankTeams(ctx: Pick<TGameCtx, 'roster' | 'scores'>): TRankedTeam[] {
   const scored = ctx.roster.map((team) => ({ team, score: ctx.scores[team.teamId] ?? 0 }));
   const max = scored.reduce((m, s) => Math.max(m, s.score), 0);
-  return scored
-    .slice()
-    .sort((a, b) => b.score - a.score)
-    .map((s) => ({ ...s, isWinner: s.score === max }));
+  return scored.sort((a, b) => b.score - a.score).map((s) => ({ ...s, isWinner: s.score === max }));
 }
 
 /** The slot after `slot`, couple fastest, then question. `null` = phase done. */

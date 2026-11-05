@@ -16,21 +16,16 @@ export function isGameStale(savedAt: number, now: number): boolean {
 }
 
 /**
- * What boot does with the game it read:
- * - `finish`: a final game whose profile merge may not have landed (a crash between the two
- *   writes) — replayed FIRST, even when old, since the merge is idempotent;
- * - `stale`: past the resume window — removed without a word (as before the refactor);
- * - `discard`: a deck id missing from the bank (or any other inconsistency) — removed, and the
- *   player is told (never a silent restart, S6);
- * - `resume`: Play mounts on it as-is.
+ * What boot does with the game it read. `finish`: a final game whose profile merge may not have
+ * landed (a crash between the writes), replayed FIRST even when old (the merge is idempotent).
+ * `stale`: past the resume window, removed quietly. `discard`: inconsistent (e.g. a deck id gone
+ * from the bank), removed and the player told (never a silent restart, S6). `resume`: as-is.
  */
-export type TRecovery = 'finish' | 'stale' | 'discard' | 'resume';
-
 export function recoveryOf(
   game: TGame,
   savedAt: number,
   { now, hasQuestion }: { now: number; hasQuestion: (id: number) => boolean },
-): TRecovery {
+): 'finish' | 'stale' | 'discard' | 'resume' {
   if (game.step.kind === 'final') return 'finish';
   if (isGameStale(savedAt, now)) return 'stale';
   return isGameConsistent(game, hasQuestion) ? 'resume' : 'discard';
@@ -50,8 +45,6 @@ export function mergeFinish(profile: TProfile, final: TGame): { profile: TProfil
   const points = ctx.scores[solo.teamId] ?? 0;
   const previous = profile.soloBest[ctx.mode];
   const best = Math.max(previous, points);
-  return {
-    profile: { ...profile, seenIds, soloBest: { ...profile.soloBest, [ctx.mode]: best } },
-    soloResult: { isBest: points > previous, points, best },
-  };
+  const soloBest = { ...profile.soloBest, [ctx.mode]: best };
+  return { profile: { ...profile, seenIds, soloBest }, soloResult: { isBest: points > previous, points, best } };
 }

@@ -24,10 +24,7 @@ export function startOf(c: TGoldenCase): TGame {
   return newGame({ roster: goldenRoster(c.couples), mode: c.mode, difficulty: 'mix', themes: [], deck: c.deck });
 }
 
-/**
- * Play a golden case to `final` with the scripted policy. `act` applies each action (default:
- * the bare reducer) and returns the next game; returns every game shown, start to final.
- */
+/** Play a golden case to `final` with the scripted policy (`act`: default the bare reducer); returns every game shown. */
 export function playScripted(
   c: TGoldenCase,
   act: (game: TGame, action: TAction) => TGame = (game, action) => reduce(game, { ...action, seq: game.ctx.seq }),

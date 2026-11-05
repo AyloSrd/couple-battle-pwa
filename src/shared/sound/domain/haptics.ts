@@ -1,7 +1,7 @@
 import type { TSoundId } from './types';
 
 /** A `navigator.vibrate` pattern: one buzz (ms) or buzz / pause / buzz … */
-export type THapticPattern = number | number[];
+type THapticPattern = number | number[];
 
 // The cue table's Haptic column (plan 4.8), tiny on purpose: 10–40 ms buzzes.
 const SELECTION = 10; // any button
@@ -11,10 +11,7 @@ const SUCCESS = [15, 50, 30]; // exact, synchro
 const WARNING = [30, 60, 15]; // close
 const ERROR = [40, 40, 40]; // miss, mismatch, error
 
-/**
- * Which cues buzz, keyed by the sound they ride on. Screen cues (whoosh, pass), the tally ticks
- * and the confetti stay still; the settings toggles give their own confirmation.
- */
+// Screen cues (whoosh, pass), tally ticks and confetti stay still; the settings toggles confirm themselves.
 const HAPTICS: Partial<Record<TSoundId, THapticPattern>> = {
   'sfx.tap': SELECTION,
   'sfx.back': SELECTION,

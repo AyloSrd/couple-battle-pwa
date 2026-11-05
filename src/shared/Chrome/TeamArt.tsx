@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { teamArtUrl } from './teamArtResolver';
+import { cx } from './kit';
 import './chrome.css';
 
 type TTeamArtProps = {
@@ -31,19 +32,17 @@ export const TeamArt: FC<TTeamArtProps> = ({ teamId, label, variant, className }
     const url = teamArtUrl(teamId, 'full') ?? teamArtUrl(teamId, 'portrait', 384);
     if (!url) {
       return (
-        <div className={['cb-char-placeholder', className ?? ''].filter(Boolean).join(' ')} aria-hidden="true">
-          {initial}
-        </div>
+        <div className={cx('cb-char-placeholder', className)} aria-hidden="true">{initial}</div>
       );
     }
-    return <img className={['cb-char', className ?? ''].filter(Boolean).join(' ')} src={url} alt="" draggable={false} />;
+    return <img className={cx('cb-char', className)} src={url} alt="" draggable={false} />;
   }
 
   const small = teamArtUrl(teamId, 'portrait', 256);
   if (variant === 'tile') {
     const large = teamArtUrl(teamId, 'portrait', 384);
     return (
-      <span className={['cb-team-art', className ?? ''].filter(Boolean).join(' ')}>
+      <span className={cx('cb-team-art', className)}>
         {small ? (
           <img
             src={small}
@@ -61,10 +60,7 @@ export const TeamArt: FC<TTeamArtProps> = ({ teamId, label, variant, className }
   // avatar / avatarLg — portrait, face crop (the 112px large avatar takes the 384 for 3x screens)
   const face = variant === 'avatarLg' ? (teamArtUrl(teamId, 'portrait', 384) ?? small) : small;
   return (
-    <span
-      className={['cb-avatar', variant === 'avatarLg' ? 'cb-avatar--lg' : '', className ?? ''].filter(Boolean).join(' ')}
-      aria-hidden="true"
-    >
+    <span className={cx('cb-avatar', variant === 'avatarLg' && 'cb-avatar--lg', className)} aria-hidden="true">
       {face ? <img src={face} alt="" draggable={false} /> : initial}
     </span>
   );

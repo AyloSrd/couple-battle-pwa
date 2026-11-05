@@ -25,10 +25,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-}
-
-/* One-handed party game: never rubber-band or accidental-select the UI. */
-body {
+  /* one-handed party game: never rubber-band or accidental-select the UI */
   overscroll-behavior: none;
   -webkit-user-select: none;
   user-select: none;

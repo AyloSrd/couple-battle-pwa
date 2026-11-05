@@ -10,13 +10,9 @@ export const testRoster: TRoster = [
 ];
 
 /** The bank the test deck's ids resolve to (the deck itself holds ids + types only). */
-export const testQuestions: TQuestion[] = Array.from({ length: 4 }, (_, i) => ({
-  id: i + 1,
-  theme: 'childhood',
-  difficulty: 'easy',
-  type: 'open',
-  you: `q${i + 1}`,
-  name: `q${i + 1} de {name}`,
+export const testQuestions: TQuestion[] = [1, 2, 3, 4].map((id) => ({
+  ...{ id, theme: 'childhood', difficulty: 'easy', type: 'open' },
+  ...{ you: `q${id}`, name: `q${id} de {name}` },
 }));
 
 type TAt = { round?: 0 | 1; couple?: number; roster?: TRoster; side?: 'answerers' | 'guessers' };
@@ -30,28 +26,13 @@ function segOf(kind: TStepKind, round: number): number {
 
 function stepOf(kind: TStepKind, couple: number, side: 'answerers' | 'guessers'): TStep {
   const slot = { q: 0, couple };
-  switch (kind) {
-    case 'ask':
-      return { kind, q: 0 };
-    case 'resolve':
-      return { kind, ...slot, results: {} };
-    case 'gate':
-      return { kind, side, secrets: {} };
-    case 'handoff':
-    case 'secret':
-    case 'guess':
-    case 'judge':
-      return { kind, ...slot, secrets: {} };
-    case 'rapidTurn':
-      return { kind, couple };
-    case 'rapidAsk':
-    case 'rapidJudge':
-      return { kind, ...slot };
-    case 'rapidIntro':
-    case 'scoreboard':
-    case 'final':
-      return { kind };
-  }
+  if (kind === 'ask') return { kind, q: 0 };
+  if (kind === 'resolve') return { kind, ...slot, results: {} };
+  if (kind === 'gate') return { kind, side, secrets: {} };
+  if (kind === 'rapidTurn') return { kind, couple };
+  if (kind === 'rapidAsk' || kind === 'rapidJudge') return { kind, ...slot };
+  if (kind === 'rapidIntro' || kind === 'scoreboard' || kind === 'final') return { kind };
+  return { kind, ...slot, secrets: {} }; // handoff, secret, guess, judge
 }
 
 /** An Ultime game at step `kind` (Flash round, couple, roster, gate side) — for rendering a

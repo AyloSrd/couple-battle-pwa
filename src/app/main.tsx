@@ -7,20 +7,13 @@ import { renderCrashScreen } from './crash';
 import { CrashScreen } from './CrashScreen';
 import { SplashGate } from './SplashGate';
 import { routeTree } from '../routeTree.gen';
-// Register the beforeinstallprompt listener at boot — it can fire before Home
-// mounts, so it must be captured here or it's missed.
-import '@/shared/pwa/installPrompt';
-// Auto-reload open tabs when a new deploy's service worker takes over (kills
-// stale-version tabs). Guarded so it never fires on the first visit.
-import '@/shared/pwa/swUpdate';
+import '@/shared/pwa/installPrompt'; // beforeinstallprompt can fire before Home mounts
+import '@/shared/pwa/swUpdate'; // reload open tabs when a new deploy's service worker takes over
 import '../styles/global.css';
-// The component stylesheet is otherwise only pulled in by the lazy route chunks:
-// importing it here keeps it render-blocking in index.html, so a cold first load
-// never paints an unstyled (or blank) frame while the first route loads.
+// Render-blocking here, else only the lazy route chunks pull it in (an unstyled first frame).
 import '@/shared/Chrome/chrome.css';
 
-// GitHub Pages has no SPA rewrites — hash history keeps every route reachable.
-// The router context is the booted app: route guards read the save store and the draft.
+// GitHub Pages has no SPA rewrites: hash history. The context (the booted app) feeds the guards.
 function createAppRouter(context: TBooted) {
   return createRouter({
     routeTree,
@@ -38,10 +31,7 @@ declare module '@tanstack/react-router' {
   }
 }
 
-/**
- * Boot (IDB import → load → store → recover), then render. Anything that throws before React
- * renders gets the provider-free crash screen instead of a blank page; saved data is untouched.
- */
+/** Boot, then render. A throw before React renders gets the provider-free crash screen, not a blank page. */
 async function bootstrap() {
   const rootEl = document.getElementById('root');
   if (!rootEl) throw new Error('#root element not found');

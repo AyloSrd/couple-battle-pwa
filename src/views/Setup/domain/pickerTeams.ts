@@ -6,11 +6,4 @@ import type { TAvatarId } from '@/shared/game/domain/types';
  * delivered (portrait, full body, both busts), in registry order, so the whole grid
  * fits on one screen without scrolling.
  */
-export const PICKER_TEAMS = [
-  'otters',
-  'lions',
-  'foxes',
-  'squirrels',
-  'raccoons',
-  'mice',
-] as const satisfies readonly TAvatarId[];
+export const PICKER_TEAMS = ['otters', 'lions', 'foxes', 'squirrels', 'raccoons', 'mice'] as const satisfies readonly TAvatarId[];

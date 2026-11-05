@@ -1,42 +1,28 @@
 import { useEffect } from 'react';
 
-// Minimal structural types — avoids depending on lib.dom shipping the Wake Lock API.
-type TWakeLockSentinel = {
-  release(): Promise<void>;
-  addEventListener(type: 'release', listener: () => void): void;
-};
-type TNavigatorWakeLock = { request(type: 'screen'): Promise<TWakeLockSentinel> };
-
-function getWakeLock(): TNavigatorWakeLock | null {
-  const wl = (navigator as unknown as { wakeLock?: TNavigatorWakeLock }).wakeLock;
-  return wl ?? null;
-}
+type TSentinel = { release(): Promise<void>; addEventListener(type: 'release', listener: () => void): void };
+type TWakeLock = { request(type: 'screen'): Promise<TSentinel> };
 
 /**
- * Screen wake lock backed by `navigator.wakeLock` (UI output: no port, no provider). Fails
- * silently if denied or unsupported (iOS < 16.4, jsdom).
- *
- * `wl.request` is async, so `release()` (unmount) or a second `acquire`
- * (visibilitychange, StrictMode) can land while a request is in flight.
- * `pending` keeps a single request at a time, and a lock that resolves after
- * `release()` is dropped on arrival — otherwise it would be held with nobody
- * left to free it, keeping the screen awake outside the game.
+ * Keep the screen awake while the calling screen (Play) is mounted; silent where denied or
+ * unsupported (iOS < 16.4, jsdom). Each mount owns its lock: one request in flight, re-acquired
+ * when the page is visible again (the browser drops it when hidden), and a lock granted after
+ * unmount is released on arrival — never held with nobody left to free it.
  */
-export function createBrowserWakeLock(): { request(): Promise<void>; release(): Promise<void> } {
-  let sentinel: TWakeLockSentinel | null = null;
-  let active = false;
-  let pending: Promise<void> | null = null;
-
-  const acquire = (): Promise<void> =>
-    (pending ??= (async () => {
-      const wl = getWakeLock();
-      if (!active || !wl || sentinel) return;
+export function useKeepAwake(): void {
+  useEffect(() => {
+    const wakeLock = (navigator as { wakeLock?: TWakeLock }).wakeLock;
+    if (!wakeLock) return;
+    let mounted = true;
+    let pending = false;
+    let sentinel: TSentinel | null = null;
+    const acquire = async () => {
+      if (pending || sentinel) return;
+      pending = true;
       try {
-        const s = await wl.request('screen');
-        if (!active) {
-          // Not awaited: `pending` must clear in this same tick, so a request()
-          // right behind the release starts a fresh acquire instead of reusing us.
-          s.release().catch(() => {});
+        const s = await wakeLock.request('screen');
+        if (!mounted) {
+          await s.release();
           return;
         }
         sentinel = s;
@@ -44,47 +30,21 @@ export function createBrowserWakeLock(): { request(): Promise<void>; release(): 
           if (sentinel === s) sentinel = null;
         });
       } catch {
-        // battery saver, permission, or not-visible — ignore.
+        // battery saver, permission, not visible: stay asleep-able
+      } finally {
+        pending = false;
       }
-    })().finally(() => {
-      pending = null;
-    }));
-
-  const onVisibility = () => {
-    if (active && document.visibilityState === 'visible') void acquire();
-  };
-
-  return {
-    async request() {
-      if (!getWakeLock()) return;
-      active = true;
-      document.addEventListener('visibilitychange', onVisibility);
-      await acquire();
-    },
-    async release() {
-      active = false;
-      document.removeEventListener('visibilitychange', onVisibility);
-      // Clear before awaiting, so a `request()` right behind us (Play → Home →
-      // Resume) acquires a fresh lock instead of seeing the dying one.
-      const s = sentinel;
-      sentinel = null;
-      try {
-        await s?.release();
-      } catch {
-        // already released — ignore.
-      }
-    },
-  };
-}
-
-const wakeLock = createBrowserWakeLock();
-
-/** Keep the screen awake while the calling screen is mounted (Play). */
-export function useKeepAwake(): void {
-  useEffect(() => {
-    void wakeLock.request();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') void acquire();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    void acquire();
     return () => {
-      void wakeLock.release();
+      mounted = false;
+      document.removeEventListener('visibilitychange', onVisibility);
+      sentinel?.release().catch(() => {});
+      sentinel = null;
     };
   }, []);
 }

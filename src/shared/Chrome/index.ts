@@ -10,7 +10,7 @@ export { teamArtUrl, teamsWithArt, playerArtUrl } from './teamArtResolver';
 export { PlayerAvatar } from './PlayerAvatar';
 export { BackButton } from './BackButton';
 export { Logo } from './Logo';
-export { ModeIcon, modeIconSmall, type TModeIconMode } from './ModeIcon';
+export { ModeIcon, modeIconSmall } from './ModeIcon';
 export { Notice } from './Notice';
 export { Sheet } from './Sheet';
 export { TopBar } from './TopBar';

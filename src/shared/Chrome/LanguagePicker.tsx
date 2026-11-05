@@ -14,15 +14,7 @@ const LanguageRow: FC = () => {
   return (
     <>
       {LANGS.map((l) => (
-        <PixelButton
-          key={l}
-          className="cb-lang-pill"
-          variant={lang === l ? 'primary' : 'secondary'}
-          block={false}
-          onClick={makePick(l)}
-          aria-pressed={lang === l}
-          aria-label={LANG_NAMES[l]}
-        >
+        <PixelButton key={l} className="cb-lang-pill" variant={lang === l ? 'primary' : 'secondary'} block={false} onClick={makePick(l)} aria-pressed={lang === l} aria-label={LANG_NAMES[l]}>
           {l.toUpperCase()}
         </PixelButton>
       ))}
@@ -30,10 +22,8 @@ const LanguageRow: FC = () => {
   );
 };
 
-/**
- * The current code on a chip that drops every language under it (Home). Outside taps and Escape
- * close it; the document listeners exist only while it is open.
- */
+/** The current code on a chip that drops every language under it (Home). Outside taps and
+ *  Escape close it; the document listeners exist only while it is open. */
 const LanguageMenu: FC = () => {
   const t = useT();
   const { lang } = useLang();
@@ -81,9 +71,7 @@ const LanguageMenu: FC = () => {
         <ul id={listId} className="cb-lang-menu">
           {LANGS.map((l) => (
             <li key={l}>
-              <button type="button" lang={l} aria-pressed={l === lang} onClick={makeChoose(l)}>
-                {LANG_NAMES[l]}
-              </button>
+              <button type="button" lang={l} aria-pressed={l === lang} onClick={makeChoose(l)}>{LANG_NAMES[l]}</button>
             </li>
           ))}
         </ul>
@@ -97,7 +85,6 @@ type TLanguagePickerProps = {
   variant: 'menu' | 'row';
 };
 
-/** The one language picker. A pick is a settings change: the save store writes `settings.lang`
- *  and the language follows (one owner, no copy). */
+/** The one language picker. A pick is a settings change (`settings.lang`); the language follows. */
 export const LanguagePicker: FC<TLanguagePickerProps> = ({ variant }) =>
   variant === 'menu' ? <LanguageMenu /> : <LanguageRow />;

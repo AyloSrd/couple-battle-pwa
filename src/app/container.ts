@@ -4,20 +4,13 @@ import { createSaveMemoryApi } from '@/shared/save/api/memory';
 import type { TQuestionsApi } from '@/shared/questions';
 import type { TSaveApi } from '@/shared/save';
 
-/**
- * The composition root's product: the data ports. This is the ONLY module that names concrete
- * backends (ARCHITECTURE.md). Sound and the wake lock are UI output, not ports: they are not
- * here.
- */
+/** The data ports. The ONLY module naming concrete backends (sound, wake lock: UI output, not here). */
 export type TContainer = {
   questionsApi: TQuestionsApi;
   saveApi: TSaveApi;
 };
 
-/**
- * Build every adapter once. It only builds: nothing is read or written here (reading is
- * `boot()`'s job). `memory`: an in-memory save (tests, a session where storage is off).
- */
+/** Build every adapter once. It only builds: reading is `boot()`'s job. `memory`: tests, storage off. */
 export function createContainer(mode: 'persistent' | 'memory' = 'persistent'): TContainer {
   return {
     questionsApi: createQuestionsJsonApi(),

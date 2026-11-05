@@ -1,9 +1,9 @@
-/* Finale + results views (S8): RapidFire, Scoreboard, FinalScreen, RankList.
-   Every rule is scoped under a view root class so nothing leaks to other screens.
-   Tokens only (rgba shadows aside). Text colours come from the scoped --cb-text* set:
-   white on the stage, eggplant inside .cb-card / .cb-row / .cb-sheet. */
-
-/* ---------- shared screen column ---------- */
+/* The shared Play column, then RapidFire, Scoreboard and Final, each scoped under its view root.
+   Text colours follow the scoped --cb-text* set: white on the stage, eggplant in cards / rows. */
+/* every Play screen fills the Screen column (Flash sets its own, tighter gap) */
+.cb-v-flash,
+.cb-v-dilemma--question,
+.cb-v-dilemma--resolve,
 .cb-v-rapid,
 .cb-v-score,
 .cb-v-final {
@@ -11,44 +11,37 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--cb-s4);
+  gap: var(--flash-gap, var(--cb-s4));
 }
-
-/* ---------- score rows (Scoreboard + FinalScreen) ---------- */
-.cb-v-score .cb-rows,
-.cb-v-final .cb-rows {
+/* ---------- score rows (RankList: Scoreboard + Final) ---------- */
+:is(.cb-v-score, .cb-v-final) .cb-rows {
   gap: var(--cb-s3);
 }
-.cb-v-score .cb-row,
-.cb-v-final .cb-row {
+:is(.cb-v-score, .cb-v-final) .cb-row {
   gap: var(--cb-s4);
   padding: var(--cb-s3) var(--cb-s4);
   border-radius: var(--cb-r-lg);
   box-shadow: var(--cb-e2);
   min-height: 72px;
 }
-.cb-v-score .cb-row > span:not(.cb-avatar):not(.cb-score),
-.cb-v-final .cb-row > span:not(.cb-avatar):not(.cb-score) {
+:is(.cb-v-score, .cb-v-final) .cb-row > span:not(.cb-avatar):not(.cb-score) {
   min-width: 0;
   overflow-wrap: anywhere;
   font: 800 var(--cb-fs-body-lg) / 1.15 var(--cb-font-display);
   letter-spacing: -0.01em;
 }
-.cb-v-score .cb-row .cb-avatar,
-.cb-v-final .cb-row .cb-avatar {
+:is(.cb-v-score, .cb-v-final) .cb-row .cb-avatar {
   width: 56px;
   height: 56px;
   border-width: var(--cb-outline-w);
   border-radius: var(--cb-r-md);
   font-size: 22px;
 }
-.cb-v-score .cb-row .cb-score,
-.cb-v-final .cb-row .cb-score {
+:is(.cb-v-score, .cb-v-final) .cb-row .cb-score {
   font-size: var(--cb-fs-display-lg);
   line-height: 1;
   padding-left: var(--cb-s2);
 }
-
 /* ---------- RapidFire ---------- */
 .cb-v-rapid .cb-rapid-stage {
   flex: 1;
@@ -96,7 +89,7 @@
   font-size: clamp(var(--cb-fs-h2), min(8.6vw, 4.6dvh), 40px);
   line-height: 1.15;
 }
-/* the two `size="lg"` verdict buttons stack: full-width, thumb-sized */
+/* the two verdict buttons stack */
 .cb-v-rapid .cb-rapid-judge {
   flex-direction: column;
   gap: var(--cb-s2);
@@ -105,7 +98,6 @@
   flex: none;
   border-radius: var(--cb-r-lg);
 }
-
 /* ---------- Scoreboard ---------- */
 .cb-v-score .cb-score-title {
   font-size: clamp(var(--cb-fs-h2), 9vw, var(--cb-fs-h1));
@@ -128,10 +120,6 @@
 }
 @keyframes cb-row-settle {
   from { transform: translateY(12px) scale(0.94); }
-  to { transform: none; }
-}
-.cb-v-score .cb-score-note--pending {
-  visibility: hidden;
 }
 .cb-v-score .cb-score-note {
   margin: 0;
@@ -141,13 +129,15 @@
   text-shadow: var(--cb-title-shadow);
   text-wrap: balance;
 }
-
-/* ---------- FinalScreen ---------- */
+.cb-v-score .cb-score-note--pending {
+  visibility: hidden;
+}
+/* ---------- Final ---------- */
 .cb-v-final .cb-glow {
   top: 30%;
 }
+/* the winner takes whatever room the page has left */
 .cb-v-final .cb-char {
-  /* the winner takes whatever room the page has left */
   height: auto;
   flex: 1000 1 170px;
   min-height: 170px;
@@ -173,6 +163,29 @@
 .cb-v-final .cb-final-tied .cb-team-art:nth-child(even) {
   rotate: 3deg;
 }
+/* GF5: the crown sits on the winner (hero or tied portraits), overlapping the art below it */
+.cb-v-final .cb-final-crown {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  margin-bottom: calc(-1 * (var(--cb-s4) + 30px));
+  font-size: 56px;
+  line-height: 1;
+  rotate: -12deg;
+  filter: drop-shadow(0 4px 0 var(--cb-outline));
+  animation: cb-crown-pop 600ms var(--cb-ease-overshoot) 250ms both;
+}
+@keyframes cb-crown-pop {
+  from { transform: translateY(-40px) scale(0.2); opacity: 0; }
+}
+.cb-confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 25;
+  pointer-events: none;
+}
 .cb-v-final .cb-final-head {
   display: grid;
   justify-items: center;
@@ -192,16 +205,18 @@
   text-wrap: balance;
 }
 .cb-v-final .cb-btn--ghost {
-  color: var(--cb-text);
   font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-
-/* the final lists every team under a headline and two buttons: slightly tighter rows */
+/* tighter rows (a headline and two buttons share the page), each a 3-column grid: a long pair
+   of names wraps in its own column, never pushing the score down; the charts span line 2 */
 .cb-v-final .cb-row {
   min-height: 64px;
   padding: var(--cb-s2) var(--cb-s4);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  row-gap: var(--cb-s2);
 }
 .cb-v-final .cb-row .cb-avatar {
   width: 48px;
@@ -210,16 +225,7 @@
 .cb-v-final .cb-row .cb-score {
   font-size: var(--cb-fs-h1);
 }
-
-/* ---------- FinalScreen: per-team charts (TeamStats) ----------
-   The stats sit inside each team's row card, under the avatar / names / score line: the row
-   is a 3-column grid (a long pair of names wraps in its own column and never pushes the
-   score down) and the stats span the full second line. */
-.cb-v-final .cb-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  row-gap: var(--cb-s2);
-}
+/* ---------- Final: per-team charts (TeamStats) ---------- */
 .cb-v-final .cb-stats {
   grid-column: 1 / -1;
   min-width: 0;
@@ -246,7 +252,6 @@
   font: 800 var(--cb-fs-body-lg) / 1 var(--cb-font-display);
   font-variant-numeric: tabular-nums;
 }
-
 /* the meter: a sunk track with the chunky outline, the fill grows to --cb-fill */
 .cb-v-final .cb-meter {
   display: block;
@@ -271,11 +276,8 @@
   background: var(--cb-pink);
 }
 @keyframes cb-meter-grow {
-  from {
-    width: 0;
-  }
+  from { width: 0; }
 }
-
 /* hearts: one per scored question, wrapping */
 .cb-v-final .cb-hearts {
   display: flex;
@@ -309,16 +311,16 @@
 .cb-v-final .cb-row--lead .cb-heart-half {
   fill: var(--cb-outline);
 }
-
-/* per-stage bars: side by side (3 for Ultime, 2 flash rounds) */
+/* per-stage bars side by side (3 for Ultime, 2 Flash rounds); the vs-best bars stacked */
 .cb-v-final .cb-stages,
 .cb-v-final .cb-vsbest {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  gap: var(--cb-s1);
 }
 .cb-v-final .cb-stages {
-  display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
   gap: var(--cb-s3);
@@ -328,17 +330,6 @@
   gap: var(--cb-s1);
   min-width: 0;
 }
-.cb-v-final .cb-vsbest {
-  display: grid;
-  gap: var(--cb-s1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cb-v-final .cb-meter-fill {
-    animation: none;
-  }
-}
-
 /* ---------- GF2: "+N" pop over the scoring couple's art (any Play screen) ---------- */
 .cb-score-pop {
   position: fixed;
@@ -372,30 +363,4 @@
   25% { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
   70% { opacity: 1; transform: translate(-50%, -12px) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -36px) scale(1); }
-}
-
-/* ---------- GF5: final payoff — confetti canvas, crown pop ---------- */
-.cb-confetti {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 25;
-  pointer-events: none;
-}
-/* the crown sits on the winner (hero or tied portraits): it overlaps the art below it */
-.cb-v-final .cb-final-crown {
-  position: relative;
-  z-index: 1;
-  align-self: center;
-  margin-bottom: calc(-1 * (var(--cb-s4) + 30px));
-  font-size: 56px;
-  line-height: 1;
-  rotate: -12deg;
-  filter: drop-shadow(0 4px 0 var(--cb-outline));
-  animation: cb-crown-pop 600ms var(--cb-ease-overshoot) 250ms both;
-}
-@keyframes cb-crown-pop {
-  from { transform: translateY(-40px) scale(0.2); opacity: 0; }
-  to { transform: none; opacity: 1; }
 }

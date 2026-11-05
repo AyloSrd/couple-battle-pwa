@@ -13,11 +13,8 @@ type TProps = {
   onNext: () => void;
 };
 
-/**
- * Step A — TEAM PICK. All teams on one page: a compact 3×2 grid of team tiles (the half-body couple
- * portrait filling the tile width, or the placeholder initial; name in Inter underneath). Tapping a free tile SELECTS it (no auto-advance);
- * taken tiles are disabled; the pinned "Suivant" advances.
- */
+/** Step A — TEAM PICK: a 3×2 grid of team tiles on one page. A tap SELECTS a free tile (no
+ *  auto-advance); taken tiles are disabled; "Suivant" advances. */
 export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
   const t = useT();
   const sound = useSound();
@@ -46,21 +43,11 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
         {pickTitle(t('setup.team.pick', { n: state.coupleIdx + 1 }))}
       </h1>
 
-      <div className="cb-teams cb-v-setup__teams">
+      <div className="cb-v-setup__teams">
         {PICKER_TEAMS.map((id) => {
-          const isTaken = taken.has(id);
-          const isSelected = state.avatar === id;
           const name = t(teamKey(id));
           return (
-            <button
-              key={id}
-              type="button"
-              className="cb-team"
-              onClick={handleTap(id)}
-              aria-label={id}
-              aria-pressed={isSelected}
-              disabled={isTaken}
-            >
+            <button key={id} type="button" className="cb-team" onClick={handleTap(id)} aria-label={id} aria-pressed={state.avatar === id} disabled={taken.has(id)}>
               <TeamArt teamId={id} label={name} variant="tile" />
               <span className="cb-team-name">{name}</span>
             </button>
@@ -68,15 +55,9 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
         })}
       </div>
 
-      {toast && (
-        <div className="cb-toast cb-toast--error cb-v-setup__toast" role="status">
-          {t('setup.team.taken')}
-        </div>
-      )}
+      {toast && <div className="cb-toast cb-toast--error cb-v-setup__toast" role="status">{t('setup.team.taken')}</div>}
 
-      <PixelButton sfx="sfx.select" onClick={onNext} disabled={state.avatar === null}>
-        {t('common.next')}
-      </PixelButton>
+      <PixelButton sfx="sfx.select" onClick={onNext} disabled={state.avatar === null}>{t('common.next')}</PixelButton>
     </div>
   );
 };

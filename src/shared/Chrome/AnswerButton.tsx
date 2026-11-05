@@ -1,5 +1,6 @@
-import type { ButtonHTMLAttributes, FC, MouseEvent } from 'react';
-import { useSound, type TSoundId } from '@/shared/sound';
+import type { ButtonHTMLAttributes, FC } from 'react';
+import type { TSoundId } from '@/shared/sound';
+import { cx, useSfxClick } from './kit';
 import './chrome.css';
 
 type TAnswerButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -24,20 +25,9 @@ export const AnswerButton: FC<TAnswerButtonProps> = ({
   onClick,
   ...rest
 }) => {
-  const sound = useSound();
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    if (sfx) sound.play(sfx);
-    onClick?.(event);
-  };
+  const handleClick = useSfxClick(sfx, onClick);
   const shown = initial === undefined ? label.trim().charAt(0).toUpperCase() : initial;
-  const classes = [
-    'cb-answer',
-    tone === 'p2' ? 'cb-answer--p2' : tone === 'neutral' ? 'cb-answer--neutral' : '',
-    locked ? 'cb-answer--locked' : '',
-    className ?? '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const classes = cx('cb-answer', tone !== 'p1' && `cb-answer--${tone}`, locked && 'cb-answer--locked', className);
   return (
     <button type="button" className={classes} onClick={handleClick} {...rest}>
       {shown && <span className="cb-initial">{shown}</span>}

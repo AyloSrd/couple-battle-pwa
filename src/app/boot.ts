@@ -17,17 +17,10 @@ function load(container: TContainer): { saveApi: TSaveApi; loaded: TLoaded } {
   }
 }
 
-/**
- * Boot, in order: the one-time IndexedDB import → `load()` → the save store → `recover()` (a
- * pending finish is replayed, a bad game discarded). Never throws over storage; anything else
- * that throws reaches `bootstrap()`'s crash screen.
- */
+/** Boot, in order: one-time IndexedDB import → `load()` → save store → `recover()`. Never throws
+ *  over storage; anything else that throws reaches `bootstrap()`'s crash screen. */
 export async function boot(container: TContainer = createContainer(), idb?: IDBFactory): Promise<TBooted> {
-  try {
-    await importLegacyIdb(container.saveApi, idb);
-  } catch {
-    // never blocks the boot (storage itself may be what throws)
-  }
+  await importLegacyIdb(container.saveApi, idb); // never rejects
   const { saveApi, loaded } = load(container);
   const store = createSaveStore(saveApi, loaded);
   // Deck ids are language-free: any one bank tells whether an id still exists.

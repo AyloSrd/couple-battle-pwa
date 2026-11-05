@@ -16,10 +16,8 @@ type TLangProviderProps = PropsWithChildren<{
   lang: TLang;
 }>;
 
-/**
- * Controlled and read-only: the language has one owner (the saved settings), so there is no
- * copy to drift. A pick goes to the save store (`LanguagePicker` in shared/Chrome); `lang` follows.
- */
+/** Controlled and read-only: the language has one owner (the saved settings). A pick goes to the
+ *  save store (`LanguagePicker`); `lang` follows. */
 export const LangProvider: FC<TLangProviderProps> = ({ lang, children }) => {
   // Keep <html lang> in sync for screen readers / correct hyphenation.
   useEffect(() => {

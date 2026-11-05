@@ -1,19 +1,5 @@
-/* Dilemma screens (V-DilemmaQuestion, V-Countdown, V-DilemmaResolve) — "Colored" skin, bigger and
-   fuller than v2 ("use the whole page, more gaming"). Every rule is scoped under `.cb-v-dilemma`
-   so nothing leaks to other screens; tokens only (rgba shadows aside). The text colours follow
-   the scoped tokens: white on the stage, eggplant inside .cb-card. */
-
-/* the view fills the Screen column (Question / Resolve render inside Play's shell) */
-.cb-v-dilemma--question,
-.cb-v-dilemma--resolve {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--cb-s4);
-}
-
-/* ---------- V-DilemmaQuestion ---------- */
+/* Dilemma screens (Question, Countdown, Resolve), scoped under `.cb-v-dilemma`. */
+/* ---------- Question ---------- */
 /* (also on Resolve) up to 10 dots + the mode chip must clear the fixed pause button at 360 px */
 .cb-v-dilemma .cb-topbar .cb-chip {
   flex: none;
@@ -63,8 +49,7 @@
     display: none;
   }
 }
-
-/* ---------- V-Countdown (burst stage) ---------- */
+/* ---------- Countdown (burst stage) ---------- */
 /* the bigger bloom (130vw) is wider than a phone: clip it to the page box, or the document
    becomes horizontally pannable during the countdown */
 .cb-v-dilemma--count {
@@ -93,8 +78,8 @@
   animation: cb-v-ring var(--cb-t-count) var(--cb-ease-out) both;
 }
 @keyframes cb-v-ring {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(1.35); opacity: 0; }
+  from { transform: scale(0.6); opacity: 0.9; }
+  to { transform: scale(1.35); opacity: 0; }
 }
 .cb-v-dilemma .cb-v-get-ready {
   margin: var(--cb-s6) 0 0;
@@ -109,14 +94,7 @@
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
-@media (prefers-reduced-motion: reduce) {
-  .cb-v-dilemma .cb-v-ring {
-    animation: none;
-    display: none;
-  }
-}
-
-/* ---------- V-DilemmaResolve ---------- */
+/* ---------- Resolve ---------- */
 /* one row, never taller than one badge: with 3+ duos done it scrolls inside itself, not the page */
 .cb-v-dilemma .cb-v-confirmed {
   display: flex;
@@ -156,7 +134,7 @@
 .cb-v-dilemma .cb-v-hero {
   position: relative;
   align-self: stretch;
-  flex: 1 1 56px; /* the minimum (the couple's "Name & Name" line takes its room from the portrait); grows into whatever height the screen has left */
+  flex: 1 1 56px;
   min-height: 56px;
   max-height: 300px;
 }

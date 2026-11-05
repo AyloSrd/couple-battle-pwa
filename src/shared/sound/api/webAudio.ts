@@ -3,15 +3,12 @@ import type { TMusicId, TPlayOpts, TSoundId } from '../domain/types';
 import type { TSoundApi } from './index';
 
 /**
- * Couple Battle sound engine. SFX are synthesized — ported from
- * handoff/lib/sounds.js to TS, frequencies and envelopes kept byte-for-byte; do
- * not retune here, changes come from the design side. Music is NOT synthesized:
- * three pre-rendered files (public/audio/*.m4a, "Bounce House", generated in
- * music-lab/) are decoded lazily into the same AudioContext after the first
- * user gesture and played through a music bus feeding the same master gain.
+ * Couple Battle sound engine. SFX are synthesized (ported from handoff/lib/sounds.js,
+ * frequencies and envelopes byte-for-byte: do not retune here). Music is three pre-rendered
+ * files (public/audio/*.m4a), decoded lazily after the first gesture into a music bus.
  */
 
-/** Music files, resolved against the Vite `base` (the app lives under a sub-path). */
+// Resolved against the Vite `base` (the app lives under a sub-path).
 const MUSIC_FILES = {
   'mus.menu': 'audio/menu.m4a',
   'mus.final': 'audio/final.m4a',
@@ -19,42 +16,25 @@ const MUSIC_FILES = {
 } as const;
 type TMusicFileId = keyof typeof MUSIC_FILES;
 
-const MUSIC_LEVEL = 0.3; // music bus gain (unchanged from the synth loops)
+const MASTER_LEVEL = 0.55;
+const MUSIC_LEVEL = 0.3; // music bus gain
 const MUSIC_LEVEL_DUCKED = 0.09; // while the pause sheet is open
 const FADE_OUT_S = 0.2; // stop / switch fade
 
 const S = 0.0001; // exp ramp floor
 
-type TToneOpts = {
-  freq?: number;
-  type?: OscillatorType;
-  t?: number;
-  dur?: number;
-  vol?: number;
-  slideTo?: number | null;
-  out?: AudioNode | null;
-};
-
-type TNoiseOpts = {
-  t?: number;
-  dur?: number;
-  vol?: number;
-  hp?: number;
-  lpFrom?: number | null;
-  lpTo?: number | null;
-};
+type TToneOpts = { freq?: number; type?: OscillatorType; t?: number; dur?: number; vol?: number; slideTo?: number | null };
+type TNoiseOpts = { t?: number; dur?: number; vol?: number; hp?: number; lpFrom?: number | null; lpTo?: number | null };
 
 class Engine {
   ctx: AudioContext | null = null;
   master: GainNode | null = null;
   enabled = true;
   haptics = false;
-  baseVolume = 0.55; // master volume when enabled (adjustable via setVolume)
   musicBus: GainNode | null = null;
   ducked = false;
-  /** The loop the caller last asked for (null = none). Decides whether a late decode may still start. */
+  /** The loop last asked for (null = none): decides whether a late decode may still start. */
   wanted: TMusicId | null = null;
-  /** The loop currently playing: its source, its own fade gain, and which id it is. */
   loop: { id: TMusicId; src: AudioBufferSourceNode; gain: GainNode } | null = null;
   stingers = new Set<AudioBufferSourceNode>();
   buffers = new Map<TMusicFileId, AudioBuffer>();
@@ -63,22 +43,17 @@ class Engine {
 
   unlock() {
     if (!this.ctx) {
-      const AC =
-        window.AudioContext ??
-        (window as unknown as { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext;
+      const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AC) return; // no WebAudio support — stay silent instead of throwing
       this.ctx = new AC();
       this.master = this.ctx.createGain();
-      this.master.gain.value = this.baseVolume;
+      this.master.gain.value = MASTER_LEVEL;
       this.master.connect(this.ctx.destination);
       this.musicBus = this.ctx.createGain();
       this.musicBus.gain.value = this.ducked ? MUSIC_LEVEL_DUCKED : MUSIC_LEVEL;
       this.musicBus.connect(this.master);
-      // A running context keeps the audio thread (and battery) busy even while
-      // silent: suspend it whenever the app is hidden, resume when back in view.
-      // Without a user gesture the resume may be refused — the next tap's
-      // `unlock()` retries it.
+      // A running context keeps the audio thread (and battery) busy even while silent: suspend it
+      // while hidden. A resume refused without a gesture is retried by the next tap's `unlock()`.
       document.addEventListener('visibilitychange', () => {
         if (!this.ctx) return;
         if (document.visibilityState === 'hidden') this.ctx.suspend().catch(() => {});
@@ -97,32 +72,24 @@ class Engine {
       this.music(null);
       this.stopStingers();
     }
-    if (this.master) this.master.gain.value = on ? this.baseVolume : 0;
+    if (this.master) this.master.gain.value = on ? MASTER_LEVEL : 0;
   }
 
   setHaptics(on: boolean) {
     this.haptics = on;
   }
 
-  /** The cue's buzz, where the Vibration API exists. */
   buzz(id: TSoundId) {
     const pattern = hapticFor(id, this.haptics);
     if (pattern !== null) navigator.vibrate?.(pattern);
   }
 
-  setVolume(level: number) {
-    this.baseVolume = level;
-    if (this.master && this.enabled) this.master.gain.value = level;
-  }
-
-  /** Duck music volume (e.g. pause sheet open) */
   duck(on: boolean) {
     this.ducked = on;
     if (this.musicBus) this.musicBus.gain.value = on ? MUSIC_LEVEL_DUCKED : MUSIC_LEVEL;
   }
 
-  // ---- primitives -------------------------------------------------------
-  tone({ freq = 440, type = 'square', t = 0, dur = 0.08, vol = 0.5, slideTo = null, out = null }: TToneOpts) {
+  tone({ freq = 440, type = 'square', t = 0, dur = 0.08, vol = 0.5, slideTo = null }: TToneOpts) {
     const c = this.ctx!, now = c.currentTime + t;
     const o = c.createOscillator();
     const g = c.createGain();
@@ -131,7 +98,7 @@ class Engine {
     if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
     g.gain.setValueAtTime(vol, now);
     g.gain.exponentialRampToValueAtTime(S, now + dur);
-    o.connect(g).connect(out || this.master!);
+    o.connect(g).connect(this.master!);
     o.start(now);
     o.stop(now + dur + 0.02);
     return o;
@@ -165,7 +132,6 @@ class Engine {
     freqs.forEach((f) => this.tone({ freq: f, type, t, dur, vol }));
   }
 
-  // ---- SFX --------------------------------------------------------------
   play(id: TSoundId, opt: TPlayOpts = {}) {
     this.buzz(id);
     this.synth(id, opt);
@@ -212,7 +178,6 @@ class Engine {
     (fx[id] || (() => console.warn('unknown sound', id)))();
   }
 
-  // ---- music (pre-rendered files) ----------------------------------------
   /** Fetch + decode a music file once; failures are logged once and stay silent (retried on the next ask). */
   load(id: TMusicFileId): Promise<AudioBuffer | null> {
     const cached = this.buffers.get(id);
@@ -323,14 +288,11 @@ class Engine {
   }
 }
 
-/** WebAudio-backed sound port. One engine instance per app. */
 export function createSoundWebAudioApi(): TSoundApi {
   const engine = new Engine();
   return {
-    unlock: () => engine.unlock(),
     setEnabled: (on) => engine.setEnabled(on),
     setHaptics: (on) => engine.setHaptics(on),
-    setVolume: (level) => engine.setVolume(level),
     duck: (on) => engine.duck(on),
     play: (id, opt) => engine.play(id, opt),
     music: (id) => engine.music(id),

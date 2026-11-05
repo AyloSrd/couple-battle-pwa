@@ -107,11 +107,7 @@ export const SettingsView: FC = () => {
         </button>
       </div>
 
-      {toast && (
-        <div className="cb-toast" role="status">
-          {toast}
-        </div>
-      )}
+      {toast && <div className="cb-toast" role="status">{toast}</div>}
 
       {confirmReset && (
         <Sheet label={t('settings.resetSeen.confirm')}>

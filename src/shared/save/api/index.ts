@@ -11,14 +11,9 @@ export type TLoaded = {
   persistent: boolean;
 };
 
-/**
- * The save port: synchronous, so the store writes in the same tick as it updates memory
- * (write, then publish). Only the save store calls it. Adapters encode / decode with the
- * domain codec; Zod runs at this boundary.
- */
+/** Synchronous, so the store writes in the same tick as it updates memory. Only the store calls it. */
 export type TSaveApi = {
-  /** Read and decode both values once, at boot. */
-  load(): TLoaded;
+  load(): TLoaded; // once, at boot
   /** Store one whole value. Throws when storage refuses it (the store marks the key dirty). */
   write<K extends TSaveKey>(key: K, value: TSaveValues[K]): void;
   remove(key: TSaveKey): void;

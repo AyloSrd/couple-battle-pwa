@@ -301,7 +301,7 @@ describe('music (pre-rendered files)', () => {
   it('duck() lowers the music bus and restores it, without touching the master volume', () => {
     stubFetch();
     const api = createSoundWebAudioApi();
-    api.unlock();
+    api.play('sfx.tap'); // the first cue creates the context, master then music bus
     const ctx = FakeContext.last;
     const master = at(ctx.gains, 0);
     const bus = at(ctx.gains, 1);
