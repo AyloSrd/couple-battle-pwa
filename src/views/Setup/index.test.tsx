@@ -10,6 +10,7 @@ import {
   createRouter,
 } from '@tanstack/react-router';
 import { useDraft } from '@/shared/session';
+import { fr } from '@/data/strings.fr';
 import { createTestApp, TestProviders, type TTestApp } from '@/test/renderApp';
 import { SetupView } from './index';
 
@@ -54,7 +55,7 @@ describe('V-Setup → Mode hand-off', () => {
     mountSetup();
 
     fireEvent.click(await screen.findByRole('button', { name: '1' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'lions' }));
+    fireEvent.click(await screen.findByRole('button', { name: fr['team.lions'] }));
     fireEvent.click(screen.getByRole('button', { name: 'Suivant' }));
     const [first, second] = await screen.findAllByRole('textbox');
     fireEvent.change(first as HTMLElement, { target: { value: 'Ana' } });

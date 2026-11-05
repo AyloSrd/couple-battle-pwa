@@ -122,6 +122,7 @@ export const fr = {
   "pass.secret.confirm": "C'est moi, {name} !",
   "pass.secret.sub": "Équipe {team} — les autres, on ne regarde pas 🙈",
   "pass.secret.title": "Passez le téléphone à {name} !",
+  "pause.button": "Pause",
   "pause.quit": "Quitter la partie",
   "pause.quit.confirm": "Sûr·e ? Les scores seront perdus.",
   "pause.restartRound": "Recommencer la manche",

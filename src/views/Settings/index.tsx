@@ -6,17 +6,26 @@ import { useSound } from '@/shared/sound';
 import { Screen, PixelPanel, PixelButton, Sheet, TopBar, LanguagePicker } from '@/shared/Chrome';
 import './view.css';
 
-const Row: FC<{ label: string; hint?: string; children: ReactNode }> = ({ label, hint, children }) => (
-  <PixelPanel className="cb-v-row">
-    <div className="cb-v-row-text">
-      <span className="cb-label">{label}</span>
-      {hint && <span className="cb-muted">{hint}</span>}
-    </div>
-    <div className="cb-v-row-ctl">{children}</div>
-  </PixelPanel>
-);
+/** `toggle` makes the row a `<label>` so a tap anywhere on it reaches the one switch inside
+ *  (a label forwards its click to its button; a tap on the switch itself is not forwarded twice). */
+const Row: FC<{ label: string; hint?: string; toggle?: boolean; children: ReactNode }> = ({ label, hint, toggle = false, children }) => {
+  const body = (
+    <>
+      <div className="cb-v-row-text">
+        <span className="cb-label">{label}</span>
+        {hint && <span className="cb-muted">{hint}</span>}
+      </div>
+      <div className="cb-v-row-ctl">{children}</div>
+    </>
+  );
+  return toggle ? (
+    <label className="cb-card cb-v-row cb-v-row--toggle">{body}</label>
+  ) : (
+    <PixelPanel className="cb-v-row">{body}</PixelPanel>
+  );
+};
 
-/** A big on/off switch. `label` names it for assistive tech (the row label is visual only). */
+/** A big on/off switch. `label` names it for assistive tech (the row is a label around it, so the name is set explicitly). */
 const Switch: FC<{ label: string; checked: boolean; onToggle: () => void }> = ({ label, checked, onToggle }) => (
   <button type="button" role="switch" aria-checked={checked} aria-label={label} className="cb-v-switch" onClick={onToggle}>
     <span className="cb-v-switch-thumb" aria-hidden="true" />
@@ -83,11 +92,11 @@ export const SettingsView: FC = () => {
           <LanguagePicker variant="row" />
         </Row>
 
-        <Row label={t('settings.sound')} hint={settings.sound ? t('settings.sound.on') : t('settings.sound.off')}>
+        <Row toggle label={t('settings.sound')} hint={settings.sound ? t('settings.sound.on') : t('settings.sound.off')}>
           <Switch label={t('settings.sound')} checked={settings.sound} onToggle={handleToggleSound} />
         </Row>
 
-        <Row label={t('settings.vibration')} hint={settings.vibration ? t('settings.vibration.on') : t('settings.vibration.off')}>
+        <Row toggle label={t('settings.vibration')} hint={settings.vibration ? t('settings.vibration.on') : t('settings.vibration.off')}>
           <Switch label={t('settings.vibration')} checked={settings.vibration} onToggle={handleToggleVibration} />
         </Row>
 

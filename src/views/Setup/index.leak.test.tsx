@@ -55,14 +55,14 @@ describe('SetupView — leaks (StrictMode, fake timers)', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: '2' }));
-    fireEvent.click(screen.getByRole('button', { name: 'lions' }));
+    fireEvent.click(screen.getByRole('button', { name: fr['team.lions'] }));
     fireEvent.click(screen.getByRole('button', { name: fr['common.next'] }));
     fireEvent.change(screen.getByPlaceholderText(fr['setup.names.p1']), { target: { value: 'Ana' } });
     fireEvent.change(screen.getByPlaceholderText(fr['setup.names.p2']), { target: { value: 'Bo' } });
     fireEvent.click(screen.getByRole('button', { name: fr['common.next'] }));
     // pass interstitial → team pick for couple 2, lions now taken
     fireEvent.click(screen.getByRole('button', { name: fr['setup.pass.confirm'] }));
-    const taken = screen.getByRole('button', { name: 'lions' });
+    const taken = screen.getByRole('button', { name: fr['team.lions'] });
     expect(taken).toBeDisabled();
     fireEvent.click(taken);
     flushJsdomZeroTimers();
@@ -83,7 +83,7 @@ describe('SetupView — leaks (StrictMode, fake timers)', () => {
       </StrictMode>,
     );
     fireEvent.click(screen.getByRole('button', { name: '1' }));
-    fireEvent.click(screen.getByRole('button', { name: 'otters' }));
+    fireEvent.click(screen.getByRole('button', { name: fr['team.otters'] }));
     fireEvent.click(screen.getByRole('button', { name: fr['common.next'] }));
     fireEvent.change(screen.getByPlaceholderText(fr['setup.names.p1']), { target: { value: 'Ana' } });
     fireEvent.change(screen.getByPlaceholderText(fr['setup.names.p2']), { target: { value: 'Bo' } });

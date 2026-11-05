@@ -143,7 +143,7 @@ describe('PlayView — the machine end to end, on the save store', () => {
     });
     const before = app.store.get().game;
     expect(before?.ctx.seq).toBe(1);
-    fireEvent.click(screen.getByRole('button', { name: 'Paused' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
     fireEvent.click(await screen.findByRole('button', { name: /Restart/i }));
     const after = app.store.get().game;
     expect(after?.step).toEqual({ kind: 'ask', q: 0 });

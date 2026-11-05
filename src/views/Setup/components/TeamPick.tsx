@@ -47,7 +47,7 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
         {PICKER_TEAMS.map((id) => {
           const name = t(teamKey(id));
           return (
-            <button key={id} type="button" className="cb-team" onClick={handleTap(id)} aria-label={id} aria-pressed={state.avatar === id} disabled={taken.has(id)}>
+            <button key={id} type="button" className="cb-team" onClick={handleTap(id)} aria-label={name} aria-pressed={state.avatar === id} disabled={taken.has(id)}>
               <TeamArt teamId={id} label={name} variant="tile" />
               <span className="cb-team-name">{name}</span>
             </button>

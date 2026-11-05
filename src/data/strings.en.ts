@@ -122,6 +122,7 @@ export const en = {
   "pass.secret.confirm": "It's me, {name}!",
   "pass.secret.sub": "Team {team} — everyone else, no peeking 🙈",
   "pass.secret.title": "Pass the phone to {name}!",
+  "pause.button": "Pause",
   "pause.quit": "Quit game",
   "pause.quit.confirm": "Sure? Scores will be lost.",
   "pause.restartRound": "Restart round",

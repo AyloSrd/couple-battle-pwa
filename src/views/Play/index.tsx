@@ -138,7 +138,7 @@ export const PlayView: FC = () => {
     <Screen burst={burst} className={showPause ? 'cb-page--with-pause' : undefined}>
       {showPause && (
         <div style={{ position: 'fixed', top: 'calc(var(--cb-s3) + env(safe-area-inset-top))', right: 'var(--cb-s3)', zIndex: 20 }}>
-          <PixelButton variant="ghost" block={false} onClick={handlePause} aria-label={t('pause.title')} className="cb-icon-btn">
+          <PixelButton variant="ghost" block={false} onClick={handlePause} aria-label={t('pause.button')} className="cb-icon-btn">
             ⏸
           </PixelButton>
         </div>

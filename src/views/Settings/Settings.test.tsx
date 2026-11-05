@@ -40,6 +40,20 @@ describe('SettingsView', () => {
     expectSynced(app.store, app.api);
   });
 
+  it('toggles from a tap on the row text, once (no double fire), with one switch per setting', () => {
+    const app = mount();
+    expect(screen.getAllByRole('switch')).toHaveLength(2);
+    fireEvent.click(screen.getByText('Vibration'));
+    expect(screen.getByRole('switch', { name: 'Vibration' })).toHaveAttribute('aria-checked', 'false');
+    expect(app.store.get().profile.settings.vibration).toBe(false);
+    fireEvent.click(screen.getByText('On')); // the hint under "Sound" is part of the row too
+    expect(screen.getByRole('switch', { name: 'Sound' })).toHaveAttribute('aria-checked', 'false');
+    expect(app.store.get().profile.settings).toMatchObject({ sound: false, vibration: false });
+    fireEvent.click(screen.getByText('Sound')); // and back on: toggled exactly once per tap
+    expect(screen.getByRole('switch', { name: 'Sound' })).toHaveAttribute('aria-checked', 'true');
+    expectSynced(app.store, app.api);
+  });
+
   it('offers every language and switches the screen to the one picked (saved)', () => {
     const app = mount();
     const spanish = screen.getByRole('button', { name: 'Español' });

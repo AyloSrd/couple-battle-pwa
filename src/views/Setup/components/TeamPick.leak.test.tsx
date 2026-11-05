@@ -49,14 +49,14 @@ describe('TeamPick — leaks (StrictMode, fake timers)', () => {
     );
 
     // A taken tile is disabled, so tapping it can never raise the toast (and so never arms its timer).
-    const taken = screen.getByRole('button', { name: 'lions' });
+    const taken = screen.getByRole('button', { name: fr['team.lions'] });
     expect(taken).toBeDisabled();
     fireEvent.click(taken);
     expect(screen.queryByText(fr['setup.team.taken'])).toBeNull();
     expect(vi.getTimerCount()).toBe(0);
 
     // a free tile selects through the parent callback only: no timers either
-    fireEvent.click(screen.getByRole('button', { name: 'otters' }));
+    fireEvent.click(screen.getByRole('button', { name: fr['team.otters'] }));
     act(() => vi.advanceTimersByTime(5000));
     expect(vi.getTimerCount()).toBe(0);
 

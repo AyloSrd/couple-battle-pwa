@@ -122,6 +122,7 @@ export const es = {
   "pass.secret.confirm": "¡Soy {name}!",
   "pass.secret.sub": "{team} — el resto, sin mirar 🙈",
   "pass.secret.title": "¡Pásale el teléfono a {name}!",
+  "pause.button": "Pausa",
   "pause.quit": "Salir de la partida",
   "pause.quit.confirm": "¿Salir de verdad? Se perderán los puntos.",
   "pause.restartRound": "Reiniciar la ronda",

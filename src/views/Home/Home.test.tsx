@@ -56,6 +56,16 @@ describe('HomeView — saved game', () => {
     expectSynced(app.store, app.api);
   });
 
+  it('the "?" is not a control of its own: one "How to play" button carries the name, every button has one', () => {
+    mount();
+    const howto = screen.getByRole('button', { name: en['home.howto'] });
+    expect(howto.querySelector('[aria-hidden="true"]')).toHaveTextContent('?');
+    expect(screen.queryByRole('button', { name: '?' })).toBeNull();
+    for (const button of screen.getAllByRole('button')) expect(button, button.outerHTML).toHaveAccessibleName();
+    fireEvent.click(howto);
+    expect(navigate).toHaveBeenLastCalledWith({ to: '/how-to-play' });
+  });
+
   it('a finished game (kept for its Final screen) is not something to resume', () => {
     const app = createTestApp();
     app.store.startGame({ ...running, step: { kind: 'final' } });
