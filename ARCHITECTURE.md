@@ -39,7 +39,8 @@ secret answers → reveal → judge → countdown → resolve → …) is a **st
 in `shared/game/domain/game.ts` so the save can validate it), NOT nested routes —
 a URL change must never be able to skip a secret screen or replay a judged question
 (handoff/docs/views-spec.md §1 "Routing model"). The in-game screens live in `views/Play/components/`
-(one folder per V-* id). Hardware/browser back inside `#/play` opens the pause sheet.
+(one folder per V-* id). The in-game pause button opens the pause sheet; hardware/browser back
+is not intercepted (not done yet: it leaves `#/play`, and the game stays saved for Resume).
 Everything else follows the doc below to the letter.
 
 **Ports are data only:** `app/container.ts` builds `questionsApi` and `saveApi`, nothing else.

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FC } from 'react';
+import { useEffect, useEffectEvent, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import { Screen } from '@/shared/Chrome';
@@ -23,7 +23,8 @@ export const Countdown: FC<{ onDone: () => void; ticks?: 3 | 2; go?: keyof typeo
   const sound = useSound();
   const digits: (3 | 2 | 1)[] = ticks === 2 ? [2, 1] : [3, 2, 1];
   const [phase, setPhase] = useState(0); // 0..digits.length-1 = digit, digits.length = go
-  useEffect(() => {
+  // The timed sequence runs once, from mount (an effect event: it reads this render's props).
+  const start = useEffectEvent(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
     digits.forEach((step, idx) => {
       const tick = () => {
@@ -42,9 +43,8 @@ export const Countdown: FC<{ onDone: () => void; ticks?: 3 | 2; go?: keyof typeo
     );
     timers.push(setTimeout(() => onDone(), goAt + GO_MS));
     return () => timers.forEach(clearTimeout);
-    // Mount-only timed sequence; onDone is stable while the countdown is shown.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
+  useEffect(() => start(), []);
   const isGo = phase >= digits.length;
   const digit = digits[phase] ?? 1;
 

@@ -188,7 +188,7 @@ export default tseslint.config(
             },
 
             // application: domain + own provider (use[View]Api) + the api PORT
-            // type (for query-option factories) + shared surface. Never adapters.
+            // type + shared surface. Never adapters.
             {
               from: { element: { type: 'application' } },
               allow: [

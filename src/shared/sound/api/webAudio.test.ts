@@ -190,6 +190,9 @@ const flush = async () => {
   for (let i = 0; i < 10; i++) await Promise.resolve();
 };
 
+/** The first tap: a button's cue unlocks the context. */
+const gesture = (api: ReturnType<typeof createSoundWebAudioApi>) => api.play('sfx.tap');
+
 async function settle(calls: TDeferred[], name: string) {
   calls.filter((c) => c.url.includes(`/${name}.m4a`)).forEach((c) => c.resolve());
   await flush();
@@ -207,9 +210,12 @@ describe('music (pre-rendered files)', () => {
   it('fetches under the Vite base only after the first gesture, and starts a gapless loop once decoded', async () => {
     const { fn, calls } = stubFetch();
     const api = createSoundWebAudioApi();
-    expect(fn).not.toHaveBeenCalled(); // nothing before unlock/play
+    const before = FakeContext.last;
+    api.music('mus.menu'); // Home asks for its loop at mount, before any gesture
+    expect(fn).not.toHaveBeenCalled();
+    expect(FakeContext.last).toBe(before); // no AudioContext created either
 
-    api.music('mus.menu');
+    gesture(api);
     expect(fn).toHaveBeenCalled();
     expect(fn.mock.calls.map((c) => c[0])).toContain(`${import.meta.env.BASE_URL}audio/menu.m4a`);
     const ctx = FakeContext.last;
@@ -225,6 +231,7 @@ describe('music (pre-rendered files)', () => {
   it('plays straight away from the cache the second time', async () => {
     const { calls } = stubFetch();
     const api = createSoundWebAudioApi();
+    gesture(api);
     api.music('mus.menu');
     await settle(calls, 'menu');
     api.music(null);
@@ -237,6 +244,7 @@ describe('music (pre-rendered files)', () => {
   it('a late decode does not start when another music() call superseded it', async () => {
     const { calls } = stubFetch();
     const api = createSoundWebAudioApi();
+    gesture(api);
     api.music('mus.menu');
     api.music('mus.final');
     const ctx = FakeContext.last;
@@ -251,6 +259,7 @@ describe('music (pre-rendered files)', () => {
   it('music(null) before the decode cancels the pending start', async () => {
     const { calls } = stubFetch();
     const api = createSoundWebAudioApi();
+    gesture(api);
     api.music('mus.menu');
     api.music(null);
     await settle(calls, 'menu');
@@ -260,6 +269,7 @@ describe('music (pre-rendered files)', () => {
   it('switching stops the previous loop (no double playback) and asking for the same loop twice is a no-op', async () => {
     const { calls } = stubFetch();
     const api = createSoundWebAudioApi();
+    gesture(api);
     api.music('mus.menu');
     await settle(calls, 'menu');
     api.music('mus.menu');
@@ -278,6 +288,7 @@ describe('music (pre-rendered files)', () => {
   it('disabling sound stops the music, and nothing restarts while disabled', async () => {
     const { calls } = stubFetch();
     const api = createSoundWebAudioApi();
+    gesture(api);
     api.music('mus.menu');
     await settle(calls, 'menu');
     const ctx = FakeContext.last;
@@ -292,6 +303,7 @@ describe('music (pre-rendered files)', () => {
   it('disabling during the decode keeps the music from starting later', async () => {
     const { calls } = stubFetch();
     const api = createSoundWebAudioApi();
+    gesture(api);
     api.music('mus.menu');
     api.setEnabled(false);
     await settle(calls, 'menu');
@@ -316,6 +328,7 @@ describe('music (pre-rendered files)', () => {
   it('mus.round: skipped while not decoded, then plays once on the music bus without stopping the loop', async () => {
     const { calls } = stubFetch();
     const api = createSoundWebAudioApi();
+    gesture(api);
     api.music('mus.menu');
     await settle(calls, 'menu');
     const ctx = FakeContext.last;
@@ -338,6 +351,7 @@ describe('music (pre-rendered files)', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { calls } = stubFetch();
     const api = createSoundWebAudioApi();
+    gesture(api);
     expect(() => api.music('mus.menu')).not.toThrow();
     calls.forEach((c) => c.reject());
     await flush();
@@ -347,10 +361,24 @@ describe('music (pre-rendered files)', () => {
     expect(() => api.music(null)).not.toThrow();
   });
 
+  it('a failed load is retried by the next music() call', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { calls } = stubFetch();
+    const api = createSoundWebAudioApi();
+    gesture(api);
+    api.music('mus.menu');
+    calls.forEach((c) => c.reject());
+    await flush();
+    api.music('mus.menu'); // e.g. back on Home
+    await settle(calls, 'menu');
+    expect(FakeContext.last.musicSources('menu')).toHaveLength(1);
+  });
+
   it('stays silent when the response is not ok', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: false, status: 404 } as Response)));
     const api = createSoundWebAudioApi();
+    gesture(api);
     api.music('mus.final');
     await flush();
     expect(FakeContext.last.musicSources()).toHaveLength(0);

@@ -20,9 +20,9 @@ function load(container: TContainer): { saveApi: TSaveApi; loaded: TLoaded } {
 /** Boot, in order: one-time IndexedDB import → `load()` → save store → `recover()`. Never throws
  *  over storage; anything else that throws reaches `bootstrap()`'s crash screen. */
 export async function boot(container: TContainer = createContainer(), idb?: IDBFactory): Promise<TBooted> {
-  await importLegacyIdb(container.saveApi, idb); // never rejects
+  const importIssues = await importLegacyIdb(container.saveApi, idb); // never rejects
   const { saveApi, loaded } = load(container);
-  const store = createSaveStore(saveApi, loaded);
+  const store = createSaveStore(saveApi, { ...loaded, issues: [...loaded.issues, ...importIssues] });
   // Deck ids are language-free: any one bank tells whether an id still exists.
   const bank = new Set(container.questionsApi.list({ lang: loaded.profile.settings.lang }).map((q) => q.id));
   store.recover((id) => bank.has(id));

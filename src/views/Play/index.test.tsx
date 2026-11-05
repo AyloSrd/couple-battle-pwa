@@ -108,10 +108,11 @@ describe('PlayView — the machine end to end, on the save store', () => {
     expect(board?.ctx.scores).toEqual({ t1: 4 });
   });
 
-  it('Dilemma: 3-2-1 on the first question, 2-1 on the next; a match pops "+1", a miss pops nothing', async () => {
+  it('Dilemma: 3-2-1 on the first question, 2-1 on the next; a match pops "+1" once, a miss pops nothing', async () => {
     const deck = [q(1, 'who_of_two', 'Who snores?'), q(2, 'who_of_two', 'Who cooks?'), q(3, 'who_of_two', 'Who sings?'), q(4, 'who_of_two', 'Who naps?')];
     mountPlay('dilemma', deck);
     const numeral = () => document.querySelector('.cb-numeral')?.textContent;
+    const pop = () => document.querySelector('.cb-score-pop');
     const runCountdown = () =>
       act(() => {
         vi.advanceTimersByTime(3 * 700 + 1500 + 100);
@@ -120,16 +121,35 @@ describe('PlayView — the machine end to end, on the save store', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'READY!' }));
     expect(numeral()).toBe('3');
     runCountdown();
-    fireEvent.click(await screen.findByRole('button', { name: /Missed/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /MATCH/ }));
     await flush();
-    expect(document.querySelector('.cb-score-pop')).toBeNull();
+    expect(pop()).toHaveTextContent('+1');
 
     fireEvent.click(await screen.findByRole('button', { name: 'READY!' }));
     expect(numeral()).toBe('2'); // the repeat countdown starts at 2
     runCountdown();
-    fireEvent.click(await screen.findByRole('button', { name: /MATCH/ }));
+    await screen.findByRole('button', { name: /Missed/ });
+    expect(pop()).toBeNull(); // the countdown unmounted it: the old "+1" never replays on resolve
+    fireEvent.click(screen.getByRole('button', { name: /Missed/ }));
     await flush();
-    expect(document.querySelector('.cb-score-pop')).toHaveTextContent('+1');
+    expect(pop()).toBeNull();
+  });
+
+  it('Restart keeps the deck and moves seq on, so no event of the old game can apply', async () => {
+    const { app } = mountPlay('dilemma', [q(7, 'who_of_two', 'Who snores?'), q(8, 'who_of_two', 'Who cooks?')]);
+    fireEvent.click(await screen.findByRole('button', { name: 'READY!' }));
+    act(() => {
+      vi.advanceTimersByTime(3 * 700 + 1500 + 100);
+    });
+    const before = app.store.get().game;
+    expect(before?.ctx.seq).toBe(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Paused' }));
+    fireEvent.click(await screen.findByRole('button', { name: /Restart/i }));
+    const after = app.store.get().game;
+    expect(after?.step).toEqual({ kind: 'ask', q: 0 });
+    expect(after?.ctx.deck).toEqual(before?.ctx.deck);
+    expect(after?.ctx.seq).toBe(2);
+    expectSynced(app.store, app.api);
   });
 
   it('a relaunch mid-game (a new store over the same storage) resumes on the very screen it left', async () => {

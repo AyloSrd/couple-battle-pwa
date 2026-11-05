@@ -58,7 +58,7 @@ describe('Play buttons: one sound per tap, the same as before the kit played the
     expect(tapSounds(<SecretAnswers game={closed('secret')} question={yesNo} dispatch={noop} />, /yes/i)).toEqual(['sfx.lock']);
   });
 
-  it('a guess pick plays the riser, its outcome when the card lands; NEXT then taps', () => {
+  it('a guess pick plays the riser, its outcome once when the card lands; NEXT then taps', () => {
     const play = vi.spyOn(soundEngine, 'play');
     const { getByRole, container } = renderScreen(<GuessReveal game={closed('guess', 'yes')} question={yesNo} dispatch={noop} />);
     play.mockClear();
@@ -69,6 +69,19 @@ describe('Play buttons: one sound per tap, the same as before the kit played the
     play.mockClear();
     fireEvent.click(getByRole('button', { name: /next/i }));
     expect(play.mock.calls.map(([id]) => id)).toEqual(['sfx.tap']);
+  });
+
+  it('NEXT before the card lands still plays the outcome, once', () => {
+    const play = vi.spyOn(soundEngine, 'play');
+    const dispatch = vi.fn();
+    const { getByRole, container } = renderScreen(<GuessReveal game={closed('guess', 'yes')} question={yesNo} dispatch={dispatch} />);
+    fireEvent.click(getByRole('button', { name: /yes/i }));
+    play.mockClear();
+    fireEvent.click(getByRole('button', { name: /next/i }));
+    expect(play.mock.calls.map(([id]) => id)).toEqual(['sfx.tap', 'sfx.point.exact']);
+    expect(dispatch).toHaveBeenCalledWith({ type: 'guess', value: 'yes' });
+    landCard(container.querySelector('.cb-flash-card--flip')!); // a late landing adds nothing
+    expect(play.mock.calls.map(([id]) => id)).toEqual(['sfx.tap', 'sfx.point.exact']);
   });
 
   it('verdicts play their outcome', () => {

@@ -70,6 +70,12 @@ describe('boot', () => {
     expect(store.get().profile.settings.lang).toBe('en');
   });
 
+  it('a running pre-refactor game dropped by the import is reported (Home: "couldn\'t be restored")', async () => {
+    const { idb } = fakeIdb({ 'couple-battle': { save: { gameSnapshot: { savedAt: Date.now() - 60_000 } } } });
+    const { store } = await boot(containerOver(), idb);
+    expect(store.get().issues).toEqual(['gameDiscarded']);
+  });
+
   it('runs the one-time IndexedDB import before loading, so the old profile is there on first paint', async () => {
     const { idb } = fakeIdb({ 'couple-battle': { save: { settings: { lang: 'en', sound: false }, seenQuestionIds: [3] } } });
     const { store, container } = await boot(containerOver(), idb);

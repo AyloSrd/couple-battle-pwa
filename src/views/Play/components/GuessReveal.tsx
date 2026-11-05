@@ -15,22 +15,30 @@ export const GuessReveal: FC<TScreenProps<'guess'>> = ({ game, question, dispatc
   const t = useT();
   const sound = useSound();
   const [picked, setPicked] = useState<string>();
+  const [landed, setLanded] = useState(false);
   const { guesserName, answererName: partnerName } = flashNames(game);
   const choices = closedChoices(game, t);
   const truth = secretOf(game);
   const isMatch = picked !== undefined && truth !== undefined && picked === truth;
-  // GF4: the riser on the pick (silent buttons), the card flips, match / miss as it lands.
+  // GF4: the riser on the pick (silent buttons), the card flips, match / miss as it lands — or
+  // at once when NEXT comes first, so the outcome always sounds exactly once.
   const handlePick = (guess: string) => {
     sound.play('sfx.reveal');
     setPicked(guess);
   };
-  const handleCardLanded = (event: AnimationEvent<HTMLDivElement>) => {
-    // the card's own flip — not its face-down back (`::after`) ending at the same moment
-    if (event.target !== event.currentTarget || event.pseudoElement) return;
+  const land = () => {
+    if (landed) return;
+    setLanded(true);
     sound.play(isMatch ? 'sfx.point.exact' : 'sfx.point.miss');
   };
+  const handleCardLanded = (event: AnimationEvent<HTMLDivElement>) => {
+    // the card's own flip — not its face-down back (`::after`) ending at the same moment
+    if (event.target === event.currentTarget && !event.pseudoElement) land();
+  };
   const handleNext = () => {
-    if (picked !== undefined) dispatch({ type: 'guess', value: picked });
+    if (picked === undefined) return;
+    land();
+    dispatch({ type: 'guess', value: picked });
   };
   const handleReveal = () => dispatch({ type: 'next' }); // the riser plays on the Judge mount
 

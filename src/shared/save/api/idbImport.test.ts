@@ -19,7 +19,7 @@ const storedProfile = (api: ReturnType<typeof createSaveMemoryApi>) => {
   return decoded.kind === 'ok' ? decoded.data : decoded.kind;
 };
 
-describe('importLegacyIdb — one-time move of the pre-refactor IndexedDB save', () => {
+describe('importLegacyIdb — move of the pre-refactor IndexedDB save', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -27,7 +27,7 @@ describe('importLegacyIdb — one-time move of the pre-refactor IndexedDB save',
   it('copies the profile keys into cb.profile (v1), drops the old game, then deletes the old DB', async () => {
     const { idb, calls, databases } = fakeIdb({ 'couple-battle': { save: { ...legacySave } } });
     const api = createSaveMemoryApi();
-    await importLegacyIdb(api, idb);
+    expect(await importLegacyIdb(api, idb)).toEqual([]); // its old game has no savedAt: stale anyway
     expect(storedProfile(api)).toEqual({
       settings: { lang: 'en', sound: false, vibration: false },
       seenIds: [5, 8, 13],
@@ -58,19 +58,57 @@ describe('importLegacyIdb — one-time move of the pre-refactor IndexedDB save',
     expect(calls.deleted).toEqual([]);
   });
 
-  it('runs once: with a cb.profile already there, IndexedDB is not even opened', async () => {
+  it('with a profile already saved, merges into it: seen ids ∪, bests and flags max, settings kept', async () => {
     const { idb, calls } = fakeIdb({ 'couple-battle': { save: { ...legacySave } } });
     const api = createSaveMemoryApi();
-    api.write('profile', defaultProfile());
+    const current = { ...defaultProfile(), seenIds: [8, 40], soloBest: { flash: 9, dilemma: 2, ultime: 0 } };
+    api.write('profile', current);
     await importLegacyIdb(api, idb);
-    expect(calls.open).toBe(0);
-    expect(storedProfile(api)).toEqual(defaultProfile());
+    expect(storedProfile(api)).toEqual({
+      settings: current.settings,
+      seenIds: [8, 40, 5, 13],
+      guidelinesSeen: { flash: true, dilemma: false, ultime: false },
+      soloBest: { flash: 9, dilemma: 2, ultime: 22 },
+    });
+    await flush();
+    expect(calls.deleted).toEqual(['couple-battle']); // after the write
+  });
+
+  it('a launch that timed out (and then saved) is caught up by the next one: nothing lost', async () => {
+    vi.useFakeTimers();
+    const databases = { 'couple-battle': { save: { ...legacySave } } };
+    const api = createSaveMemoryApi();
+    const slow = importLegacyIdb(api, fakeIdb(databases, { hang: true }).idb);
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(await slow).toEqual([]);
+    api.write('profile', { ...defaultProfile(), seenIds: [77] }); // the session went on and saved
+    vi.useRealTimers();
+    const { idb, calls } = fakeIdb(databases);
+    await importLegacyIdb(api, idb);
+    expect(storedProfile(api)).toMatchObject({ seenIds: [77, 5, 8, 13], soloBest: { ultime: 22 } });
+    await flush();
+    expect(calls.deleted).toEqual(['couple-battle']);
+  });
+
+  it('a fresh old game cannot resume: reported so Home says so; a stale one is dropped quietly', async () => {
+    const at = (savedAt: number) => fakeIdb({ 'couple-battle': { save: { ...legacySave, gameSnapshot: { cursor: {}, savedAt } } } }).idb;
+    expect(await importLegacyIdb(createSaveMemoryApi(), at(Date.now() - 60_000))).toEqual(['gameDiscarded']);
+    expect(await importLegacyIdb(createSaveMemoryApi(), at(Date.now() - 13 * 3600_000))).toEqual([]);
+  });
+
+  it('an unreadable current profile is left to load() (backup first): nothing written, old DB kept', async () => {
+    const { idb, calls } = fakeIdb({ 'couple-battle': { save: { ...legacySave } } });
+    const storage = createMemoryStorage({ [STORAGE_KEYS.profile]: 'garbage' });
+    await importLegacyIdb(createSaveMemoryApi(storage), idb);
+    await flush();
+    expect(storage.getItem(STORAGE_KEYS.profile)).toBe('garbage');
+    expect(calls.deleted).toEqual([]);
   });
 
   it('a failing open is skipped: no throw, nothing written, the old DB kept', async () => {
     const { idb, databases } = fakeIdb({ 'couple-battle': { save: { ...legacySave } } }, { failOpen: true });
     const api = createSaveMemoryApi();
-    await expect(importLegacyIdb(api, idb)).resolves.toBeUndefined();
+    await expect(importLegacyIdb(api, idb)).resolves.toEqual([]);
     expect(api.raw('profile')).toBeNull();
     expect(Object.keys(databases)).toEqual(['couple-battle']);
   });
@@ -81,7 +119,7 @@ describe('importLegacyIdb — one-time move of the pre-refactor IndexedDB save',
     vi.spyOn(storage, 'setItem').mockImplementation(() => {
       throw new DOMException('full', 'QuotaExceededError');
     });
-    await expect(importLegacyIdb(createSaveMemoryApi(storage), idb)).resolves.toBeUndefined();
+    await expect(importLegacyIdb(createSaveMemoryApi(storage), idb)).resolves.toEqual([]);
     await flush();
     expect(calls.deleted).toEqual([]);
   });
@@ -99,13 +137,13 @@ describe('importLegacyIdb — one-time move of the pre-refactor IndexedDB save',
     const api = createSaveMemoryApi();
     const done = importLegacyIdb(api, idb);
     await vi.advanceTimersByTimeAsync(3000);
-    await expect(done).resolves.toBeUndefined();
+    await expect(done).resolves.toEqual([]);
     expect(api.raw('profile')).toBeNull();
     expect(vi.getTimerCount()).toBe(0);
   });
 
   it('no IndexedDB at all (old browser, test env) is a no-op', async () => {
-    await expect(importLegacyIdb(createSaveMemoryApi(), undefined)).resolves.toBeUndefined();
+    await expect(importLegacyIdb(createSaveMemoryApi(), undefined)).resolves.toEqual([]);
   });
 
   it('the storage keys it writes are the new ones', () => {

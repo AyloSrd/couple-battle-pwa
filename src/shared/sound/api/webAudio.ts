@@ -64,6 +64,7 @@ class Engine {
     if (this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
     // First gesture: warm the decoded buffers (served from the SW precache after the first visit).
     if (this.enabled) for (const id of Object.keys(MUSIC_FILES) as TMusicFileId[]) void this.load(id);
+    this.startWanted();
   }
 
   setEnabled(on: boolean) {
@@ -265,6 +266,7 @@ class Engine {
     this.loop = { id, src, gain };
   }
 
+  /** Records the loop; it starts once a gesture has unlocked the context (the first cue). */
   music(id: TMusicId | null) {
     if (id !== null && id === this.wanted && this.enabled) return; // already playing / loading it
     this.wanted = id;
@@ -273,14 +275,19 @@ class Engine {
       this.wanted = null;
       return;
     }
-    this.unlock();
-    if (!this.ctx) return; // no AudioContext available — nothing to play
+    this.startWanted();
+  }
+
+  startWanted() {
+    const id = this.wanted;
+    if (!id || !this.ctx || this.loop) return;
     const ready = this.buffers.get(id);
     if (ready) {
       this.startLoop(id, ready);
       return;
     }
     void this.load(id).then((buf) => {
+      if (!buf && this.wanted === id) this.wanted = null; // failed: the next music(id) retries
       // Superseded (another music() call, or sound disabled) while decoding: stay silent.
       if (!buf || this.wanted !== id || !this.enabled || this.loop) return;
       this.startLoop(id, buf);

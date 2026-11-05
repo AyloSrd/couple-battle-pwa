@@ -93,8 +93,10 @@ export const PlayView: FC = () => {
   const handleResume = () => setPause(false);
   const handleRestart = () => {
     if (!game) return;
-    const { roster, mode, difficulty, themes, deck } = game.ctx;
-    store.startGame(newGame({ roster, mode, difficulty, themes, deck })); // same deck
+    const { roster, mode, difficulty, themes, deck, seq } = game.ctx;
+    const fresh = newGame({ roster, mode, difficulty, themes, deck }); // same deck
+    // seq stays monotonic, so no event from the old game can become legal again
+    store.startGame({ ...fresh, ctx: { ...fresh.ctx, seq: seq + 1 } });
     setCountdownSeq(null);
     setPause(false);
   };
@@ -129,7 +131,8 @@ export const PlayView: FC = () => {
   // The sunburst only for the theatrical beats (the countdown draws its own); the rest is calm.
   const burst = RAPID_KINDS.has(step.kind) || step.kind === 'scoreboard' || step.kind === 'final';
   const card = cardOf(game);
-  const popTeam = scorePop ? game.ctx.roster.find((team) => team.teamId === scorePop.entry.teamId) : undefined;
+  const pop = scorePop?.seq === game.ctx.seq ? scorePop : null;
+  const popTeam = pop ? game.ctx.roster.find((team) => team.teamId === pop.entry.teamId) : undefined;
 
   return (
     <Screen burst={burst} className={showPause ? 'cb-page--with-pause' : undefined}>
@@ -149,7 +152,7 @@ export const PlayView: FC = () => {
         onNewGame={handleNewGame}
         solo={soloResult}
       />
-      {scorePop && popTeam && <ScorePop key={scorePop.id} team={popTeam} points={scorePop.entry.points} />}
+      {pop && popTeam && <ScorePop key={pop.id} team={popTeam} points={pop.entry.points} />}
       {paused && <PauseSheet onResume={handleResume} onRestart={handleRestart} onQuit={handleQuit} />}
     </Screen>
   );
