@@ -1,4 +1,4 @@
-import type { TAvatarId, TTeam } from '@/shared/game/domain/types';
+import type { TAvatarId, TRoster, TTeam } from '@/shared/game/domain/types';
 
 /**
  * The roster-building wizard as a pure sub-machine (same idea as Play's
@@ -41,7 +41,24 @@ export type TSetupEvent =
   | { type: 'confirmPass' }
   | { type: 'back' };
 
-export function initSetup(): TSetupState {
+/**
+ * The wizard's first state. With a roster (the draft: Back from Mode, or Rematch then Back) it
+ * reopens on the last couple's NAMES step with every couple kept, as Back from `done` would.
+ */
+export function initSetup(roster?: TRoster | null): TSetupState {
+  const last = roster?.[roster.length - 1];
+  if (roster && last) {
+    return {
+      step: 'names',
+      count: roster.length,
+      coupleIdx: roster.length - 1,
+      teams: roster.slice(0, -1),
+      avatar: last.avatarId,
+      name1: last.players[0],
+      name2: last.players[1],
+      error: null,
+    };
+  }
   return {
     step: 'count',
     count: null,

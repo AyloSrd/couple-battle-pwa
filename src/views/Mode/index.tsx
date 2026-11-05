@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
-import { useDraftGame } from '@/shared/session';
+import { useSound } from '@/shared/sound';
+import { useDraft } from '@/shared/session';
 import { Mode, type TMode } from '@/shared/game';
 import { Screen, ProgressDots, ModeIcon, BackButton } from '@/shared/Chrome';
 import './view.css';
@@ -38,8 +38,8 @@ const ModeCard: FC<{ def: TModeCardDef; onPick: (mode: TMode) => void }> = ({ de
 export const ModeView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
-  const sound = useSoundApi();
-  const { setMode } = useDraftGame();
+  const sound = useSound();
+  const { draftStore } = useDraft();
 
   const handleBack = () => {
     sound.play('sfx.back');
@@ -48,7 +48,7 @@ export const ModeView: FC = () => {
 
   const handlePick = (mode: TMode) => {
     sound.play('sfx.select');
-    setMode(mode);
+    draftStore.set({ mode });
     navigate({ to: '/difficulty' });
   };
 

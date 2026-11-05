@@ -1,8 +1,8 @@
 import { useReducer, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
-import { useDraftGame } from '@/shared/session';
+import { useSound } from '@/shared/sound';
+import { useDraft } from '@/shared/session';
 import { type TAvatarId, type TRoster } from '@/shared/game';
 import { Screen, PixelButton, PixelPanel, Chip, ProgressDots, BackButton, TeamArt } from '@/shared/Chrome';
 import { initSetup, reduceSetup } from './domain/machine';
@@ -30,10 +30,11 @@ export function duoLabel(full: string): string {
 export const SetupView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
-  const sound = useSoundApi();
-  const { setRoster } = useDraftGame();
+  const sound = useSound();
+  const { draft, draftStore } = useDraft();
 
-  const [state, dispatch] = useReducer(reduceSetup, undefined, initSetup);
+  // Seeded from the draft: Back from Mode lands on the last couple with every name kept.
+  const [state, dispatch] = useReducer(reduceSetup, draft.roster, initSetup);
 
   const handleBack = () => {
     sound.play('sfx.back');
@@ -61,7 +62,7 @@ export const SetupView: FC = () => {
     dispatch({ type: 'confirmNames' });
     // Final couple locked in → seed the draft roster and head to mode select.
     if (next.step === 'done') {
-      setRoster(next.teams as TRoster);
+      draftStore.set({ roster: next.teams as TRoster });
       navigate({ to: '/mode' });
     }
   };

@@ -1,14 +1,14 @@
 import type { FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { Screen, PixelPanel, Logo, BackButton } from '@/shared/Chrome';
 import './view.css';
 
 export const LegalView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
-  const sound = useSoundApi();
+  const sound = useSound();
 
   const handleBack = () => {
     sound.play('sfx.back');

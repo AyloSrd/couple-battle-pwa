@@ -1,6 +1,6 @@
 import { useEffect, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { rankTeams, type TGameAt } from '../domain/machine';
 import '../results.css';
@@ -13,7 +13,7 @@ type TProps = {
 /** V-Scoreboard — between-rounds standings, on the sunburst (burst). */
 export const Scoreboard: FC<TProps> = ({ game, onNext }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
   const ranked = rankTeams(game.ctx);
   const allTied = ranked.every((r) => r.isWinner);
   const leader = ranked[0];

@@ -760,6 +760,38 @@ button.cb-chip {
   background: var(--cb-error-bg);
   color: var(--cb-error-ink);
 }
+/* pinned status line (save status, boot issues): bottom-centred, above the page */
+.cb-notice {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--cb-s4) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(calc(100% - 2 * var(--cb-page-x)), 440px);
+  z-index: 40;
+  animation: cb-fade var(--cb-t-screen) var(--cb-ease-out) both;
+}
+.cb-notice .cb-toast {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cb-s3);
+  box-shadow: var(--cb-e3);
+}
+.cb-notice-action {
+  border: 0;
+  padding: var(--cb-s1) var(--cb-s2);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- crash screen (provider-free) ---------- */
+.cb-crash {
+  justify-content: center;
+  text-align: center;
+}
 
 /* ---------- misc layout helpers ---------- */
 .cb-stack {

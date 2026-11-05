@@ -2,8 +2,6 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { fr } from '@/data/strings.fr';
 import { initSetup, reduceSetup, type TSetupState } from '../domain/machine';
 import { TeamPick } from './TeamPick';
@@ -44,10 +42,8 @@ describe('TeamPick — leaks (StrictMode, fake timers)', () => {
 
     const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={createSoundNoopApi()}>
-            <TeamPick state={secondCoupleState()} onSelect={vi.fn()} onNext={vi.fn()} />
-          </SoundApiProvider>
+        <LangProvider lang="fr">
+          <TeamPick state={secondCoupleState()} onSelect={vi.fn()} onNext={vi.fn()} />
         </LangProvider>
       </StrictMode>,
     );

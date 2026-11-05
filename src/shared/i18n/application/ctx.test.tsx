@@ -1,7 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { FC } from 'react';
+import { useState, type FC, type ReactNode } from 'react';
 import { LangProvider, useLang, useT } from './ctx';
+import type { TLang } from '../domain/types';
+
+/** The shell's role: owns the language and feeds it back (the save store in the app). */
+const Owner: FC<{ initial: TLang; children: ReactNode }> = ({ initial, children }) => {
+  const [lang, setLang] = useState(initial);
+  return (
+    <LangProvider lang={lang} onLangChange={setLang}>
+      {children}
+    </LangProvider>
+  );
+};
 
 const Probe: FC = () => {
   const t = useT();
@@ -19,11 +30,11 @@ const Probe: FC = () => {
 };
 
 describe('useT / LangProvider', () => {
-  it('renders the seeded language and flips instantly on setLang', () => {
+  it('renders the given language and flips as soon as its owner follows setLang', () => {
     render(
-      <LangProvider initialLang="fr">
+      <Owner initial="fr">
         <Probe />
-      </LangProvider>,
+      </Owner>,
     );
 
     expect(screen.getByTestId('value')).toHaveTextContent('Oui');
@@ -42,14 +53,16 @@ describe('useT / LangProvider', () => {
     expect(screen.getByTestId('value')).toHaveTextContent('Oui');
   });
 
-  it('calls onLangChange when the language changes', () => {
+  it('is controlled: setLang only reports the pick (once per real change); `lang` decides', () => {
     const seen: string[] = [];
     render(
-      <LangProvider initialLang="fr" onLangChange={(l) => seen.push(l)}>
+      <LangProvider lang="fr" onLangChange={(l) => seen.push(l)}>
         <Probe />
       </LangProvider>,
     );
     fireEvent.click(screen.getByText('to-en'));
+    fireEvent.click(screen.getByText('to-fr')); // already the language: not reported
     expect(seen).toEqual(['en']);
+    expect(screen.getByTestId('value')).toHaveTextContent('Oui'); // the owner did not follow
   });
 });

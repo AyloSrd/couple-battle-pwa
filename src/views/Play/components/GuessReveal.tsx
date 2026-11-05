@@ -1,6 +1,6 @@
 import { useState, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton } from '@/shared/Chrome';
 import { ActorBadge } from './ActorBadge';
 import '../flash.css';
@@ -23,7 +23,7 @@ type TProps = {
  *  real answer is shown with the match/miss verdict, then NEXT scores it. */
 export const GuessReveal: FC<TProps> = ({ game, question, guesserName, partnerName, onReveal, onAutoGuess }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
   const [picked, setPicked] = useState<string>();
   const type = cardOf(game)?.type;
   const truth = secretOf(game);

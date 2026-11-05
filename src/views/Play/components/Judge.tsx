@@ -1,6 +1,6 @@
 import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { PixelPanel, PixelButton, Chip, ProgressDots } from '@/shared/Chrome';
 import '../flash.css';
 import type { TQuestion } from '@/shared/questions';
@@ -17,7 +17,7 @@ type TProps = {
 /** V-Judge — the revealed answer, scored by the table (exact / close / miss). */
 export const Judge: FC<TProps> = ({ game, question, answererName, onJudge }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
   const answer = answerLabel(secretOf(game), cardOf(game)?.type, teamOf(game), t);
 
   // The reveal / card-flip moment.

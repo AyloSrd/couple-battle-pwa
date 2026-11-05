@@ -1,6 +1,6 @@
 import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { PixelButton } from '@/shared/Chrome';
 
 type TProps = {
@@ -21,7 +21,7 @@ function duoLabel(full: string): string {
  */
 export const SetupPass: FC<TProps> = ({ nextCoupleNumber, onConfirm }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
 
   useEffect(() => {
     sound.play('sfx.pass');

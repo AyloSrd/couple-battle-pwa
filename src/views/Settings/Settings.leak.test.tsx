@@ -1,12 +1,6 @@
-import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LangProvider } from '@/shared/i18n';
-import { SaveApiProvider } from '@/shared/save';
-import { createSaveMemoryApi } from '@/shared/save/api/memory';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
+import { act, fireEvent, screen } from '@testing-library/react';
+import { renderWithApp } from '@/test/renderApp';
 import { SettingsView } from './index';
 
 vi.mock('@tanstack/react-router', () => ({ useNavigate: () => vi.fn() }));
@@ -21,9 +15,6 @@ function balance(add: { mock: { calls: unknown[][] } }, remove: { mock: { calls:
   return [...net].filter(([type, n]) => n !== 0 && !REACT_OWNED.has(type));
 }
 
-/** gcTime Infinity: react-query's own 5-minute gc timers are not ours to count; the view's timers are. */
-const newClient = () =>
-  new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { gcTime: Infinity } } });
 
 describe('SettingsView — leaks', () => {
   beforeEach(() => {
@@ -40,25 +31,8 @@ describe('SettingsView — leaks', () => {
     const docAdd = vi.spyOn(document, 'addEventListener');
     const docRemove = vi.spyOn(document, 'removeEventListener');
 
-    const qc = newClient();
-    const view = render(
-      <StrictMode>
-        <QueryClientProvider client={qc}>
-          <SaveApiProvider api={createSaveMemoryApi()}>
-            <SoundApiProvider api={createSoundNoopApi()}>
-              <LangProvider initialLang="en">
-                <SettingsView />
-              </LangProvider>
-            </SoundApiProvider>
-          </SaveApiProvider>
-        </QueryClientProvider>
-      </StrictMode>,
-    );
+    const view = renderWithApp(<SettingsView />, { strict: true });
 
-    // settings load through the memory port (microtasks only)
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(0);
-    });
     fireEvent.click(screen.getByRole('switch', { name: 'Vibration' }));
 
     // reset flow arms the toast timer; unmount while it is still pending
@@ -67,13 +41,8 @@ describe('SettingsView — leaks', () => {
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(vi.getTimerCount()).toBeGreaterThan(0);
 
-    // The one timer we own is the toast's: unmounting must cancel it. react-query's 0ms notify flushes
-    // are drained first (they are finite and not ours), then nothing may remain.
+    // The one timer we own is the toast's: unmounting must cancel it.
     view.unmount();
-    qc.clear();
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(0);
-    });
 
     expect(vi.getTimerCount()).toBe(0);
     expect(balance(winAdd, winRemove)).toEqual([]);
@@ -81,23 +50,7 @@ describe('SettingsView — leaks', () => {
   });
 
   it('lets the toast expire on its own and then holds no timer', async () => {
-    const qc = newClient();
-    const view = render(
-      <StrictMode>
-        <QueryClientProvider client={qc}>
-          <SaveApiProvider api={createSaveMemoryApi()}>
-            <SoundApiProvider api={createSoundNoopApi()}>
-              <LangProvider initialLang="en">
-                <SettingsView />
-              </LangProvider>
-            </SoundApiProvider>
-          </SaveApiProvider>
-        </QueryClientProvider>
-      </StrictMode>,
-    );
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(0);
-    });
+    const view = renderWithApp(<SettingsView />, { strict: true });
     fireEvent.click(screen.getByRole('button', { name: 'Reset seen questions' }));
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await act(async () => {
@@ -105,7 +58,6 @@ describe('SettingsView — leaks', () => {
     });
     expect(screen.queryByRole('status')).toBeNull();
     view.unmount();
-    qc.clear();
     expect(vi.getTimerCount()).toBe(0);
   });
 });

@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { AVATAR_IDS } from '@/shared/game';
 import { playerArtUrl, teamArtUrl, teamsWithArt } from '@/shared/Chrome';
 import { fr } from '@/data/strings.fr';
@@ -13,10 +11,8 @@ import { TeamPick } from './TeamPick';
 function mountGrid() {
   const state = reduceSetup(initSetup(), { type: 'pickCount', count: 2 });
   return render(
-    <LangProvider initialLang="fr">
-      <SoundApiProvider api={createSoundNoopApi()}>
-        <TeamPick state={state} onSelect={vi.fn()} onNext={vi.fn()} />
-      </SoundApiProvider>
+    <LangProvider lang="fr">
+      <TeamPick state={state} onSelect={vi.fn()} onNext={vi.fn()} />
     </LangProvider>,
   );
 }

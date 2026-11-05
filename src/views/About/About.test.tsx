@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { AboutView } from './index';
 
 const navigate = vi.fn();
@@ -10,11 +8,9 @@ vi.mock('@tanstack/react-router', () => ({ useNavigate: () => navigate }));
 
 function mount(lang: 'fr' | 'en') {
   render(
-    <SoundApiProvider api={createSoundNoopApi()}>
-      <LangProvider initialLang={lang}>
-        <AboutView />
-      </LangProvider>
-    </SoundApiProvider>,
+    <LangProvider lang={lang}>
+      <AboutView />
+    </LangProvider>,
   );
 }
 

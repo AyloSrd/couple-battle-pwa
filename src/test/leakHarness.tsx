@@ -1,13 +1,12 @@
-import { StrictMode, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
-import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
+import { soundEngine } from '@/shared/sound';
+import { renderWithApp } from './renderApp';
 
 /**
  * Shared harness for the `*.leak.test.tsx` files: mounts a component under
- * StrictMode with the real language provider and a spied no-op sound port,
+ * StrictMode with the app providers (French) and a spied sound engine,
  * then checks nothing outlives the unmount (timers, window/document listeners).
  */
 export function mountLeakChecked(ui: ReactElement) {
@@ -16,19 +15,12 @@ export function mountLeakChecked(ui: ReactElement) {
   // what the component under test adds.
   render(<span />).unmount();
   vi.useFakeTimers();
-  const sound = createSoundNoopApi();
-  const play = vi.spyOn(sound, 'play');
+  const play = vi.spyOn(soundEngine, 'play');
   const targets = [window, document];
   const adds = targets.map((t) => vi.spyOn(t, 'addEventListener'));
   const removes = targets.map((t) => vi.spyOn(t, 'removeEventListener'));
 
-  const view = render(
-    <StrictMode>
-      <LangProvider initialLang="fr">
-        <SoundApiProvider api={sound}>{ui}</SoundApiProvider>
-      </LangProvider>
-    </StrictMode>,
-  );
+  const view = renderWithApp(ui, { lang: 'fr', strict: true });
 
   const tally = (calls: unknown[][]) => {
     const byType: Record<string, number> = {};

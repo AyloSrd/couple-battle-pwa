@@ -207,3 +207,36 @@ describe('hasDuplicateName', () => {
     expect(hasDuplicateName(['A', 'B', 'C', 'a'])).toBe(true);
   });
 });
+
+describe('setup wizard — seeded from the draft roster (Back from Mode keeps every name)', () => {
+  const roster = [
+    { teamId: 't1', avatarId: 'otters' as const, players: ['Ana', 'Bo'] as [string, string] },
+    { teamId: 't2', avatarId: 'lions' as const, players: ['Cy', 'Di'] as [string, string] },
+  ];
+
+  it('no roster (or an empty one) starts on the count step', () => {
+    expect(initSetup(null)).toEqual(initSetup());
+    expect(initSetup([])).toEqual(initSetup());
+  });
+
+  it("reopens on the last couple's names, the earlier couples kept", () => {
+    expect(initSetup(roster)).toEqual({
+      step: 'names',
+      count: 2,
+      coupleIdx: 1,
+      teams: [roster[0]],
+      avatar: 'lions',
+      name1: 'Cy',
+      name2: 'Di',
+      error: null,
+    });
+  });
+
+  it('confirming again gives back the same roster; Back walks into the earlier couple', () => {
+    const seeded = initSetup(roster);
+    expect(reduceSetup(seeded, { type: 'confirmNames' })).toMatchObject({ step: 'done', teams: roster });
+    const team = reduceSetup(seeded, { type: 'back' });
+    expect(team).toMatchObject({ step: 'team', avatar: 'lions' });
+    expect(reduceSetup(team, { type: 'back' })).toMatchObject({ step: 'names', coupleIdx: 0, name1: 'Ana', name2: 'Bo', teams: [] });
+  });
+});

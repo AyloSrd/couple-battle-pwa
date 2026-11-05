@@ -9,8 +9,6 @@ import {
   RouterProvider,
 } from '@tanstack/react-router';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { HowToPlayView } from './index';
 
 type TCall = [string, ...unknown[]];
@@ -37,10 +35,8 @@ async function mountView() {
   await router.load();
   return render(
     <StrictMode>
-      <LangProvider initialLang="en">
-        <SoundApiProvider api={createSoundNoopApi()}>
-          <RouterProvider router={router} />
-        </SoundApiProvider>
+      <LangProvider lang="en">
+        <RouterProvider router={router} />
       </LangProvider>
     </StrictMode>,
   );

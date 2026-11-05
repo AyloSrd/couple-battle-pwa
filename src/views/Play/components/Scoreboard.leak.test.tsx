@@ -2,8 +2,6 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import type { TGameAt } from '../domain/machine';
 import { Scoreboard } from './Scoreboard';
 
@@ -53,10 +51,8 @@ describe('Scoreboard — leaks', () => {
 
     const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={createSoundNoopApi()}>
-            <Scoreboard game={game} onNext={() => {}} />
-          </SoundApiProvider>
+        <LangProvider lang="fr">
+          <Scoreboard game={game} onNext={() => {}} />
         </LangProvider>
       </StrictMode>,
     );

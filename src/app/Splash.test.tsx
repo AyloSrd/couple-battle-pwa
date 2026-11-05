@@ -8,7 +8,7 @@ let warmSpy: ReturnType<typeof vi.spyOn>;
 
 function mountSplash(onDone: () => void) {
   return render(
-    <LangProvider initialLang="en">
+    <LangProvider lang="en">
       <Splash onDone={onDone} />
     </LangProvider>,
   );

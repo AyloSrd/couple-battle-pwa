@@ -1,6 +1,6 @@
 import { useEffect, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { PixelButton } from '@/shared/Chrome';
 import { actorOf } from '../domain/actor';
 import type { TGameAt } from '../domain/machine';
@@ -17,7 +17,7 @@ type TProps = {
 /** V-PassPhone — privacy gate before/after secret input. */
 export const PassPhone: FC<TProps> = ({ variant, game, onConfirm }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
 
   useEffect(() => {
     sound.play('sfx.pass');

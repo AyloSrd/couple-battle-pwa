@@ -1,6 +1,6 @@
 import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { PixelButton, Chip } from '@/shared/Chrome';
 import '../flash.css';
 
@@ -18,7 +18,7 @@ type TProps = {
  */
 export const SideGate: FC<TProps> = ({ side, onConfirm }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
 
   useEffect(() => {
     sound.play('sfx.pass');

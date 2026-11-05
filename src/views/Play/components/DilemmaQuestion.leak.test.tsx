@@ -2,9 +2,7 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import type { TSoundApi } from '@/shared/sound';
+import { soundEngine } from '@/shared/sound';
 import { isAt, type TGameAt } from '../domain/machine';
 import type { TQuestion } from '@/shared/questions/domain/types';
 import type { TRoster } from '@/shared/game/domain/types';
@@ -42,13 +40,11 @@ describe('DilemmaQuestion — leaks', () => {
   it('only a one-shot whoosh: no timers, no window/document listeners left behind', () => {
     const add = [vi.spyOn(window, 'addEventListener'), vi.spyOn(document, 'addEventListener')];
     const remove = [vi.spyOn(window, 'removeEventListener'), vi.spyOn(document, 'removeEventListener')];
-    const sound: TSoundApi = { ...createSoundNoopApi(), play: vi.fn() };
+    const play = vi.spyOn(soundEngine, 'play');
     const view = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={sound}>
-            <DilemmaQuestion game={askGame()} question={deck[0]} onReady={() => {}} />
-          </SoundApiProvider>
+        <LangProvider lang="fr">
+          <DilemmaQuestion game={askGame()} question={deck[0]} onReady={() => {}} />
         </LangProvider>
       </StrictMode>,
     );
@@ -56,7 +52,7 @@ describe('DilemmaQuestion — leaks', () => {
       vi.advanceTimersByTime(10_000);
     });
     expect(vi.getTimerCount()).toBe(0);
-    expect(sound.play).toHaveBeenCalledWith('sfx.whoosh');
+    expect(play).toHaveBeenCalledWith('sfx.whoosh');
     view.unmount();
     expect(vi.getTimerCount()).toBe(0);
 

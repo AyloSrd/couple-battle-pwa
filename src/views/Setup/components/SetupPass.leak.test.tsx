@@ -2,8 +2,7 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
+import { soundEngine } from '@/shared/sound';
 import { SetupPass } from './SetupPass';
 
 /** add/remove counts per event type. `selectionchange` is React DOM's own once-per-document listener (never removed by design). */
@@ -28,15 +27,12 @@ describe('SetupPass — leaks (StrictMode, fake timers)', () => {
     const remW = vi.spyOn(window, 'removeEventListener');
     const addD = vi.spyOn(document, 'addEventListener');
     const remD = vi.spyOn(document, 'removeEventListener');
-    const api = createSoundNoopApi();
-    const play = vi.spyOn(api, 'play');
+    const play = vi.spyOn(soundEngine, 'play');
 
     const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={api}>
-            <SetupPass nextCoupleNumber={2} onConfirm={vi.fn()} />
-          </SoundApiProvider>
+        <LangProvider lang="fr">
+          <SetupPass nextCoupleNumber={2} onConfirm={vi.fn()} />
         </LangProvider>
       </StrictMode>,
     );

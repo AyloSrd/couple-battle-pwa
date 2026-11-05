@@ -1,31 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SaveApiProvider, saveKeys } from '@/shared/save';
-import { createSaveMemoryApi } from '@/shared/save/api/memory';
-import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
+import { renderWithApp } from '@/test/renderApp';
 import { Countdown } from './Countdown';
 
 const STEP_MS = 700;
 
 function mount(ui: ReactElement, lang: 'fr' | 'en' = 'fr', vibration = true) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const settings = { lang, sound: true, vibration };
-  const save = createSaveMemoryApi({ settings });
-  // The app gate has read the settings before any game screen mounts: start with a warm cache.
-  qc.setQueryData(saveKeys.byKey('settings'), settings);
-  return render(
-    <QueryClientProvider client={qc}>
-      <SaveApiProvider api={save}>
-        <LangProvider initialLang={lang}>
-          <SoundApiProvider api={createSoundNoopApi()}>{ui}</SoundApiProvider>
-        </LangProvider>
-      </SaveApiProvider>
-    </QueryClientProvider>,
-  );
+  // The save store is booted before any game screen mounts: settings are already there.
+  return renderWithApp(ui, { lang, seed: { profile: { settings: { lang, sound: true, vibration } } } });
 }
 
 /** Jump the timed sequence to the GO beat (after `ticks` digit steps). */

@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type FC,
-  type PropsWithChildren,
-} from 'react';
+import { createContext, useContext, useEffect, type FC, type PropsWithChildren } from 'react';
 import { fr } from '@/data/strings.fr';
 import { en } from '@/data/strings.en';
 import { es } from '@/data/strings.es';
@@ -22,32 +15,24 @@ type TLangContext = {
 const LangCtx = createContext<TLangContext | null>(null);
 
 type TLangProviderProps = PropsWithChildren<{
-  /** Initial language (seeded from persisted settings). */
-  initialLang: TLang;
-  /** Called whenever the language changes — the shell persists it to settings. */
+  /** The active language: the shell passes `settings.lang` from the save store. */
+  lang: TLang;
+  /** A screen picked another language — the shell saves it (and `lang` follows). */
   onLangChange?: (lang: TLang) => void;
 }>;
 
 /**
- * Holds the active language in memory. Seeding from and persisting to settings
- * is the shell's job (via `initialLang` / `onLangChange`), so i18n never depends
- * on the save port.
+ * Controlled: the language has one owner (the saved settings), so there is no copy to drift.
+ * i18n never depends on the save store; the shell wires the two.
  */
-export const LangProvider: FC<TLangProviderProps> = ({
-  initialLang,
-  onLangChange,
-  children,
-}) => {
-  const [lang, setLangState] = useState<TLang>(initialLang);
-
+export const LangProvider: FC<TLangProviderProps> = ({ lang, onLangChange, children }) => {
   // Keep <html lang> in sync for screen readers / correct hyphenation.
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
 
   const setLang = (next: TLang) => {
-    setLangState(next);
-    onLangChange?.(next);
+    if (next !== lang) onLangChange?.(next);
   };
 
   return <LangCtx.Provider value={{ lang, setLang }}>{children}</LangCtx.Provider>;

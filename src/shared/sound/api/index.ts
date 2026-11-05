@@ -2,7 +2,7 @@ import type { TMusicId, TPlayOpts, TSoundId } from '../domain/types';
 
 /**
  * Imperative sound port (not a data source — no TanStack Query). The WebAudio
- * adapter synthesizes everything; the no-op adapter is used in tests and when
+ * adapter synthesizes the SFX and plays the music from pre-rendered files; the no-op adapter is used in tests and when
  * sound is unsupported.
  */
 export type TSoundApi = {

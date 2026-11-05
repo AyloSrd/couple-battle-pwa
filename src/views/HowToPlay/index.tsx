@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { Screen, PixelPanel, ModeIcon, type TModeIconMode, BackButton } from '@/shared/Chrome';
 import { clampIndex, indexFromKey, indexFromScroll } from './domain/carousel';
 import './view.css';
@@ -17,7 +17,7 @@ const SLIDES: TSlide[] = [
 export const HowToPlayView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
-  const sound = useSoundApi();
+  const sound = useSound();
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
 

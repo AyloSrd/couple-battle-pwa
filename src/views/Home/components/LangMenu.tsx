@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type FC } from 'react';
 import { LANGS, LANG_NAMES, useLang, useT, type TLang } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { ChipButton } from '@/shared/Chrome';
 
 /**
@@ -10,7 +10,7 @@ import { ChipButton } from '@/shared/Chrome';
 export const LangMenu: FC = () => {
   const t = useT();
   const { lang, setLang } = useLang();
-  const sound = useSoundApi();
+  const sound = useSound();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const chipRef = useRef<HTMLButtonElement>(null);

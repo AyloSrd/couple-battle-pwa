@@ -1,17 +1,17 @@
-import { useEffect, useState, type FC } from 'react';
+import { useRef, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT, useLang, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
-import { useDraftGame } from '@/shared/session';
+import { useSound } from '@/shared/sound';
+import { useDraft } from '@/shared/session';
 import {
   GameDifficulty,
   THEME_IDS,
+  newGame,
   type TGameDifficulty,
   type TThemeId,
 } from '@/shared/game';
-import { useQueryClient } from '@tanstack/react-query';
-import { useListQuestions, drawDeck, deckSizeFor } from '@/shared/questions';
-import { useGetSave, usePutSave, newGameSnapshot, saveKeys } from '@/shared/save';
+import { useQuestionsApi, drawDeck, deckSizeFor } from '@/shared/questions';
+import { selectProfile, useSave, useSaveStore } from '@/shared/save';
 import { Screen, PixelPanel, PixelButton, ProgressDots, BackButton } from '@/shared/Chrome';
 import './view.css';
 
@@ -69,12 +69,13 @@ export const DifficultyView: FC = () => {
   const t = useT();
   const { lang } = useLang();
   const navigate = useNavigate();
-  const sound = useSoundApi();
-  const { draft, setDifficulty, setThemes } = useDraftGame();
-  const queryClient = useQueryClient();
-  const allQuestions = useListQuestions({ lang });
-  const seenQuery = useGetSave('seenQuestionIds');
-  const putSnapshot = usePutSave('gameSnapshot');
+  const sound = useSound();
+  const { draft } = useDraft();
+  const questionsApi = useQuestionsApi();
+  const store = useSaveStore();
+  const { seenIds } = useSave(selectProfile);
+  // S8: Start fires once — a second tap before the navigation lands draws nothing.
+  const starting = useRef(false);
 
   const coupleCount = draft.roster?.length ?? 1;
   const [difficulty, setLocalDifficulty] = useState<TGameDifficulty>(GameDifficulty.Mix);
@@ -82,11 +83,7 @@ export const DifficultyView: FC = () => {
   const [themesOpen, setThemesOpen] = useState(false);
   const [deckEmpty, setDeckEmpty] = useState(false);
 
-  // Guard: reached without a roster/mode → back to setup.
-  useEffect(() => {
-    if (!draft.roster || !draft.mode) navigate({ to: '/setup' });
-  }, [draft.roster, draft.mode, navigate]);
-
+  // The route guard sends a missing roster / mode to Setup; this keeps the types honest.
   if (!draft.roster || !draft.mode) return null;
   const { roster, mode } = draft;
 
@@ -107,31 +104,26 @@ export const DifficultyView: FC = () => {
     navigate({ to: '/mode' });
   };
 
-  const startWith = (seenIds: number[]) => {
-    const deck = drawDeck(allQuestions.data ?? [], {
+  const startWith = (excludeIds: number[]) => {
+    if (starting.current) return;
+    const deck = drawDeck(questionsApi.list({ lang }), {
       mode,
       difficulty,
       themes,
-      seenIds,
+      seenIds: excludeIds,
       size: deckSizeFor(mode, coupleCount),
     });
     if (deck.length === 0) {
       setDeckEmpty(true);
       return;
     }
-    setDifficulty(difficulty);
-    setThemes(themes);
+    starting.current = true;
     sound.play('sfx.select');
-    putSnapshot.mutate(newGameSnapshot({ roster, mode, difficulty, themes, deck }), {
-      onSuccess: (saved) => {
-        // Prime the cache so Play reads the snapshot immediately (no stale-null gap).
-        queryClient.setQueryData(saveKeys.byKey('gameSnapshot'), saved);
-        navigate({ to: '/play' });
-      },
-    });
+    store.startGame(newGame({ roster, mode, difficulty, themes, deck })); // synchronous: saved before we move
+    navigate({ to: '/play', replace: true });
   };
 
-  const handleStart = () => startWith(seenQuery.data ?? []);
+  const handleStart = () => startWith(seenIds);
   const handleReshuffle = () => {
     setDeckEmpty(false);
     startWith([]); // ignore seen ids
@@ -207,7 +199,7 @@ export const DifficultyView: FC = () => {
         </PixelPanel>
       )}
 
-      <PixelButton className="cb-start" onClick={handleStart} disabled={!allQuestions.data}>
+      <PixelButton className="cb-start" onClick={handleStart}>
         {t('common.start')}
       </PixelButton>
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createWakeLockBrowserApi } from './browser';
+import { createBrowserWakeLock } from './useKeepAwake';
 
 type TFakeSentinel = { released: boolean; release(): Promise<void>; addEventListener(): void };
 
@@ -30,7 +30,7 @@ function stubWakeLock() {
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
-describe('createWakeLockBrowserApi', () => {
+describe('createBrowserWakeLock', () => {
   let wl: ReturnType<typeof stubWakeLock>;
   beforeEach(() => {
     wl = stubWakeLock();
@@ -40,7 +40,7 @@ describe('createWakeLockBrowserApi', () => {
   });
 
   it('releases a lock that is granted after release() (left Play mid-request)', async () => {
-    const api = createWakeLockBrowserApi();
+    const api = createBrowserWakeLock();
     void api.request();
     await api.release();
     wl.grant();
@@ -50,7 +50,7 @@ describe('createWakeLockBrowserApi', () => {
   });
 
   it('holds a lock when re-requested right after a late grant was dropped', async () => {
-    const api = createWakeLockBrowserApi();
+    const api = createBrowserWakeLock();
     void api.request();
     await api.release();
     wl.grant(); // arrives after release → dropped
@@ -64,7 +64,7 @@ describe('createWakeLockBrowserApi', () => {
   });
 
   it('keeps a single request in flight (StrictMode / visibilitychange)', async () => {
-    const api = createWakeLockBrowserApi();
+    const api = createBrowserWakeLock();
     void api.request();
     void api.request();
     wl.grant();
@@ -76,7 +76,7 @@ describe('createWakeLockBrowserApi', () => {
   });
 
   it('re-acquires right after a release (Play → Home → Resume)', async () => {
-    const api = createWakeLockBrowserApi();
+    const api = createBrowserWakeLock();
     void api.request();
     wl.grant();
     await flush();

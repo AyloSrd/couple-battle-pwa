@@ -1,18 +1,12 @@
 import './zodConfig';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import {
-  RouterProvider,
-  createRouter,
-  createHashHistory,
-} from '@tanstack/react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SAVE_DEFAULTS } from '@/shared/save';
-import { createContainer } from './container';
-import { Boot } from './Boot';
-import { bootHash } from './bootRoute';
+import { RouterProvider, createRouter, createHashHistory } from '@tanstack/react-router';
+import { boot, type TBooted } from './boot';
+import { renderCrashScreen } from './crash';
+import { CrashScreen } from './CrashScreen';
+import { SplashGate } from './SplashGate';
 import { routeTree } from '../routeTree.gen';
-import type { TRouterContext } from '../routes/__root';
 // Register the beforeinstallprompt listener at boot — it can fire before Home
 // mounts, so it must be captured here or it's missed.
 import '@/shared/pwa/installPrompt';
@@ -26,12 +20,14 @@ import '../styles/global.css';
 import '@/shared/Chrome/chrome.css';
 
 // GitHub Pages has no SPA rewrites — hash history keeps every route reachable.
-function createAppRouter(context: TRouterContext) {
+// The router context is the booted app: route guards read the save store and the draft.
+function createAppRouter(context: TBooted) {
   return createRouter({
     routeTree,
     history: createHashHistory(),
     context,
     defaultPreload: 'intent',
+    defaultErrorComponent: CrashScreen,
     scrollRestoration: true,
   });
 }
@@ -42,32 +38,28 @@ declare module '@tanstack/react-router' {
   }
 }
 
+/**
+ * Boot (IDB import → load → store → recover), then render. Anything that throws before React
+ * renders gets the provider-free crash screen instead of a blank page; saved data is untouched.
+ */
 async function bootstrap() {
-  // Before the router reads the URL: a reload mid new-game flow lands on Home.
-  const homeHash = bootHash(window.location.hash);
-  if (homeHash) window.history.replaceState(window.history.state, '', homeHash);
-
-  const queryClient = new QueryClient();
-  const container = await createContainer();
-  // Seed the splash's language from persisted settings (FR fallback baked in).
-  const settings = await container.saveApi.get('settings').catch(() => SAVE_DEFAULTS.settings);
-  const router = createAppRouter({ ...container, queryClient });
-
   const rootEl = document.getElementById('root');
   if (!rootEl) throw new Error('#root element not found');
-
-  // Sound, language and the save/questions ports are provided by the root route
-  // (src/routes/__root.tsx). The only thing rendered outside the router is the boot
-  // splash, which never blocks: the router mounts the moment it ends or fails.
-  createRoot(rootEl).render(
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <Boot lang={settings.lang}>
+  try {
+    const booted = await boot();
+    const router = createAppRouter(booted);
+    // The splash plays ahead of the router; its skip label uses the saved language.
+    createRoot(rootEl).render(
+      <StrictMode>
+        <SplashGate lang={booted.store.get().profile.settings.lang}>
           <RouterProvider router={router} />
-        </Boot>
-      </QueryClientProvider>
-    </StrictMode>,
-  );
+        </SplashGate>
+      </StrictMode>,
+    );
+  } catch (error) {
+    console.error('boot failed', error);
+    renderCrashScreen(rootEl);
+  }
 }
 
 void bootstrap();

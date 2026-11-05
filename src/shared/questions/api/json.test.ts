@@ -10,11 +10,18 @@ const others = { en: questionsEn as TQuestion[], es: questionsEs as TQuestion[] 
 const all = { fr, ...others };
 
 describe('bundled question catalogs', () => {
-  it('parse through the adapter for every language', async () => {
+  it('parse through the adapter for every language', () => {
     const api = createQuestionsJsonApi();
     for (const lang of ['fr', 'en', 'es'] as const) {
-      expect(await api.list({ lang })).toHaveLength(fr.length);
+      expect(api.list({ lang })).toHaveLength(fr.length);
     }
+  });
+
+  it('parses a language on first use only: an unused language is never read', () => {
+    const api = createQuestionsJsonApi({ fr, en: 'not a bank', es: null });
+    expect(api.list({ lang: 'fr' })).toHaveLength(fr.length);
+    expect(api.list({ lang: 'fr' })).toEqual(api.list({ lang: 'fr' }));
+    expect(() => api.list({ lang: 'en' })).toThrow(); // read, and rejected, only when asked for
   });
 
   it('have unique ids', () => {

@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Boot, SPLASH_SEEN_KEY } from './Boot';
+import { SplashGate, SPLASH_SEEN_KEY } from './SplashGate';
 import * as warm from './warmMediaCache';
 
-describe('Boot', () => {
+describe('SplashGate', () => {
   beforeEach(() => {
     sessionStorage.clear();
     vi.spyOn(warm, 'warmMediaCache').mockResolvedValue(undefined);
@@ -17,9 +17,9 @@ describe('Boot', () => {
 
   it('holds the app behind the splash on a cold start, then mounts it on skip', () => {
     render(
-      <Boot lang="fr">
+      <SplashGate lang="fr">
         <p>the app</p>
-      </Boot>,
+      </SplashGate>,
     );
     expect(screen.queryByText('the app')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: "Passer l'intro" }));
@@ -30,9 +30,9 @@ describe('Boot', () => {
   it('skips the splash for the rest of the session (reload, update reload)', () => {
     sessionStorage.setItem(SPLASH_SEEN_KEY, '1');
     render(
-      <Boot lang="en">
+      <SplashGate lang="en">
         <p>the app</p>
-      </Boot>,
+      </SplashGate>,
     );
     expect(screen.getByText('the app')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Skip the intro' })).toBeNull();

@@ -1,25 +1,25 @@
-import {
-  SAVE_DEFAULTS,
-  SAVE_SCHEMAS,
-  type TSaveShape,
-} from '../domain/types';
+import { createSaveLocalStorageApi, type TStringStorage } from './localStorage';
 import type { TSaveApi } from './index';
 
-/**
- * In-memory save for tests and the pre-persist new-game session. Seed with a
- * partial fixture; unspecified keys fall back to defaults.
- */
-export function createSaveMemoryApi(seed?: Partial<TSaveShape>): TSaveApi {
-  const store: TSaveShape = { ...structuredClone(SAVE_DEFAULTS), ...seed };
-
+/** A Web Storage twin over a Map: strings in, strings out, like `localStorage`. */
+export function createMemoryStorage(seed: Record<string, string> = {}): TStringStorage & { keys(): string[] } {
+  const items = new Map(Object.entries(seed));
   return {
-    async get(key) {
-      return structuredClone(store[key]);
+    getItem: (key) => items.get(key) ?? null,
+    setItem: (key, value) => {
+      items.set(key, String(value));
     },
-    async put(key, value) {
-      const parsed = SAVE_SCHEMAS[key].parse(value) as TSaveShape[typeof key];
-      store[key] = parsed;
-      return structuredClone(parsed);
+    removeItem: (key) => {
+      items.delete(key);
     },
+    keys: () => [...items.keys()],
   };
+}
+
+/**
+ * In-memory save for tests and a session where storage is off. It runs the real adapter over
+ * strings, so a value that cannot survive JSON fails here exactly as it would in the browser.
+ */
+export function createSaveMemoryApi(storage: TStringStorage = createMemoryStorage()): TSaveApi {
+  return createSaveLocalStorageApi(() => storage);
 }

@@ -20,6 +20,26 @@ const sameSlice = {
   slice: '{{ from.captured.slice }}',
 };
 
+/**
+ * Persisted data has one owner, the save store (ARCHITECTURE "Data safety"). Browser storage
+ * is reachable only from the adapters that own it; each override below lifts exactly one key.
+ * Rule options do not merge across blocks, so every list is built from these tables.
+ */
+const STORAGE_MESSAGE = 'Persisted data goes through the save store (shared/save); see ARCHITECTURE.md "Data safety".';
+const STORAGE_GLOBALS = ['localStorage', 'indexedDB'];
+const restrictStorage = (allowed = []) => {
+  const names = STORAGE_GLOBALS.filter((name) => !allowed.includes(name));
+  return {
+    'no-restricted-globals': ['error', ...names.map((name) => ({ name, message: STORAGE_MESSAGE }))],
+    'no-restricted-properties': [
+      'error',
+      ...['window', 'globalThis', 'self'].flatMap((object) =>
+        names.map((property) => ({ object, property, message: STORAGE_MESSAGE })),
+      ),
+    ],
+  };
+};
+
 export default tseslint.config(
   {
     ignores: ['dist', 'dev-dist', 'handoff', 'public', 'src/routeTree.gen.ts'],
@@ -88,6 +108,17 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
           ignoreRestSiblings: true,
           caughtErrors: 'none',
+        },
+      ],
+
+      ...restrictStorage(),
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: '@tanstack/react-query', message: 'Save data lives in the save store (useSave); there is no async cache.' },
+            { name: 'idb', message: 'IndexedDB is gone: the save is localStorage (shared/save/api/localStorage.ts).' },
+          ],
         },
       ],
 
@@ -233,11 +264,18 @@ export default tseslint.config(
     },
   },
 
+  // The only modules that touch browser storage, each for its own key.
+  { files: ['src/shared/save/api/localStorage.ts'], rules: restrictStorage(['localStorage']) },
+  { files: ['src/shared/save/api/idbImport.ts'], rules: restrictStorage(['indexedDB']) },
+  // A browser UI flag (iOS install hint), not save data.
+  { files: ['src/shared/pwa/iosHint.ts'], rules: restrictStorage(['localStorage']) },
+
   // Test files & test harness: TS/vitest handle these; keep boundaries off.
   {
     files: ['**/*.test.{ts,tsx}', 'src/test/**'],
     rules: {
       'boundaries/dependencies': 'off',
+      ...restrictStorage(STORAGE_GLOBALS),
     },
   },
 );

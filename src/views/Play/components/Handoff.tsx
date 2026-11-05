@@ -1,6 +1,6 @@
 import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { PixelButton } from '@/shared/Chrome';
 import { actorOf } from '../domain/actor';
 import type { TGameAt } from '../domain/machine';
@@ -20,7 +20,7 @@ type TProps = {
  */
 export const Handoff: FC<TProps> = ({ game, onConfirm }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
   const actor = actorOf(game);
   const name = actor.kind === 'player' ? actor.team.players[actor.playerIdx] : '';
 

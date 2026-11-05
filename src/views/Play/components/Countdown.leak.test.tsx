@@ -1,12 +1,6 @@
-import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SaveApiProvider } from '@/shared/save';
-import { createSaveMemoryApi } from '@/shared/save/api/memory';
-import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
+import { act } from '@testing-library/react';
+import { renderWithApp } from '@/test/renderApp';
 import { Countdown } from './Countdown';
 
 const STEP_MS = 700;
@@ -23,21 +17,7 @@ function balance(add: { mock: { calls: unknown[][] } }, remove: { mock: { calls:
 }
 
 function mount(onDone: () => void) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const view = render(
-    <StrictMode>
-      <QueryClientProvider client={qc}>
-        <SaveApiProvider api={createSaveMemoryApi()}>
-          <LangProvider initialLang="fr">
-            <SoundApiProvider api={createSoundNoopApi()}>
-              <Countdown onDone={onDone} />
-            </SoundApiProvider>
-          </LangProvider>
-        </SaveApiProvider>
-      </QueryClientProvider>
-    </StrictMode>,
-  );
-  return { view, qc };
+  return { view: renderWithApp(<Countdown onDone={onDone} />, { lang: 'fr', strict: true }) };
 }
 
 describe('Countdown — leaks', () => {
@@ -55,13 +35,12 @@ describe('Countdown — leaks', () => {
     const docAdd = vi.spyOn(document, 'addEventListener');
     const docRemove = vi.spyOn(document, 'removeEventListener');
     const onDone = vi.fn();
-    const { view, qc } = mount(onDone);
+    const { view } = mount(onDone);
 
     act(() => {
       vi.advanceTimersByTime(STEP_MS + 1);
     });
     view.unmount();
-    qc.clear();
 
     expect(vi.getTimerCount()).toBe(0);
     act(() => {
@@ -74,13 +53,12 @@ describe('Countdown — leaks', () => {
 
   it('a full run fires onDone exactly once (the StrictMode first pass is cancelled) and leaves no timer', () => {
     const onDone = vi.fn();
-    const { view, qc } = mount(onDone);
+    const { view } = mount(onDone);
     act(() => {
       vi.advanceTimersByTime(3 * STEP_MS + GO_MS);
     });
     expect(onDone).toHaveBeenCalledTimes(1);
     view.unmount();
-    qc.clear();
     expect(vi.getTimerCount()).toBe(0);
   });
 });

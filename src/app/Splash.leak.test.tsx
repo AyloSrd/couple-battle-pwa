@@ -9,7 +9,7 @@ import * as warm from './warmMediaCache';
 function mount(onDone: () => void) {
   return render(
     <StrictMode>
-      <LangProvider initialLang="en">
+      <LangProvider lang="en">
         <Splash onDone={onDone} />
       </LangProvider>
     </StrictMode>,

@@ -8,7 +8,7 @@ import type { TQuestionsApi } from './index';
  */
 export function createQuestionsMemoryApi(seed: TQuestion[] = []): TQuestionsApi {
   return {
-    async list({ lang: _lang, ...rest }) {
+    list({ lang: _lang, ...rest }) {
       return filterQuestions(seed, rest);
     },
   };

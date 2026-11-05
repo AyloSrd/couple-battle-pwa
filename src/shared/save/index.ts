@@ -1,19 +1,27 @@
-export { SaveApiProvider, useSaveApi } from './provider';
-export { useGetSave, saveQueryOptions, saveKeys } from './application/queries';
-export { usePutSave } from './application/mutations';
 export {
+  SaveStoreProvider,
+  useSaveStore,
+  useSave,
+  selectGame,
+  selectProfile,
+  selectSettings,
+  selectStatus,
+  selectIssues,
+} from './application/ctx';
+export { createSaveStore, type TSaveStore, type TSaveState, type TSaveStatus } from './application/store';
+export {
+  ZProfileSchema,
   ZSettingsSchema,
-  ZGameSnapshotSchema,
-  SAVE_DEFAULTS,
-  SAVE_SCHEMAS,
+  defaultProfile,
+  type TProfile,
   type TSettings,
-  type TSeenQuestionIds,
   type TGuidelinesSeen,
   type TSoloBest,
-  type TGameSnapshot,
-  type THistoryEntry,
-  type TSaveShape,
+  type TSoloResult,
+  type TSaveIssue,
   type TSaveKey,
+  type TSaveValues,
 } from './domain/types';
-export { newGameSnapshot } from './domain/services';
-export type { TSaveApi } from './api';
+export { SAVE_VERSION, encode, decode, type TDecoded } from './domain/codec';
+export { mergeFinish, isGameStale, GAME_MAX_AGE_MS } from './domain/services';
+export type { TSaveApi, TLoaded, TLoadedGame } from './api';

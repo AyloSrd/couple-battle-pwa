@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { Screen, PixelPanel, BackButton } from '@/shared/Chrome';
 import './view.css';
 
@@ -13,7 +13,7 @@ const POSTER_URL = `${import.meta.env.BASE_URL}splash/ninou-poster.webp`;
 export const AboutView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
-  const sound = useSoundApi();
+  const sound = useSound();
 
   const handleBack = () => {
     sound.play('sfx.back');

@@ -2,18 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import type { THistoryEntry, TMode } from '@/shared/game';
 import type { TGameAt } from '../domain/machine';
 import { FinalScreen } from './FinalScreen';
 
 function mount(ui: ReactElement, lang: 'fr' | 'en' = 'fr') {
-  return render(
-    <LangProvider initialLang={lang}>
-      <SoundApiProvider api={createSoundNoopApi()}>{ui}</SoundApiProvider>
-    </LangProvider>,
-  );
+  return render(<LangProvider lang={lang}>{ui}</LangProvider>);
 }
 
 const roster = [

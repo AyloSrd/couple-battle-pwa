@@ -1,6 +1,6 @@
 import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import { PixelPanel, PixelButton, Chip, ProgressDots, ModeIcon, modeIconSmall } from '@/shared/Chrome';
 import type { TQuestion } from '@/shared/questions';
 import { questionText, segmentLength, type TGameAt } from '../domain/machine';
@@ -16,7 +16,7 @@ type TProps = {
 /** V-DilemmaQuestion: the shared "Qui de vous deux…?" prompt before the countdown. */
 export const DilemmaQuestion: FC<TProps> = ({ game, question, onReady }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
   const total = segmentLength(game.ctx);
   const q = game.step.q;
 

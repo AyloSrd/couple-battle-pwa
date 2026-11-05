@@ -1,27 +1,26 @@
 import { useEffect, useMemo, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useLang, useT } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
-import { useWakeLockApi } from '@/shared/wakeLock';
-import { useGetSave, usePutSave } from '@/shared/save';
-import { useDraftGame } from '@/shared/session';
+import { useSound } from '@/shared/sound';
+import { useKeepAwake } from '@/shared/wakeLock';
+import { useSaveStore } from '@/shared/save';
+import { useDraft } from '@/shared/session';
 import { Screen, PixelButton } from '@/shared/Chrome';
-import { newGame, type TGame, type TResult } from '@/shared/game';
-import { useListQuestions, type TQuestion } from '@/shared/questions';
+import { newGame, type TResult } from '@/shared/game';
+import { useQuestionsApi, type TQuestion } from '@/shared/questions';
+import { useGame } from './application/game';
 import {
-  reduce,
   isAt,
   cardOf,
   flashNames,
   RAPID_KINDS,
-  type TGameEventBody,
   type TVerdict,
 } from './domain/machine';
 import { DilemmaQuestion } from './components/DilemmaQuestion';
 import { Countdown } from './components/Countdown';
 import { DilemmaResolve } from './components/DilemmaResolve';
 import { Scoreboard } from './components/Scoreboard';
-import { FinalScreen, type TSoloResult } from './components/FinalScreen';
+import { FinalScreen } from './components/FinalScreen';
 import { PauseSheet } from './components/PauseSheet';
 import { PassPhone } from './components/PassPhone';
 import { SideGate } from './components/SideGate';
@@ -34,47 +33,22 @@ import { RapidFire } from './components/RapidFire';
 export const PlayView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
-  const sound = useSoundApi();
-  const wakeLock = useWakeLockApi();
-  const { reset } = useDraftGame();
+  const sound = useSound();
+  const store = useSaveStore();
+  const { draftStore } = useDraft();
   const { lang } = useLang();
+  const questionsApi = useQuestionsApi();
+  const { game, dispatch, soloResult } = useGame();
 
-  const snapshotQuery = useGetSave('gameSnapshot');
-  const seenQuery = useGetSave('seenQuestionIds');
-  const soloBestQuery = useGetSave('soloBest');
-  const putSnapshot = usePutSave('gameSnapshot');
-  const putSeen = usePutSave('seenQuestionIds');
-  const putSolo = usePutSave('soloBest');
   // The deck holds ids only: the text comes from the active language's bank.
-  const bankQuery = useListQuestions({ lang });
-  const bank = useMemo(() => new Map((bankQuery.data ?? []).map((q) => [q.id, q])), [bankQuery.data]);
+  const bank = useMemo(() => new Map(questionsApi.list({ lang }).map((q) => [q.id, q])), [questionsApi, lang]);
 
-  const [game, setGame] = useState<TGame | null>(null);
   const [paused, setPaused] = useState(false);
-  const [soloResult, setSoloResult] = useState<TSoloResult | null>(null);
   // The READY countdown is a UI beat, not a step: it runs while the game is still at the
   // `seq` it started on (any transition ends it), then dispatches `next`.
   const [countdownSeq, setCountdownSeq] = useState<number | null>(null);
 
-  // Initialize the machine from the snapshot once it loads (resume or new game).
-  useEffect(() => {
-    if (game === null && snapshotQuery.data) setGame(snapshotQuery.data.game);
-  }, [game, snapshotQuery.data]);
-
-  // No game to play → back to Home (only once the query has genuinely settled).
-  useEffect(() => {
-    if (game === null && snapshotQuery.isSuccess && !snapshotQuery.isFetching && !snapshotQuery.data) {
-      navigate({ to: '/' });
-    }
-  }, [game, snapshotQuery.isSuccess, snapshotQuery.isFetching, snapshotQuery.data, navigate]);
-
-  // Keep the screen awake while in-game.
-  useEffect(() => {
-    void wakeLock.request();
-    return () => {
-      void wakeLock.release();
-    };
-  }, [wakeLock]);
+  useKeepAwake();
 
   // Tense loop during the rapid-fire finale; silent otherwise.
   const kind = game?.step.kind;
@@ -83,33 +57,6 @@ export const PlayView: FC = () => {
     else sound.music(null);
     return () => sound.music(null);
   }, [kind, sound]);
-
-  const commitFinal = ({ ctx: final }: TGame) => {
-    const ids = final.deck.map((card) => card.id);
-    const seen = seenQuery.data ?? [];
-    putSeen.mutate(Array.from(new Set([...seen, ...ids])));
-    putSnapshot.mutate(null);
-
-    if (final.roster.length === 1) {
-      const team = final.roster[0];
-      const solo = soloBestQuery.data ?? { flash: 0, dilemma: 0, ultime: 0 };
-      const score = team ? (final.scores[team.teamId] ?? 0) : 0;
-      const prevBest = solo[final.mode];
-      setSoloResult({ isBest: score > prevBest, points: score, best: Math.max(prevBest, score) });
-      if (score > prevBest) putSolo.mutate({ ...solo, [final.mode]: score });
-    }
-  };
-
-  /** The only way the game moves: the event carries the seq THIS render showed, so a double
-   *  tap or a late timer is ignored by the reducer (same object → no render, no write). */
-  const dispatch = (event: TGameEventBody) => {
-    if (!game) return;
-    const next = reduce(game, { ...event, seq: game.ctx.seq });
-    if (next === game) return;
-    setGame(next);
-    if (next.step.kind === 'final') commitFinal(next);
-    else putSnapshot.mutate({ game: next, savedAt: Date.now() });
-  };
 
   const handleReady = () => {
     if (!game) return;
@@ -174,31 +121,34 @@ export const PlayView: FC = () => {
   const handleRestart = () => {
     if (!game) return;
     const { roster, mode, difficulty, themes, deck } = game.ctx;
-    const fresh = newGame({ roster, mode, difficulty, themes, deck }); // same deck
-    setGame(fresh);
+    store.startGame(newGame({ roster, mode, difficulty, themes, deck })); // same deck
     setCountdownSeq(null);
-    putSnapshot.mutate({ game: fresh, savedAt: Date.now() });
     sound.duck(false);
     setPaused(false);
   };
   const handleQuit = () => {
     sound.play('sfx.back');
     sound.duck(false);
-    putSnapshot.mutate(null);
+    store.quitGame();
     navigate({ to: '/' });
   };
 
   const handleRematch = () => {
+    if (!game) return;
     sound.play('sfx.select');
-    navigate({ to: '/mode' }); // same roster still in the draft
+    // From the game itself, so Rematch also works after a cold-start resume.
+    draftStore.set({ roster: game.ctx.roster, mode: null });
+    store.leaveGame();
+    navigate({ to: '/mode' });
   };
   const handleNewGame = () => {
     sound.play('sfx.tap');
-    reset();
+    draftStore.clear();
+    store.leaveGame();
     navigate({ to: '/' });
   };
 
-  if (snapshotQuery.isPending || bankQuery.isPending || !game) return null;
+  if (!game) return null;
 
   const card = cardOf(game);
   const question: TQuestion | undefined = card ? bank.get(card.id) : undefined;
@@ -279,3 +229,5 @@ export const PlayView: FC = () => {
     </Screen>
   );
 };
+
+export { PlayCrash } from './components/PlayCrash';

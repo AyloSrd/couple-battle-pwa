@@ -12,8 +12,8 @@ function readSplashSeen(): boolean {
   }
 }
 
-type TBootProps = PropsWithChildren<{
-  /** Persisted language, for the splash's skip label (the router has its own provider). */
+type TSplashGateProps = PropsWithChildren<{
+  /** Saved language, for the splash's skip label (the router mounts its own providers). */
   lang: TLang;
 }>;
 
@@ -23,7 +23,7 @@ type TBootProps = PropsWithChildren<{
  * mid-game goes straight back to the current route instead of replaying the clip.
  * The app (children) mounts only when the splash is done — it never blocks on it.
  */
-export const Boot: FC<TBootProps> = ({ lang, children }) => {
+export const SplashGate: FC<TSplashGateProps> = ({ lang, children }) => {
   const [done, setDone] = useState(readSplashSeen);
 
   const handleDone = () => {
@@ -37,7 +37,7 @@ export const Boot: FC<TBootProps> = ({ lang, children }) => {
 
   if (done) return <>{children}</>;
   return (
-    <LangProvider initialLang={lang}>
+    <LangProvider lang={lang}>
       <Splash onDone={handleDone} />
     </LangProvider>
   );

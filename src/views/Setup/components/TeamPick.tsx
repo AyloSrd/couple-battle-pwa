@@ -1,6 +1,6 @@
 import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
 import type { TAvatarId } from '@/shared/game';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { takenAvatars, type TSetupState } from '../domain/machine';
@@ -25,7 +25,7 @@ function pickTitle(full: string): string {
  */
 export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
   const taken = takenAvatars(state);
   const [toast, setToast] = useState(false);
 

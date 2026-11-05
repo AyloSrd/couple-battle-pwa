@@ -1,25 +1,18 @@
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useT } from '@/shared/i18n';
-import { useGetSave, usePutSave } from '@/shared/save';
-import { useSoundApi } from '@/shared/sound';
-import { useDraftGame } from '@/shared/session';
-import { useInstallPrompt } from '@/shared/pwa';
-import { Screen, PixelPanel, PixelButton, Logo } from '@/shared/Chrome';
+import { selectGame, selectIssues, selectSettings, useSave, useSaveStore } from '@/shared/save';
+import { useSound } from '@/shared/sound';
+import { useDraft } from '@/shared/session';
+import { markIosHintSeen, readIosHintSeen, useInstallPrompt } from '@/shared/pwa';
+import { Screen, PixelPanel, PixelButton, Logo, Notice } from '@/shared/Chrome';
 import chars600 from '@/assets/art/chars-home-600.webp';
 import chars900 from '@/assets/art/chars-home-900.webp';
 import { LangMenu } from './components/LangMenu';
 import './view.css';
 
-const IOS_HINT_KEY = 'cb-ios-hint-seen';
-
-function readIosHintSeen(): boolean {
-  try {
-    return localStorage.getItem(IOS_HINT_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
+/** How long "your last game couldn't be restored" stays up. */
+const DISCARDED_NOTICE_MS = 4000;
 
 /** Settings gear — inline so Home needs no extra image file. Decorative: the button carries the label. */
 const GearIcon: FC = () => (
@@ -31,13 +24,14 @@ const GearIcon: FC = () => (
 
 export const HomeView: FC = () => {
   const t = useT();
-  const sound = useSoundApi();
+  const sound = useSound();
   const navigate = useNavigate();
-  const { reset } = useDraftGame();
-  const snapshotQuery = useGetSave('gameSnapshot');
-  const settingsQuery = useGetSave('settings');
-  const putSnapshot = usePutSave('gameSnapshot');
-  const hasResume = Boolean(snapshotQuery.data);
+  const { draftStore } = useDraft();
+  const store = useSaveStore();
+  const game = useSave(selectGame);
+  const issues = useSave(selectIssues);
+  // A finished game stays in memory for its Final screen: it is not something to resume.
+  const hasResume = game !== null && game.step.kind !== 'final';
 
   const { platform, promptInstall } = useInstallPrompt();
   const [installDismissed, setInstallDismissed] = useState(false);
@@ -45,8 +39,8 @@ export const HomeView: FC = () => {
   const showAndroidInstall = platform === 'android' && !installDismissed;
   const showIosInstall = platform === 'ios' && !installDismissed && !iosHintSeen;
 
-  // Menu music while on Home (only once audio is on); stops when leaving.
-  const soundOn = settingsQuery.data?.sound ?? false;
+  // Menu music while on Home (only when sound is on); stops when leaving.
+  const soundOn = useSave(selectSettings).sound;
   useEffect(() => {
     if (soundOn) sound.music('mus.menu');
     return () => sound.music(null);
@@ -55,7 +49,8 @@ export const HomeView: FC = () => {
   const handlePlay = () => {
     sound.unlock();
     sound.play('sfx.select');
-    reset();
+    draftStore.clear();
+    store.leaveGame();
     navigate({ to: '/setup' });
   };
   const handleHowto = () => {
@@ -73,8 +68,9 @@ export const HomeView: FC = () => {
   };
   const handleDiscard = () => {
     sound.play('sfx.back');
-    putSnapshot.mutate(null);
+    store.quitGame();
   };
+  const handleDiscardedShown = () => store.dismissIssue('gameDiscarded');
   const handleInstall = () => {
     sound.play('sfx.tap');
     void promptInstall();
@@ -82,13 +78,7 @@ export const HomeView: FC = () => {
   const handleDismissInstall = () => {
     sound.play('sfx.back');
     setInstallDismissed(true);
-    if (platform === 'ios') {
-      try {
-        localStorage.setItem(IOS_HINT_KEY, '1');
-      } catch {
-        // storage unavailable — hint just reappears next visit.
-      }
-    }
+    if (platform === 'ios') markIosHintSeen();
   };
 
   return (
@@ -158,6 +148,12 @@ export const HomeView: FC = () => {
             {t('home.install.dismiss')}
           </PixelButton>
         </PixelPanel>
+      )}
+
+      {issues.includes('gameDiscarded') && (
+        <Notice tone="error" autoHideMs={DISCARDED_NOTICE_MS} onHide={handleDiscardedShown}>
+          {t('save.gameDiscarded')}
+        </Notice>
       )}
     </Screen>
   );

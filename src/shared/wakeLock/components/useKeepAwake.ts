@@ -1,4 +1,4 @@
-import type { TWakeLockApi } from './index';
+import { useEffect } from 'react';
 
 // Minimal structural types — avoids depending on lib.dom shipping the Wake Lock API.
 type TWakeLockSentinel = {
@@ -13,7 +13,8 @@ function getWakeLock(): TNavigatorWakeLock | null {
 }
 
 /**
- * Screen wake lock backed by `navigator.wakeLock`. Fails silently if denied.
+ * Screen wake lock backed by `navigator.wakeLock` (UI output: no port, no provider). Fails
+ * silently if denied or unsupported (iOS < 16.4, jsdom).
  *
  * `wl.request` is async, so `release()` (unmount) or a second `acquire`
  * (visibilitychange, StrictMode) can land while a request is in flight.
@@ -21,7 +22,7 @@ function getWakeLock(): TNavigatorWakeLock | null {
  * `release()` is dropped on arrival — otherwise it would be held with nobody
  * left to free it, keeping the screen awake outside the game.
  */
-export function createWakeLockBrowserApi(): TWakeLockApi {
+export function createBrowserWakeLock(): { request(): Promise<void>; release(): Promise<void> } {
   let sentinel: TWakeLockSentinel | null = null;
   let active = false;
   let pending: Promise<void> | null = null;
@@ -74,4 +75,16 @@ export function createWakeLockBrowserApi(): TWakeLockApi {
       }
     },
   };
+}
+
+const wakeLock = createBrowserWakeLock();
+
+/** Keep the screen awake while the calling screen is mounted (Play). */
+export function useKeepAwake(): void {
+  useEffect(() => {
+    void wakeLock.request();
+    return () => {
+      void wakeLock.release();
+    };
+  }, []);
 }

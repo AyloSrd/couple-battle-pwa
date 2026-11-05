@@ -1,15 +1,13 @@
 import { useEffect, type FC } from 'react';
 import { useLang, useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
+import { useSound } from '@/shared/sound';
+import type { TSoloResult } from '@/shared/save';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { rankTeams, type TGameAt } from '../domain/machine';
 import { joinNames, resolveOutcome } from '../domain/outcome';
 import { gameStats } from '../domain/stats';
 import { TeamStats } from './TeamStats';
 import '../results.css';
-
-/** Solo record outcome (only for a 1-couple game). */
-export type TSoloResult = { isBest: boolean; points: number; best: number };
 
 type TFinalScreenProps = {
   game: TGameAt<'final'>;
@@ -22,7 +20,7 @@ type TFinalScreenProps = {
 export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame, solo }) => {
   const t = useT();
   const { lang } = useLang();
-  const sound = useSoundApi();
+  const sound = useSound();
   const { history } = game.ctx;
   const ranked = rankTeams(game.ctx);
   const outcome = resolveOutcome(ranked);

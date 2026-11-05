@@ -1,10 +1,7 @@
 import { StrictMode, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import { DraftGameProvider } from '@/shared/session';
+import { createTestApp, TestProviders } from '@/test/renderApp';
 import { fr } from '@/data/strings.fr';
 
 const navigate = vi.fn();
@@ -43,6 +40,7 @@ describe('SetupView — leaks (StrictMode, fake timers)', () => {
   });
 
   it('drives the whole wizard (2 couples, taken tile, back) and unmounts clean', () => {
+    const app = createTestApp({ lang: 'fr' });
     const addW = vi.spyOn(window, 'addEventListener');
     const remW = vi.spyOn(window, 'removeEventListener');
     const addD = vi.spyOn(document, 'addEventListener');
@@ -50,13 +48,9 @@ describe('SetupView — leaks (StrictMode, fake timers)', () => {
 
     const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={createSoundNoopApi()}>
-            <DraftGameProvider>
-              <Host />
-            </DraftGameProvider>
-          </SoundApiProvider>
-        </LangProvider>
+        <TestProviders app={app}>
+          <Host />
+        </TestProviders>
       </StrictMode>,
     );
 
@@ -80,15 +74,12 @@ describe('SetupView — leaks (StrictMode, fake timers)', () => {
   });
 
   it('finishing the last couple seeds the roster once and navigates to /mode', () => {
+    const app = createTestApp({ lang: 'fr' });
     const { unmount } = render(
       <StrictMode>
-        <LangProvider initialLang="fr">
-          <SoundApiProvider api={createSoundNoopApi()}>
-            <DraftGameProvider>
-              <Host />
-            </DraftGameProvider>
-          </SoundApiProvider>
-        </LangProvider>
+        <TestProviders app={app}>
+          <Host />
+        </TestProviders>
       </StrictMode>,
     );
     fireEvent.click(screen.getByRole('button', { name: '1' }));
@@ -101,6 +92,7 @@ describe('SetupView — leaks (StrictMode, fake timers)', () => {
     });
     expect(navigate).toHaveBeenCalledWith({ to: '/mode' });
     expect(navigate).toHaveBeenCalledTimes(1);
+    expect(app.draft.get().roster).toEqual([{ teamId: 't1', avatarId: 'otters', players: ['Ana', 'Bo'] }]);
     flushJsdomZeroTimers();
     expect(vi.getTimerCount()).toBe(0);
     unmount();

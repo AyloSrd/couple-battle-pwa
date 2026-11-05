@@ -18,3 +18,4 @@ export { PlayerAvatar } from './PlayerAvatar';
 export { BackButton } from './BackButton';
 export { Logo } from './Logo';
 export { ModeIcon, modeIconSmall, type TModeIconMode } from './ModeIcon';
+export { Notice } from './Notice';

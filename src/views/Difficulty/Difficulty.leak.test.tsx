@@ -1,16 +1,8 @@
-import { StrictMode, useEffect, useState, type FC, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
-import { SaveApiProvider } from '@/shared/save';
-import { createSaveMemoryApi } from '@/shared/save/api/memory';
-import { QuestionsApiProvider } from '@/shared/questions';
-import { createQuestionsMemoryApi } from '@/shared/questions/api/memory';
-import { DraftGameProvider, useDraftGame } from '@/shared/session';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { Mode, THEME_IDS } from '@/shared/game';
+import { renderWithApp } from '@/test/renderApp';
+import { expectSynced } from '@/test/expectSynced';
 import { DifficultyView } from './index';
 
 const navigate = vi.fn();
@@ -26,19 +18,6 @@ const QUESTIONS = THEME_IDS.flatMap((theme, i) =>
     name: `Q {name} ${theme} ${difficulty}`,
   })),
 );
-
-/** Seeds the draft the way Setup + Mode would, then renders the view. */
-const Seeded: FC<{ children: ReactNode }> = ({ children }) => {
-  const { draft, setRoster, setMode } = useDraftGame();
-  const [seeded, setSeeded] = useState(false);
-  useEffect(() => {
-    setRoster([{ teamId: 't1', avatarId: THEME_AVATAR, players: ['A', 'B'] }]);
-    setMode(Mode.Flash);
-    setSeeded(true);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- test seeding, run once
-  return seeded && draft.roster && draft.mode ? <>{children}</> : null;
-};
-const THEME_AVATAR = 'otters' as const;
 
 type TListenerCounts = Record<string, { add: number; remove: number }>;
 
@@ -74,35 +53,14 @@ describe('DifficultyView — leak check (StrictMode, fake timers)', () => {
   });
 
   it('leaves no timer and no unbalanced listener after driving the view and unmounting', async () => {
-    // gcTime: Infinity — react-query's own cache-gc timers (5 min) would otherwise
-    // show up as pending timers; this test is about timers the component owns.
-    const qc = new QueryClient({
-      defaultOptions: {
-        queries: { retry: false, gcTime: Infinity },
-        mutations: { gcTime: Infinity },
-      },
-    });
     const { counts, restore } = spyListeners();
 
-    const view = render(
-      <StrictMode>
-        <QueryClientProvider client={qc}>
-          <SaveApiProvider api={createSaveMemoryApi()}>
-            <SoundApiProvider api={createSoundNoopApi()}>
-              <QuestionsApiProvider api={createQuestionsMemoryApi(QUESTIONS)}>
-                <LangProvider initialLang="en">
-                  <DraftGameProvider>
-                    <Seeded>
-                      <DifficultyView />
-                    </Seeded>
-                  </DraftGameProvider>
-                </LangProvider>
-              </QuestionsApiProvider>
-            </SoundApiProvider>
-          </SaveApiProvider>
-        </QueryClientProvider>
-      </StrictMode>,
-    );
+    // The draft as Setup + Mode leave it.
+    const view = renderWithApp(<DifficultyView />, {
+      strict: true,
+      questions: QUESTIONS,
+      draft: { roster: [{ teamId: 't1', avatarId: 'otters', players: ['A', 'B'] }], mode: Mode.Flash },
+    });
     const flush = () => act(() => vi.advanceTimersByTimeAsync(1000));
 
     await flush();
@@ -113,12 +71,18 @@ describe('DifficultyView — leak check (StrictMode, fake timers)', () => {
     const themeChips = screen.getAllByRole('button', { pressed: true });
     fireEvent.click(themeChips[themeChips.length - 1]!);
     await flush();
-    fireEvent.click(screen.getByRole('button', { name: /let's go/i }));
+    const start = screen.getByRole('button', { name: /let's go/i });
+    fireEvent.click(start);
+    fireEvent.click(start); // S8: a double tap starts one game
     await flush();
-    expect(navigate).toHaveBeenCalledWith({ to: '/play' });
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith({ to: '/play', replace: true });
+    const game = view.app.store.get().game;
+    expect(game?.ctx).toMatchObject({ mode: 'flash', difficulty: 'easy', seq: 0 });
+    expect(game?.ctx.deck).toHaveLength(4);
+    expectSynced(view.app.store, view.app.api);
 
     view.unmount();
-    qc.clear();
     restore();
 
     expect(vi.getTimerCount()).toBe(0);

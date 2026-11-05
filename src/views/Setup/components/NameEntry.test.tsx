@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { LangProvider } from '@/shared/i18n';
-import { SoundApiProvider } from '@/shared/sound';
-import { createSoundNoopApi } from '@/shared/sound/api/noop';
 import { playerArtUrl } from '@/shared/Chrome';
 import { fr } from '@/data/strings.fr';
 import { initSetup, reduceSetup } from '../domain/machine';
@@ -17,10 +15,8 @@ function mountNames(avatarId: (typeof PICKER_TEAMS)[number], name1 = '', name2 =
   state = reduceSetup(state, { type: 'setName', which: 2, value: name2 });
   if (confirm) state = reduceSetup(state, { type: 'confirmNames' });
   return render(
-    <LangProvider initialLang="fr">
-      <SoundApiProvider api={createSoundNoopApi()}>
-        <NameEntry state={state} onChangeName={vi.fn()} onConfirm={vi.fn()} />
-      </SoundApiProvider>
+    <LangProvider lang="fr">
+      <NameEntry state={state} onChangeName={vi.fn()} onConfirm={vi.fn()} />
     </LangProvider>,
   );
 }

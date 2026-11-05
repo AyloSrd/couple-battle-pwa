@@ -1,8 +1,8 @@
 import { useEffect, useState, type FC, type ReactNode } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { LANGS, LANG_NAMES, useT, useLang, type TLang } from '@/shared/i18n';
-import { useGetSave, usePutSave } from '@/shared/save';
-import { useSoundApi } from '@/shared/sound';
+import { selectSettings, useSave, useSaveStore } from '@/shared/save';
+import { useSound } from '@/shared/sound';
 import { Screen, PixelPanel, PixelButton, BackButton } from '@/shared/Chrome';
 import './view.css';
 
@@ -17,21 +17,8 @@ const Row: FC<{ label: string; hint?: string; children: ReactNode }> = ({ label,
 );
 
 /** A big on/off switch. `label` names it for assistive tech (the row label is visual only). */
-const Switch: FC<{ label: string; checked: boolean; disabled: boolean; onToggle: () => void }> = ({
-  label,
-  checked,
-  disabled,
-  onToggle,
-}) => (
-  <button
-    type="button"
-    role="switch"
-    aria-checked={checked}
-    aria-label={label}
-    disabled={disabled}
-    className="cb-v-switch"
-    onClick={onToggle}
-  >
+const Switch: FC<{ label: string; checked: boolean; onToggle: () => void }> = ({ label, checked, onToggle }) => (
+  <button type="button" role="switch" aria-checked={checked} aria-label={label} className="cb-v-switch" onClick={onToggle}>
     <span className="cb-v-switch-thumb" aria-hidden="true" />
   </button>
 );
@@ -46,11 +33,9 @@ export const SettingsView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
   const { lang, setLang } = useLang();
-  const sound = useSoundApi();
-  const settingsQuery = useGetSave('settings');
-  const putSettings = usePutSave('settings');
-  const putSeen = usePutSave('seenQuestionIds');
-  const settings = settingsQuery.data;
+  const sound = useSound();
+  const store = useSaveStore();
+  const settings = useSave(selectSettings);
 
   const [confirmReset, setConfirmReset] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -67,20 +52,18 @@ export const SettingsView: FC = () => {
   };
 
   const handleToggleSound = () => {
-    if (!settings) return;
     const next = !settings.sound;
-    sound.setEnabled(next);
+    sound.setEnabled(next); // now, so the "on" toggle sound is heard (the shell follows the setting)
     sound.play(next ? 'sfx.toggle.on' : 'sfx.toggle.off');
-    putSettings.mutate({ ...settings, sound: next });
+    store.updateSettings({ sound: next });
   };
 
   const handleToggleVibration = () => {
-    if (!settings) return;
     const next = !settings.vibration;
     sound.play(next ? 'sfx.toggle.on' : 'sfx.toggle.off');
     // a short buzz confirms "on" (feature-detected: iOS Safari has no Vibration API)
     if (next) navigator.vibrate?.(40);
-    putSettings.mutate({ ...settings, vibration: next });
+    store.updateSettings({ vibration: next });
   };
 
   const handleOpenReset = () => {
@@ -92,7 +75,7 @@ export const SettingsView: FC = () => {
     setConfirmReset(false);
   };
   const handleConfirmReset = () => {
-    putSeen.mutate([]);
+    store.resetSeenIds();
     sound.play('sfx.select');
     setConfirmReset(false);
     setToast(t('settings.resetSeen.done'));
@@ -127,17 +110,12 @@ export const SettingsView: FC = () => {
           ))}
         </Row>
 
-        <Row label={t('settings.sound')} hint={settings?.sound ? t('settings.sound.on') : t('settings.sound.off')}>
-          <Switch label={t('settings.sound')} checked={Boolean(settings?.sound)} disabled={!settings} onToggle={handleToggleSound} />
+        <Row label={t('settings.sound')} hint={settings.sound ? t('settings.sound.on') : t('settings.sound.off')}>
+          <Switch label={t('settings.sound')} checked={settings.sound} onToggle={handleToggleSound} />
         </Row>
 
-        <Row label={t('settings.vibration')} hint={settings?.vibration ? t('settings.vibration.on') : t('settings.vibration.off')}>
-          <Switch
-            label={t('settings.vibration')}
-            checked={Boolean(settings?.vibration)}
-            disabled={!settings}
-            onToggle={handleToggleVibration}
-          />
+        <Row label={t('settings.vibration')} hint={settings.vibration ? t('settings.vibration.on') : t('settings.vibration.off')}>
+          <Switch label={t('settings.vibration')} checked={settings.vibration} onToggle={handleToggleVibration} />
         </Row>
 
         <PixelButton variant="secondary" className="cb-v-reset" onClick={handleOpenReset}>

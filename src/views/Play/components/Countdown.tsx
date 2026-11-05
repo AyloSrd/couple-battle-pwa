@@ -1,7 +1,7 @@
 import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
-import { useSoundApi } from '@/shared/sound';
-import { useGetSave } from '@/shared/save';
+import { useSound } from '@/shared/sound';
+import { selectSettings, useSave } from '@/shared/save';
 import { Screen } from '@/shared/Chrome';
 import '../dilemma.css';
 
@@ -33,9 +33,8 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
   go = 'point',
 }) => {
   const t = useT();
-  const sound = useSoundApi();
-  // Settings are already cached by the app gate when a game runs; default on until read.
-  const vibrationOn = useGetSave('settings').data?.vibration ?? true;
+  const sound = useSound();
+  const vibrationOn = useSave(selectSettings).vibration;
   const vibrate = (pattern: number | number[]) => {
     if (vibrationOn) navigator.vibrate?.(pattern);
   };
