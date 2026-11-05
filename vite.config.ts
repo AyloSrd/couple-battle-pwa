@@ -65,7 +65,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Precache everything — the game must be 100% playable offline after first load.
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico,woff2,json}'],
+        // m4a: the three music files (menu 0.9 MB, final 0.6 MB, round 0.07 MB — all under workbox's
+        // 2 MiB maximumFileSizeToCacheInBytes default). They are fetched whole by the sound engine
+        // (fetch + decodeAudioData, no range requests), so the precache route can serve them.
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico,woff2,json,m4a}'],
         // The splash video is NOT precached: iOS Safari only plays media answered with byte
         // ranges, which the precache route cannot do. It is cached at runtime instead (the
         // splash warms it with one full GET) and served with range support from that cache.

@@ -1,4 +1,4 @@
-/** Ids playable via `play()` (all sfx.* plus the one-shot mus.fanfare). */
+/** Ids playable via `play()` (all sfx.*, the synthesized one-shot mus.fanfare and the pre-rendered round stinger mus.round). */
 export type TSoundId =
   | 'sfx.tap'
   | 'sfx.back'
@@ -19,8 +19,7 @@ export type TSoundId =
   | 'sfx.synchro'
   | 'sfx.mismatch'
   | 'sfx.confetti'
-  | 'sfx.splash.clash'
-  | 'mus.birthday'
+  | 'mus.round'
   | 'mus.fanfare';
 
 /** Looping music, driven by `music()`. */

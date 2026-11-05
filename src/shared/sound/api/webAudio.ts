@@ -2,11 +2,25 @@ import type { TMusicId, TPlayOpts, TSoundId } from '../domain/types';
 import type { TSoundApi } from './index';
 
 /**
- * Couple Battle sound engine — ported from handoff/lib/sounds.js to TS. The
- * synthesis (frequencies, envelopes, loop patterns) is kept byte-for-byte; only
- * types and the port surface are added. Do not retune here — changes come from
- * the design side and are re-delivered upstream.
+ * Couple Battle sound engine. SFX are synthesized — ported from
+ * handoff/lib/sounds.js to TS, frequencies and envelopes kept byte-for-byte; do
+ * not retune here, changes come from the design side. Music is NOT synthesized:
+ * three pre-rendered files (public/audio/*.m4a, "Bounce House", generated in
+ * music-lab/) are decoded lazily into the same AudioContext after the first
+ * user gesture and played through a music bus feeding the same master gain.
  */
+
+/** Music files, resolved against the Vite `base` (the app lives under a sub-path). */
+const MUSIC_FILES = {
+  'mus.menu': 'audio/menu.m4a',
+  'mus.final': 'audio/final.m4a',
+  'mus.round': 'audio/round.m4a',
+} as const;
+type TMusicFileId = keyof typeof MUSIC_FILES;
+
+const MUSIC_LEVEL = 0.3; // music bus gain (unchanged from the synth loops)
+const MUSIC_LEVEL_DUCKED = 0.09; // while the pause sheet is open
+const FADE_OUT_S = 0.2; // stop / switch fade
 
 const S = 0.0001; // exp ramp floor
 
@@ -34,12 +48,16 @@ class Engine {
   master: GainNode | null = null;
   enabled = true;
   baseVolume = 0.55; // master volume when enabled (adjustable via setVolume)
-  musicTimer: ReturnType<typeof setInterval> | null = null;
-  musicGain: GainNode | null = null;
-  currentMusic: TMusicId | null = null;
-  // Voices of the music loop scheduled ahead (up to a whole loop pass) — kept so
-  // `music()` can stop them right away instead of letting them run out silently.
-  musicVoices = new Set<OscillatorNode>();
+  musicBus: GainNode | null = null;
+  ducked = false;
+  /** The loop the caller last asked for (null = none). Decides whether a late decode may still start. */
+  wanted: TMusicId | null = null;
+  /** The loop currently playing: its source, its own fade gain, and which id it is. */
+  loop: { id: TMusicId; src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  stingers = new Set<AudioBufferSourceNode>();
+  buffers = new Map<TMusicFileId, AudioBuffer>();
+  loading = new Map<TMusicFileId, Promise<AudioBuffer | null>>();
+  warned = false;
 
   unlock() {
     if (!this.ctx) {
@@ -52,6 +70,9 @@ class Engine {
       this.master = this.ctx.createGain();
       this.master.gain.value = this.baseVolume;
       this.master.connect(this.ctx.destination);
+      this.musicBus = this.ctx.createGain();
+      this.musicBus.gain.value = this.ducked ? MUSIC_LEVEL_DUCKED : MUSIC_LEVEL;
+      this.musicBus.connect(this.master);
       // A running context keeps the audio thread (and battery) busy even while
       // silent: suspend it whenever the app is hidden, resume when back in view.
       // Without a user gesture the resume may be refused — the next tap's
@@ -64,11 +85,16 @@ class Engine {
     }
     // 'interrupted' is iOS Safari's state after a call or screen lock.
     if (this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
+    // First gesture: warm the decoded buffers (served from the SW precache after the first visit).
+    if (this.enabled) for (const id of Object.keys(MUSIC_FILES) as TMusicFileId[]) void this.load(id);
   }
 
   setEnabled(on: boolean) {
     this.enabled = on;
-    if (!on) this.music(null);
+    if (!on) {
+      this.music(null);
+      this.stopStingers();
+    }
     if (this.master) this.master.gain.value = on ? this.baseVolume : 0;
   }
 
@@ -79,7 +105,8 @@ class Engine {
 
   /** Duck music volume (e.g. pause sheet open) */
   duck(on: boolean) {
-    if (this.musicGain) this.musicGain.gain.value = on ? 0.09 : 0.3;
+    this.ducked = on;
+    if (this.musicBus) this.musicBus.gain.value = on ? MUSIC_LEVEL_DUCKED : MUSIC_LEVEL;
   }
 
   // ---- primitives -------------------------------------------------------
@@ -158,28 +185,7 @@ class Engine {
       'sfx.synchro':   () => { [659, 784, 988, 1318].forEach((f, i) => this.tone({ freq: f, t: i * 0.06, dur: 0.09, type: 'triangle', vol: 0.45 })); },
       'sfx.mismatch':  () => { [415, 349, 277].forEach((f, i) => this.tone({ freq: f, t: i * 0.14, dur: 0.18 })); },
       'sfx.confetti':  () => { for (let i = 0; i < 6; i++) this.noise({ t: i * 0.05 + Math.random() * 0.02, dur: 0.05, vol: 0.2, hp: 2000 + Math.random() * 3000 }); },
-      'sfx.splash.clash': () => {
-        this.noise({ dur: 0.15, vol: 0.4, hp: 1000 });
-        [523, 659, 1046].forEach((f, i) => this.tone({ freq: f, t: 0.1 + i * 0.08, dur: 0.12 }));
-      },
-      'mus.birthday':  () => {
-        // Happy Birthday, chiptune one-shot (~9 s). Square lead + triangle an octave below.
-        const bpm = 180, beat = 60 / bpm;
-        const G4 = 392, A4 = 440, B4 = 493.88, C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99;
-        const seq: [number, number][] = [
-          [G4, .75], [G4, .25], [A4, 1], [G4, 1], [C5, 1], [B4, 2],
-          [G4, .75], [G4, .25], [A4, 1], [G4, 1], [D5, 1], [C5, 2],
-          [G4, .75], [G4, .25], [G5, 1], [E5, 1], [C5, 1], [B4, 1], [A4, 2],
-          [F5, .75], [F5, .25], [E5, 1], [C5, 1], [D5, 1], [C5, 3],
-        ];
-        let b = 0;
-        for (const [f, d] of seq) {
-          this.tone({ freq: f, t: b * beat, dur: d * beat * 0.9, vol: 0.32 });
-          this.tone({ freq: f / 2, t: b * beat, dur: d * beat * 0.9, type: 'triangle', vol: 0.18 });
-          b += d;
-        }
-        for (let i = 0; i < 5; i++) this.noise({ t: b * beat + i * 0.06, dur: 0.05, vol: 0.18, hp: 2500 });
-      },
+      'mus.round':     () => this.stinger(),
       'mus.fanfare':   () => {
         const seq: [number, number, number][] = [[523, 0, .12], [523, .14, .12], [523, .28, .12], [659, .42, .3], [523, .76, .12], [659, .9, .5]];
         seq.forEach(([f, t, d]) => { this.tone({ freq: f, t, dur: d, vol: 0.35 }); this.tone({ freq: f / 2, t, dur: d, type: 'triangle', vol: 0.3 }); });
@@ -189,79 +195,114 @@ class Engine {
     (fx[id] || (() => console.warn('unknown sound', id)))();
   }
 
-  // ---- music loops ------------------------------------------------------
-  music(id: TMusicId | null) {
-    if (this.musicTimer) { clearInterval(this.musicTimer); this.musicTimer = null; }
-    this.currentMusic = id;
-    // hard-stop whatever is already scheduled: kill the whole music bus
-    if (this.musicGain) {
-      this.musicGain.gain.cancelScheduledValues(0);
-      this.musicGain.gain.value = 0;
-      this.musicGain.disconnect();
-      this.musicGain = null;
-    }
-    for (const o of this.musicVoices) {
+  // ---- music (pre-rendered files) ----------------------------------------
+  /** Fetch + decode a music file once; failures are logged once and stay silent (retried on the next ask). */
+  load(id: TMusicFileId): Promise<AudioBuffer | null> {
+    const cached = this.buffers.get(id);
+    if (cached) return Promise.resolve(cached);
+    const pending = this.loading.get(id);
+    if (pending) return pending;
+    const ctx = this.ctx;
+    if (!ctx) return Promise.resolve(null);
+    const p = (async () => {
       try {
-        o.stop();
+        const res = await fetch(`${import.meta.env.BASE_URL}${MUSIC_FILES[id]}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const buf = await ctx.decodeAudioData(await res.arrayBuffer());
+        this.buffers.set(id, buf);
+        return buf;
+      } catch (err) {
+        if (!this.warned) {
+          this.warned = true;
+          console.warn('music unavailable, staying silent', id, err);
+        }
+        return null;
+      } finally {
+        this.loading.delete(id);
+      }
+    })();
+    this.loading.set(id, p);
+    return p;
+  }
+
+  /** One-shot round stinger on the music bus. Does not touch the loop. Skipped if not decoded yet. */
+  stinger() {
+    const buf = this.buffers.get('mus.round');
+    if (!buf) {
+      void this.load('mus.round'); // ready for next time
+      return;
+    }
+    if (!this.ctx || !this.musicBus) return;
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(this.musicBus);
+    src.onended = () => this.stingers.delete(src);
+    this.stingers.add(src);
+    src.start();
+  }
+
+  stopStingers() {
+    for (const src of this.stingers) {
+      try {
+        src.stop();
       } catch {
         // already stopped — ignore.
       }
     }
-    this.musicVoices.clear();
-    if (!id || !this.enabled) return;
+    this.stingers.clear();
+  }
+
+  /** Fade the current loop out and release it. */
+  stopLoop() {
+    const cur = this.loop;
+    if (!cur) return;
+    this.loop = null;
+    const now = this.ctx!.currentTime;
+    try {
+      cur.gain.gain.cancelScheduledValues(now);
+      cur.gain.gain.setValueAtTime(cur.gain.gain.value, now);
+      cur.gain.gain.linearRampToValueAtTime(0, now + FADE_OUT_S);
+      cur.src.stop(now + FADE_OUT_S);
+    } catch {
+      // already stopped — ignore.
+    }
+    cur.src.onended = () => {
+      cur.src.disconnect();
+      cur.gain.disconnect();
+    };
+  }
+
+  startLoop(id: TMusicId, buf: AudioBuffer) {
+    if (!this.ctx || !this.musicBus) return;
+    const src = this.ctx.createBufferSource();
+    const gain = this.ctx.createGain();
+    src.buffer = buf;
+    src.loop = true; // the files are sample-exact seamless loops
+    src.connect(gain).connect(this.musicBus);
+    src.start();
+    this.loop = { id, src, gain };
+  }
+
+  music(id: TMusicId | null) {
+    if (id !== null && id === this.wanted && this.enabled) return; // already playing / loading it
+    this.wanted = id;
+    if (this.ctx) this.stopLoop();
+    if (!id || !this.enabled) {
+      this.wanted = null;
+      return;
+    }
     this.unlock();
-    if (!this.ctx) return; // no AudioContext available — nothing to loop
-    this.musicGain = this.ctx.createGain();
-    this.musicGain.gain.value = 0.3;
-    this.musicGain.connect(this.master!);
-    const loops: Record<string, { bpm: number; bars: number; notes: [number, number, number, OscillatorType][] }> = {
-      // [bpm, [beat, freq, dur(beats), type] ...] — one bar loop patterns
-      'mus.menu': {
-        bpm: 104, bars: 4,
-        notes: [
-          // lead (square) — cheerful I-V-vi-IV noodle
-          [0, 523, .5, 'square'], [1, 659, .5, 'square'], [2, 784, .5, 'square'], [3, 659, .5, 'square'],
-          [4, 587, .5, 'square'], [5, 784, .5, 'square'], [6, 988, 1, 'square'],
-          [8, 440, .5, 'square'], [9, 523, .5, 'square'], [10, 659, .5, 'square'], [11, 523, .5, 'square'],
-          [12, 587, .5, 'square'], [13, 698, .5, 'square'], [14, 587, 1.5, 'square'],
-          // bass (triangle)
-          [0, 131, 1, 'triangle'], [2, 131, 1, 'triangle'], [4, 196, 1, 'triangle'], [6, 196, 1, 'triangle'],
-          [8, 110, 1, 'triangle'], [10, 110, 1, 'triangle'], [12, 147, 1, 'triangle'], [14, 147, 1, 'triangle'],
-        ],
-      },
-      'mus.final': {
-        bpm: 128, bars: 2,
-        notes: [
-          [0, 220, .5, 'square'], [1, 262, .5, 'square'], [2, 330, .5, 'square'], [3, 262, .5, 'square'],
-          [4, 220, .5, 'square'], [5, 262, .5, 'square'], [6, 349, .5, 'square'], [7, 330, .5, 'square'],
-          [0, 110, 2, 'triangle'], [2, 110, 2, 'triangle'], [4, 87, 2, 'triangle'], [6, 98, 2, 'triangle'],
-        ],
-      },
-    };
-    const L = loops[id];
-    if (!L) return;
-    const beat = 60 / L.bpm / 2; // 8th notes as grid
-    const barDur = L.bars * 8 * beat;
-    const bus = this.musicGain;
-    // drift-free scheduling: anchor every bar to AudioContext time, look ahead
-    let nextBar = this.ctx!.currentTime + 0.05;
-    const scheduleBar = (at: number) => {
-      L.notes.forEach(([b, f, d, type]) => {
-        const o = this.tone({ freq: f, t: (at - this.ctx!.currentTime) + b * beat, dur: d * beat * 0.9, type, vol: type === 'square' ? 0.16 : 0.22, out: bus });
-        this.musicVoices.add(o);
-        o.onended = () => this.musicVoices.delete(o);
-      });
-    };
-    scheduleBar(nextBar);
-    nextBar += barDur;
-    this.musicTimer = setInterval(() => {
-      if (this.currentMusic !== id || bus !== this.musicGain) return;
-      // schedule the next bar only when it's close (0.6s lookahead)
-      if (nextBar - this.ctx!.currentTime < 0.6) {
-        scheduleBar(nextBar);
-        nextBar += barDur;
-      }
-    }, 120);
+    if (!this.ctx) return; // no AudioContext available — nothing to play
+    const ready = this.buffers.get(id);
+    if (ready) {
+      this.startLoop(id, ready);
+      return;
+    }
+    void this.load(id).then((buf) => {
+      // Superseded (another music() call, or sound disabled) while decoding: stay silent.
+      if (!buf || this.wanted !== id || !this.enabled || this.loop) return;
+      this.startLoop(id, buf);
+    });
   }
 }
 
