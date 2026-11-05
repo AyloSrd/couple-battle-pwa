@@ -78,6 +78,8 @@ export const en = {
   "guide.ultime.s1": "Rounds 1 & 2: like Flash.",
   "guide.ultime.s2": "Round 3: like Dilemma.",
   "guide.ultime.s3": "Finale: simultaneous rapid-fire answers, the others judge 💖 or 💀.",
+  "home.discard.confirm": "The game in progress will be lost. Drop it?",
+  "home.discard.yes": "Discard",
   "home.howto": "How to play",
   "home.install.android": "Install the game on your phone 📲",
   "home.install.dismiss": "Later",

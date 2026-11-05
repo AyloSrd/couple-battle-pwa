@@ -64,7 +64,6 @@
 
 /* ---------- themes ---------- */
 .cb-v-difficulty .cb-btn.cb-themes-toggle {
-  min-height: var(--cb-h-btn-sec);
   justify-content: flex-start;
   gap: var(--cb-s3);
   padding: 0 var(--cb-s4);
@@ -135,13 +134,6 @@
   font: 800 13px / 1 var(--cb-font-ui);
 }
 
-/* ---------- start ---------- */
-.cb-v-difficulty .cb-btn.cb-start {
-  min-height: 72px;
-  font-size: var(--cb-fs-h2);
-  line-height: var(--cb-lh-label);
-}
-
 /* ---------- 360x800-class phones: one-line title so the Start button stays on the page ---------- */
 @media (max-height: 840px) {
   .cb-v-difficulty .cb-title {
@@ -179,11 +171,5 @@
     width: 48px;
     height: 48px;
     font-size: 28px;
-  }
-  .cb-v-difficulty .cb-btn.cb-themes-toggle {
-    min-height: var(--cb-target-min);
-  }
-  .cb-v-difficulty .cb-btn.cb-start {
-    min-height: var(--cb-h-btn);
   }
 }

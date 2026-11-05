@@ -1,11 +1,13 @@
 import { useEffect, type FC } from 'react';
-import { useLang, useT, type TStringKey } from '@/shared/i18n';
+import { useLang, useT } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
+import type { TAvatarId } from '@/shared/game';
 import type { TSoloResult } from '@/shared/save';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
-import { rankTeams, type TGameAt } from '../domain/machine';
+import { rankTeams, type TGameAt, type TRankedTeam } from '../domain/machine';
 import { joinNames, resolveOutcome } from '../domain/outcome';
 import { gameStats } from '../domain/stats';
+import { RankList } from './RankList';
 import { TeamStats } from './TeamStats';
 import '../results.css';
 
@@ -25,13 +27,12 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame,
   const ranked = rankTeams(game.ctx);
   const outcome = resolveOutcome(ranked);
   const winner = outcome?.kind === 'winner' ? outcome.winner : undefined;
-  const allTied = ranked.every((r) => r.isWinner);
   // A game resumed from a snapshot saved before history existed has none — or only the
   // questions played after the resume. Chart only when every team's history adds up to
   // its score (always true for a game played start to finish), never a partial picture.
   const allStats = history.length > 0 ? gameStats(history, ranked.map((r) => r.team.teamId)) : [];
   const stats = ranked.every((r) => allStats.find((s) => s.teamId === r.team.teamId)?.earned === r.score) ? allStats : [];
-  const teamLabel = (avatarId: string) => t(`team.${avatarId}` as TStringKey);
+  const teamLabel = (avatarId: TAvatarId) => t(`team.${avatarId}`);
   const headline = !outcome
     ? null
     : outcome.kind === 'winner'
@@ -52,6 +53,11 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame,
           sub: t('results.tie.sub', { score: outcome.score }),
         };
 
+  const renderStats = (row: TRankedTeam) => {
+    const teamStats = stats.find((s) => s.teamId === row.team.teamId);
+    return teamStats && teamStats.hearts.length > 0 ? <TeamStats stats={teamStats} vsBest={solo} /> : null;
+  };
+
   useEffect(() => {
     sound.play('mus.fanfare');
     sound.play('sfx.confetti');
@@ -63,7 +69,7 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame,
       {winner && (
         <TeamArt
           teamId={winner.team.avatarId}
-          label={t(`team.${winner.team.avatarId}` as TStringKey)}
+          label={teamLabel(winner.team.avatarId)}
           variant="hero"
           className="cb-reveal-in"
         />
@@ -99,26 +105,10 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame,
         )}
       </div>
 
-      <div className="cb-rows">
-        {ranked.map((row) => {
-          const label = t(`team.${row.team.avatarId}` as TStringKey);
-          const lead = row.isWinner && !allTied;
-          const teamStats = stats.find((s) => s.teamId === row.team.teamId);
-          return (
-            <div key={row.team.teamId} className={['cb-row', lead ? 'cb-row--lead' : ''].filter(Boolean).join(' ')}>
-              <TeamArt teamId={row.team.avatarId} label={label} variant="avatar" />
-              <span>
-                {row.team.players[0]} &amp; {row.team.players[1]}
-              </span>
-              <span className="cb-score">{row.score}</span>
-              {teamStats && teamStats.hearts.length > 0 && <TeamStats stats={teamStats} vsBest={solo} />}
-            </div>
-          );
-        })}
-      </div>
+      <RankList ranked={ranked} renderExtra={renderStats} />
 
       <div className="cb-grow" />
-      <PixelButton variant="win" onClick={onRematch}>
+      <PixelButton variant="win" sfx="sfx.select" onClick={onRematch}>
         {t('results.rematch')}
       </PixelButton>
       <PixelButton variant="ghost" onClick={onNewGame}>

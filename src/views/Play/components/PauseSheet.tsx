@@ -1,7 +1,6 @@
 import { useState, type FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { PixelPanel, PixelButton } from '@/shared/Chrome';
-import '../results.css';
+import { PixelButton, Sheet } from '@/shared/Chrome';
 
 type TPauseSheetProps = {
   onResume: () => void;
@@ -9,7 +8,8 @@ type TPauseSheetProps = {
   onQuit: () => void;
 };
 
-/** Pause overlay (game dimmed behind). Quit asks for confirmation. */
+/** Pause overlay (game dimmed behind). Quit asks for confirmation. Resume taps, the confirmed
+ *  quit plays the back blip; restart, quit and cancel are silent. */
 export const PauseSheet: FC<TPauseSheetProps> = ({ onResume, onRestart, onQuit }) => {
   const t = useT();
   const [confirmQuit, setConfirmQuit] = useState(false);
@@ -17,34 +17,30 @@ export const PauseSheet: FC<TPauseSheetProps> = ({ onResume, onRestart, onQuit }
   const handleCancelQuit = () => setConfirmQuit(false);
 
   return (
-    <div className="cb-overlay cb-v-pause" role="dialog" aria-modal="true" aria-label={t('pause.title')}>
-      <PixelPanel className="cb-sheet">
-        <h2 className="cb-h2 cb-center">{t('pause.title')}</h2>
-
-        {confirmQuit ? (
-          <>
-            <p className="cb-pause-confirm">{t('pause.quit.confirm')}</p>
-            <div className="cb-row-2">
-              <PixelButton variant="secondary" onClick={handleCancelQuit}>
-                {t('common.cancel')}
-              </PixelButton>
-              <PixelButton variant="negative" onClick={onQuit}>
-                {t('common.confirm')}
-              </PixelButton>
-            </div>
-          </>
-        ) : (
-          <>
-            <PixelButton onClick={onResume}>{t('pause.resume')}</PixelButton>
-            <PixelButton variant="secondary" onClick={onRestart}>
-              {t('pause.restartRound')}
+    <Sheet label={t('pause.title')} title={t('pause.title')}>
+      {confirmQuit ? (
+        <>
+          <p className="cb-dialog__text">{t('pause.quit.confirm')}</p>
+          <div className="cb-row-2">
+            <PixelButton variant="secondary" sfx={null} onClick={handleCancelQuit}>
+              {t('common.cancel')}
             </PixelButton>
-            <PixelButton variant="ghost" onClick={handleAskQuit}>
-              {t('pause.quit')}
+            <PixelButton variant="negative" sfx="sfx.back" onClick={onQuit}>
+              {t('common.confirm')}
             </PixelButton>
-          </>
-        )}
-      </PixelPanel>
-    </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <PixelButton onClick={onResume}>{t('pause.resume')}</PixelButton>
+          <PixelButton variant="secondary" sfx={null} onClick={onRestart}>
+            {t('pause.restartRound')}
+          </PixelButton>
+          <PixelButton variant="ghost" sfx={null} onClick={handleAskQuit}>
+            {t('pause.quit')}
+          </PixelButton>
+        </>
+      )}
+    </Sheet>
   );
 };

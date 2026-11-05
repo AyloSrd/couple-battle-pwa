@@ -33,12 +33,24 @@ describe('HomeView — saved game', () => {
     vi.useRealTimers();
   });
 
-  it('offers to resume a running game; New game throws it away (saved)', () => {
+  it('offers to resume a running game; New game throws it away after a confirm (saved)', () => {
     const app = createTestApp();
     app.store.startGame(running);
     mount(app);
     expect(screen.getByText(en['common.resume.title'])).toBeInTheDocument();
+
+    // S13: Cancel keeps it.
     fireEvent.click(screen.getByRole('button', { name: en['common.resume.no'] }));
+    expect(screen.getByRole('dialog', { name: en['home.discard.confirm'] })).toBeInTheDocument();
+    expect(app.store.get().game).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: en['common.cancel'] }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(app.store.get().game).not.toBeNull();
+    expectSynced(app.store, app.api);
+
+    fireEvent.click(screen.getByRole('button', { name: en['common.resume.no'] }));
+    fireEvent.click(screen.getByRole('button', { name: en['home.discard.yes'] }));
+    expect(screen.queryByRole('dialog')).toBeNull();
     expect(app.store.get().game).toBeNull();
     expect(screen.queryByText(en['common.resume.title'])).toBeNull();
     expectSynced(app.store, app.api);

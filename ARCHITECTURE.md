@@ -18,7 +18,7 @@
 | Validation | **Zod** | Parse at every adapter boundary |
 | PWA | **vite-plugin-pwa** — https://vite-pwa-org.netlify.app/guide/ | `registerType: 'autoUpdate'`, precache everything: the game must be fully playable offline after first load |
 | Storage | **`localStorage`** (synchronous, values of a few KB) | Used only inside `shared/save/api/localStorage.ts`. The pre-refactor IndexedDB save is imported once by `shared/save/api/idbImport.ts` (raw `indexedDB`, no library) then deleted. Lint bans both globals everywhere else |
-| i18n | **No library — typed dictionaries + a ~30-line hook** (decision) | `src/data/strings.fr.ts` / `strings.en.ts` / `strings.es.ts` export `as const` objects; `shared/i18n` exposes `useT(): (key: TStringKey, vars?: Record<string, string \| number>) => string` with `TStringKey = keyof typeof fr` and `{name}`-style interpolation. `LangProvider` is controlled by `settings.lang` from the save store (one owner, no mirror). Wrong keys are compile errors — with 3 locales and ~236 flat keys this beats react-i18next. FR is the fallback language |
+| i18n | **No library — typed dictionaries + a ~30-line hook** (decision) | `src/data/strings.fr.ts` / `strings.en.ts` / `strings.es.ts` export `as const` objects; `shared/i18n` exposes `useT(): (key: TStringKey, vars?: Record<string, string \| number>) => string` with `TStringKey = keyof typeof fr` and `{name}`-style interpolation. `LangProvider` is read-only, controlled by `settings.lang` from the save store (one owner, no mirror); `LanguagePicker` changes it with `store.updateSettings({ lang })`. Dynamic keys go through typed helpers or `satisfies Record<…, TStringKey>` maps (`teamKey(avatarId)`), never `as TStringKey`. Wrong keys are compile errors — with 3 locales and ~236 flat keys this beats react-i18next. FR is the fallback language |
 | Testing | Vitest + React Testing Library | The real save store over the memory adapter (strings, like `localStorage`) — never mock storage; `expectSynced` after every action (doc below) |
 
 ## Mapping the generic doc onto Couple Battle
@@ -31,7 +31,7 @@ The doc below uses an RPG inventory as its running example. Translate as follows
 | `shared/save` (IndexedDB) | `shared/save` — two `localStorage` keys, each a `{ v, savedAt, data }` envelope: `cb.profile` (`{ settings, seenIds, guidelinesSeen, soloBest }`) and `cb.game` (the running `TGame`); `cb.profile.bad` keeps the first unreadable profile. One synchronous `TSaveApi` port (`load` / `write` / `remove`), one save store (`application/store.ts`) |
 | `views/Inventory` etc. | `views/Home`, `views/Setup`, `views/Mode`, `views/Difficulty`, `views/Settings`, `views/HowToPlay`, `views/Legal`, `views/Play` |
 | domain services (`canEquip`) | `drawDeck`, `reduce(machine, event)`, `applyScore`, `rankTeams`, … — the game reducer lives in `views/Play/domain/` and is **always tested** |
-| `Hud` | `shared/Chrome` — `PixelButton`, `PixelPanel`, `Sprite`, `ProgressDots`, `PauseButton`, … styled from `handoff/design/tokens.css` |
+| `Hud` | `shared/Chrome` — `PixelButton`, `AnswerButton`, `BackButton`, `ChipButton`, `PixelPanel`, `ProgressDots`, `TopBar`, `Sheet`, `LanguagePicker`, `Notice`, … styled from `handoff/design/tokens.css` (see "UI kit" below) |
 
 **The one sanctioned deviation from "1 route = 1 view":** the flow inside a game (pass-phone →
 secret answers → reveal → judge → countdown → resolve → …) is a **state machine in
@@ -789,6 +789,14 @@ const SlotRow: FC<{ itemId: string; name: string; onEquip: (id: string) => void 
 Rule of thumb: **returns JSX → inline arrow is fine. Performs an action → named handler / extracted child.**
 
 Functional `setState` when next depends on previous. Lazy `useState(() => …)` for expensive init. Don't `useMemo` simple primitives. Don't `useCallback` to "help" memo.
+
+### UI kit (`shared/Chrome`)
+
+- **Buttons own their click sound.** `PixelButton`, `AnswerButton`, `ChipButton` play `sfx` on click (default `'sfx.tap'`; `BackButton` `'sfx.back'`). Pass another id (`sfx="sfx.select"`) instead of calling `sound.play` in the handler; `sfx={null}` only when the handler picks the sound (outcome-dependent, or also reached by keyboard). Plain `<button>`s (cards, tiles, switches) still play their own.
+- **One button size scale.** `PixelButton size="md"` (default: the variant's token height) or `size="lg"` (76 px: start, verdict, answer). Views do not patch a button's height in their `view.css`. The two exceptions are not buttons-with-a-label but their own looks: Setup's couple-count numerals and Difficulty's emoji theme tiles.
+- **`TopBar`** is every screen's top bar: `back` = a route or a handler (Setup steps back inside its wizard first), children on the right (dots, chip, language menu). No hand-rolled `.cb-topbar` + `handleBack` in views.
+- **`Sheet`** is every modal (pause, confirmations, deck empty): `label`, optional `title`, children; `cb-dialog__text` for the question, `cb-row-2` for the button pair. Destructive or progress-losing actions (discard a saved game, quit, reset seen questions) confirm in a `Sheet`.
+- **`LanguagePicker`** (`variant="menu"` on Home, `"row"` in Settings) is the only language control.
 
 ---
 

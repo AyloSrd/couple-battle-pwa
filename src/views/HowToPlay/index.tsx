@@ -1,22 +1,20 @@
 import { useEffect, useEffectEvent, useRef, useState, type FC } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
-import { Screen, PixelPanel, ModeIcon, type TModeIconMode, BackButton } from '@/shared/Chrome';
+import { Screen, PixelPanel, ModeIcon, TopBar, type TModeIconMode } from '@/shared/Chrome';
 import { clampIndex, indexFromKey, indexFromScroll } from './domain/carousel';
 import './view.css';
 
 type TSlide = { nameKey: TStringKey; bodyKey: TStringKey; mode: TModeIconMode };
 
-const SLIDES: TSlide[] = [
+const SLIDES = [
   { nameKey: 'howto.flash.name', bodyKey: 'howto.flash.body', mode: 'flash' },
   { nameKey: 'howto.dilemma.name', bodyKey: 'howto.dilemma.body', mode: 'dilemma' },
   { nameKey: 'howto.ultime.name', bodyKey: 'howto.ultime.body', mode: 'ultime' },
-];
+] as const satisfies readonly TSlide[];
 
 export const HowToPlayView: FC = () => {
   const t = useT();
-  const navigate = useNavigate();
   const sound = useSound();
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -44,18 +42,13 @@ export const HowToPlayView: FC = () => {
     return () => window.removeEventListener('keydown', listener);
   }, []);
 
-  const handleBack = () => {
-    sound.play('sfx.back');
-    navigate({ to: '/' });
-  };
-
   const handleScroll = () => {
     const el = trackRef.current;
     if (!el) return;
     setIndex(indexFromScroll(el.scrollLeft, el.clientWidth, SLIDES.length));
   };
 
-  const handleDot = (target: number) => {
+  const makeDot = (target: number) => () => {
     if (target === index) return;
     sound.play('sfx.tap');
     goTo(target);
@@ -63,9 +56,7 @@ export const HowToPlayView: FC = () => {
 
   return (
     <Screen className="cb-v-howto">
-      <div className="cb-topbar">
-        <BackButton label={t('common.back')} onClick={handleBack} />
-      </div>
+      <TopBar back="/" />
       <h1 className="cb-title">{t('howto.title')}</h1>
 
       <div
@@ -95,7 +86,7 @@ export const HowToPlayView: FC = () => {
             className="cb-howto-dot"
             aria-label={t(slide.nameKey)}
             aria-current={i === index ? 'true' : undefined}
-            onClick={() => handleDot(i)}
+            onClick={makeDot(i)}
           />
         ))}
       </div>

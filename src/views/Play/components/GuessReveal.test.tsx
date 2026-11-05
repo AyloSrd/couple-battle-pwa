@@ -1,26 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent } from '@testing-library/react';
 import { playerArtUrl } from '@/shared/Chrome';
-import { gameAt, questionFor, testRoster } from '@/test/gameStates';
+import { gameAt, questionFor } from '@/test/gameStates';
 import { renderScreen } from '@/test/renderScreen';
-import { answerKey, answererIndex } from '@/shared/game';
+import { answerKey } from '@/shared/game';
+import type { TDispatch } from '../application/game';
 import { GuessReveal } from './GuessReveal';
 
 function mount(round: number, coupleIdx: number) {
-  const [a, b] = testRoster[coupleIdx]!.players;
-  const [answerer, guesser] = answererIndex(round) === 0 ? [a, b] : [b, a];
   const game = gameAt('guess', { round: round as 0 | 1, couple: coupleIdx });
-  return renderScreen(
-    <GuessReveal
-      game={game}
-      question={questionFor(game)}
-      guesserName={guesser}
-      partnerName={answerer}
-      onReveal={() => {}}
-      onAutoGuess={() => {}}
-    />,
-  );
+  return renderScreen(<GuessReveal game={game} question={questionFor(game)} dispatch={() => {}} />);
 }
+
 const badge = (c: HTMLElement) => c.querySelector('.cb-flash-card .cb-actor');
 
 describe('GuessReveal — who acts: the GUESSER (the answerer’s partner)', () => {
@@ -62,46 +53,37 @@ const typed = (type: TQType, truth?: string) => {
   };
 };
 const typedQuestion = (type: TQType) => ({ id: 1, theme: 'childhood' as const, difficulty: 'easy' as const, type, you: 'Q?', name: 'Q de {name}?' });
-const mountTyped = (
-  type: TQType,
-  h: { onReveal?: () => void; onAutoGuess?: (g: string) => void; truth?: string } = {},
-  lang: 'en' | 'fr' = 'en',
-) =>
+// gameAt('guess'): round 0, couple 0 → Ana answered, Bo guesses.
+const mountTyped = (type: TQType, h: { dispatch?: TDispatch; truth?: string } = {}, lang: 'en' | 'fr' = 'en') =>
   renderScreen(
-    <GuessReveal
-      game={typed(type, h.truth)}
-      question={typedQuestion(type)}
-      guesserName="Bo"
-      partnerName="Ana"
-      onReveal={h.onReveal ?? (() => {})}
-      onAutoGuess={h.onAutoGuess ?? (() => {})}
-    />,
+    <GuessReveal game={typed(type, h.truth)} question={typedQuestion(type)} dispatch={h.dispatch ?? (() => {})} />,
     lang,
   );
 
 describe('GuessReveal — the badge changed nothing about guessing', () => {
-  it('open: REVEAL stays and fires onReveal', () => {
-    const onReveal = vi.fn();
-    const { getByRole } = mountTyped('open', { onReveal });
+  it('open: REVEAL stays and advances to the judge', () => {
+    const dispatch = vi.fn();
+    const { getByRole } = mountTyped('open', { dispatch });
     fireEvent.click(getByRole('button', { name: /reveal/i }));
-    expect(onReveal).toHaveBeenCalledOnce();
+    expect(dispatch).toHaveBeenCalledOnce();
+    expect(dispatch).toHaveBeenCalledWith({ type: 'next' });
   });
 
   it('yes/no: the pick auto-guesses its token, on NEXT', () => {
-    const onAutoGuess = vi.fn();
-    const { getByRole } = mountTyped('yes_no', { onAutoGuess, truth: 'yes' });
+    const dispatch = vi.fn();
+    const { getByRole } = mountTyped('yes_no', { dispatch, truth: 'yes' });
     fireEvent.click(getByRole('button', { name: /no/i }));
-    expect(onAutoGuess).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
     fireEvent.click(getByRole('button', { name: /next/i }));
-    expect(onAutoGuess).toHaveBeenCalledWith('no');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'guess', value: 'no' });
   });
 
   it('who_of_two: the pick auto-guesses the picked player’s index, on NEXT', () => {
-    const onAutoGuess = vi.fn();
-    const { getByRole } = mountTyped('who_of_two', { onAutoGuess, truth: 'p0' });
+    const dispatch = vi.fn();
+    const { getByRole } = mountTyped('who_of_two', { dispatch, truth: 'p0' });
     fireEvent.click(getByRole('button', { name: /Ana/ }));
     fireEvent.click(getByRole('button', { name: /next/i }));
-    expect(onAutoGuess).toHaveBeenCalledWith('p0');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'guess', value: 'p0' });
   });
 });
 

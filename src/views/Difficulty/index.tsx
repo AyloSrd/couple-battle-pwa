@@ -12,15 +12,15 @@ import {
 } from '@/shared/game';
 import { useQuestionsApi, drawDeck, deckSizeFor } from '@/shared/questions';
 import { selectProfile, useSave, useSaveStore } from '@/shared/save';
-import { Screen, PixelPanel, PixelButton, ProgressDots, BackButton } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, ProgressDots, Sheet, TopBar } from '@/shared/Chrome';
 import './view.css';
 
-const DIFFS: { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey }[] = [
+const DIFFS = [
   { id: GameDifficulty.Mix, nameKey: 'diff.mix.name', descKey: 'diff.mix.desc' },
   { id: GameDifficulty.Easy, nameKey: 'diff.easy.name', descKey: 'diff.easy.desc' },
   { id: GameDifficulty.Medium, nameKey: 'diff.medium.name', descKey: 'diff.medium.desc' },
   { id: GameDifficulty.Hard, nameKey: 'diff.hard.name', descKey: 'diff.hard.desc' },
-];
+] as const satisfies readonly { id: TGameDifficulty; nameKey: TStringKey; descKey: TStringKey }[];
 
 // Emojis live here (by id), not in the question data or the strings.
 const DIFF_EMOJI: Record<TGameDifficulty, string> = {
@@ -45,7 +45,7 @@ const THEME_EMOJI: Record<TThemeId, string> = {
   random: '🎲',
 };
 
-const THEME_KEY: Record<TThemeId, TStringKey> = {
+const THEME_KEY = {
   homeDaily: 'theme.homeDaily',
   foodDrinks: 'theme.foodDrinks',
   travel: 'theme.travel',
@@ -58,7 +58,7 @@ const THEME_KEY: Record<TThemeId, TStringKey> = {
   dreams: 'theme.dreams',
   loveIntimacy: 'theme.loveIntimacy',
   random: 'theme.random',
-};
+} as const satisfies Record<TThemeId, TStringKey>;
 
 /** All themes on; Love & Intimacy off by default in a group (>1 couple). */
 function defaultThemes(coupleCount: number): TThemeId[] {
@@ -99,11 +99,6 @@ export const DifficultyView: FC = () => {
     );
   };
 
-  const handleBack = () => {
-    sound.play('sfx.back');
-    navigate({ to: '/mode' });
-  };
-
   const startWith = (excludeIds: number[]) => {
     if (starting.current) return;
     const deck = drawDeck(questionsApi.list({ lang }), {
@@ -135,10 +130,9 @@ export const DifficultyView: FC = () => {
 
   return (
     <Screen className="cb-v-difficulty">
-      <div className="cb-topbar">
-        <BackButton label={t('common.back')} onClick={handleBack} />
+      <TopBar back="/mode">
         <ProgressDots total={3} current={2} />
-      </div>
+      </TopBar>
       <h1 className="cb-title">{t('diff.title')}</h1>
 
       <div className="cb-diffs" role="radiogroup" aria-label={t('diff.title')}>
@@ -165,6 +159,7 @@ export const DifficultyView: FC = () => {
 
       <PixelButton
         variant="ghost"
+        sfx={null}
         className="cb-themes-toggle"
         onClick={handleToggleThemes}
         aria-expanded={themesOpen}
@@ -185,6 +180,7 @@ export const DifficultyView: FC = () => {
                 key={id}
                 className="cb-theme-chip"
                 variant={themes.includes(id) ? 'primary' : 'secondary'}
+                sfx={null}
                 aria-pressed={themes.includes(id)}
                 onClick={makeToggleTheme(id)}
               >
@@ -199,22 +195,22 @@ export const DifficultyView: FC = () => {
         </PixelPanel>
       )}
 
-      <PixelButton className="cb-start" onClick={handleStart}>
+      <PixelButton size="lg" sfx={null} onClick={handleStart}>
         {t('common.start')}
       </PixelButton>
 
       {deckEmpty && (
-        <div className="cb-overlay" role="dialog" aria-modal="true">
-          <PixelPanel className="cb-sheet">
-            <p className="cb-body-lg">{t('error.deckEmpty')}</p>
-            <div className="cb-row-2">
-              <PixelButton variant="secondary" onClick={handleCloseDeckEmpty}>
-                {t('common.cancel')}
-              </PixelButton>
-              <PixelButton onClick={handleReshuffle}>{t('common.confirm')}</PixelButton>
-            </div>
-          </PixelPanel>
-        </div>
+        <Sheet label={t('error.deckEmpty')}>
+          <p className="cb-dialog__text">{t('error.deckEmpty')}</p>
+          <div className="cb-row-2">
+            <PixelButton variant="secondary" sfx={null} onClick={handleCloseDeckEmpty}>
+              {t('common.cancel')}
+            </PixelButton>
+            <PixelButton sfx={null} onClick={handleReshuffle}>
+              {t('common.confirm')}
+            </PixelButton>
+          </div>
+        </Sheet>
       )}
     </Screen>
   );

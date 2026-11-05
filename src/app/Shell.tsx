@@ -1,5 +1,5 @@
 import { useEffect, useState, type FC, type PropsWithChildren } from 'react';
-import { LangProvider, useT, type TLang } from '@/shared/i18n';
+import { LangProvider, useT } from '@/shared/i18n';
 import { QuestionsApiProvider } from '@/shared/questions';
 import { SaveStoreProvider, selectIssues, selectSettings, selectStatus, useSave, useSaveStore } from '@/shared/save';
 import { DraftProvider } from '@/shared/session';
@@ -21,16 +21,11 @@ export const AppProviders: FC<PropsWithChildren<TBooted>> = ({ container, store,
   </SaveStoreProvider>
 );
 
-/** `LangProvider` controlled by the saved settings: one owner, read once, no mirror. */
+/** `LangProvider` controlled by the saved settings: one owner, read once, no mirror. A pick is
+ *  `store.updateSettings({ lang })` (`LanguagePicker`); the provider follows. */
 const SettingsLang: FC<PropsWithChildren> = ({ children }) => {
-  const store = useSaveStore();
   const { lang } = useSave(selectSettings);
-  const handleLangChange = (next: TLang) => store.updateSettings({ lang: next });
-  return (
-    <LangProvider lang={lang} onLangChange={handleLangChange}>
-      {children}
-    </LangProvider>
-  );
+  return <LangProvider lang={lang}>{children}</LangProvider>;
 };
 
 /** Save status for the player: storage off, a write failing (with Retry), settings reset at boot. */

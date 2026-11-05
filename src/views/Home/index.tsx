@@ -5,10 +5,9 @@ import { selectGame, selectIssues, selectSettings, useSave, useSaveStore } from 
 import { useSound } from '@/shared/sound';
 import { useDraft } from '@/shared/session';
 import { markIosHintSeen, readIosHintSeen, useInstallPrompt } from '@/shared/pwa';
-import { Screen, PixelPanel, PixelButton, Logo, Notice } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, Logo, Notice, Sheet, TopBar, LanguagePicker } from '@/shared/Chrome';
 import chars600 from '@/assets/art/chars-home-600.webp';
 import chars900 from '@/assets/art/chars-home-900.webp';
-import { LangMenu } from './components/LangMenu';
 import './view.css';
 
 /** How long "your last game couldn't be restored" stays up. */
@@ -38,6 +37,7 @@ export const HomeView: FC = () => {
   const [iosHintSeen] = useState(readIosHintSeen);
   const showAndroidInstall = platform === 'android' && !installDismissed;
   const showIosInstall = platform === 'ios' && !installDismissed && !iosHintSeen;
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   // Menu music while on Home (only when sound is on); stops when leaving.
   const soundOn = useSave(selectSettings).sound;
@@ -47,8 +47,6 @@ export const HomeView: FC = () => {
   }, [sound, soundOn]);
 
   const handlePlay = () => {
-    sound.unlock();
-    sound.play('sfx.select');
     draftStore.clear();
     store.leaveGame();
     navigate({ to: '/setup' });
@@ -61,32 +59,26 @@ export const HomeView: FC = () => {
     sound.play('sfx.tap');
     navigate({ to: '/settings' });
   };
-  const handleResume = () => {
-    sound.unlock();
-    sound.play('sfx.select');
-    navigate({ to: '/play' });
-  };
+  const handleResume = () => navigate({ to: '/play' });
+  // S13: throwing a saved game away asks first.
+  const handleAskDiscard = () => setConfirmDiscard(true);
+  const handleCancelDiscard = () => setConfirmDiscard(false);
   const handleDiscard = () => {
-    sound.play('sfx.back');
+    setConfirmDiscard(false);
     store.quitGame();
   };
   const handleDiscardedShown = () => store.dismissIssue('gameDiscarded');
-  const handleInstall = () => {
-    sound.play('sfx.tap');
-    void promptInstall();
-  };
+  const handleInstall = () => void promptInstall();
   const handleDismissInstall = () => {
-    sound.play('sfx.back');
     setInstallDismissed(true);
     if (platform === 'ios') markIosHintSeen();
   };
 
   return (
     <Screen className="cb-v-home">
-      <div className="cb-topbar">
-        <span />
-        <LangMenu />
-      </div>
+      <TopBar>
+        <LanguagePicker variant="menu" />
+      </TopBar>
 
       <Logo alt={t('app.name')} className="cb-v-home-logo" />
 
@@ -107,14 +99,16 @@ export const HomeView: FC = () => {
         <PixelPanel className="cb-stack cb-v-home-panel">
           <strong className="cb-h2">{t('common.resume.title')}</strong>
           <p>{t('common.resume.body')}</p>
-          <PixelButton onClick={handleResume}>{t('common.resume.yes')}</PixelButton>
-          <PixelButton variant="ghost" onClick={handleDiscard}>
+          <PixelButton sfx="sfx.select" onClick={handleResume}>
+            {t('common.resume.yes')}
+          </PixelButton>
+          <PixelButton variant="ghost" onClick={handleAskDiscard}>
             {t('common.resume.no')}
           </PixelButton>
         </PixelPanel>
       )}
 
-      <PixelButton className="cb-v-home-play" onClick={handlePlay}>
+      <PixelButton className="cb-v-home-play" size="lg" sfx="sfx.select" onClick={handlePlay}>
         {t('home.play')}
       </PixelButton>
 
@@ -136,7 +130,7 @@ export const HomeView: FC = () => {
           <PixelButton variant="secondary" onClick={handleInstall}>
             {t('home.install.android')}
           </PixelButton>
-          <PixelButton variant="ghost" onClick={handleDismissInstall}>
+          <PixelButton variant="ghost" sfx="sfx.back" onClick={handleDismissInstall}>
             {t('home.install.dismiss')}
           </PixelButton>
         </PixelPanel>
@@ -144,10 +138,24 @@ export const HomeView: FC = () => {
       {showIosInstall && (
         <PixelPanel className="cb-stack cb-v-home-panel">
           <p className="cb-muted">{t('home.install.ios')}</p>
-          <PixelButton variant="ghost" onClick={handleDismissInstall}>
+          <PixelButton variant="ghost" sfx="sfx.back" onClick={handleDismissInstall}>
             {t('home.install.dismiss')}
           </PixelButton>
         </PixelPanel>
+      )}
+
+      {confirmDiscard && (
+        <Sheet label={t('home.discard.confirm')}>
+          <p className="cb-dialog__text">{t('home.discard.confirm')}</p>
+          <div className="cb-row-2">
+            <PixelButton variant="secondary" sfx="sfx.back" onClick={handleCancelDiscard}>
+              {t('common.cancel')}
+            </PixelButton>
+            <PixelButton variant="negative" sfx="sfx.back" onClick={handleDiscard}>
+              {t('home.discard.yes')}
+            </PixelButton>
+          </div>
+        </Sheet>
       )}
 
       {issues.includes('gameDiscarded') && (

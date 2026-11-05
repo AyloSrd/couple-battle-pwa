@@ -1,4 +1,4 @@
-/* Finale + results views (S8): RapidFire, Scoreboard, FinalScreen, PauseSheet.
+/* Finale + results views (S8): RapidFire, Scoreboard, FinalScreen, RankList.
    Every rule is scoped under a view root class so nothing leaks to other screens.
    Tokens only (rgba shadows aside). Text colours come from the scoped --cb-text* set:
    white on the stage, eggplant inside .cb-card / .cb-row / .cb-sheet. */
@@ -96,17 +96,14 @@
   font-size: clamp(var(--cb-fs-h2), min(8.6vw, 4.6dvh), 40px);
   line-height: 1.15;
 }
-/* the two verdict buttons stack: full-width, thumb-sized, labels never wrap mid-word */
+/* the two `size="lg"` verdict buttons stack: full-width, thumb-sized */
 .cb-v-rapid .cb-rapid-judge {
   flex-direction: column;
   gap: var(--cb-s2);
 }
 .cb-v-rapid .cb-rapid-judge .cb-btn {
   flex: none;
-  min-height: var(--cb-h-answer);
   border-radius: var(--cb-r-lg);
-  font-size: calc(var(--cb-fs-body-lg) + 2px);
-  line-height: 1.15;
 }
 
 /* ---------- Scoreboard ---------- */
@@ -188,33 +185,6 @@
   font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
   text-decoration: underline;
   text-underline-offset: 4px;
-}
-
-/* ---------- PauseSheet ---------- */
-.cb-v-pause .cb-sheet {
-  max-width: 420px;
-  gap: var(--cb-s4);
-  padding: var(--cb-s7) var(--cb-s5) var(--cb-s6);
-}
-.cb-v-pause .cb-h2 {
-  font-size: var(--cb-fs-h1);
-  line-height: var(--cb-lh-h1);
-}
-.cb-v-pause .cb-sheet .cb-btn:not(.cb-btn--ghost) {
-  min-height: var(--cb-h-btn);
-}
-.cb-v-pause .cb-btn--ghost {
-  font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
-}
-.cb-v-pause .cb-pause-confirm {
-  margin: 0;
-  text-align: center;
-  font: 800 var(--cb-fs-h2) / var(--cb-lh-h2) var(--cb-font-display);
-  letter-spacing: var(--cb-tracking-display);
-  text-wrap: balance;
-}
-.cb-v-pause .cb-row-2 {
-  gap: var(--cb-s3);
 }
 
 /* the final lists every team under a headline and two buttons: slightly tighter rows */

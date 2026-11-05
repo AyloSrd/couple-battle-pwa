@@ -1,9 +1,9 @@
 import type { CSSProperties, FC } from 'react';
-import { useT, type TStringKey } from '@/shared/i18n';
+import { useT } from '@/shared/i18n';
 import type { THeart, TTeamStats } from '../domain/stats';
 
 /** The solo record line: this game's points against the mode's best. */
-export type TVsBest = { points: number; best: number };
+type TVsBest = { points: number; best: number };
 
 type TTeamStatsProps = {
   stats: TTeamStats;
@@ -42,7 +42,7 @@ const Heart: FC<{ kind: THeart }> = ({ kind }) => (
  */
 export const TeamStats: FC<TTeamStatsProps> = ({ stats, vsBest }) => {
   const t = useT();
-  const stageLabel = (stage: 'flash' | 'dilemma' | 'rapid') => t(`results.stats.stage.${stage}` as TStringKey);
+  const stageLabel = (stage: 'flash' | 'dilemma' | 'rapid') => t(`results.stats.stage.${stage}`);
 
   const segments =
     stats.byStage.length > 1

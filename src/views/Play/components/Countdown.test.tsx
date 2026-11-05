@@ -96,3 +96,28 @@ describe('Countdown — vibration setting', () => {
     expect(vibrate).not.toHaveBeenCalled();
   });
 });
+
+describe('Countdown — screen readers (S11)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('one live region: "get ready" at the start, the GO word at GO, never a tick', () => {
+    const { container } = mount(<Countdown onDone={() => {}} />);
+    const live = screen.getByRole('status');
+    expect(live).toHaveTextContent('Tout le monde est prêt ?');
+    expect(container.querySelectorAll('[aria-live], [role="status"], [role="alert"]')).toHaveLength(1);
+    act(() => {
+      vi.advanceTimersByTime(STEP_MS); // tick 2: the region does not change
+    });
+    expect(screen.getByRole('status')).toBe(live);
+    expect(live).toHaveTextContent('Tout le monde est prêt ?');
+    expect(live).not.toHaveTextContent('2');
+    reachGo(2);
+    expect(screen.getByRole('status')).toBe(live);
+    expect(live).toHaveTextContent('POINTEZ !');
+  });
+});

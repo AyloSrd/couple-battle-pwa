@@ -22,8 +22,8 @@ export const PlayCrash: FC<{ onRetry: () => void }> = ({ onRetry }) => {
     <Screen className="cb-crash">
       <h1 className="cb-title">{t('crash.title')}</h1>
       <p>{t('crash.play.body')}</p>
-      <PixelButton onClick={onRetry}>{t('crash.retry')}</PixelButton>
-      <PixelButton variant="ghost" onClick={handleQuit}>
+      <PixelButton sfx={null} onClick={onRetry}>{t('crash.retry')}</PixelButton>
+      <PixelButton variant="ghost" sfx={null} onClick={handleQuit}>
         {t('pause.quit')}
       </PixelButton>
     </Screen>

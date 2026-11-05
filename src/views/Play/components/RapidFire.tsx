@@ -1,7 +1,8 @@
 import type { FC } from 'react';
-import { useT, type TStringKey } from '@/shared/i18n';
+import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, ProgressDots, TeamArt } from '@/shared/Chrome';
 import type { TQuestion } from '@/shared/questions';
+import type { TDispatch } from '../application/game';
 import { questionText, rapidSubjectIndex, segmentLength, teamOf, type TGameAt } from '../domain/machine';
 import { ActorBadge } from './ActorBadge';
 import '../results.css';
@@ -10,19 +11,20 @@ type TProps = {
   game: TGameAt<'rapidIntro' | 'rapidTurn' | 'rapidAsk' | 'rapidJudge'>;
   /** The card's text in the active language (rapidAsk / rapidJudge). */
   question: TQuestion | undefined;
-  onNext: () => void; // intro / turn → advance
-  onReady: () => void; // question → countdown
-  onJudge: (synchro: boolean) => void;
+  dispatch: TDispatch;
+  /** READY on a question: starts the countdown (a UI beat owned by Play). */
+  onReady: () => void;
 };
 
 /** V-FinalRapidFire — the crown-deciding finale (Ultime), on the sunburst (burst). */
-export const RapidFire: FC<TProps> = ({ game, question, onNext, onReady, onJudge }) => {
+export const RapidFire: FC<TProps> = ({ game, question, dispatch, onReady }) => {
   const t = useT();
-  const handleSynchro = () => onJudge(true);
-  const handleMismatch = () => onJudge(false);
+  const handleStart = () => dispatch({ type: 'next' }); // intro / turn → advance
+  const handleSynchro = () => dispatch({ type: 'verdict', v: 'exact' });
+  const handleMismatch = () => dispatch({ type: 'verdict', v: 'miss' });
   const { step } = game;
   const team = teamOf(game);
-  const teamName = team ? t(`team.${team.avatarId}` as TStringKey) : '';
+  const teamName = team ? t(`team.${team.avatarId}`) : '';
 
   if (step.kind === 'rapidIntro') {
     return (
@@ -34,7 +36,7 @@ export const RapidFire: FC<TProps> = ({ game, question, onNext, onReady, onJudge
             <p>{t('final.intro.body')}</p>
           </PixelPanel>
         </div>
-        <PixelButton onClick={onNext}>{t('common.start')}</PixelButton>
+        <PixelButton onClick={handleStart}>{t('common.start')}</PixelButton>
       </div>
     );
   }
@@ -48,7 +50,7 @@ export const RapidFire: FC<TProps> = ({ game, question, onNext, onReady, onJudge
           <h1 className="cb-title cb-rapid-turn">{t('final.turn', { team: teamName })}</h1>
           <ActorBadge game={game} variant="hero" />
         </div>
-        <PixelButton onClick={onNext}>{t('common.start')}</PixelButton>
+        <PixelButton onClick={handleStart}>{t('common.start')}</PixelButton>
       </div>
     );
   }
@@ -83,10 +85,10 @@ export const RapidFire: FC<TProps> = ({ game, question, onNext, onReady, onJudge
       {header}
       {questionCard}
       <div className="cb-row-2 cb-rapid-judge">
-        <PixelButton variant="positive" onClick={handleSynchro}>
+        <PixelButton variant="positive" size="lg" sfx="sfx.synchro" onClick={handleSynchro}>
           {t('final.synchro')}
         </PixelButton>
-        <PixelButton variant="negative" onClick={handleMismatch}>
+        <PixelButton variant="negative" size="lg" sfx="sfx.mismatch" onClick={handleMismatch}>
           {t('final.mismatch')}
         </PixelButton>
       </div>

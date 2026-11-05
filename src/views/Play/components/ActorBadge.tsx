@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useT, type TStringKey } from '@/shared/i18n';
+import { useT } from '@/shared/i18n';
 import { PlayerAvatar, TeamArt } from '@/shared/Chrome';
 import { actorOf, playerSlot } from '../domain/actor';
 import type { TGame } from '@/shared/game';
@@ -26,7 +26,7 @@ export const ActorBadge: FC<TProps> = ({ game, variant, showName = true }) => {
   const actor = actorOf(game);
   if (actor.kind === 'table') return null;
   const { team } = actor;
-  const teamName = t(`team.${team.avatarId}` as TStringKey);
+  const teamName = t(`team.${team.avatarId}`);
 
   if (actor.kind === 'player') {
     const name = team.players[actor.playerIdx];

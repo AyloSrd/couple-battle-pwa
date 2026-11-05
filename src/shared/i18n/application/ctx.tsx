@@ -7,35 +7,25 @@ import { Lang, type TLang, type TStringKey, type TStringVars } from '../domain/t
 
 const DICTS: Record<TLang, Record<TStringKey, string>> = { fr, en, es };
 
-type TLangContext = {
-  lang: TLang;
-  setLang: (lang: TLang) => void;
-};
+type TLangContext = { lang: TLang };
 
 const LangCtx = createContext<TLangContext | null>(null);
 
 type TLangProviderProps = PropsWithChildren<{
   /** The active language: the shell passes `settings.lang` from the save store. */
   lang: TLang;
-  /** A screen picked another language — the shell saves it (and `lang` follows). */
-  onLangChange?: (lang: TLang) => void;
 }>;
 
 /**
- * Controlled: the language has one owner (the saved settings), so there is no copy to drift.
- * i18n never depends on the save store; the shell wires the two.
+ * Controlled and read-only: the language has one owner (the saved settings), so there is no
+ * copy to drift. A pick goes to the save store (`LanguagePicker` in shared/Chrome); `lang` follows.
  */
-export const LangProvider: FC<TLangProviderProps> = ({ lang, onLangChange, children }) => {
+export const LangProvider: FC<TLangProviderProps> = ({ lang, children }) => {
   // Keep <html lang> in sync for screen readers / correct hyphenation.
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
-
-  const setLang = (next: TLang) => {
-    if (next !== lang) onLangChange?.(next);
-  };
-
-  return <LangCtx.Provider value={{ lang, setLang }}>{children}</LangCtx.Provider>;
+  return <LangCtx.Provider value={{ lang }}>{children}</LangCtx.Provider>;
 };
 
 export function useLang(): TLangContext {

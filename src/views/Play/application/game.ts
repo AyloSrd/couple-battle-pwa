@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { selectGame, useSave, useSaveStore, type TSoloResult } from '@/shared/save';
 import { reduce, type TGameEventBody } from '../domain/machine';
 
+/** What a screen sends the game: the event body; `useGame` adds the `seq`. */
+export type TDispatch = (event: TGameEventBody) => void;
+
 /**
  * The only Play code touching save. `game` is the stored reference (never copied into state);
  * `dispatch` attaches the `seq` of the game THIS render showed, so a double tap or a late timer
@@ -13,7 +16,7 @@ export function useGame() {
   const game = useSave(selectGame);
   const [soloResult, setSoloResult] = useState<TSoloResult | null>(null);
 
-  const dispatch = (event: TGameEventBody) => {
+  const dispatch: TDispatch = (event) => {
     if (!game) return; // a timer firing after quit
     const seq = game.ctx.seq;
     const result = store.updateGame((current) => reduce(current, { ...event, seq }));

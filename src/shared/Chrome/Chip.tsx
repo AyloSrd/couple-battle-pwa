@@ -1,4 +1,5 @@
-import type { ComponentProps, FC, ReactNode } from 'react';
+import type { ComponentProps, FC, MouseEvent, ReactNode } from 'react';
+import { useSound, type TSoundId } from '@/shared/sound';
 import './chrome.css';
 
 type TChipProps = {
@@ -16,9 +17,21 @@ export const Chip: FC<TChipProps> = ({ children, icon, className }) => (
   </span>
 );
 
+type TChipButtonProps = ComponentProps<'button'> & {
+  /** Sound played on click (default the tap blip); `null` = silent. */
+  sfx?: TSoundId | null;
+};
+
 /** Tappable chip (language toggle etc.) — same look, ≥ 48px hit area via padding. */
-export const ChipButton: FC<ComponentProps<'button'>> = ({ className, children, ...rest }) => (
-  <button type="button" className={['cb-chip', className ?? ''].filter(Boolean).join(' ')} {...rest}>
-    {children}
-  </button>
-);
+export const ChipButton: FC<TChipButtonProps> = ({ className, children, sfx = 'sfx.tap', onClick, ...rest }) => {
+  const sound = useSound();
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (sfx) sound.play(sfx);
+    onClick?.(event);
+  };
+  return (
+    <button type="button" className={['cb-chip', className ?? ''].filter(Boolean).join(' ')} onClick={handleClick} {...rest}>
+      {children}
+    </button>
+  );
+};

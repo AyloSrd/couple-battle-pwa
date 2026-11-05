@@ -113,6 +113,27 @@ describe('setup wizard — NAMES validation per step', () => {
     expect(s.error).toBe('duplicate');
   });
 
+  it('S10: a name made only of invisible characters counts as empty', () => {
+    let s = reduceSetup(onNames, { type: 'setName', which: 1, value: 'Luca' });
+    s = reduceSetup(s, { type: 'setName', which: 2, value: ' \u200b\u202e\u2066 ' });
+    s = reduceSetup(s, { type: 'confirmNames' });
+    expect(s.error).toBe('required');
+  });
+
+  it('S10: invisible / bidi characters cannot disguise a duplicate', () => {
+    let s = reduceSetup(onNames, { type: 'setName', which: 1, value: 'Luca' });
+    s = reduceSetup(s, { type: 'setName', which: 2, value: 'Lu\u200bca' });
+    s = reduceSetup(s, { type: 'confirmNames' });
+    expect(s.error).toBe('duplicate');
+  });
+
+  it('S10: names enter the roster normalised (NFC, invisibles stripped, trimmed, capped)', () => {
+    const start = reduceSetup(initSetup(), { type: 'pickCount', count: 1 });
+    const done = buildCouple(start, 'otters', '  Ame\u0301lie\u200d ', 'Bartholomew-Alexander');
+    expect(done.step).toBe('done');
+    expect(done.teams[0]?.players).toEqual(['Amélie', 'Bartholomew-Alex']);
+  });
+
   it('editing a name clears a standing error', () => {
     let s = reduceSetup(onNames, { type: 'confirmNames' }); // required
     expect(s.error).toBe('required');

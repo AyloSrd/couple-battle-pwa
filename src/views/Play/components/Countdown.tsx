@@ -13,7 +13,7 @@ function stepOf(digit: string): 3 | 2 | 1 {
 }
 
 /** What the GO beat shouts — the mechanic differs per context. */
-export type TCountdownGo = 'point' | 'answer';
+type TCountdownGo = 'point' | 'answer';
 
 const GO_KEY = {
   point: 'count.go', // Dilemma: everyone points at someone → "POINTEZ !"
@@ -22,8 +22,7 @@ const GO_KEY = {
 
 /**
  * V-Countdown — the game's signature beat, on the sunburst (burst). Numerals slam
- * in with rising ticks + haptics, then the GO word. Auto-advances (dispatches
- * countdownDone) ~1.5s after GO. `ticks` = 3 (Dilemma) or 2 (rapid-fire); `go`
+ * in with rising ticks + haptics, then the GO word. Calls `onDone` ~1.5s after GO. `ticks` = 3 (Dilemma) or 2 (rapid-fire); `go`
  * picks the GO word for the mechanic (default: point). Ticks, haptics and
  * timing are identical in every context. Runs once on mount.
  */
@@ -76,22 +75,22 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
   return (
     <Screen burst center className="cb-v-dilemma cb-v-dilemma--count">
       <div className="cb-glow" aria-hidden="true" />
-      {isGo ? (
-        <div className="cb-go cb-reveal-in" role="status">
-          {t(GO_KEY[go])}
+      {!isGo && (
+        // key re-mounts the numeral (and its ring) so the slam replays per tick
+        <div key={digit} className="cb-v-count-stage">
+          <span className="cb-v-ring" aria-hidden="true" />
+          <div className="cb-numeral is-in">{digit}</div>
         </div>
-      ) : (
-        <>
-          {/* key re-mounts the numeral (and its ring) so the slam replays per tick */}
-          <div key={digit} className="cb-v-count-stage">
-            <span className="cb-v-ring" aria-hidden="true" />
-            <div className="cb-numeral is-in" aria-live="assertive">
-              {digit}
-            </div>
-          </div>
-          <p className="cb-v-get-ready">{t('dilemma.getready')}</p>
-        </>
       )}
+      {/* One live region for the whole beat: screen readers hear "get ready" at the start and
+          the GO word once — never every tick (S11). A plain box: the page centres it like its child. */}
+      <div role="status">
+        {isGo ? (
+          <div className="cb-go cb-reveal-in">{t(GO_KEY[go])}</div>
+        ) : (
+          <p className="cb-v-get-ready">{t('dilemma.getready')}</p>
+        )}
+      </div>
     </Screen>
   );
 };

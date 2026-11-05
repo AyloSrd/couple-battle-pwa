@@ -1,4 +1,6 @@
 import type { TAvatarId, TRoster, TTeam } from '@/shared/game/domain/types';
+import { NAME_MAX } from '@/shared/game/domain/game';
+import { normalizeText } from '@/shared/game/domain/text';
 
 /**
  * The roster-building wizard as a pure sub-machine (same idea as Play's
@@ -76,11 +78,16 @@ export function takenAvatars(state: TSetupState): Set<TAvatarId> {
   return new Set(state.teams.map((team) => team.avatarId));
 }
 
-/** True once `names` holds a repeat, trimmed and compared case-insensitively. */
+/** A player name as it enters the roster (S10): NFC, no invisible / bidi characters, trimmed, capped. */
+export function cleanName(raw: string): string {
+  return normalizeText(raw, NAME_MAX);
+}
+
+/** True once `names` holds a repeat, cleaned and compared case-insensitively. */
 export function hasDuplicateName(names: string[]): boolean {
   const seen = new Set<string>();
   for (const raw of names) {
-    const key = raw.trim().toLocaleLowerCase();
+    const key = cleanName(raw).toLocaleLowerCase();
     if (seen.has(key)) return true;
     seen.add(key);
   }
@@ -136,19 +143,21 @@ export function reduceSetup(state: TSetupState, event: TSetupEvent): TSetupState
 
     case 'confirmNames': {
       if (state.step !== 'names' || state.avatar === null) return state;
-      if (!state.name1.trim() || !state.name2.trim()) {
+      const name1 = cleanName(state.name1);
+      const name2 = cleanName(state.name2);
+      if (!name1 || !name2) {
         return { ...state, error: 'required' };
       }
       const rosterNames = state.teams
         .flatMap((team) => team.players)
-        .concat(state.name1, state.name2);
+        .concat(name1, name2);
       if (hasDuplicateName(rosterNames)) {
         return { ...state, error: 'duplicate' };
       }
       const team: TTeam = {
         teamId: `t${state.coupleIdx + 1}`,
         avatarId: state.avatar,
-        players: [state.name1.trim(), state.name2.trim()],
+        players: [name1, name2],
       };
       const teams = [...state.teams, team];
       // Last couple → hand off to mode select. Otherwise → pass interstitial for

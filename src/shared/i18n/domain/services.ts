@@ -1,4 +1,5 @@
-import type { TStringVars } from './types';
+import type { TAvatarId } from '@/shared/game/domain/types';
+import type { TStringKey, TStringVars } from './types';
 
 /**
  * Replace `{placeholder}` slots in a template with values. Unknown slots are
@@ -11,4 +12,9 @@ export function interpolate(template: string, vars?: TStringVars): string {
     const value = Object.hasOwn(vars, key) ? vars[key] : undefined;
     return value === undefined ? match : String(value);
   });
+}
+
+/** The string key of a team's display name. Typed: an avatar without a `team.*` string is a compile error. */
+export function teamKey(avatarId: TAvatarId): TStringKey {
+  return `team.${avatarId}`;
 }

@@ -1,22 +1,17 @@
 import { useEffect, useState, type FC } from 'react';
-import { useT, type TStringKey } from '@/shared/i18n';
+import { teamKey, useT } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import type { TAvatarId } from '@/shared/game';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { takenAvatars, type TSetupState } from '../domain/machine';
 import { PICKER_TEAMS } from '../domain/pickerTeams';
+import { pickTitle } from '../domain/labels';
 
 type TProps = {
   state: TSetupState;
   onSelect: (id: TAvatarId) => void;
   onNext: () => void;
 };
-
-/** The title is the localized pick line after its "Duo n :" head (the chip shows the head). */
-function pickTitle(full: string): string {
-  const idx = full.indexOf(':');
-  return idx === -1 ? full : full.slice(idx + 1).trim();
-}
 
 /**
  * Step A — TEAM PICK. All teams on one page: a compact 3×2 grid of team tiles (the half-body couple
@@ -55,7 +50,7 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
         {PICKER_TEAMS.map((id) => {
           const isTaken = taken.has(id);
           const isSelected = state.avatar === id;
-          const name = t(`team.${id}` as TStringKey);
+          const name = t(teamKey(id));
           return (
             <button
               key={id}
@@ -79,7 +74,7 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
         </div>
       )}
 
-      <PixelButton onClick={onNext} disabled={state.avatar === null}>
+      <PixelButton sfx="sfx.select" onClick={onNext} disabled={state.avatar === null}>
         {t('common.next')}
       </PixelButton>
     </div>

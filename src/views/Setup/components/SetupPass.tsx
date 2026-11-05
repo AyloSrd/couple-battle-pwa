@@ -2,18 +2,13 @@ import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import { PixelButton } from '@/shared/Chrome';
+import { duoLabel } from '../domain/labels';
 
 type TProps = {
   /** 1-based number of the NEXT couple (they have no avatar yet). */
   nextCoupleNumber: number;
   onConfirm: () => void;
 };
-
-/** "Duo {n}" — the localized team-pick line up to its colon. */
-function duoLabel(full: string): string {
-  const head = full.split(':')[0]?.trim();
-  return head && head !== full ? head : full;
-}
 
 /**
  * Step C — PASS-PHONE interstitial, shown only BETWEEN couples: the next

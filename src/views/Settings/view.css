@@ -38,14 +38,6 @@
   flex: none;
   margin-left: auto;
 }
-/* FR / EN / ES pills: the glossy buttons, sized for a thumb, lip drawn by the shadow (no margin) */
-.cb-v-settings .cb-v-row .cb-btn {
-  min-height: 52px;
-  min-width: 64px;
-  padding: 0 var(--cb-s4);
-  margin-bottom: 0;
-  border-radius: var(--cb-r-md);
-}
 
 /* ---------- big switch ---------- */
 .cb-v-settings .cb-v-switch {
@@ -88,7 +80,6 @@
 
 /* ---------- reset: one line at 360 px, in FR and EN ---------- */
 .cb-v-settings .cb-v-reset {
-  min-height: 64px;
   padding: 0 var(--cb-s3);
   font-size: clamp(14px, 5.2vw, 20px);
   white-space: nowrap;

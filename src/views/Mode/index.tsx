@@ -4,7 +4,7 @@ import { useT, type TStringKey } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import { useDraft } from '@/shared/session';
 import { Mode, type TMode } from '@/shared/game';
-import { Screen, ProgressDots, ModeIcon, BackButton } from '@/shared/Chrome';
+import { Screen, ProgressDots, ModeIcon, TopBar } from '@/shared/Chrome';
 import './view.css';
 
 type TModeCardDef = {
@@ -14,11 +14,11 @@ type TModeCardDef = {
   descKey: TStringKey;
 };
 
-const CARDS: TModeCardDef[] = [
+const CARDS = [
   { mode: Mode.Flash, nameKey: 'mode.flash.name', durKey: 'mode.flash.dur', descKey: 'mode.flash.desc' },
   { mode: Mode.Dilemma, nameKey: 'mode.dilemma.name', durKey: 'mode.dilemma.dur', descKey: 'mode.dilemma.desc' },
   { mode: Mode.Ultime, nameKey: 'mode.ultime.name', durKey: 'mode.ultime.dur', descKey: 'mode.ultime.desc' },
-];
+] as const satisfies readonly TModeCardDef[];
 
 const ModeCard: FC<{ def: TModeCardDef; onPick: (mode: TMode) => void }> = ({ def, onPick }) => {
   const t = useT();
@@ -41,11 +41,6 @@ export const ModeView: FC = () => {
   const sound = useSound();
   const { draftStore } = useDraft();
 
-  const handleBack = () => {
-    sound.play('sfx.back');
-    navigate({ to: '/setup' });
-  };
-
   const handlePick = (mode: TMode) => {
     sound.play('sfx.select');
     draftStore.set({ mode });
@@ -54,10 +49,9 @@ export const ModeView: FC = () => {
 
   return (
     <Screen className="cb-v-mode">
-      <div className="cb-topbar">
-        <BackButton label={t('common.back')} onClick={handleBack} />
+      <TopBar back="/setup">
         <ProgressDots total={3} current={1} />
-      </div>
+      </TopBar>
       <h1 className="cb-title">{t('mode.title')}</h1>
       <div className="cb-modes">
         {CARDS.map((def) => (

@@ -24,7 +24,7 @@ const question = { id: 1, theme: 'childhood' as const, difficulty: 'easy' as con
 describe('Judge — no leaks', () => {
   it('plays the reveal cue and leaves no timer or listener behind after unmount', () => {
     const { play, unmountAndAssertClean } = mountLeakChecked(
-      <Judge game={game} question={question} answererName="A" onJudge={() => {}} />,
+      <Judge game={game} question={question} dispatch={() => {}} />,
     );
     expect(play).toHaveBeenCalledWith('sfx.reveal');
     unmountAndAssertClean();

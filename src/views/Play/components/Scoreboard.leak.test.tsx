@@ -52,7 +52,7 @@ describe('Scoreboard — leaks', () => {
     const { unmount } = render(
       <StrictMode>
         <LangProvider lang="fr">
-          <Scoreboard game={game} onNext={() => {}} />
+          <Scoreboard game={game} dispatch={() => {}} />
         </LangProvider>
       </StrictMode>,
     );

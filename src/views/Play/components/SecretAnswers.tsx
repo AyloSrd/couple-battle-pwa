@@ -3,19 +3,20 @@ import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton, Field } from '@/shared/Chrome';
 import { ActorBadge } from './ActorBadge';
 import '../flash.css';
-import { SECRET_MAX } from '@/shared/game';
+import { normalizeText, SECRET_MAX } from '@/shared/game';
 import type { TQuestion } from '@/shared/questions';
+import type { TDispatch } from '../application/game';
 import { cardOf, questionText, segmentLength, teamOf, type TGameAt } from '../domain/machine';
 
 type TProps = {
   game: TGameAt<'secret'>;
   question: TQuestion | undefined;
-  /** Locks the answer: typed text, or a closed token ('yes' | 'no', 'p0' | 'p1'). */
-  onLock: (answer: string) => void;
+  dispatch: TDispatch;
 };
 
-/** V-SecretAnswers — the answerer privately answers, then locks. No going back. */
-export const SecretAnswers: FC<TProps> = ({ game, question, onLock }) => {
+/** V-SecretAnswers — the answerer privately answers, then locks: typed text, or a closed
+ *  token ('yes' | 'no', 'p0' | 'p1'). No going back. Mounted with a key per slot. */
+export const SecretAnswers: FC<TProps> = ({ game, question, dispatch }) => {
   const t = useT();
   const [text, setText] = useState('');
   const type = cardOf(game)?.type;
@@ -23,12 +24,12 @@ export const SecretAnswers: FC<TProps> = ({ game, question, onLock }) => {
   // who_of_two answers are one of the couple's two names (roster order), locked as p0 | p1.
   const twoNames = type === 'who_of_two' ? teamOf(game)?.players : undefined;
 
-  const lock = (answer: string) => {
-    setText('');
-    onLock(answer);
-  };
+  // What the machine will store (it normalises again): blank or invisible-only text can't lock.
+  const typed = normalizeText(text, SECRET_MAX);
+
+  const lock = (value: string) => dispatch({ type: 'answer', value });
   const handleSubmitText = () => {
-    if (text.trim()) lock(text.trim());
+    if (typed) lock(typed);
   };
   const handleYes = () => lock('yes');
   const handleNo = () => lock('no');
@@ -52,13 +53,13 @@ export const SecretAnswers: FC<TProps> = ({ game, question, onLock }) => {
 
       {twoNames ? (
         <div className="cb-answers">
-          <AnswerButton label={twoNames[0]} tone="p1" onClick={handleFirst} />
-          <AnswerButton label={twoNames[1]} tone="p2" onClick={handleSecond} />
+          <AnswerButton label={twoNames[0]} tone="p1" sfx="sfx.lock" onClick={handleFirst} />
+          <AnswerButton label={twoNames[1]} tone="p2" sfx="sfx.lock" onClick={handleSecond} />
         </div>
       ) : isYesNo ? (
         <div className="cb-answers">
-          <AnswerButton label={t('common.yes')} tone="p1" onClick={handleYes} />
-          <AnswerButton label={t('common.no')} tone="p2" onClick={handleNo} />
+          <AnswerButton label={t('common.yes')} tone="p1" sfx="sfx.lock" onClick={handleYes} />
+          <AnswerButton label={t('common.no')} tone="p2" sfx="sfx.lock" onClick={handleNo} />
         </div>
       ) : (
         <>
@@ -73,7 +74,7 @@ export const SecretAnswers: FC<TProps> = ({ game, question, onLock }) => {
             autoCorrect="off"
             spellCheck={false}
           />
-          <PixelButton onClick={handleSubmitText} disabled={!text.trim()}>
+          <PixelButton size="lg" sfx="sfx.lock" onClick={handleSubmitText} disabled={!typed}>
             {t('secret.submit')}
           </PixelButton>
         </>

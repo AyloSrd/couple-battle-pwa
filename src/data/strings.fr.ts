@@ -78,6 +78,8 @@ export const fr = {
   "guide.ultime.s1": "Manches 1 & 2 : comme au Flash.",
   "guide.ultime.s2": "Manche 3 : comme au Dilemme.",
   "guide.ultime.s3": "Finale : réponses simultanées en rafale, les autres jugent 💖 ou 💀.",
+  "home.discard.confirm": "La partie en cours sera perdue. On l'abandonne ?",
+  "home.discard.yes": "Abandonner",
   "home.howto": "Comment on joue ?",
   "home.install.android": "Installe le jeu sur ton tel 📲",
   "home.install.dismiss": "Plus tard",

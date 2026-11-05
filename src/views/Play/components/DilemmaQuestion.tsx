@@ -10,6 +10,7 @@ type TProps = {
   game: TGameAt<'ask'>;
   /** The card's text in the active language (undefined past a short deck). */
   question: TQuestion | undefined;
+  /** READY: starts the countdown (a UI beat owned by Play). */
   onReady: () => void;
 };
 
@@ -37,7 +38,7 @@ export const DilemmaQuestion: FC<TProps> = ({ game, question, onReady }) => {
       </PixelPanel>
 
       <p className="cb-v-rule">{t('dilemma.rule')}</p>
-      <PixelButton className="cb-v-cta" onClick={onReady}>
+      <PixelButton size="lg" className="cb-v-cta" onClick={onReady}>
         {t('dilemma.ready')}
       </PixelButton>
     </div>

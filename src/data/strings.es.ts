@@ -78,6 +78,8 @@ export const es = {
   "guide.ultime.s1": "Rondas 1 y 2: como en el Flash.",
   "guide.ultime.s2": "Ronda 3: como en el Dilema.",
   "guide.ultime.s3": "Final: respuestas simultáneas en ráfaga, el resto juzga 💖 o 💀.",
+  "home.discard.confirm": "La partida en curso se perderá. ¿La abandonamos?",
+  "home.discard.yes": "Abandonar",
   "home.howto": "¿Cómo se juega?",
   "home.install.android": "Instala el juego en tu teléfono 📲",
   "home.install.dismiss": "Más tarde",

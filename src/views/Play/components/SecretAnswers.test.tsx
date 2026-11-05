@@ -7,7 +7,7 @@ import { SecretAnswers } from './SecretAnswers';
 
 function mount(round: number, coupleIdx: number) {
   const game = gameAt('secret', { round: round as 0 | 1, couple: coupleIdx });
-  return renderScreen(<SecretAnswers game={game} question={questionFor(game)} onLock={() => {}} />);
+  return renderScreen(<SecretAnswers game={game} question={questionFor(game)} dispatch={() => {}} />);
 }
 const badge = (c: HTMLElement) => c.querySelector('.cb-flash-card .cb-actor');
 
@@ -47,36 +47,51 @@ describe('SecretAnswers — the badge changed nothing about answering', () => {
   };
 
   it('open: the lock button stays disabled until there is text, then locks the trimmed answer', () => {
-    const onLock = vi.fn();
-    const { getByRole, getByPlaceholderText } = renderScreen(<SecretAnswers {...typed('open')} onLock={onLock} />);
+    const dispatch = vi.fn();
+    const { getByRole, getByPlaceholderText } = renderScreen(<SecretAnswers {...typed('open')} dispatch={dispatch} />);
     const lock = getByRole('button', { name: /lock my answer/i });
     expect(lock).toBeDisabled();
     fireEvent.change(getByPlaceholderText(/your answer/i), { target: { value: '  pasta ' } });
     fireEvent.click(lock);
-    expect(onLock).toHaveBeenCalledWith('pasta');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', value: 'pasta' });
+  });
+
+  it('open: invisible-only text (zero-width, bidi controls, spaces) cannot lock; the lock sends the normalised text', () => {
+    const dispatch = vi.fn();
+    const { getByRole, getByPlaceholderText } = renderScreen(<SecretAnswers {...typed('open')} dispatch={dispatch} />);
+    const field = getByPlaceholderText(/your answer/i);
+    const lock = getByRole('button', { name: /lock my answer/i });
+    fireEvent.change(field, { target: { value: ' \u200B\u202E\u2066 ' } });
+    expect(lock).toBeDisabled();
+    fireEvent.click(lock);
+    expect(dispatch).not.toHaveBeenCalled();
+    fireEvent.change(field, { target: { value: ' Ky\u200Boto\u202E ' } });
+    expect(lock).toBeEnabled();
+    fireEvent.click(lock);
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', value: 'Kyoto' });
   });
 
   it('yes/no: the two answer buttons show the localized word and lock the language-free token', () => {
-    const onLock = vi.fn();
-    const { getByRole } = renderScreen(<SecretAnswers {...typed('yes_no')} onLock={onLock} />);
+    const dispatch = vi.fn();
+    const { getByRole } = renderScreen(<SecretAnswers {...typed('yes_no')} dispatch={dispatch} />);
     fireEvent.click(getByRole('button', { name: /yes/i }));
-    expect(onLock).toHaveBeenCalledWith('yes');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', value: 'yes' });
     const fr = vi.fn();
-    renderScreen(<SecretAnswers {...typed('yes_no')} onLock={fr} />, 'fr').getByRole('button', { name: /non/i }).click();
-    expect(fr).toHaveBeenCalledWith('no');
+    renderScreen(<SecretAnswers {...typed('yes_no')} dispatch={fr} />, 'fr').getByRole('button', { name: /non/i }).click();
+    expect(fr).toHaveBeenCalledWith({ type: 'answer', value: 'no' });
   });
 
   it('who_of_two: the buttons are the couple’s names and lock the picked player’s index', () => {
-    const onLock = vi.fn();
-    const { getByRole } = renderScreen(<SecretAnswers {...typed('who_of_two')} onLock={onLock} />);
+    const dispatch = vi.fn();
+    const { getByRole } = renderScreen(<SecretAnswers {...typed('who_of_two')} dispatch={dispatch} />);
     fireEvent.click(getByRole('button', { name: /Bo/ }));
-    expect(onLock).toHaveBeenCalledWith('p1');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'answer', value: 'p1' });
     fireEvent.click(getByRole('button', { name: /Ana/ }));
-    expect(onLock).toHaveBeenLastCalledWith('p0');
+    expect(dispatch).toHaveBeenLastCalledWith({ type: 'answer', value: 'p0' });
   });
 
   it('no way back: the screen offers no back / cancel control', () => {
-    const { queryByRole } = renderScreen(<SecretAnswers {...typed('open')} onLock={() => {}} />);
+    const { queryByRole } = renderScreen(<SecretAnswers {...typed('open')} dispatch={() => {}} />);
     expect(queryByRole('button', { name: /back|cancel/i })).toBeNull();
   });
 });

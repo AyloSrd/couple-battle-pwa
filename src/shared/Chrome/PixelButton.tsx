@@ -1,4 +1,5 @@
-import type { ButtonHTMLAttributes, FC } from 'react';
+import type { ButtonHTMLAttributes, FC, MouseEvent } from 'react';
+import { useSound, type TSoundId } from '@/shared/sound';
 import './chrome.css';
 
 /**
@@ -12,6 +13,11 @@ type TPixelButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: TPixelButtonVariant;
   /** Full-width (default). `false` = inline, hugging its label. */
   block?: boolean;
+  /** Height scale: `md` (default, the token height of the variant) or `lg` (verdict / answer /
+   *  start buttons). The only button sizes — views do not patch heights. */
+  size?: 'md' | 'lg';
+  /** Sound played on click (default the tap blip); `null` = silent (the handler plays its own). */
+  sfx?: TSoundId | null;
 };
 
 const VARIANT_CLASS: Record<TPixelButtonVariant, string> = {
@@ -29,13 +35,21 @@ export const PixelButton: FC<TPixelButtonProps> = ({
   type = 'button',
   className,
   children,
+  size = 'md',
+  sfx = 'sfx.tap',
+  onClick,
   ...rest
 }) => {
-  const classes = ['cb-btn', VARIANT_CLASS[variant], block ? '' : 'cb-btn--inline', className ?? '']
+  const sound = useSound();
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (sfx) sound.play(sfx);
+    onClick?.(event);
+  };
+  const classes = ['cb-btn', VARIANT_CLASS[variant], block ? '' : 'cb-btn--inline', size === 'lg' ? 'cb-btn--lg' : '', className ?? '']
     .filter(Boolean)
     .join(' ');
   return (
-    <button type={type} className={classes} {...rest}>
+    <button type={type} className={classes} onClick={handleClick} {...rest}>
       {children}
     </button>
   );

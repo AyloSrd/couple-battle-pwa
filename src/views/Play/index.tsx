@@ -3,33 +3,60 @@ import { useNavigate } from '@tanstack/react-router';
 import { useLang, useT } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import { useKeepAwake } from '@/shared/wakeLock';
-import { useSaveStore } from '@/shared/save';
+import { useSaveStore, type TSoloResult } from '@/shared/save';
 import { useDraft } from '@/shared/session';
 import { Screen, PixelButton } from '@/shared/Chrome';
-import { newGame, type TResult } from '@/shared/game';
+import { newGame, type TGame } from '@/shared/game';
 import { useQuestionsApi, type TQuestion } from '@/shared/questions';
-import { useGame } from './application/game';
-import {
-  isAt,
-  cardOf,
-  flashNames,
-  RAPID_KINDS,
-  type TVerdict,
-} from './domain/machine';
+import { useGame, type TDispatch } from './application/game';
+import { isAt, cardOf, RAPID_KINDS } from './domain/machine';
 import { DilemmaQuestion } from './components/DilemmaQuestion';
 import { Countdown } from './components/Countdown';
 import { DilemmaResolve } from './components/DilemmaResolve';
 import { Scoreboard } from './components/Scoreboard';
 import { FinalScreen } from './components/FinalScreen';
 import { PauseSheet } from './components/PauseSheet';
-import { PassPhone } from './components/PassPhone';
-import { SideGate } from './components/SideGate';
-import { Handoff } from './components/Handoff';
+import { Gate } from './components/Gate';
 import { SecretAnswers } from './components/SecretAnswers';
 import { GuessReveal } from './components/GuessReveal';
 import { Judge } from './components/Judge';
 import { RapidFire } from './components/RapidFire';
 
+type TStepScreenProps = {
+  game: TGame;
+  /** The card's text in the active language (undefined: no card, or past a short deck). */
+  question: TQuestion | undefined;
+  dispatch: TDispatch;
+  /** READY (Dilemma, rapid-fire question): start the countdown beat. */
+  onReady: () => void;
+  onRematch: () => void;
+  onNewGame: () => void;
+  solo: TSoloResult | null;
+};
+
+/** The screen for the game's step. Each screen owns its handlers and sounds. */
+const StepScreen: FC<TStepScreenProps> = ({ game, question, dispatch, onReady, onRematch, onNewGame, solo }) => {
+  // A key per slot (or gate) remounts the screen: fresh input, and its mount cue plays again.
+  const slot = 'q' in game.step && 'couple' in game.step ? `${game.ctx.seg}-${game.step.q}-${game.step.couple}` : '';
+
+  if (isAt(game, 'ask')) return <DilemmaQuestion game={game} question={question} onReady={onReady} />;
+  if (isAt(game, 'resolve')) return <DilemmaResolve game={game} question={question} dispatch={dispatch} />;
+  if (isAt(game, 'gate', 'handoff')) {
+    const gateKey = `${game.step.kind}-${game.step.kind === 'gate' ? game.step.side : slot}`;
+    return <Gate key={gateKey} game={game} dispatch={dispatch} />;
+  }
+  if (isAt(game, 'secret')) return <SecretAnswers key={slot} game={game} question={question} dispatch={dispatch} />;
+  if (isAt(game, 'guess')) return <GuessReveal key={slot} game={game} question={question} dispatch={dispatch} />;
+  if (isAt(game, 'judge')) return <Judge game={game} question={question} dispatch={dispatch} />;
+  if (isAt(game, 'rapidIntro', 'rapidTurn', 'rapidAsk', 'rapidJudge')) {
+    return <RapidFire game={game} question={question} dispatch={dispatch} onReady={onReady} />;
+  }
+  if (isAt(game, 'scoreboard')) return <Scoreboard game={game} dispatch={dispatch} />;
+  if (isAt(game, 'final')) return <FinalScreen game={game} onRematch={onRematch} onNewGame={onNewGame} solo={solo ?? undefined} />;
+  return null;
+};
+
+/** `/play`: step → screen, plus what spans screens — pause, background, countdown beat, music. */
 export const PlayView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
@@ -59,62 +86,18 @@ export const PlayView: FC = () => {
   }, [kind, sound]);
 
   const handleReady = () => {
-    if (!game) return;
-    sound.play('sfx.tap');
-    setCountdownSeq(game.ctx.seq);
+    if (game) setCountdownSeq(game.ctx.seq);
   };
   const handleCountdownDone = () => {
     setCountdownSeq(null);
     dispatch({ type: 'next' });
   };
-  const handleConfirm = (result: TResult) => {
-    sound.play(result === 'match' ? 'sfx.point.exact' : 'sfx.point.miss');
-    dispatch({ type: 'verdict', v: result === 'match' ? 'exact' : 'miss' });
-  };
-  const handleNext = () => {
-    sound.play('sfx.select');
-    dispatch({ type: 'next' });
-  };
-
-  // --- Flash handlers ---
-  const handlePassConfirm = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'next' });
-  };
-  const handleLock = (value: string) => {
-    sound.play('sfx.lock');
-    dispatch({ type: 'answer', value });
-  };
-  const handleReveal = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'next' }); // the riser plays on the Judge (flip) mount
-  };
-  const handleAutoGuess = (value: string) => {
-    sound.play('sfx.tap'); // the match/miss sound played on the pick, with the reveal
-    dispatch({ type: 'guess', value });
-  };
-  const handleJudge = (v: TVerdict) => {
-    sound.play(v === 'exact' ? 'sfx.point.exact' : v === 'close' ? 'sfx.point.close' : 'sfx.point.miss');
-    dispatch({ type: 'verdict', v });
-  };
-
-  // --- Rapid-fire handlers ---
-  const handleRapidNext = () => {
-    sound.play('sfx.tap');
-    dispatch({ type: 'next' });
-  };
-  const handleRapidJudge = (synchro: boolean) => {
-    sound.play(synchro ? 'sfx.synchro' : 'sfx.mismatch');
-    dispatch({ type: 'verdict', v: synchro ? 'exact' : 'miss' });
-  };
 
   const handlePause = () => {
-    sound.play('sfx.tap');
     sound.duck(true);
     setPaused(true);
   };
   const handleResume = () => {
-    sound.play('sfx.tap');
     sound.duck(false);
     setPaused(false);
   };
@@ -127,7 +110,6 @@ export const PlayView: FC = () => {
     setPaused(false);
   };
   const handleQuit = () => {
-    sound.play('sfx.back');
     sound.duck(false);
     store.quitGame();
     navigate({ to: '/' });
@@ -135,14 +117,12 @@ export const PlayView: FC = () => {
 
   const handleRematch = () => {
     if (!game) return;
-    sound.play('sfx.select');
     // From the game itself, so Rematch also works after a cold-start resume.
     draftStore.set({ roster: game.ctx.roster, mode: null });
     store.leaveGame();
     navigate({ to: '/mode' });
   };
   const handleNewGame = () => {
-    sound.play('sfx.tap');
     draftStore.clear();
     store.leaveGame();
     navigate({ to: '/' });
@@ -150,26 +130,20 @@ export const PlayView: FC = () => {
 
   if (!game) return null;
 
-  const card = cardOf(game);
-  const question: TQuestion | undefined = card ? bank.get(card.id) : undefined;
-
   // The countdown owns the whole sunburst screen: 3 ticks → "POINTEZ !" for
   // Dilemma; 2 ticks → "RÉPONDEZ !" for the rapid-fire (nobody points there).
-  if (countdownSeq === game.ctx.seq && game.step.kind === 'ask') return <Countdown onDone={handleCountdownDone} />;
-  if (countdownSeq === game.ctx.seq && game.step.kind === 'rapidAsk') {
+  if (countdownSeq === game.ctx.seq && isAt(game, 'ask')) return <Countdown onDone={handleCountdownDone} />;
+  if (countdownSeq === game.ctx.seq && isAt(game, 'rapidAsk')) {
     return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
   }
 
   const { step } = game;
   const showPause = step.kind !== 'final';
-  const solo = game.ctx.roster.length === 1;
   // Sunburst (burst) background ONLY for the theatrical beats: the rapid-fire
   // finale, the between-rounds scoreboard and the final results. Countdowns
   // render their own burst screen above. Everything else is calm Paper.
   const burst = RAPID_KINDS.has(step.kind) || step.kind === 'scoreboard' || step.kind === 'final';
-  /** Names for the couple currently in the Flash spotlight. */
-  const names = flashNames(game);
-  const slotKey = 'q' in step && 'couple' in step ? `${game.ctx.seg}-${step.q}-${step.couple}` : '';
+  const card = cardOf(game);
 
   return (
     <Screen burst={burst} className={showPause ? 'cb-page--with-pause' : undefined}>
@@ -181,51 +155,17 @@ export const PlayView: FC = () => {
         </div>
       )}
 
-      {isAt(game, 'ask') && <DilemmaQuestion game={game} question={question} onReady={handleReady} />}
-      {isAt(game, 'resolve') && <DilemmaResolve game={game} question={question} onConfirm={handleConfirm} />}
+      <StepScreen
+        game={game}
+        question={card ? bank.get(card.id) : undefined}
+        dispatch={dispatch}
+        onReady={handleReady}
+        onRematch={handleRematch}
+        onNewGame={handleNewGame}
+        solo={soloResult}
+      />
 
-      {/* Flash "sofa sides": group gates for ≥2 couples; solo has no group to
-          share with, so its gates are the strict no-peek pass-phone screens. */}
-      {isAt(game, 'gate') &&
-        (solo ? (
-          <PassPhone
-            key={game.step.side}
-            variant={game.step.side === 'answerers' ? 'secret' : 'back'}
-            game={game}
-            onConfirm={handlePassConfirm}
-          />
-        ) : (
-          <SideGate key={game.step.side} side={game.step.side} onConfirm={handlePassConfirm} />
-        ))}
-      {isAt(game, 'handoff') && <Handoff game={game} onConfirm={handlePassConfirm} />}
-      {isAt(game, 'secret') && <SecretAnswers key={slotKey} game={game} question={question} onLock={handleLock} />}
-      {isAt(game, 'guess') && (
-        <GuessReveal
-          key={slotKey}
-          game={game}
-          question={question}
-          guesserName={names.guesserName}
-          partnerName={names.answererName}
-          onReveal={handleReveal}
-          onAutoGuess={handleAutoGuess}
-        />
-      )}
-      {isAt(game, 'judge') && (
-        <Judge game={game} question={question} answererName={names.answererName} onJudge={handleJudge} />
-      )}
-
-      {isAt(game, 'rapidIntro', 'rapidTurn', 'rapidAsk', 'rapidJudge') && (
-        <RapidFire game={game} question={question} onNext={handleRapidNext} onReady={handleReady} onJudge={handleRapidJudge} />
-      )}
-
-      {isAt(game, 'scoreboard') && <Scoreboard game={game} onNext={handleNext} />}
-      {isAt(game, 'final') && (
-        <FinalScreen game={game} onRematch={handleRematch} onNewGame={handleNewGame} solo={soloResult ?? undefined} />
-      )}
-
-      {paused && (
-        <PauseSheet onResume={handleResume} onRestart={handleRestart} onQuit={handleQuit} />
-      )}
+      {paused && <PauseSheet onResume={handleResume} onRestart={handleRestart} onQuit={handleQuit} />}
     </Screen>
   );
 };
