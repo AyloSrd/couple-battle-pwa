@@ -15,3 +15,4 @@ export { Notice } from './Notice';
 export { Sheet } from './Sheet';
 export { TopBar } from './TopBar';
 export { LanguagePicker } from './LanguagePicker';
+export { usePrefersReducedMotion } from './usePrefersReducedMotion';

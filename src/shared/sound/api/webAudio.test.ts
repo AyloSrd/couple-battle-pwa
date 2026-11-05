@@ -20,6 +20,49 @@ describe('createSoundWebAudioApi without an AudioContext', () => {
   });
 });
 
+describe('haptics', () => {
+  let vibrate: ReturnType<typeof vi.fn>;
+  beforeEach(() => {
+    vibrate = vi.fn();
+    vi.stubGlobal('AudioContext', undefined);
+    vi.stubGlobal('webkitAudioContext', undefined);
+    Object.defineProperty(navigator, 'vibrate', { value: vibrate, configurable: true, writable: true });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    Reflect.deleteProperty(navigator, 'vibrate');
+  });
+
+  it('off until the shell turns them on; then every cue with a pattern buzzes', () => {
+    const api = createSoundWebAudioApi();
+    api.play('sfx.point.exact');
+    expect(vibrate).not.toHaveBeenCalled();
+    api.setHaptics(true);
+    api.play('sfx.point.exact');
+    api.play('sfx.whoosh'); // a screen cue: still
+    expect(vibrate.mock.calls).toEqual([[[15, 50, 30]]]);
+    api.setHaptics(false);
+    api.play('sfx.tap');
+    expect(vibrate).toHaveBeenCalledTimes(1);
+  });
+
+  it('follow the vibration setting, not the sound one; the fanfare buzzes once', () => {
+    const api = createSoundWebAudioApi();
+    api.setEnabled(false);
+    api.setHaptics(true);
+    api.play('sfx.tap');
+    api.play('mus.fanfare');
+    expect(vibrate.mock.calls).toEqual([[10], [[40, 80, 15, 50, 30]]]);
+  });
+
+  it('no Vibration API (iOS Safari): nothing throws', () => {
+    Reflect.deleteProperty(navigator, 'vibrate');
+    const api = createSoundWebAudioApi();
+    api.setHaptics(true);
+    expect(() => api.play('sfx.tap')).not.toThrow();
+  });
+});
+
 // ---- fake WebAudio ------------------------------------------------------------------------
 
 class FakeParam {

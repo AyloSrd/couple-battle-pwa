@@ -44,6 +44,14 @@ describe('Shell', () => {
     expect(setEnabled).toHaveBeenLastCalledWith(false);
   });
 
+  it('haptics follow the saved vibration setting', () => {
+    const setHaptics = vi.spyOn(soundEngine, 'setHaptics');
+    const app = mount();
+    expect(setHaptics).toHaveBeenLastCalledWith(true);
+    act(() => app.store.updateSettings({ vibration: false }));
+    expect(setHaptics).toHaveBeenLastCalledWith(false);
+  });
+
   it('a failing write shows the retrying notice with Retry; Retry re-sends and the notice goes', () => {
     const app = mount();
     vi.spyOn(app.api, 'write').mockImplementationOnce(() => {

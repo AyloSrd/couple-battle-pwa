@@ -3,12 +3,15 @@ import { useLang, useT } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import type { TAvatarId } from '@/shared/game';
 import type { TSoloResult } from '@/shared/save';
-import { PixelButton, TeamArt } from '@/shared/Chrome';
+import { PixelButton, TeamArt, usePrefersReducedMotion } from '@/shared/Chrome';
 import { rankTeams, type TGameAt, type TRankedTeam } from '../domain/machine';
 import { joinNames, resolveOutcome } from '../domain/outcome';
+import { countedValue } from '../domain/beats';
 import { gameStats } from '../domain/stats';
+import { Confetti } from './Confetti';
 import { RankList } from './RankList';
 import { TeamStats } from './TeamStats';
+import { useCountUp } from './useCountUp';
 import '../results.css';
 
 type TFinalScreenProps = {
@@ -18,11 +21,18 @@ type TFinalScreenProps = {
   solo?: TSoloResult | undefined;
 };
 
-/** V-FinalResults — the winner on the sunburst (burst). Fanfare once on mount. */
+const COUNT_MS = 1200;
+
+/**
+ * V-FinalResults — the winner on the sunburst (burst). On mount: the fanfare, confetti (canvas)
+ * with its sound, the crown pops on the winner and the scores count up from 0. Reduced motion:
+ * no confetti, the final scores at once.
+ */
 export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame, solo }) => {
   const t = useT();
   const { lang } = useLang();
   const sound = useSound();
+  const reduced = usePrefersReducedMotion();
   const { history } = game.ctx;
   const ranked = rankTeams(game.ctx);
   const outcome = resolveOutcome(ranked);
@@ -53,6 +63,12 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame,
           sub: t('results.tie.sub', { score: outcome.score }),
         };
 
+  const steps = reduced ? 0 : Math.max(0, ...ranked.map((r) => r.score));
+  const counted = useCountUp({ steps, durationMs: COUNT_MS });
+  const shown = counted >= steps ? ranked : ranked.map((row) => ({ ...row, score: countedValue(0, row.score, counted) }));
+  // the crown: a winner, a shared crown on a tie; solo only on a new best
+  const crowned = solo ? solo.isBest : outcome !== null && game.ctx.roster.length > 1;
+
   const renderStats = (row: TRankedTeam) => {
     const teamStats = stats.find((s) => s.teamId === row.team.teamId);
     return teamStats && teamStats.hearts.length > 0 ? <TeamStats stats={teamStats} vsBest={solo} /> : null;
@@ -66,6 +82,12 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame,
   return (
     <div className="cb-v-final">
       <div className="cb-glow" aria-hidden="true" />
+      {!reduced && <Confetti />}
+      {crowned && (
+        <span className="cb-final-crown" aria-hidden="true">
+          👑
+        </span>
+      )}
       {winner && (
         <TeamArt
           teamId={winner.team.avatarId}
@@ -105,7 +127,7 @@ export const FinalScreen: FC<TFinalScreenProps> = ({ game, onRematch, onNewGame,
         )}
       </div>
 
-      <RankList ranked={ranked} renderExtra={renderStats} />
+      <RankList ranked={shown} renderExtra={renderStats} />
 
       <div className="cb-grow" />
       <PixelButton variant="win" sfx="sfx.select" onClick={onRematch}>

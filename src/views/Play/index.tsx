@@ -9,6 +9,7 @@ import { Screen, PixelButton } from '@/shared/Chrome';
 import { newGame, type TGame } from '@/shared/game';
 import { useQuestionsApi, type TQuestion } from '@/shared/questions';
 import { useGame, type TDispatch } from './application/game';
+import { countdownTicks } from './domain/beats';
 import { isAt, cardOf, RAPID_KINDS } from './domain/machine';
 import { DilemmaQuestion } from './components/DilemmaQuestion';
 import { Countdown } from './components/Countdown';
@@ -21,6 +22,7 @@ import { SecretAnswers } from './components/SecretAnswers';
 import { GuessReveal } from './components/GuessReveal';
 import { Judge } from './components/Judge';
 import { RapidFire } from './components/RapidFire';
+import { ScorePop } from './components/ScorePop';
 
 type TStepScreenProps = {
   game: TGame;
@@ -56,7 +58,7 @@ const StepScreen: FC<TStepScreenProps> = ({ game, question, dispatch, onReady, o
   return null;
 };
 
-/** `/play`: step → screen, plus what spans screens — pause, background, countdown beat, music. */
+/** `/play`: step → screen, plus what spans screens — pause, background, countdown beat, score pop, music. */
 export const PlayView: FC = () => {
   const t = useT();
   const navigate = useNavigate();
@@ -65,7 +67,7 @@ export const PlayView: FC = () => {
   const { draftStore } = useDraft();
   const { lang } = useLang();
   const questionsApi = useQuestionsApi();
-  const { game, dispatch, soloResult } = useGame();
+  const { game, dispatch, soloResult, scorePop } = useGame();
 
   // The deck holds ids only: the text comes from the active language's bank.
   const bank = useMemo(() => new Map(questionsApi.list({ lang }).map((q) => [q.id, q])), [questionsApi, lang]);
@@ -130,9 +132,11 @@ export const PlayView: FC = () => {
 
   if (!game) return null;
 
-  // The countdown owns the whole sunburst screen: 3 ticks → "POINTEZ !" for
-  // Dilemma; 2 ticks → "RÉPONDEZ !" for the rapid-fire (nobody points there).
-  if (countdownSeq === game.ctx.seq && isAt(game, 'ask')) return <Countdown onDone={handleCountdownDone} />;
+  // The countdown owns the whole sunburst screen: "POINTEZ !" for Dilemma (3-2-1 to open a
+  // block, then 2-1); 2-1 → "RÉPONDEZ !" for the rapid-fire (nobody points there).
+  if (countdownSeq === game.ctx.seq && isAt(game, 'ask')) {
+    return <Countdown ticks={countdownTicks(game)} onDone={handleCountdownDone} />;
+  }
   if (countdownSeq === game.ctx.seq && isAt(game, 'rapidAsk')) {
     return <Countdown ticks={2} go="answer" onDone={handleCountdownDone} />;
   }
@@ -144,6 +148,7 @@ export const PlayView: FC = () => {
   // render their own burst screen above. Everything else is calm Paper.
   const burst = RAPID_KINDS.has(step.kind) || step.kind === 'scoreboard' || step.kind === 'final';
   const card = cardOf(game);
+  const popTeam = scorePop ? game.ctx.roster.find((team) => team.teamId === scorePop.entry.teamId) : undefined;
 
   return (
     <Screen burst={burst} className={showPause ? 'cb-page--with-pause' : undefined}>
@@ -164,6 +169,8 @@ export const PlayView: FC = () => {
         onNewGame={handleNewGame}
         solo={soloResult}
       />
+
+      {scorePop && popTeam && <ScorePop key={scorePop.id} team={popTeam} points={scorePop.entry.points} />}
 
       {paused && <PauseSheet onResume={handleResume} onRestart={handleRestart} onQuit={handleQuit} />}
     </Screen>

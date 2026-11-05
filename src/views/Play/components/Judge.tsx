@@ -21,7 +21,7 @@ export const Judge: FC<TProps> = ({ game, question, dispatch }) => {
   const { answererName } = flashNames(game);
   const answer = answerLabel(secretOf(game), cardOf(game)?.type, teamOf(game), t);
 
-  // The reveal / card-flip moment.
+  // GF4: the riser plays first, then the card flips over (CSS, ~500 ms) and the answer lands.
   useEffect(() => {
     sound.play('sfx.reveal');
   }, [sound]);
@@ -41,8 +41,8 @@ export const Judge: FC<TProps> = ({ game, question, dispatch }) => {
         {t('guess.answerWas', { name: answererName })}
       </p>
 
-      {/* the reveal card */}
-      <PixelPanel className="cb-flash-card cb-flash-card--reveal cb-reveal-in">
+      {/* the reveal card: face down for the riser, then it flips */}
+      <PixelPanel className="cb-flash-card cb-flash-card--reveal cb-flash-card--flip">
         <p className="cb-question">{answer ?? '—'}</p>
       </PixelPanel>
 

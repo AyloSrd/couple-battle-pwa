@@ -65,16 +65,19 @@ const SaveNotices: FC = () => {
 };
 
 /**
- * App-wide UI around every route: sound follows `settings.sound`; dirty saves are re-sent when
+ * App-wide UI around every route: sound and haptics follow `settings.sound` / `settings.vibration`; dirty saves are re-sent when
  * the page is hidden (the OS may kill it next); the save notices.
  */
 export const Shell: FC<PropsWithChildren> = ({ children }) => {
   const store = useSaveStore();
-  const { sound } = useSave(selectSettings);
+  const { sound, vibration } = useSave(selectSettings);
 
   useEffect(() => {
     soundEngine.setEnabled(sound);
   }, [sound]);
+  useEffect(() => {
+    soundEngine.setHaptics(vibration);
+  }, [vibration]);
 
   useEffect(() => {
     const onHidden = () => {

@@ -1,7 +1,6 @@
 import { useEffect, useState, type FC } from 'react';
 import { useT, type TStringKey } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
-import { selectSettings, useSave } from '@/shared/save';
 import { Screen } from '@/shared/Chrome';
 import '../dilemma.css';
 
@@ -21,22 +20,18 @@ const GO_KEY = {
 } as const satisfies Record<TCountdownGo, TStringKey>;
 
 /**
- * V-Countdown — the game's signature beat, on the sunburst (burst). Numerals slam
- * in with rising ticks + haptics, then the GO word. Calls `onDone` ~1.5s after GO. `ticks` = 3 (Dilemma) or 2 (rapid-fire); `go`
- * picks the GO word for the mechanic (default: point). Ticks, haptics and
- * timing are identical in every context. Runs once on mount.
+ * V-Countdown — the game's signature beat, on the sunburst (burst). Numerals slam in with
+ * rising ticks (their haptics ride on the cues), then the GO word. Calls `onDone` ~1.5s after
+ * GO. `ticks` = 3 (a segment's first Dilemma question) or 2 (the following ones, and the
+ * rapid-fire); `go` picks the GO word for the mechanic (default: point). Runs once on mount.
  */
-export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdownGo }> = ({
+export const Countdown: FC<{ onDone: () => void; ticks?: 3 | 2; go?: TCountdownGo }> = ({
   onDone,
   ticks = 3,
   go = 'point',
 }) => {
   const t = useT();
   const sound = useSound();
-  const vibrationOn = useSave(selectSettings).vibration;
-  const vibrate = (pattern: number | number[]) => {
-    if (vibrationOn) navigator.vibrate?.(pattern);
-  };
   const digits = ticks === 2 ? ['2', '1'] : ['3', '2', '1'];
   const [phase, setPhase] = useState(0); // 0..digits.length-1 = digit, digits.length = go
 
@@ -44,14 +39,12 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
     const timers: ReturnType<typeof setTimeout>[] = [];
     const first = digits[0] ?? '1';
     sound.play('sfx.countdown.tick', { step: stepOf(first) });
-    vibrate(50);
     for (let idx = 1; idx < digits.length; idx++) {
       const d = digits[idx] ?? '1';
       timers.push(
         setTimeout(() => {
           setPhase(idx);
           sound.play('sfx.countdown.tick', { step: stepOf(d) });
-          vibrate(50);
         }, idx * STEP_MS),
       );
     }
@@ -60,7 +53,6 @@ export const Countdown: FC<{ onDone: () => void; ticks?: number; go?: TCountdown
       setTimeout(() => {
         setPhase(digits.length);
         sound.play('sfx.countdown.go');
-        vibrate([60, 40, 60]);
       }, goAt),
     );
     timers.push(setTimeout(() => onDone(), goAt + GO_MS));

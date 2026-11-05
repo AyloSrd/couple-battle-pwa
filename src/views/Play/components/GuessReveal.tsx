@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { useState, type AnimationEvent, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import { PixelPanel, PixelButton, Chip, ProgressDots, AnswerButton } from '@/shared/Chrome';
@@ -31,10 +31,16 @@ export const GuessReveal: FC<TProps> = ({ game, question, dispatch }) => {
   const twoNames = type === 'who_of_two' ? teamOf(game)?.players : undefined;
   const isMatch = picked !== undefined && truth !== undefined && picked === truth;
 
-  // The pick plays the match / miss sound with the reveal (its buttons are silent).
+  // GF4: the pick plays the riser (its buttons are silent), the answer card flips over, and the
+  // match / miss sound plays as it lands.
   const pick = (guess: string) => {
-    sound.play(truth !== undefined && guess === truth ? 'sfx.point.exact' : 'sfx.point.miss');
+    sound.play('sfx.reveal');
     setPicked(guess);
+  };
+  const handleCardLanded = (event: AnimationEvent<HTMLDivElement>) => {
+    // the card's own flip — not its face-down back (`::after`) ending at the same moment
+    if (event.target !== event.currentTarget || event.pseudoElement) return;
+    sound.play(isMatch ? 'sfx.point.exact' : 'sfx.point.miss');
   };
   const handleYes = () => pick('yes');
   const handleNo = () => pick('no');
@@ -62,10 +68,13 @@ export const GuessReveal: FC<TProps> = ({ game, question, dispatch }) => {
       {picked !== undefined ? (
         <>
           <p className="cb-muted cb-flash-hint">{t('guess.answerWas', { name: partnerName })}</p>
-          <PixelPanel className={`cb-flash-card cb-flash-card--reveal cb-flash-card--auto cb-reveal-in${isMatch ? ' is-match' : ' is-miss'}`}>
+          <PixelPanel
+            className={`cb-flash-card cb-flash-card--reveal cb-flash-card--auto cb-flash-card--flip${isMatch ? ' is-match' : ' is-miss'}`}
+            onAnimationEnd={handleCardLanded}
+          >
             <p className="cb-question">{answerLabel(truth, type, teamOf(game), t) ?? '—'}</p>
           </PixelPanel>
-          <p className="cb-label cb-flash-verdict">{t(isMatch ? 'judge.auto.match' : 'judge.auto.miss')}</p>
+          <p className="cb-label cb-flash-verdict cb-flash-verdict--landed">{t(isMatch ? 'judge.auto.match' : 'judge.auto.miss')}</p>
           <PixelButton size="lg" onClick={handleNext}>{t('common.next')}</PixelButton>
         </>
       ) : twoNames ? (

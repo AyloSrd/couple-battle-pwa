@@ -1,13 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
+import { soundEngine } from '@/shared/sound';
 import { renderWithApp } from '@/test/renderApp';
 import { Countdown } from './Countdown';
 
 const STEP_MS = 700;
 
 function mount(ui: ReactElement, lang: 'fr' | 'en' = 'fr', vibration = true) {
-  // The save store is booted before any game screen mounts: settings are already there.
+  // The save store is booted before any game screen mounts, and the shell has passed the
+  // vibration setting to the sound engine (the haptics ride on the cues).
+  soundEngine.setHaptics(vibration);
   return renderWithApp(ui, { lang, seed: { profile: { settings: { lang, sound: true, vibration } } } });
 }
 

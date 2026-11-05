@@ -1,3 +1,4 @@
+import { hapticFor } from '../domain/haptics';
 import type { TMusicId, TPlayOpts, TSoundId } from '../domain/types';
 import type { TSoundApi } from './index';
 
@@ -47,6 +48,7 @@ class Engine {
   ctx: AudioContext | null = null;
   master: GainNode | null = null;
   enabled = true;
+  haptics = false;
   baseVolume = 0.55; // master volume when enabled (adjustable via setVolume)
   musicBus: GainNode | null = null;
   ducked = false;
@@ -96,6 +98,16 @@ class Engine {
       this.stopStingers();
     }
     if (this.master) this.master.gain.value = on ? this.baseVolume : 0;
+  }
+
+  setHaptics(on: boolean) {
+    this.haptics = on;
+  }
+
+  /** The cue's buzz, where the Vibration API exists. */
+  buzz(id: TSoundId) {
+    const pattern = hapticFor(id, this.haptics);
+    if (pattern !== null) navigator.vibrate?.(pattern);
   }
 
   setVolume(level: number) {
@@ -155,6 +167,11 @@ class Engine {
 
   // ---- SFX --------------------------------------------------------------
   play(id: TSoundId, opt: TPlayOpts = {}) {
+    this.buzz(id);
+    this.synth(id, opt);
+  }
+
+  synth(id: TSoundId, opt: TPlayOpts = {}) {
     if (!this.enabled) return;
     this.unlock();
     if (!this.ctx) return; // no AudioContext available — nothing to play
@@ -189,7 +206,7 @@ class Engine {
       'mus.fanfare':   () => {
         const seq: [number, number, number][] = [[523, 0, .12], [523, .14, .12], [523, .28, .12], [659, .42, .3], [523, .76, .12], [659, .9, .5]];
         seq.forEach(([f, t, d]) => { this.tone({ freq: f, t, dur: d, vol: 0.35 }); this.tone({ freq: f / 2, t, dur: d, type: 'triangle', vol: 0.3 }); });
-        this.play('sfx.confetti');
+        this.synth('sfx.confetti');
       },
     };
     (fx[id] || (() => console.warn('unknown sound', id)))();
@@ -312,6 +329,7 @@ export function createSoundWebAudioApi(): TSoundApi {
   return {
     unlock: () => engine.unlock(),
     setEnabled: (on) => engine.setEnabled(on),
+    setHaptics: (on) => engine.setHaptics(on),
     setVolume: (level) => engine.setVolume(level),
     duck: (on) => engine.duck(on),
     play: (id, opt) => engine.play(id, opt),

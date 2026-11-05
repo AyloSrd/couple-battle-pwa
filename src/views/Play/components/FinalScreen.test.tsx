@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { LangProvider } from '@/shared/i18n';
 import type { THistoryEntry, TMode } from '@/shared/game';
@@ -244,5 +244,42 @@ describe('FinalScreen — per-team charts', () => {
     const pcts = [...container.querySelectorAll('.cb-stats-sync .cb-stats-pct')].map((n) => n.textContent);
     expect(pcts).toEqual(['100%', '100%']);
     expect(container.querySelectorAll('.cb-row')[0]).toHaveTextContent('Synchro');
+  });
+});
+
+describe('FinalScreen — GF5 payoff', () => {
+  const scoresOf = (c: HTMLElement) => [...c.querySelectorAll('.cb-row .cb-score')].map((n) => n.textContent);
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('confetti canvas and the crown on mount; the scores count up from 0 and land on the real ones', () => {
+    const { container } = mount(<FinalScreen game={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />);
+    expect(container.querySelector('canvas.cb-confetti')).not.toBeNull();
+    expect(container.querySelector('.cb-final-crown')).not.toBeNull();
+    expect(scoresOf(container)).toEqual(['0', '0', '0']);
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(scoresOf(container)).toEqual(['5', '3', '1']);
+  });
+
+  it('reduced motion: no confetti, the final scores at once (the crown still shows, without motion)', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('reduce'), media: query }));
+    const { container } = mount(<FinalScreen game={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />);
+    expect(container.querySelector('canvas')).toBeNull();
+    expect(scoresOf(container)).toEqual(['5', '3', '1']);
+  });
+
+  it('solo: the crown only for a new best', () => {
+    const best = mount(<FinalScreen game={finalState({ t1: 2 }, 1)} solo={{ isBest: true, points: 2, best: 2 }} onRematch={noop} onNewGame={noop} />);
+    expect(best.container.querySelector('.cb-final-crown')).not.toBeNull();
+    const not = mount(<FinalScreen game={finalState({ t1: 2 }, 1)} solo={{ isBest: false, points: 2, best: 8 }} onRematch={noop} onNewGame={noop} />);
+    expect(not.container.querySelector('.cb-final-crown')).toBeNull();
   });
 });

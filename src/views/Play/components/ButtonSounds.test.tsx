@@ -14,6 +14,13 @@ import { SecretAnswers } from './SecretAnswers';
 
 const noop = () => {};
 
+/** The card's flip ends. jsdom has no AnimationEvent, so React listens to the prefixed name
+ *  there: send both, React hears exactly one. */
+function landCard(card: Element) {
+  fireEvent(card, new Event('animationend', { bubbles: true }));
+  fireEvent(card, new Event('webkitAnimationEnd', { bubbles: true }));
+}
+
 /** Mount `ui`, forget its mount cues, then click the button named `name`: the sounds of that tap. */
 function tapSounds(ui: Parameters<typeof renderScreen>[0], name: RegExp) {
   const play = vi.spyOn(soundEngine, 'play');
@@ -51,12 +58,14 @@ describe('Play buttons: one sound per tap, the same as before the kit played the
     expect(tapSounds(<SecretAnswers game={closed('secret')} question={yesNo} dispatch={noop} />, /yes/i)).toEqual(['sfx.lock']);
   });
 
-  it('a guess pick plays its outcome; NEXT then taps', () => {
+  it('a guess pick plays the riser, its outcome when the card lands; NEXT then taps', () => {
     const play = vi.spyOn(soundEngine, 'play');
-    const { getByRole } = renderScreen(<GuessReveal game={closed('guess', 'yes')} question={yesNo} dispatch={noop} />);
+    const { getByRole, container } = renderScreen(<GuessReveal game={closed('guess', 'yes')} question={yesNo} dispatch={noop} />);
     play.mockClear();
     fireEvent.click(getByRole('button', { name: /no/i }));
-    expect(play.mock.calls.map(([id]) => id)).toEqual(['sfx.point.miss']);
+    expect(play.mock.calls.map(([id]) => id)).toEqual(['sfx.reveal']);
+    landCard(container.querySelector('.cb-flash-card--flip')!);
+    expect(play.mock.calls.map(([id]) => id)).toEqual(['sfx.reveal', 'sfx.point.miss']);
     play.mockClear();
     fireEvent.click(getByRole('button', { name: /next/i }));
     expect(play.mock.calls.map(([id]) => id)).toEqual(['sfx.tap']);

@@ -122,6 +122,17 @@
   width: 64px;
   height: 64px;
 }
+/* GF3: the leader lands at #1 after the tally; the leader line waits for it (no layout jump) */
+.cb-v-score .cb-row--settle {
+  animation: cb-row-settle var(--cb-t-reveal) var(--cb-ease-overshoot) both;
+}
+@keyframes cb-row-settle {
+  from { transform: translateY(12px) scale(0.94); }
+  to { transform: none; }
+}
+.cb-v-score .cb-score-note--pending {
+  visibility: hidden;
+}
 .cb-v-score .cb-score-note {
   margin: 0;
   text-align: center;
@@ -326,4 +337,65 @@
   .cb-v-final .cb-meter-fill {
     animation: none;
   }
+}
+
+/* ---------- GF2: "+N" pop over the scoring couple's art (any Play screen) ---------- */
+.cb-score-pop {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  z-index: 30;
+  display: grid;
+  justify-items: center;
+  pointer-events: none;
+  opacity: 0;
+  animation: cb-score-pop 600ms var(--cb-ease-out) both;
+}
+.cb-score-pop .cb-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--cb-r-md);
+  box-shadow: 0 0 0 3px var(--cb-gold), var(--cb-e2);
+}
+.cb-score-pop__n {
+  margin-top: calc(-1 * var(--cb-s3));
+  padding: 0 var(--cb-s3);
+  border: var(--cb-outline-w) solid var(--cb-outline);
+  border-radius: var(--cb-r-pill);
+  background: var(--cb-gold);
+  color: var(--cb-eggplant);
+  font: 800 var(--cb-fs-h2) / 1.2 var(--cb-font-display);
+  font-variant-numeric: tabular-nums;
+}
+@keyframes cb-score-pop {
+  0% { opacity: 0; transform: translate(-50%, 16px) scale(0.5); }
+  25% { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
+  70% { opacity: 1; transform: translate(-50%, -12px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -36px) scale(1); }
+}
+
+/* ---------- GF5: final payoff — confetti canvas, crown pop ---------- */
+.cb-confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 25;
+  pointer-events: none;
+}
+/* the crown sits on the winner (hero or tied portraits): it overlaps the art below it */
+.cb-v-final .cb-final-crown {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  margin-bottom: calc(-1 * (var(--cb-s4) + 30px));
+  font-size: 56px;
+  line-height: 1;
+  rotate: -12deg;
+  filter: drop-shadow(0 4px 0 var(--cb-outline));
+  animation: cb-crown-pop 600ms var(--cb-ease-overshoot) 250ms both;
+}
+@keyframes cb-crown-pop {
+  from { transform: translateY(-40px) scale(0.2); opacity: 0; }
+  to { transform: none; opacity: 1; }
 }

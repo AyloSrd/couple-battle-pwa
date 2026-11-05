@@ -93,6 +93,7 @@ describe('PlayView — the machine end to end, on the save store', () => {
     synced();
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     synced();
+    expect(document.querySelector('.cb-score-pop')).toHaveTextContent('+2'); // GF2: the points land visibly
     // open question: reveal, then the table judges
     fireEvent.click(await screen.findByRole('button', { name: /REVEAL/ }));
     synced();
@@ -105,6 +106,30 @@ describe('PlayView — the machine end to end, on the save store', () => {
     const board = app.store.get().game;
     expect(board?.step).toEqual({ kind: 'scoreboard' }); // the round's secrets are gone
     expect(board?.ctx.scores).toEqual({ t1: 4 });
+  });
+
+  it('Dilemma: 3-2-1 on the first question, 2-1 on the next; a match pops "+1", a miss pops nothing', async () => {
+    const deck = [q(1, 'who_of_two', 'Who snores?'), q(2, 'who_of_two', 'Who cooks?'), q(3, 'who_of_two', 'Who sings?'), q(4, 'who_of_two', 'Who naps?')];
+    mountPlay('dilemma', deck);
+    const numeral = () => document.querySelector('.cb-numeral')?.textContent;
+    const runCountdown = () =>
+      act(() => {
+        vi.advanceTimersByTime(3 * 700 + 1500 + 100);
+      });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'READY!' }));
+    expect(numeral()).toBe('3');
+    runCountdown();
+    fireEvent.click(await screen.findByRole('button', { name: /Missed/ }));
+    await flush();
+    expect(document.querySelector('.cb-score-pop')).toBeNull();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'READY!' }));
+    expect(numeral()).toBe('2'); // the repeat countdown starts at 2
+    runCountdown();
+    fireEvent.click(await screen.findByRole('button', { name: /MATCH/ }));
+    await flush();
+    expect(document.querySelector('.cb-score-pop')).toHaveTextContent('+1');
   });
 
   it('a relaunch mid-game (a new store over the same storage) resumes on the very screen it left', async () => {
