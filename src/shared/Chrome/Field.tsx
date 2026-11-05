@@ -1,11 +1,5 @@
-import { forwardRef, type InputHTMLAttributes } from 'react';
+import type { ComponentProps, FC } from 'react';
 import { cx } from './kit';
 import './chrome.css';
 
-type TFieldProps = InputHTMLAttributes<HTMLInputElement>;
-
-/** 56px text field, violet focus ring. */
-export const Field = forwardRef<HTMLInputElement, TFieldProps>(({ className, ...rest }, ref) => (
-  <input ref={ref} className={cx('cb-field', className)} {...rest} />
-));
-Field.displayName = 'Field';
+export const Field: FC<ComponentProps<'input'>> = ({ className, ...rest }) => <input className={cx('cb-field', className)} {...rest} />;

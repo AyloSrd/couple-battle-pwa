@@ -1,6 +1,5 @@
 import { useSound, type TSoundId } from '@/shared/sound';
 
-/** Join the truthy class names. */
 export const cx = (...names: (string | false | null | undefined)[]) => names.filter(Boolean).join(' ');
 
 /** A click handler that plays `sfx` (`null` = silent), then calls `onClick`. */

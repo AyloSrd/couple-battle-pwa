@@ -4,7 +4,6 @@ import { cx } from './kit';
 import './chrome.css';
 
 type TPlayerAvatarProps = {
-  /** Team (avatar) id from the registry. */
   teamId: string;
   /** Which of the couple's two characters (fixed art order). */
   slot: TPlayerSlot;

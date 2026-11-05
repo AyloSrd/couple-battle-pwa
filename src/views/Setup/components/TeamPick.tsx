@@ -5,7 +5,7 @@ import type { TAvatarId } from '@/shared/game';
 import { PixelButton, TeamArt } from '@/shared/Chrome';
 import { takenAvatars, type TSetupState } from '../domain/machine';
 import { PICKER_TEAMS } from '../domain/pickerTeams';
-import { pickTitle } from '../domain/labels';
+import { splitPickLine } from '../domain/labels';
 
 type TProps = {
   state: TSetupState;
@@ -40,7 +40,7 @@ export const TeamPick: FC<TProps> = ({ state, onSelect, onNext }) => {
   return (
     <div className="cb-v-setup__team-block">
       <h1 className="cb-title cb-cap cb-v-setup__title--sm">
-        {pickTitle(t('setup.team.pick', { n: state.coupleIdx + 1 }))}
+        {splitPickLine(t('setup.team.pick', { n: state.coupleIdx + 1 }))[1]}
       </h1>
 
       <div className="cb-v-setup__teams">

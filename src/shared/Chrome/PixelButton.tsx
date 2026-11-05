@@ -14,10 +14,9 @@ type TPixelButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: TPixelButtonVariant;
   /** Full-width (default). `false` = inline, hugging its label. */
   block?: boolean;
-  /** Height scale: `md` (default, the token height of the variant) or `lg` (verdict / answer /
-   *  start buttons). The only button sizes — views do not patch heights. */
+  /** `md`: the variant's token height; `lg`: verdict / answer / start. Views do not patch heights. */
   size?: 'md' | 'lg';
-  /** Sound played on click (default the tap blip); `null` = silent (the handler plays its own). */
+  /** Played on click (default the tap blip); `null` = silent, the handler plays its own. Same on every kit button. */
   sfx?: TSoundId | null;
 };
 

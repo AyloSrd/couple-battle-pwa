@@ -4,7 +4,6 @@ import { cx } from './kit';
 import './chrome.css';
 
 type TTeamArtProps = {
-  /** Team (avatar) id from the registry. */
   teamId: string;
   /** Localized team name — its initial is the placeholder when no art exists. */
   label: string;
@@ -18,23 +17,14 @@ type TTeamArtProps = {
   className?: string;
 };
 
-function initialOf(label: string, teamId: string): string {
-  const ch = label.trim().charAt(0) || teamId.charAt(0);
-  return ch.toUpperCase();
-}
-
 /** Team character art by id, with the placeholder (tinted tile + initial) fallback. */
 export const TeamArt: FC<TTeamArtProps> = ({ teamId, label, variant, className }) => {
-  const initial = initialOf(label, teamId);
+  const initial = (label.trim().charAt(0) || teamId.charAt(0)).toUpperCase();
 
   if (variant === 'hero') {
     // full body (2:3); a team with only a portrait still gets its portrait in the slot
     const url = teamArtUrl(teamId, 'full') ?? teamArtUrl(teamId, 'portrait', 384);
-    if (!url) {
-      return (
-        <div className={cx('cb-char-placeholder', className)} aria-hidden="true">{initial}</div>
-      );
-    }
+    if (!url) return <div className={cx('cb-char-placeholder', className)} aria-hidden="true">{initial}</div>;
     return <img className={cx('cb-char', className)} src={url} alt="" draggable={false} />;
   }
 
@@ -44,12 +34,7 @@ export const TeamArt: FC<TTeamArtProps> = ({ teamId, label, variant, className }
     return (
       <span className={cx('cb-team-art', className)}>
         {small ? (
-          <img
-            src={small}
-            {...(large && large !== small ? { srcSet: `${small} 1x, ${large} 2x` } : {})}
-            alt=""
-            draggable={false}
-          />
+          <img src={small} {...(large && large !== small ? { srcSet: `${small} 1x, ${large} 2x` } : {})} alt="" draggable={false} />
         ) : (
           <span className="cb-team-placeholder">{initial}</span>
         )}

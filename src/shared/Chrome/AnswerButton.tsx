@@ -10,11 +10,9 @@ type TAnswerButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Leading initial tile; defaults to the label's first letter. Pass `null` for none. */
   initial?: string | null;
   locked?: boolean;
-  /** Sound played on click (default the tap blip); `null` = silent (the handler plays its own). */
   sfx?: TSoundId | null;
 };
 
-/** 66px answer / partner-name button with the initial tile. */
 export const AnswerButton: FC<TAnswerButtonProps> = ({
   label,
   tone = 'p1',

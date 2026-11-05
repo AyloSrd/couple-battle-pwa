@@ -4,7 +4,6 @@ import type { fr } from '@/data/strings.fr';
 export const Lang = { Fr: 'fr', En: 'en', Es: 'es' } as const;
 export type TLang = (typeof Lang)[keyof typeof Lang];
 
-/** Every shipped locale, in menu order. */
 export const LANGS: readonly TLang[] = Object.values(Lang);
 
 /** Each language's own name (endonym) — shown as-is in every UI language. */

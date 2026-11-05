@@ -1,5 +1,3 @@
-/** Pure helpers for the How-to-play swipe carousel (no DOM, no React). */
-
 /** Keep `index` inside `[0, total - 1]` (0 when the carousel is empty). */
 export function clampIndex(index: number, total: number): number {
   if (total <= 0) return 0;
@@ -12,7 +10,6 @@ export function indexFromScroll(scrollLeft: number, slideWidth: number, total: n
   return clampIndex(Math.round(scrollLeft / slideWidth), total);
 }
 
-/** Arrow keys step, Home/End jump. */
 const KEY_TARGET: Record<string, (current: number, total: number) => number> = {
   ArrowRight: (current) => current + 1,
   ArrowLeft: (current) => current - 1,

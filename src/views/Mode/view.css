@@ -27,7 +27,6 @@
 .cb-v-mode .cb-mode h3 {
   /* grows a little on tall screens, floors at the h2 token */
   font-size: clamp(var(--cb-fs-h2), 4dvh, 36px);
-  line-height: 1.1;
 }
 .cb-v-mode .cb-mode p {
   margin-top: var(--cb-s1);

@@ -4,9 +4,7 @@ import { cx, useSfxClick } from './kit';
 import './chrome.css';
 
 type TBackButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
-  /** Visible label (e.g. `t('common.back')`). */
   label: string;
-  /** Sound played on click (default the back blip); `null` = silent. */
   sfx?: TSoundId | null;
 };
 

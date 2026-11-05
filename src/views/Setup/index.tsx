@@ -6,7 +6,7 @@ import { useDraft } from '@/shared/session';
 import { type TAvatarId, type TRoster } from '@/shared/game';
 import { Screen, PixelButton, PixelPanel, Chip, ProgressDots, TeamArt, TopBar } from '@/shared/Chrome';
 import { initSetup, reduceSetup } from './domain/machine';
-import { duoLabel } from './domain/labels';
+import { splitPickLine } from './domain/labels';
 import { TeamPick } from './components/TeamPick';
 import { NameEntry } from './components/NameEntry';
 import { SetupPass } from './components/SetupPass';
@@ -48,13 +48,12 @@ export const SetupView: FC = () => {
 
   if (state.step === 'done') return null;
 
-
   return (
     <Screen className={state.step === 'count' || state.step === 'team' ? 'cb-v-setup cb-v-setup--fit' : 'cb-v-setup'}>
       <TopBar back={handleBack}>
         {state.step !== 'count' && state.count !== null && (
           <span className="cb-v-setup__meta">
-            <Chip>{duoLabel(t('setup.team.pick', { n: state.coupleIdx + 1 }))}</Chip>
+            <Chip>{splitPickLine(t('setup.team.pick', { n: state.coupleIdx + 1 }))[0]}</Chip>
             <ProgressDots total={state.count} current={state.coupleIdx} />
           </span>
         )}

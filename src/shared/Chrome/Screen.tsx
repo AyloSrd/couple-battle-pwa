@@ -3,7 +3,6 @@ import { cx } from './kit';
 import './chrome.css';
 
 type TScreenProps = HTMLAttributes<HTMLElement> & {
-  /** Vertically + horizontally center the content (for short screens). */
   center?: boolean;
   /** "Burst" stage (stronger rays + pink core) for the big beats ONLY: countdown, rapid-fire
    *  finale, scoreboard, final results. Set here on the shell, never per component. */

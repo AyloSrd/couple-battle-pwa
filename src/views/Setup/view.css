@@ -129,7 +129,6 @@
   flex: none;
   text-align: center;
   font: 800 14px / 1.2 var(--cb-font-display);
-  color: var(--cb-text);
   text-wrap: balance;
   overflow-wrap: anywhere;
 }

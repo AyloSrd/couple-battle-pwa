@@ -8,7 +8,6 @@ export const DraftProvider: FC<PropsWithChildren<{ store: TDraftStore }>> = ({ s
   <DraftCtx.Provider value={store}>{children}</DraftCtx.Provider>
 );
 
-/** The current draft and the store that changes it. */
 export function useDraft(): { draft: TDraft; draftStore: TDraftStore } {
   const store = useContext(DraftCtx);
   if (!store) throw new Error('DraftProvider not found in tree');

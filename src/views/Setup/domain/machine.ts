@@ -58,13 +58,8 @@ export function cleanName(raw: string): string {
 
 /** True once `names` holds a repeat, cleaned and compared case-insensitively. */
 export function hasDuplicateName(names: string[]): boolean {
-  const seen = new Set<string>();
-  for (const raw of names) {
-    const key = cleanName(raw).toLocaleLowerCase();
-    if (seen.has(key)) return true;
-    seen.add(key);
-  }
-  return false;
+  const keys = names.map((name) => cleanName(name).toLocaleLowerCase());
+  return new Set(keys).size !== keys.length;
 }
 
 /** Is the couple being built the final one? (drives NAMES button + no interstitial) */
@@ -131,7 +126,6 @@ export function reduceSetup(state: TSetupState, event: TSetupEvent): TSetupState
     case 'back': {
       switch (state.step) {
         case 'names':
-          // Back to TEAM, keeping any typed names + the chosen avatar.
           return { ...state, step: 'team', error: null };
         case 'team':
           if (state.coupleIdx === 0) return { ...state, step: 'count' };

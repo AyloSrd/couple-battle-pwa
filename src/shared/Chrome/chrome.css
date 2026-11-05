@@ -140,7 +140,6 @@ button.cb-chip {
   transform: translateY(2px);
 }
 
-/* ---------- type ---------- */
 .cb-title {
   font: 800 var(--cb-fs-h1) / var(--cb-lh-h1) var(--cb-font-display);
   letter-spacing: var(--cb-tracking-display);
@@ -189,13 +188,21 @@ button.cb-chip {
   box-shadow: inset 0 -4px 0 rgba(42, 11, 143, 0.07), var(--cb-e2);
 }
 
-/* ---------- buttons: glossy, outlined, pressable lip ---------- */
-.cb-btn {
-  --btn-bg: var(--cb-action-grad);
-  --btn-fg: var(--cb-action-text);
+/* ---------- buttons: glossy, outlined, pressable lip (the lip's room is reserved below) ---------- */
+.cb-btn,
+.cb-answer {
   appearance: none;
   border: var(--cb-outline-w) solid var(--cb-outline);
   width: 100%;
+  align-items: center;
+  margin-bottom: var(--cb-lip);
+  flex: none;
+  cursor: pointer;
+  transition: transform var(--cb-t-tap) var(--cb-ease-out), box-shadow var(--cb-t-tap) var(--cb-ease-out);
+}
+.cb-btn {
+  --btn-bg: var(--cb-action-grad);
+  --btn-fg: var(--cb-action-text);
   min-height: var(--cb-h-btn);
   padding: 0 var(--cb-s5);
   border-radius: var(--cb-r-pill);
@@ -205,14 +212,9 @@ button.cb-chip {
   letter-spacing: -0.01em;
   box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), 0 var(--cb-lip) 0 var(--cb-outline), 0 10px 18px rgba(20, 5, 74, 0.35);
   transform: translateY(0);
-  transition: transform var(--cb-t-tap) var(--cb-ease-out), box-shadow var(--cb-t-tap) var(--cb-ease-out);
-  cursor: pointer;
   display: inline-flex;
-  align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: var(--cb-lip); /* reserve room for the lip */
-  flex: none;
 }
 .cb-btn:active:not(:disabled) {
   transform: translateY(calc(var(--cb-lip) - 1px));
@@ -272,9 +274,6 @@ button.cb-chip {
 .cb-answer {
   --a-bg: var(--cb-p1);
   --a-fg: var(--cb-p1-text);
-  appearance: none;
-  border: var(--cb-outline-w) solid var(--cb-outline);
-  width: 100%;
   min-height: var(--cb-h-answer);
   padding: 0 var(--cb-s4);
   border-radius: var(--cb-r-md);
@@ -282,14 +281,9 @@ button.cb-chip {
   color: var(--a-fg);
   text-align: left;
   display: flex;
-  align-items: center;
   gap: 14px;
-  cursor: pointer;
   font: 800 var(--cb-fs-body-lg) / 1.2 var(--cb-font-display);
   box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.25), 0 var(--cb-lip) 0 var(--cb-outline);
-  margin-bottom: var(--cb-lip);
-  transition: transform var(--cb-t-tap) var(--cb-ease-out), box-shadow var(--cb-t-tap) var(--cb-ease-out);
-  flex: none;
 }
 .cb-answer:active {
   transform: translateY(4px);
@@ -329,7 +323,6 @@ button.cb-chip {
   cursor: default;
 }
 
-/* ---------- text field ---------- */
 .cb-field {
   width: 100%;
   height: var(--cb-h-field);
@@ -382,7 +375,6 @@ button.cb-chip {
 .cb-mode h3 {
   margin: 0;
   font: 800 24px / 1.1 var(--cb-font-display);
-  color: var(--cb-text);
   letter-spacing: -0.01em;
 }
 .cb-mode p {
@@ -395,19 +387,31 @@ button.cb-chip {
   box-shadow: 0 0 0 3px var(--cb-gold), 0 0 24px rgba(255, 194, 31, 0.5), var(--cb-e2);
 }
 
-/* ---------- team portrait tile (Setup picker, final ties) ---------- */
+/* ---------- team art boxes: the art fills the box, else the team's initial ---------- */
+.cb-team-art,
+.cb-avatar,
+.cb-player-avatar,
+.cb-char-placeholder {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--cb-team-art-bg);
+  color: var(--cb-violet-600);
+}
+.cb-team-art img,
+.cb-avatar img,
+.cb-player-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* portrait tile (Setup picker, final ties) */
 .cb-team-art {
   width: 100%;
   aspect-ratio: 1;
   border-radius: var(--cb-r-md);
-  background: var(--cb-team-art-bg);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
 }
 .cb-team-art img {
-  width: 100%;
-  height: 100%;
   object-fit: contain;
 }
 /* placeholder art for teams whose render isn't delivered yet: tinted tile + big initial */
@@ -422,19 +426,11 @@ button.cb-chip {
   width: 44px;
   height: 44px;
   border-radius: var(--cb-r-sm);
-  background: var(--cb-team-art-bg);
   border: 2px solid var(--cb-outline);
-  overflow: hidden;
   flex: none;
-  display: grid;
-  place-items: center;
   font: 800 16px / 1 var(--cb-font-display);
-  color: var(--cb-violet-600);
 }
 .cb-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   object-position: 50% 15%; /* faces sit in the upper third of the portraits */
 }
 .cb-avatar--lg {
@@ -452,21 +448,13 @@ button.cb-chip {
   border-radius: 50%;
   background: var(--cb-cream);
   border: var(--cb-outline-w) solid var(--cb-outline);
-  overflow: hidden;
   flex: none;
-  display: grid;
-  place-items: center;
   font: 800 28px / 1 var(--cb-font-display);
-  color: var(--cb-violet-600);
 }
 .cb-player-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   object-position: 50% 20%;
 }
 
-/* ---------- score rows ---------- */
 .cb-rows {
   display: flex;
   flex-direction: column;
@@ -548,10 +536,6 @@ button.cb-chip {
   color: var(--cb-success-ink);
   font: 800 14px / 1 var(--cb-font-ui);
 }
-.cb-badge--miss {
-  background: var(--cb-error-bg);
-  color: var(--cb-error-ink);
-}
 
 /* ---------- character slot (full-body duo renders, 2:3) ---------- */
 .cb-char {
@@ -570,12 +554,8 @@ button.cb-chip {
   aspect-ratio: 1;
   margin: 0 auto;
   border-radius: var(--cb-r-xl);
-  background: var(--cb-team-art-bg);
   border: var(--cb-outline-w) solid var(--cb-outline);
-  display: grid;
-  place-items: center;
   font: 800 96px / 1 var(--cb-font-display);
-  color: var(--cb-violet-600);
   opacity: 0.8;
 }
 /* soft light bloom behind a hero element (burst screens) */
@@ -592,7 +572,6 @@ button.cb-chip {
   pointer-events: none;
 }
 
-/* ---------- logo ---------- */
 .cb-logo {
   display: block;
   width: min(86%, 380px);
@@ -629,7 +608,6 @@ button.cb-chip {
   to { opacity: 1; }
 }
 
-/* ---------- toast ---------- */
 .cb-toast {
   border-radius: var(--cb-r-md);
   border: 2px solid var(--cb-outline);
@@ -639,7 +617,8 @@ button.cb-chip {
   font: 700 var(--cb-fs-caption) / var(--cb-lh-caption) var(--cb-font-ui);
   text-align: center;
 }
-.cb-toast--error {
+.cb-toast--error,
+.cb-badge--miss {
   background: var(--cb-error-bg);
   color: var(--cb-error-ink);
 }
@@ -670,7 +649,6 @@ button.cb-chip {
   cursor: pointer;
 }
 
-/* ---------- crash screen (provider-free) ---------- */
 .cb-crash {
   justify-content: center;
   text-align: center;

@@ -19,7 +19,6 @@ export const Chip: FC<TChipProps> = ({ children, icon, className }) => (
 );
 
 type TChipButtonProps = ComponentProps<'button'> & {
-  /** Sound played on click (default the tap blip); `null` = silent. */
   sfx?: TSoundId | null;
 };
 

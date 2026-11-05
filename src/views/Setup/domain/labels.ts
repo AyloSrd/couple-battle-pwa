@@ -1,16 +1,10 @@
 /**
- * The localized team-pick line ("Duo 2 : choisissez votre équipe") is shown in two halves:
- * the head ("Duo 2") on chips and the pass screen, the rest as the TEAM step's title.
+ * The localized team-pick line ("Duo 2 : choisissez votre équipe") in its two halves: the head
+ * ("Duo 2") for chips and the pass screen, the rest for the TEAM step's title. No colon (or an
+ * empty half) → the whole line.
  */
-
-/** "Duo {n}" — the line up to its colon (the whole line when there is none). */
-export function duoLabel(full: string): string {
-  const head = full.split(':')[0]?.trim();
-  return head && head !== full ? head : full;
-}
-
-/** The title: the line after its "Duo n :" head (the whole line when there is none). */
-export function pickTitle(full: string): string {
+export function splitPickLine(full: string): [head: string, title: string] {
   const idx = full.indexOf(':');
-  return idx === -1 ? full : full.slice(idx + 1).trim();
+  if (idx === -1) return [full, full];
+  return [full.slice(0, idx).trim() || full, full.slice(idx + 1).trim()];
 }

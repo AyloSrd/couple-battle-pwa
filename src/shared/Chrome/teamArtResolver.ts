@@ -12,18 +12,11 @@ export type TPlayerSlot = 1 | 2;
 const ART = new Map<string, string>(); // "id:kind:size" → url
 const PLAYER_ART = new Map<string, string>(); // "id:slot" → url
 for (const [path, url] of Object.entries(FILES)) {
-  const player = /team-([a-z0-9]+)-p([12])-192\.webp$/.exec(path);
-  if (player) {
-    PLAYER_ART.set(`${player[1]}:${player[2]}`, url);
-    continue;
-  }
-  const full = /team-([a-z0-9]+)-full-(\d+)\.webp$/.exec(path);
-  if (full) {
-    ART.set(`${full[1]}:full:${full[2]}`, url);
-    continue;
-  }
-  const portrait = /team-([a-z0-9]+)-(\d+)\.webp$/.exec(path);
-  if (portrait) ART.set(`${portrait[1]}:portrait:${portrait[2]}`, url);
+  const match = /team-([a-z0-9]+)-(?:p([12])-192|full-(\d+)|(\d+))\.webp$/.exec(path);
+  if (!match) continue;
+  const [, id, slot, full, portrait] = match;
+  if (slot) PLAYER_ART.set(`${id}:${slot}`, url);
+  else ART.set(full ? `${id}:full:${full}` : `${id}:portrait:${portrait}`, url);
 }
 
 const SIZES: Record<TTeamArtKind, readonly TTeamArtSize[]> = { portrait: [256, 384], full: [512] };

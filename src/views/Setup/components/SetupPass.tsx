@@ -2,7 +2,7 @@ import { useEffect, type FC } from 'react';
 import { useT } from '@/shared/i18n';
 import { useSound } from '@/shared/sound';
 import { PixelButton } from '@/shared/Chrome';
-import { duoLabel } from '../domain/labels';
+import { splitPickLine } from '../domain/labels';
 
 type TProps = {
   /** 1-based number of the NEXT couple (they have no avatar yet). */
@@ -23,7 +23,7 @@ export const SetupPass: FC<TProps> = ({ nextCoupleNumber, onConfirm }) => {
     <>
       <div className="cb-glow" aria-hidden="true" />
       <div className="cb-v-setup__pass">
-        <span className="cb-label cb-v-setup__pass-label">{duoLabel(t('setup.team.pick', { n: nextCoupleNumber }))}</span>
+        <span className="cb-label cb-v-setup__pass-label">{splitPickLine(t('setup.team.pick', { n: nextCoupleNumber }))[0]}</span>
         <span className="cb-numeral" aria-hidden="true">{nextCoupleNumber}</span>
         <h1 className="cb-title">{t('setup.pass.title')}</h1>
       </div>
