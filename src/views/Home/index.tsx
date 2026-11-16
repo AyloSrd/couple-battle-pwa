@@ -6,8 +6,6 @@ import { useSound } from '@/shared/sound';
 import { useDraft } from '@/shared/session';
 import { markIosHintSeen, readIosHintSeen, useInstallPrompt } from '@/shared/pwa';
 import { Screen, PixelPanel, PixelButton, Logo, Notice, Sheet, TopBar, LanguagePicker } from '@/shared/Chrome';
-import chars600 from '@/assets/art/chars-home-600.webp';
-import chars900 from '@/assets/art/chars-home-900.webp';
 import './view.css';
 
 /** How long "your last game couldn't be restored" stays up. */
@@ -76,20 +74,8 @@ export const HomeView: FC = () => {
         <LanguagePicker variant="menu" />
       </TopBar>
 
+      {/* The characters are part of the background art (view.css): the logo's auto margin keeps their space free. */}
       <Logo alt={t('app.name')} className="cb-v-home-logo" />
-
-      <div className="cb-v-home-stage">
-        <img
-          className="cb-v-home-chars"
-          src={chars600}
-          srcSet={`${chars600} 600w, ${chars900} 900w`}
-          sizes="(min-width: 480px) 480px, 100vw"
-          width={600}
-          height={400}
-          alt=""
-          draggable={false}
-        />
-      </div>
 
       {hasResume && (
         <PixelPanel className="cb-stack cb-v-home-panel">

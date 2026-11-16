@@ -1,16 +1,15 @@
-/* Home — the keyart. Fits one page down to ~640px tall: logo + characters flex, controls don't. */
+/* Home — the keyart. Fits one page down to ~640px tall: the logo flexes, controls don't. */
 
-/* ---------- stage: the lightning art, full-bleed over the violet fallback ---------- */
+/* ---------- stage: one picture (background + characters + trophy), full-bleed over the violet fallback ----------
+   850×1850 art pinned to the bottom, so the characters always sit just above PLAY; a screen wider than the art's
+   ratio (SE, a desktop column) shows it at the column's width and loses empty sky at the top.
+   --cb-home-art-h: the art's rendered height (cover: the larger of the screen height and width × 1850/850). */
 .cb-v-home.cb-page {
-  background: url('../../assets/art/bg-home-720.webp') center bottom / cover no-repeat, var(--cb-bg-calm) var(--cb-bg);
+  --cb-home-art-h: max(100dvh, min(100vw, 480px) * 1850 / 850);
+  background: url('../../assets/art/bg-home-850.webp') center bottom / cover no-repeat, var(--cb-bg-calm) var(--cb-bg);
   gap: var(--cb-s3);
   padding-top: calc(var(--cb-s5) + env(safe-area-inset-top));
   overflow-x: clip;
-}
-@media (min-width: 481px), (min-resolution: 1.5dppx) {
-  .cb-v-home.cb-page {
-    background: url('../../assets/art/bg-home-1024.webp') center bottom / cover no-repeat, var(--cb-bg-calm) var(--cb-bg);
-  }
 }
 
 /* language chip floats over the art, top-right, so it costs no vertical space */
@@ -22,29 +21,17 @@
   z-index: 1;
 }
 
-/* ---------- logo + characters: the flexing middle ---------- */
+/* ---------- logo: ends above the characters' heads (33.5% down the art), then the gap pushes the controls down ---------- */
 .cb-v-home .cb-v-home-logo {
   flex: none;
   width: auto;
   max-width: 100%;
-  height: clamp(110px, 25dvh, 250px);
-}
-.cb-v-home .cb-v-home-stage {
-  flex: 1;
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* edge to edge: the duo-of-duos uses the full width of the column */
-.cb-v-home .cb-v-home-chars {
-  flex: none;
-  width: calc(100% + 2 * var(--cb-page-x));
-  max-width: none;
-  height: auto;
-  max-height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 14px 22px rgba(10, 2, 40, 0.45));
+  height: clamp(
+    96px,
+    min(25dvh, 100dvh - var(--cb-home-art-h) * 0.665 - var(--cb-s5) - var(--cb-s2) - env(safe-area-inset-top)),
+    250px
+  );
+  margin-bottom: auto;
 }
 
 /* ---------- PLAY: big, gaming ---------- */
