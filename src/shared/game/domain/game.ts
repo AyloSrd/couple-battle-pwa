@@ -80,10 +80,11 @@ const ZResultSchema = z.enum(['match', 'miss']);
 export type TResult = z.infer<typeof ZResultSchema>;
 
 /** Canonical closed-answer tokens: yes_no → 'yes' | 'no'; who_of_two → 'p0' | 'p1' (player
- *  index in the couple). Language-free, so a language change mid-game cannot break scoring. */
+ *  index in the couple); choice → 'c0' | 'c1' | 'c2' (index into the question's options). Language-free, so a language change mid-game cannot break scoring. */
 export const CLOSED_TOKENS: Partial<Record<TQuestionType, readonly string[]>> = {
   yes_no: ['yes', 'no'],
   who_of_two: ['p0', 'p1'],
+  choice: ['c0', 'c1', 'c2'],
 };
 /** A closed question is auto-judged on the guesser's pick; any other type is revealed + judged. */
 export function isClosedType(type: TQuestionType | undefined): boolean {

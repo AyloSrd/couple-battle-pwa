@@ -30,6 +30,8 @@ export function modeQuestionTypes(mode: TMode): TQuestionType[] {
 /** Flash draws 2 questions per round, SHARED by every couple, over 2 rounds. */
 const FLASH_SHARED = 2 * 2;
 const ULTIME_DILEMMA = 5;
+/** Choice cards per block of Flash questions (Flash's deck, Ultime's Flash block): exactly this many, not a chance per card. */
+export const CHOICE_PER_FLASH_BLOCK = 1;
 const ULTIME_RAPID_PER_COUPLE = 5;
 
 /** Deck size to draw (mirrors `planOf`): Dilemma 10; Flash 2 × 2 rounds whatever the couple
@@ -57,14 +59,40 @@ export function drawDeck(
 ): TQuestion[] {
   if (options.mode === Mode.Ultime) return drawUltimeDeck(questions, options, rng);
   const { mode, difficulty, themes, seenIds, size } = options;
+  if (mode === Mode.Flash) return drawFlashBlock(...flashPools(questions, options, seenIds), size, rng);
   const pool = filterQuestions(questions, { types: modeQuestionTypes(mode), difficulty, themes, excludeIds: seenIds });
   return shuffle(pool, rng).slice(0, size);
+}
+
+/** The classic Flash pool and the choice pool, filtered alike (difficulty, themes, unseen). */
+function flashPools(
+  questions: TQuestion[],
+  { difficulty, themes }: TDrawDeckOptions,
+  excludeIds: number[],
+): [classicPool: TQuestion[], choicePool: TQuestion[]] {
+  const filter = { difficulty, themes, excludeIds };
+  return [
+    filterQuestions(questions, { ...filter, types: modeQuestionTypes(Mode.Flash) }),
+    filterQuestions(questions, { ...filter, types: [QuestionType.Choice] }),
+  ];
+}
+
+/**
+ * A block of `count` Flash cards: up to CHOICE_PER_FLASH_BLOCK choice cards, each at a random slot, the rest classic. No choice
+ * left in its pool → all classic; a short classic pool → a short block (never padded, never a duplicate), so callers keep their
+ * short-deck handling. Pure: the pools are not touched.
+ */
+export function drawFlashBlock(classicPool: TQuestion[], choicePool: TQuestion[], count: number, rng: () => number): TQuestion[] {
+  const choices = shuffle(choicePool, rng).slice(0, Math.min(CHOICE_PER_FLASH_BLOCK, count));
+  const block = shuffle(classicPool, rng).slice(0, count - choices.length);
+  for (const choice of choices) block.splice(Math.floor(rng() * (block.length + 1)), 0, choice);
+  return block;
 }
 
 /**
  * Ultime reads its deck by fixed offsets (Flash, Dilemma, rapid-fire), so each segment is drawn
  * from its own pool: a short segment would shift the next into the wrong round, so it empties
- * the deck (error.deckEmpty). Rapid-fire draws `open` easy/medium only (Hard falls back to both).
+ * the deck (error.deckEmpty). The Flash block holds one choice card (`drawFlashBlock`). Rapid-fire draws `open` easy/medium only (Hard falls back to both).
  */
 function drawUltimeDeck(questions: TQuestion[], options: TDrawDeckOptions, rng: () => number): TQuestion[] {
   const { difficulty, themes, seenIds, size } = options;
@@ -82,8 +110,10 @@ function drawUltimeDeck(questions: TQuestion[], options: TDrawDeckOptions, rng: 
 
   const rapidDifficulty =
     difficulty === GameDifficulty.Easy || difficulty === GameDifficulty.Medium ? difficulty : GameDifficulty.Mix;
+  const flashBlock = drawFlashBlock(...flashPools(questions, options, seenIds), FLASH_SHARED, rng);
+  deck.push(...flashBlock);
   const complete =
-    take({ types: modeQuestionTypes(Mode.Flash), difficulty, themes }, FLASH_SHARED) &&
+    flashBlock.length === FLASH_SHARED &&
     take({ types: modeQuestionTypes(Mode.Dilemma), difficulty, themes }, ULTIME_DILEMMA) &&
     take(
       { types: [QuestionType.Open], difficulty: rapidDifficulty, themes },

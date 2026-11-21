@@ -9078,5 +9078,725 @@
   "type": "who_of_two",
   "you": "Who of the two would make the biggest fool of themselves at the office Christmas party?",
   "name": "Who of the two would make the biggest fool of themselves at the office Christmas party?"
+ },
+ {
+  "id": 1136,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "The door clicks shut with your keys inside. What’s the first thing you do?",
+  "options": [
+   "I check every pocket again, even the ones I zipped up this morning.",
+   "I make a quick call to find out where we stand on that spare key.",
+   "I ring the neighbours’ bell. Three years of saying hi ought to count."
+  ]
+ },
+ {
+  "id": 1137,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "You finish building the unit together. There are three screws left on the rug. What do you do?",
+  "options": [
+   "I put them with the spare screws from the last unit. They can keep each other company.",
+   "I reopen the manual at the page we said looked pretty self-explanatory.",
+   "I test the unit with an empty glass. We can work up to heavier things."
+  ]
+ },
+ {
+  "id": 1138,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "It’s nearly midnight and your fitted sheet is still soaking in the washer. What do you do?",
+  "options": [
+   "I get out the guest sheet. Congratulations to us, we’re guests.",
+   "I start the dryer and settle on the sofa with a vague plan to stay awake.",
+   "I put the duvet cover on the mattress. It’s getting a promotion tonight."
+  ]
+ },
+ {
+  "id": 1139,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Your guests are ten minutes away and the living room looks thoroughly lived in. How do you tidy up?",
+  "options": [
+   "I clear the sofa and the table. The rest is part of the tour.",
+   "I put everything in the bedroom, then close the door very gently.",
+   "I set a timer and give us each a zone like we’re on a game show."
+  ]
+ },
+ {
+  "id": 1140,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You’ll be in bed in half an hour and your partner’s out. Which light do you leave on?",
+  "options": [
+   "I leave the little lamp on. I love coming home to that light myself.",
+   "I leave the hall light on so we can skip the keys-in-the-dark concert.",
+   "I turn them all off and send a text. “Call my phone, the doorbell’ll wake the whole building.”"
+  ]
+ },
+ {
+  "id": 1141,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "There’s one empty drawer left for the two of you. What do you claim it for?",
+  "options": [
+   "I save a corner for paperwork we need to deal with before it starts breeding.",
+   "I put the chargers in there. I’ll celebrate finding one on the first try.",
+   "I propose an official junk drawer. At least the clutter has an address."
+  ]
+ },
+ {
+  "id": 1142,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "It’s Sunday morning and you’re having a clear-out together. What do you save at the last minute?",
+  "options": [
+   "I keep the mismatched mugs. I can make a very good case for every single one.",
+   "I keep the mystery cable. Its device will turn up right after the clear-out.",
+   "I keep the sturdy cardboard boxes. Something will fit in them eventually."
+  ]
+ },
+ {
+  "id": 1143,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "You’ve scratched your partner’s favourite piece of furniture. When do you explain what happened?",
+  "options": [
+   "I say it right away, with the exact measurements I’ve just taken.",
+   "I try to buff it out first, then give a full report on the scratch and the repair.",
+   "I wait until it gets noticed and confess. I’ve already rehearsed “yes, that was me.”"
+  ]
+ },
+ {
+  "id": 1144,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner’s coming home a day early. What do you hurry to put back where it belongs?",
+  "options": [
+   "I put away the guest towels I took out for my very own spa weekend.",
+   "I fold back the duvet from the side of the bed I officially annexed.",
+   "I put the armchair back. Personally, I liked it facing the telly."
+  ]
+ },
+ {
+  "id": 1145,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your new robot vacuum is about to go under the bed. What do you rescue before its first outing?",
+  "options": [
+   "I retrieve my old stuffed toy. It’s already been through enough.",
+   "I scoop up my pile of lone socks. I was holding out for a reunion.",
+   "I pull out the pile of books I take to bed and never actually read."
+  ]
+ },
+ {
+  "id": 1146,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Your partner says “I’m not hungry”, then takes a fry off your plate. What do you do?",
+  "options": [
+   "I slide the plate closer. We both know where this is going.",
+   "I rotate the plate so the fries are on my side. Very smoothly.",
+   "I order a second portion. It'll save time on the negotiations."
+  ]
+ },
+ {
+  "id": 1147,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "You’ve been delivered the wrong pizza. It still smells amazing. What do you do?",
+  "options": [
+   "I call for the right one. I’d already picked out my first slice.",
+   "I suggest a bite to make sure we really do want to swap it.",
+   "I check the toppings and get the plates out. We’re improvising tonight."
+  ]
+ },
+ {
+  "id": 1148,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "It starts raining the second you spread out the picnic blanket. What do you suggest?",
+  "options": [
+   "I suggest eating in the car. The front seats make surprisingly good benches.",
+   "I suggest finding shelter. A blanket like this deserves a day out.",
+   "I suggest laying it all out on the floor back home. Same menu, better roof."
+  ]
+ },
+ {
+  "id": 1149,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "The restaurant has your usual home-cooked dish on the menu. What do you order out of curiosity?",
+  "options": [
+   "I order it and compare every bite to the way we make it at home.",
+   "I ask how it’s made and order something else. I have what I came for.",
+   "I order something with the same sauce. That’s the bit I really care about."
+  ]
+ },
+ {
+  "id": 1150,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Your partner wants you both to try a sauce labelled “very, very hot”. How do you test it?",
+  "options": [
+   "I put one drop on the corner of some bread. A trial, not a commitment.",
+   "I try the same amount as my partner. We need a fair testing procedure.",
+   "I get a glass of milk ready and pour the sauce without counting the drops."
+  ]
+ },
+ {
+  "id": 1151,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "At the market you can pick one unfamiliar ingredient to cook tonight. How do you choose it?",
+  "options": [
+   "I pick the one with the funniest name. I want to enjoy saying what’s for dinner.",
+   "I ask whoever’s behind the stall what they actually cook at home.",
+   "I pick the strangest-looking one. It gets a photoshoot before it goes in the pan."
+  ]
+ },
+ {
+  "id": 1152,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You challenge each other to make toast toppings from fridge leftovers. How do you play to win?",
+  "options": [
+   "I toast the bread perfectly. Everyone underestimates a good crunch.",
+   "I use the sauce that rescues anything, even the veg that’s stared at us since Monday.",
+   "I focus on presentation. Two sprigs of chives and suddenly it’s a tasting menu."
+  ]
+ },
+ {
+  "id": 1153,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "You have to confess your little ritual with the treat you buy to share. What do you say?",
+  "options": [
+   "I always take the bigger piece when I do the cutting. I’ve compared them.",
+   "I stash my half behind the vegetables. I like knowing I’ve still got some.",
+   "I eat it standing at the fridge. I don’t even make it to the plates."
+  ]
+ },
+ {
+  "id": 1154,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner asks for the truth about the fancy restaurant on your first date. What do you admit?",
+  "options": [
+   "I ate again at home. The presentation was lovely, but I was still hungry.",
+   "I ordered the only dish I could pronounce without a practice run.",
+   "I’d checked the prices beforehand. My “let’s get whatever we like” was very calculated."
+  ]
+ },
+ {
+  "id": 1155,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner knows you take a shortcut with the “family recipe” you always get right. What do you reveal?",
+  "options": [
+   "I use jarred sauce. I pour it into a bowl before anyone comes into the kitchen.",
+   "I swap out the priciest ingredient. My family has never noticed.",
+   "I let the food processor chop the “finely hand-cut” vegetables."
+  ]
+ },
+ {
+  "id": 1156,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Someone at the party greets you by name. You’ve completely forgotten theirs. What do you do?",
+  "options": [
+   "I ask their name so I can make introductions. Two birds, one stone.",
+   "I introduce myself again and hope it works both ways.",
+   "I go with “Hey, it’s been ages!” and put everything into the delivery."
+  ]
+ },
+ {
+  "id": 1157,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "You get to your friends’ place twenty minutes early. What do you do with the time?",
+  "options": [
+   "I text “We’re in the area,” while standing right outside their door.",
+   "I suggest a lap around the block. Or three, depending on our pace.",
+   "I ring anyway and offer to help. We can even slice the lemons."
+  ]
+ },
+ {
+  "id": 1158,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "You only know your partner at a party, and the quiz puts you on different teams. What do you do?",
+  "options": [
+   "I pitch a team name. It’s easier than introducing myself.",
+   "I volunteer to keep score. At least I’ll have a job to do.",
+   "I find someone who looks just as lost and suggest we stick together."
+  ]
+ },
+ {
+  "id": 1159,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Your friends want to post a party photo of you two. What do you check first?",
+  "options": [
+   "I zoom in on our faces. My eyes were open at least once, right?",
+   "I read the caption. I’d like to know which version of the night is going public.",
+   "I check who’s tagged. My family has plenty of material already."
+  ]
+ },
+ {
+  "id": 1160,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You planned to leave the party early, and a new game just started. How do you give the signal?",
+  "options": [
+   "I say “Let’s go after this round,” once I’ve checked how long the round is.",
+   "I text “Shall we slip out?” while looking very invested in the rules.",
+   "I quietly drape our coats over the backs of our chairs."
+  ]
+ },
+ {
+  "id": 1161,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You have friends over for dinner and two groups have never met. How do you break the ice?",
+  "options": [
+   "I introduce people by their strongest opinion about something silly.",
+   "I ask “Who wants to help in the kitchen?” and mix up the teams.",
+   "I ask who had the strangest journey getting here and let them tell it."
+  ]
+ },
+ {
+  "id": 1162,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "At dinner, your partner tells the story of dog-sitting for your friends. One detail was meant to stay private. What do you do?",
+  "options": [
+   "I take over the story just in time to skip that particular scene.",
+   "I give our under-the-table signal. We’ve trained for this.",
+   "I share the detail myself. At least my version will go down in history."
+  ]
+ },
+ {
+  "id": 1163,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "At a party, you bump into an ex you’ve never mentioned to your partner. How do you handle the introductions?",
+  "options": [
+   "I stick to first names and save the backstory for the way home.",
+   "I say we used to date right away. One sentence should do it.",
+   "I let the conversation get going and mention it if it comes up."
+  ]
+ },
+ {
+  "id": 1164,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner suggests a night with the group you always feel a bit out of place in. What do you say?",
+  "options": [
+   "I say yes and reserve the seat next to my partner. In writing if necessary.",
+   "I suggest the pocket-sized version of the group. One or two people to start.",
+   "I admit I feel out of place. Tonight I’d like a table for two."
+  ]
+ },
+ {
+  "id": 1165,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "At a birthday party, everyone praises your partner for the note in the card. You wrote it. What do you do?",
+  "options": [
+   "I claim credit in my best awards-acceptance voice.",
+   "I let it slide and whisper “You’re writing the next one” to my partner.",
+   "I ask for a second slice of cake. Those are my royalties."
+  ]
+ },
+ {
+  "id": 1166,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "You get off the train one stop early. The next one’s in an hour. What do you suggest?",
+  "options": [
+   "I suggest a coffee. We can call it a culinary detour.",
+   "I see if we can walk the rest of the way. Yes, even with the bags.",
+   "I look up a bus. If we mess up again, at least we’ll be on something different."
+  ]
+ },
+ {
+  "id": 1167,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Your hotel room promises an open view. You pull back the curtains and there’s a wall. What do you do?",
+  "options": [
+   "I go to reception with the listing photo already on my phone.",
+   "I send our friends a photo of the wall with “Honestly, so restorative.”",
+   "I shut the curtains and test what matters now. The shower pressure."
+  ]
+ },
+ {
+  "id": 1168,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "It’s already raining at 9 a.m. on your beach day. What’s your first suggestion for a new plan?",
+  "options": [
+   "I book the first good-looking museum. Even the one about sardines.",
+   "I suggest a breakfast that can quietly turn into lunch.",
+   "I look for a sheltered beach, even if we end up admiring it from the car."
+  ]
+ },
+ {
+  "id": 1169,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "It’s the last day of your trip and there’s one tiny spot left in the suitcase. What gets it?",
+  "options": [
+   "I bring back something edible. A short-lived but delicious souvenir.",
+   "I buy a slightly ugly magnet. It’ll have its place on the fridge.",
+   "I leave it empty. I know myself, and there’s still an airport to get through."
+  ]
+ },
+ {
+  "id": 1170,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You have six hours in a city neither of you has been to. What do you want to do first?",
+  "options": [
+   "I pick an area and wander. If I pass the same bakery twice, even better.",
+   "I book the main attraction. Everything after that is a bonus.",
+   "I ask a local for one tip and turn it into our whole itinerary."
+  ]
+ },
+ {
+  "id": 1171,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Your hotel has twin beds with a big gap. Your partner asks if you should push them together. What do you say?",
+  "options": [
+   "I suggest pushing them together. We can still negotiate two duvets.",
+   "I keep my bed. I want one night where I can sleep like a starfish.",
+   "I suggest a cuddle in one bed and then a grand journey back to our own."
+  ]
+ },
+ {
+  "id": 1172,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "For a weekend away together, you can pack exactly one pair of shoes. Which pair do you take?",
+  "options": [
+   "I take my old trainers. My feet aren’t on holiday.",
+   "I take my nice pair. I’ll miss them as soon as we go out to dinner.",
+   "I take walking shoes. A little stroll can turn into a hike pretty fast."
+  ]
+ },
+ {
+  "id": 1173,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "After three days of doing everything together on holiday, you want an hour alone. How do you bring it up?",
+  "options": [
+   "I say it outright. I need an hour in my own little bubble.",
+   "I suggest meeting for a drink after I take a walk by myself.",
+   "I ask where my partner would go alone. I’ve already picked my spot."
+  ]
+ },
+ {
+  "id": 1174,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "You’re planning another trip. Which little lie about your last holiday could you see yourself admitting to?",
+  "options": [
+   "I admit I had vertigo on that footbridge. I was staring at my shoelaces.",
+   "I admit I’ve forgotten the name of the village I keep saying I loved.",
+   "I admit I secretly checked the guide again after saying “Trust me.”"
+  ]
+ },
+ {
+  "id": 1175,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner dreams of a three-day hike staying in mountain huts. You’ve never admitted it scares you. What do you suggest?",
+  "options": [
+   "I suggest one night to start with, in a mountain hut that has actual beds.",
+   "I suggest a trial hike near home. If I survive the backpack, we can talk.",
+   "I say what scares me and suggest one home base. With a shower."
+  ]
+ },
+ {
+  "id": 1176,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "You start a show together and your partner is asleep ten minutes in. What do you do?",
+  "options": [
+   "I pause it. We’ll pick up at the first snore.",
+   "I finish the episode and give a recap with sound effects.",
+   "I rewind two minutes and try a casual “Did you see that?”"
+  ]
+ },
+ {
+  "id": 1177,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "You get to the cinema together and only the very front row is left. What do you suggest?",
+  "options": [
+   "I take the seats. I’ve always wanted to see that actor’s pores.",
+   "I suggest the next showing. We can finish the popcorn beforehand.",
+   "I pick a different film. For once, we’re choosing based on the view."
+  ]
+ },
+ {
+  "id": 1178,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "You start a co-op game and both fail the very first jump in the tutorial. What do you do?",
+  "options": [
+   "I read the controls out loud. That button deserves a fair trial.",
+   "I suggest jumping on three. Maybe it’s a timing issue.",
+   "I switch characters. This one and I have very different ideas about jumping."
+  ]
+ },
+ {
+  "id": 1179,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Your partner adds a song to your shared playlist that you skip every time. What do you do?",
+  "options": [
+   "I leave it in. It doubles as a bathroom break on long drives.",
+   "I move it to the very bottom, where shuffle never seems to go.",
+   "I propose a trade. This song for one of mine you can’t stand."
+  ]
+ },
+ {
+  "id": 1180,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You’ve finished the border of a 1,000-piece puzzle. All that’s left is blue sky. What do you do?",
+  "options": [
+   "I sort by colour. So far we’ve got “pool blue” and “sad pool blue.”",
+   "I walk around the table. Maybe I’m just looking at it from the wrong angle.",
+   "I suggest leaving it for a week. The pieces need time to marinate."
+  ]
+ },
+ {
+  "id": 1181,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Your partner teaches you their favourite hobby. Ten minutes in, you’re stuck. What do you ask for?",
+  "options": [
+   "I ask for a slow-motion demo, like it’s the Olympic final.",
+   "I ask to skip to the fun bit. We can circle back to the basics.",
+   "I ask for five minutes alone. I need to fail in peace."
+  ]
+ },
+ {
+  "id": 1182,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Your partner gets you tickets to your favourite band without knowing a single song. What do you do?",
+  "options": [
+   "I make a tiny playlist. Three songs, zero homework.",
+   "I keep it a surprise. I want to see what that first chorus does live.",
+   "I give one tip. When everyone puts their hands up, follow along."
+  ]
+ },
+ {
+  "id": 1183,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "You practised in secret after a crushing defeat at your favourite game. When do you admit it?",
+  "options": [
+   "I say it when I ask for a rematch. Just so we know where we stand.",
+   "I admit it after my first win. I might as well make it count.",
+   "I wait for you to notice that I suddenly know the rules by heart."
+  ]
+ },
+ {
+  "id": 1184,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "You hated the film your partner’s been quoting since you met. How do you finally break the news?",
+  "options": [
+   "I say it the next time you quote it. “Oh, that’s from THAT film.”",
+   "I suggest a rewatch and give my real verdict over the credits.",
+   "I make it a trade. You name a film you pretended to like for me."
+  ]
+ },
+ {
+  "id": 1185,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner wants to restart a hobby you quit together. You celebrated the last session. What do you say?",
+  "options": [
+   "I offer one trial session. The last one already felt like my leaving do.",
+   "I suggest going at our own pace. Mine, for now, happens to be zero.",
+   "I pitch a new hobby for us. I’m up for the idea, just not the comeback tour."
+  ]
+ },
+ {
+  "id": 1186,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Your partner gets home after a rotten day, drops their bag and lets out a huge sigh. What do you do?",
+  "options": [
+   "I put the kettle on. The debrief comes in a mug.",
+   "I open my arms. The bag can stay in the middle of the hallway.",
+   "I clear the sofa and ask if we’re talking or watching nonsense."
+  ]
+ },
+ {
+  "id": 1187,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Your partner snuggles up in bed with ice-cold feet. What’s your first move?",
+  "options": [
+   "I let it happen. I charge for heating in cuddles.",
+   "I pull my knees up. I love you very much from the ankles up.",
+   "I hand over a pair of socks. I came prepared for winter."
+  ]
+ },
+ {
+  "id": 1188,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Your partner leaves you a sweet little note before heading out. How do you reply in your own way?",
+  "options": [
+   "I tuck a note into your shoe. That’s my idea of doorstep delivery.",
+   "I send a photo of the note by my coffee. You’re having breakfast with me.",
+   "I draw a heart on the mirror. You’ll spot it while brushing your teeth."
+  ]
+ },
+ {
+  "id": 1189,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You’re about to kiss and bump noses. What do you do straight after?",
+  "options": [
+   "I pull back and say “Take two.” We’ll keep the blooper reel to ourselves.",
+   "I kiss your nose. That’s step one of the repair job.",
+   "I take a laugh break. The kiss can resume after the interval."
+  ]
+ },
+ {
+  "id": 1190,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You’re looking for an old photo and stumble on your very first texts. What do you want to reread?",
+  "options": [
+   "I look for the first compliment. I want to see if I saw it coming.",
+   "I find the first plan to meet up. How many days did that take again?",
+   "I scroll to the first joke. I want to see if it still holds up."
+  ]
+ },
+ {
+  "id": 1191,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "You’ve had a great night out together. In the lift, you’ve got thirty seconds left. What do you do?",
+  "options": [
+   "I restart the chorus we sang on the way home. Even without the words.",
+   "I sneak in a kiss before the bags and shoes take over.",
+   "I suggest a selfie. Lift lighting is our own special filter."
+  ]
+ },
+ {
+  "id": 1192,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "You’re talking about your first date and realise there’s one thing you’ve never admitted. What is it?",
+  "options": [
+   "I practised saying “hi” several times on the way there.",
+   "I changed outfits only to put the very first one back on.",
+   "I’d already picked the place I’d suggest for a second date."
+  ]
+ },
+ {
+  "id": 1193,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner asks which compliment you’d love to hear more often. What do you say?",
+  "options": [
+   "I pick “You make me laugh.” Even when the joke is four years old.",
+   "I pick “I love being with you.” Even in the laundry aisle.",
+   "I pick “You look good.” Especially in my pyjamas at six in the evening."
+  ]
+ },
+ {
+  "id": 1194,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner accidentally discovers the secret nickname you gave them. How do you react?",
+  "options": [
+   "I tell the origin story. It starts with “Remember that croissant?”",
+   "I ask if I have a secret nickname too. It’s my turn to find out.",
+   "I own it and start saying it out loud. Might as well enjoy it now."
+  ]
+ },
+ {
+  "id": 1195,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Your partner asks when you wanted a kiss but didn’t dare say so. Which moment do you pick?",
+  "options": [
+   "I pick the night we kept talking in the doorway for twenty extra minutes.",
+   "I pick the laughing fit in the kitchen, just as dinner started to burn.",
+   "I pick the ride where you fell asleep on my shoulder before the last stop."
+  ]
  }
 ]
