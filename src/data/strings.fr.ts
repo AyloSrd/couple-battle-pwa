@@ -6,6 +6,8 @@ export const fr = {
   "about.version": "Version {version}",
   "app.name": "Couple Battle",
   "app.tagline": "Qui de vous deux connaît mieux l'autre ?",
+  "choice.answer": "Réponse de {name}",
+  "choice.guess": "Choix de {name}",
   "common.back": "Retour",
   "common.cancel": "Annuler",
   "common.close": "Fermer",

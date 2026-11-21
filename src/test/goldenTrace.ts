@@ -46,6 +46,25 @@ export const GOLDEN_CASES: TGoldenCase[] = [
   goldenCase('ultime', 4, 2),
 ];
 
+/**
+ * Games with `choice` cards (P14): hand-placed, so the cycle above (and every recorded trace of `GOLDEN_CASES`) stays as it was.
+ * Their traces are in `goldenTraces.json` too; the UI-driven suites do not play them (they are domain-only, `goldenTrace.test.ts`).
+ */
+function choiceCase(name: string, mode: TMode, couples: number, flash: readonly TQuestionType[]): TGoldenCase {
+  const size = deckSizeFor(mode, couples);
+  const deck: TDeckCard[] = Array.from({ length: size }, (_, i) => ({
+    id: 200 + i,
+    type: i < flash.length ? flash[i]! : mode === 'ultime' && i >= 9 ? 'open' : 'who_of_two',
+  }));
+  return { name, mode, couples, deck };
+}
+
+export const CHOICE_CASES: TGoldenCase[] = [
+  choiceCase('flash · 1 couple(s) · choice at slots 1 and 2', 'flash', 1, ['open', 'choice', 'choice', 'yes_no']),
+  choiceCase('flash · 2 couple(s) · choice at slots 0 and 3', 'flash', 2, ['choice', 'yes_no', 'who_of_two', 'choice']),
+  choiceCase('ultime · 2 couple(s) · choice in the Flash block', 'ultime', 2, ['this_or_that', 'yes_no', 'choice', 'open']),
+];
+
 export function goldenRoster(n: number): TRoster {
   return Array.from({ length: n }, (_, i) => ({
     teamId: `t${i + 1}`,
@@ -77,9 +96,10 @@ export type TAction =
   | { type: 'guess'; value: string }
   | { type: 'verdict'; v: 'exact' | 'close' | 'miss' };
 
-const TOKENS: Partial<Record<TQuestionType, readonly [string, string]>> = {
+const TOKENS: Partial<Record<TQuestionType, readonly string[]>> = {
   yes_no: ['yes', 'no'],
   who_of_two: ['p0', 'p1'],
+  choice: ['c0', 'c1', 'c2'],
 };
 
 /** The n-th decision on a screen: cycles verdicts, answers and picks so every branch is hit. */
@@ -90,10 +110,10 @@ export function policy(step: TNormStep, n: number): TAction {
       return { type: 'verdict', v: (['exact', 'miss', 'exact', 'exact', 'miss'] as const)[n % 5]! };
     case 'secret':
       if (!step.card) return { type: 'answer', value: 'zzz' };
-      return { type: 'answer', value: tokens ? tokens[n % 2]! : `a${n}` };
+      return { type: 'answer', value: tokens ? tokens[n % tokens.length]! : `a${n}` };
     case 'guess':
       if (!step.card) return n % 2 === 0 ? { type: 'guess', value: 'yes' } : { type: 'next' };
-      return tokens ? { type: 'guess', value: tokens[(n % 3) % 2]! } : { type: 'next' };
+      return tokens ? { type: 'guess', value: tokens[(n % 3) % tokens.length]! } : { type: 'next' };
     case 'judge':
       return { type: 'verdict', v: (['exact', 'close', 'miss'] as const)[n % 3]! };
     case 'rapidJudge':

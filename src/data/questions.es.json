@@ -9078,5 +9078,725 @@
   "type": "who_of_two",
   "you": "¿Quién de los dos la liaría más en la cena de Navidad de la empresa?",
   "name": "¿Quién de los dos la liaría más en la cena de Navidad de la empresa?"
+ },
+ {
+  "id": 1136,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "La puerta se cierra de golpe con las llaves dentro. ¿Qué es lo primero que haces?",
+  "options": [
+   "Me reviso otra vez los bolsillos, hasta los que cerré esta mañana.",
+   "Llamo enseguida para ver en qué quedó aquello de hacer una copia.",
+   "Llamo al timbre de al lado. Tres años diciendo hola servirán de algo."
+  ]
+ },
+ {
+  "id": 1137,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Acabáis de montar el mueble y quedan tres tornillos en la alfombra. ¿Qué haces?",
+  "options": [
+   "Los guardo con los que sobraron del último mueble. Así se hacen compañía.",
+   "Vuelvo a la página del manual que nos pareció tan fácil de saltar.",
+   "Pruebo el mueble con un vaso vacío. Ya iremos subiendo de peso."
+  ]
+ },
+ {
+  "id": 1138,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Casi es medianoche y la sábana bajera sigue empapada en la lavadora. ¿Qué haces?",
+  "options": [
+   "Saco la sábana de las visitas. Hoy nos toca hacer de visita.",
+   "Pongo la secadora y me instalo en el sofá con la vaga idea de no dormirme.",
+   "Pongo la funda nórdica sobre el colchón. Esta noche le toca ascenso."
+  ]
+ },
+ {
+  "id": 1139,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vuestras visitas llegan en diez minutos y el salón está para verlo. ¿Cómo lo recoges?",
+  "options": [
+   "Despejo el sofá y la mesa. El resto forma parte de la visita guiada.",
+   "Lo meto todo en el dormitorio y cierro la puerta con mucha delicadeza.",
+   "Pongo un cronómetro y reparto zonas, como en un concurso de la tele."
+  ]
+ },
+ {
+  "id": 1140,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Te vas a acostar en media hora y tu pareja está fuera. ¿Qué luz dejas encendida?",
+  "options": [
+   "Dejo solo la lamparita. A mí me alegra verla cuando vuelvo tarde.",
+   "Dejo la luz del pasillo para ahorrarnos el concierto de llaves a oscuras.",
+   "Apago todo y mando un mensaje. «Llámame al móvil, que el timbre despierta a todo el portal»."
+  ]
+ },
+ {
+  "id": 1141,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Os queda un solo cajón vacío para los dos. ¿Para qué quieres usarlo?",
+  "options": [
+   "Reservo un rincón para los papeles pendientes, antes de que se reproduzcan.",
+   "Meto los cargadores. El día que encuentre uno a la primera lo celebro.",
+   "Propongo un cajón oficial de los trastos. Así al menos tienen dirección."
+  ]
+ },
+ {
+  "id": 1142,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "El domingo por la mañana os toca hacer limpieza en casa. ¿Qué salvas en el último momento?",
+  "options": [
+   "Me quedo las tazas desparejadas. Puedo justificar el uso de cada una.",
+   "Me quedo el cable misterioso. Su aparato aparecerá justo cuando terminemos.",
+   "Me quedo las cajas resistentes. Algún día habrá algo perfecto para meter dentro."
+  ]
+ },
+ {
+  "id": 1143,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Has rayado el mueble favorito de tu pareja. ¿Cuándo cuentas cómo ha pasado?",
+  "options": [
+   "Lo cuento enseguida, con las medidas exactas que acabo de tomar.",
+   "Intento disimular la raya y luego cuento el incidente y mis labores de restauración.",
+   "Espero a que se vea y confieso. Ya he ensayado el «sí, he sido yo»."
+  ]
+ },
+ {
+  "id": 1144,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja vuelve a casa un día antes de lo previsto. ¿Qué vuelves a poner en su sitio deprisa?",
+  "options": [
+   "Guardo las toallas de las visitas que saqué para montarme mi propio spa.",
+   "Recoloco el edredón en el lado de la cama que había ocupado oficialmente.",
+   "Vuelvo a colocar el sillón. A mí me iba la mar de bien mirando a la tele."
+  ]
+ },
+ {
+  "id": 1145,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "El robot aspirador nuevo va a pasar por debajo de la cama. ¿Qué rescatas antes de su estreno?",
+  "options": [
+   "Saco mi peluche de siempre. A estas alturas ya ha pasado por bastante.",
+   "Recojo los calcetines desparejados. Aún tenía fe en el reencuentro.",
+   "Rescato la pila de libros que me llevo a la cama y que luego nunca leo."
+  ]
+ },
+ {
+  "id": 1146,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Tu pareja dice «No tengo hambre» y luego te roba una patata frita. ¿Qué haces?",
+  "options": [
+   "Acerco el plato. Está claro cómo va a acabar esto.",
+   "Giro el plato para dejar las patatas de mi lado. Con mucha discreción.",
+   "Pido otra ración. Así nos ahorramos buena parte de la negociación."
+  ]
+ },
+ {
+  "id": 1147,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Os han traído la pizza equivocada, pero huele de maravilla. ¿Qué haces?",
+  "options": [
+   "Llamo para que traigan la nuestra. Ya tenía elegida mi primera porción.",
+   "Propongo probar un bocado, para confirmar que queremos cambiarla.",
+   "Miro los ingredientes y saco los platos. Esta noche se improvisa."
+  ]
+ },
+ {
+  "id": 1148,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Empieza a llover justo cuando extendéis la manta del pícnic. ¿Qué propones?",
+  "options": [
+   "Propongo comer en el coche. Los asientos delanteros hacen de banco estupendamente.",
+   "Propongo buscar un sitio cubierto. Esta manta se merece salir de casa.",
+   "Propongo extenderlo todo en el salón. Mismo menú, mejor techo."
+  ]
+ },
+ {
+  "id": 1149,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "El restaurante tiene en la carta ese plato que siempre hacéis en casa. Por curiosidad, ¿qué pides?",
+  "options": [
+   "Pido el plato y comparo cada bocado con cómo lo hacemos en casa.",
+   "Pregunto cómo lo preparan y pido otra cosa. Ya tengo lo que quería saber.",
+   "Pido otro plato con la misma salsa. Eso es lo que de verdad me interesa."
+  ]
+ },
+ {
+  "id": 1150,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Tu pareja propone probar una salsa que anuncia «mucho, mucho picante». ¿Cómo la pruebas?",
+  "options": [
+   "Pongo una gota en una esquina del pan. Es una prueba, no un compromiso.",
+   "Pruebo la misma cantidad que mi pareja. La prueba tiene que ser justa.",
+   "Me preparo un vaso de leche y echo la salsa sin contar las gotas."
+  ]
+ },
+ {
+  "id": 1151,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "En el mercado podéis comprar un solo ingrediente desconocido para la cena. ¿Cómo lo eliges?",
+  "options": [
+   "Elijo el que tenga el nombre más gracioso. Así me divierto contando qué se cena.",
+   "Pregunto a quien lleva el puesto qué suele cocinar en casa.",
+   "Elijo el más raro de pinta. Se merece una foto antes de ir a la sartén."
+  ]
+ },
+ {
+  "id": 1152,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Montáis un concurso de tostadas con lo que queda en la nevera. ¿Cómo intentas ganar?",
+  "options": [
+   "Tuesto el pan a la perfección. Todo el mundo infravalora un buen crujido.",
+   "Uso esa salsa que lo arregla todo, hasta la verdura que nos mira desde el lunes.",
+   "Cuido la presentación. Pongo dos hebras de cebollino y anuncio una degustación."
+  ]
+ },
+ {
+  "id": 1153,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Te toca confesar tu ritual con ese capricho que compráis para compartir. ¿Qué dices?",
+  "options": [
+   "Cuando lo reparto, me quedo el trozo más grande. Los tengo bien comparados.",
+   "Escondo mi mitad detrás de la verdura. Me gusta saber que aún me queda.",
+   "Me lo como de pie frente a la nevera. Ni me da tiempo a sacar un plato."
+  ]
+ },
+ {
+  "id": 1154,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja te pide la verdad sobre el restaurante elegante de vuestra primera cita. ¿Qué confiesas?",
+  "options": [
+   "Volví a comer en casa. La presentación era preciosa, pero seguía con hambre.",
+   "Pedí el único plato cuyo nombre podía pronunciar sin ensayo previo.",
+   "Había mirado los precios. Mi «pide lo que quieras» estaba muy calculado."
+  ]
+ },
+ {
+  "id": 1155,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja sabe que haces trampa con la receta «de familia» que siempre te sale. ¿Qué revelas?",
+  "options": [
+   "Uso salsa de bote y la paso a un bol antes de que entre nadie en la cocina.",
+   "Cambio el ingrediente más caro. En mi familia jamás se han dado cuenta.",
+   "Uso el procesador para las verduras «picadas a mano muy finitas»."
+  ]
+ },
+ {
+  "id": 1156,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "En una fiesta te saludan por tu nombre, pero tú has olvidado el de esa persona. ¿Qué haces?",
+  "options": [
+   "Pregunto el nombre para hacer las presentaciones. Ya que estamos.",
+   "Me presento otra vez con la esperanza de que funcione en ambos sentidos.",
+   "Suelto un «¡Cuánto tiempo!» y lo apuesto todo al entusiasmo."
+  ]
+ },
+ {
+  "id": 1157,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Llegáis veinte minutos antes a casa de vuestros amigos. ¿Qué haces con esos veinte minutos?",
+  "options": [
+   "Escribo «Estamos por la zona» desde la mismísima puerta.",
+   "Propongo dar una vuelta a la manzana. O tres, según el ritmo.",
+   "Llamo al timbre y ofrezco ayuda. Hasta podemos cortar los limones."
+  ]
+ },
+ {
+  "id": 1158,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "En una fiesta solo conoces a tu pareja y os separan para un concurso de preguntas. ¿Qué haces?",
+  "options": [
+   "Propongo un nombre de equipo. Me resulta más fácil que presentarme.",
+   "Me ofrezco a apuntar los puntos. Así ya tengo una misión.",
+   "Busco a alguien con la misma cara de desconcierto y propongo un dúo."
+  ]
+ },
+ {
+  "id": 1159,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vuestros amigos quieren publicar una foto de la fiesta en la que salís en pareja. ¿Qué compruebas primero?",
+  "options": [
+   "Amplío nuestras caras. Alguna vez tendría los ojos abiertos, ¿no?",
+   "Leo el pie de foto. Quiero saber qué versión de la noche va a salir.",
+   "Miro las etiquetas. Mi familia ya tiene material de sobra."
+  ]
+ },
+ {
+  "id": 1160,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Pensabais iros pronto de la fiesta y acaban de empezar otro juego. ¿Cómo das la señal?",
+  "options": [
+   "Digo «Nos vamos tras esta ronda» después de comprobar cuánto dura.",
+   "Escribo «¿Nos escabullimos?» mientras pongo cara de atender a las reglas.",
+   "Pongo discretamente nuestros abrigos en el respaldo de las sillas."
+  ]
+ },
+ {
+  "id": 1161,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Invitas a cenar a dos grupos de amigos que no se conocen. ¿Cómo rompes el hielo?",
+  "options": [
+   "Presento a cada persona con su opinión más tajante sobre una tontería.",
+   "Pregunto «¿Quién me ayuda en la cocina?» y mezclo los equipos.",
+   "Pregunto quién ha tenido el trayecto más raro hasta llegar aquí."
+  ]
+ },
+ {
+  "id": 1162,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja cuenta en la mesa cómo cuidasteis al perro de unos amigos. Un detalle debía quedar entre vosotros. ¿Qué haces?",
+  "options": [
+   "Me adueño del relato a tiempo de saltarme esa pequeña escena.",
+   "Hago nuestra señal bajo la mesa. Para esto hemos ensayado.",
+   "Cuento el detalle. Al menos mi versión quedará para la posteridad."
+  ]
+ },
+ {
+  "id": 1163,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "En una fiesta os cruzáis con una expareja de la que nunca le has hablado a tu pareja. ¿Cómo haces las presentaciones?",
+  "options": [
+   "Digo los nombres y dejo la historia para el camino de vuelta.",
+   "Aclaro enseguida que fuimos pareja. Con una frase basta.",
+   "Dejo que arranque la conversación y lo cuento si sale el tema."
+  ]
+ },
+ {
+  "id": 1164,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja propone salir con ese grupo en el que siempre te sientes un poco de más. ¿Qué dices?",
+  "options": [
+   "Digo que sí y reservo el sitio al lado de mi pareja. Por escrito si hace falta.",
+   "Propongo la versión de bolsillo del grupo. Una o dos personas para empezar.",
+   "Confieso que me siento de más. Esta noche me apetece una mesa para dos."
+  ]
+ },
+ {
+  "id": 1165,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "En un cumpleaños felicitan a tu pareja por la dedicatoria de la tarjeta. La escribiste tú. ¿Qué haces?",
+  "options": [
+   "Reclamo mi parte con mi mejor voz de discurso de agradecimiento.",
+   "Lo dejo pasar y le susurro a mi pareja «La próxima la escribes tú».",
+   "Pido otra porción de tarta. Son mis derechos de autor."
+  ]
+ },
+ {
+  "id": 1166,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Os bajáis del tren una parada antes y queda una hora para el siguiente. ¿Qué propones?",
+  "options": [
+   "Propongo un café. Diremos que era una escala gastronómica.",
+   "Miro si podemos terminar el trayecto a pie. Sí, con las maletas.",
+   "Busco un autobús. Si volvemos a liarla, que sea en otro medio de transporte."
+  ]
+ },
+ {
+  "id": 1167,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "El hotel promete vistas despejadas. Abres las cortinas y ves un muro. ¿Qué haces?",
+  "options": [
+   "Bajo a recepción con la foto del anuncio ya abierta en el móvil.",
+   "Mando a nuestros amigos una foto del muro con «Qué paz da esto».",
+   "Cierro las cortinas y compruebo lo que importa ahora. La presión de la ducha."
+  ]
+ },
+ {
+  "id": 1168,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Teníais plan de playa y a las nueve ya llueve. ¿Qué plan alternativo propones primero?",
+  "options": [
+   "Reservo el primer museo que tiene buena pinta. Hasta el de la sardina.",
+   "Propongo un desayuno que se alargue hasta la hora de comer.",
+   "Busco una playa resguardada, aunque acabemos mirando el mar desde el coche."
+  ]
+ },
+ {
+  "id": 1169,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Último día de vacaciones. Queda un hueco minúsculo en la maleta. ¿Para qué lo guardas?",
+  "options": [
+   "Me llevo algo de comer. Será un recuerdo breve y delicioso.",
+   "Compro un imán un poco feo. Tendrá su sitio en la nevera.",
+   "Dejo el hueco libre. Me conozco y aún tengo que pasar por un aeropuerto."
+  ]
+ },
+ {
+  "id": 1170,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Tenéis seis horas en una ciudad que no conocéis. ¿Por dónde quieres empezar?",
+  "options": [
+   "Elijo un barrio y callejeo. Si paso dos veces por la misma panadería, mejor.",
+   "Reservo la visita imprescindible. Todo lo que venga después es un extra.",
+   "Pido un consejo a alguien de allí y lo convierto en nuestro itinerario."
+  ]
+ },
+ {
+  "id": 1171,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "El hotel tiene dos camas individuales separadas. Tu pareja pregunta si las juntáis. ¿Qué respondes?",
+  "options": [
+   "Propongo juntar las camas. Aún podemos negociar dos edredones.",
+   "Me quedo con mi cama. Una noche durmiendo en estrella, por favor.",
+   "Propongo acurrucarnos un rato y luego que cada cual vuelva a su cama."
+  ]
+ },
+ {
+  "id": 1172,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Para un fin de semana en pareja solo puedes meter un par de zapatos en la bolsa. ¿Cuál te llevas?",
+  "options": [
+   "Me llevo mis zapatillas de siempre. Mis pies no están de vacaciones.",
+   "Me llevo el par bonito. Si no, lo echaré de menos en el restaurante.",
+   "Me llevo calzado de montaña. Un paseíto puede acabar en ruta."
+  ]
+ },
+ {
+  "id": 1173,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tras tres días de vacaciones haciendo todo en pareja, te apetece una hora a solas. ¿Cómo lo planteas?",
+  "options": [
+   "Digo tal cual que necesito pasar una hora en mi burbuja.",
+   "Propongo quedar en una terraza después de dar un paseo a solas.",
+   "Pregunto adónde iría mi pareja por su cuenta. Yo ya tengo mi sitio fichado."
+  ]
+ },
+ {
+  "id": 1174,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Planeáis otro viaje. ¿Qué mentirijilla de las últimas vacaciones te verías capaz de confesar?",
+  "options": [
+   "Admito que en la pasarela me dio vértigo. Miraba mis cordones.",
+   "Admito que he olvidado el nombre del pueblo que digo que me encantó.",
+   "Admito que volví a mirar la guía a escondidas tras decir «Fíate de mí»."
+  ]
+ },
+ {
+  "id": 1175,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja sueña con tres días de senderismo durmiendo en refugios. Nunca has dicho que te agobia. ¿Qué propones?",
+  "options": [
+   "Propongo una sola noche para empezar. En un refugio, pero con camas de verdad.",
+   "Propongo una ruta de prueba cerca. Si sobrevivo a la mochila, lo hablamos.",
+   "Digo qué me agobia y propongo dormir siempre en el mismo sitio. Con ducha."
+  ]
+ },
+ {
+  "id": 1176,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Empezáis una serie y tu pareja se duerme a los diez minutos. ¿Qué haces?",
+  "options": [
+   "Pauso el capítulo. Seguimos mañana desde el primer ronquido.",
+   "Acabo el capítulo y hago un resumen con efectos de sonido.",
+   "Retrocedo dos minutos y pruebo con un «¿Has visto eso?»"
+  ]
+ },
+ {
+  "id": 1177,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Llegáis al cine y solo quedan sitios en primera fila. ¿Qué propones?",
+  "options": [
+   "Cojo los asientos. Siempre he querido ver los poros de ese actor.",
+   "Propongo la siguiente sesión. Así da tiempo a acabar las palomitas.",
+   "Elijo otra peli. Por una vez, manda la vista desde la butaca."
+  ]
+ },
+ {
+  "id": 1178,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Empezáis un videojuego en pareja y falláis el primer salto del tutorial. ¿Qué haces?",
+  "options": [
+   "Leo los controles en voz alta. Ese botón merece un juicio justo.",
+   "Propongo saltar a la de tres. Igual solo nos falta coordinación.",
+   "Cambio de personaje. Este y yo tenemos ideas distintas sobre cómo se salta."
+  ]
+ },
+ {
+  "id": 1179,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Tu pareja añade a vuestra lista esa canción que siempre saltas. ¿Qué haces?",
+  "options": [
+   "La dejo. En los viajes largos nos sirve de pausa para ir al baño.",
+   "La mando al fondo de la lista, donde el aleatorio nunca llega.",
+   "Propongo un trato. Esta canción a cambio de una mía que odies."
+  ]
+ },
+ {
+  "id": 1180,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Habéis acabado el borde de un puzle de mil piezas. Solo queda cielo azul. ¿Qué haces?",
+  "options": [
+   "Separo los tonos. De momento tengo «azul piscina» y «azul piscina triste».",
+   "Doy la vuelta a la mesa. Igual solo estoy mirando desde el ángulo equivocado.",
+   "Propongo dejarlo una semana. Las piezas necesitan macerar."
+  ]
+ },
+ {
+  "id": 1181,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Tu pareja te enseña su afición favorita. A los diez minutos te atascas. ¿Qué pides?",
+  "options": [
+   "Pido una demostración a cámara lenta, como en una final olímpica.",
+   "Pido saltar a la parte divertida. Ya volveremos a lo básico.",
+   "Pido cinco minutos por mi cuenta. Necesito fallar en paz."
+  ]
+ },
+ {
+  "id": 1182,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Tu pareja te regala entradas para tu grupo favorito sin conocer una sola canción. ¿Qué haces?",
+  "options": [
+   "Preparo una minilista. Tres canciones y cero deberes.",
+   "Mantengo la sorpresa. Quiero ver qué pasa con el primer estribillo en directo.",
+   "Doy un solo consejo. Cuando todo el mundo levante los brazos, tú también."
+  ]
+ },
+ {
+  "id": 1183,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Has practicado a escondidas tras perder por goleada a vuestro juego favorito. ¿Cuándo lo confiesas?",
+  "options": [
+   "Lo digo al pedir la revancha. Que se sepa a qué vamos.",
+   "Lo confieso después de ganar por fin. Para algo tenía que servir.",
+   "Espero a que notes que, de repente, me sé las reglas de memoria."
+  ]
+ },
+ {
+  "id": 1184,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Odiaste la peli que tu pareja lleva citando desde que os conocisteis. ¿Cómo se lo cuentas?",
+  "options": [
+   "Lo suelto en cuanto vuelves a citarla. «Ah, eso sale de ESA peli».",
+   "Propongo volver a verla y doy mi veredicto real en los créditos.",
+   "Propongo un intercambio. Tú me dices una peli que fingiste que te gustaba por mí."
+  ]
+ },
+ {
+  "id": 1185,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja quiere retomar una actividad que dejasteis. Tú celebraste la última clase. ¿Qué dices?",
+  "options": [
+   "Propongo una clase de prueba. La última ya fue mi fiesta de despedida.",
+   "Propongo ir cada cual a su ritmo. El mío, de momento, es cero.",
+   "Propongo una actividad nueva en pareja. La idea me gusta, el regreso menos."
+  ]
+ },
+ {
+  "id": 1186,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Tu pareja llega tras un día horrible, deja el bolso en el suelo y suspira. ¿Qué haces?",
+  "options": [
+   "Pongo agua a calentar. El resumen del día se sirve en taza.",
+   "Abro los brazos. El bolso puede quedarse en medio de la entrada.",
+   "Hago sitio en el sofá y pregunto si hablamos o vemos alguna tontería."
+  ]
+ },
+ {
+  "id": 1187,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Tu pareja se acurruca a tu lado en la cama con los pies helados. ¿Cómo reaccionas?",
+  "options": [
+   "Dejo que te acerques. La calefacción se paga en abrazos.",
+   "Encojo las piernas. De los tobillos para arriba te quiero muchísimo.",
+   "Saco un par de calcetines. El invierno no me pilla por sorpresa."
+  ]
+ },
+ {
+  "id": 1188,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Tu pareja te deja una nota cariñosa antes de salir. ¿Cómo le respondes a tu manera?",
+  "options": [
+   "Meto una nota en tu zapato. Servicio de mensajería a domicilio.",
+   "Mando una foto de la nota junto al café. Así desayunamos en compañía.",
+   "Dibujo un corazón en el espejo. Lo verás al lavarte los dientes."
+  ]
+ },
+ {
+  "id": 1189,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Estáis a punto de besaros y os chocáis con la nariz. ¿Qué haces justo después?",
+  "options": [
+   "Me aparto y anuncio «Segunda toma». Las tomas falsas se quedan en casa.",
+   "Doy un beso en la nariz. Es el primer paso de la reparación.",
+   "Me tomo una pausa para reírme. El beso sigue después del descanso."
+  ]
+ },
+ {
+  "id": 1190,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Buscando una foto antigua, dais con vuestros primeros mensajes. ¿Qué quieres volver a leer?",
+  "options": [
+   "Busco el primer cumplido. Quiero ver si me lo veía venir.",
+   "Busco el primer plan para vernos. ¿Cuántos días tardamos en quedar?",
+   "Vuelvo al primer chiste. Quiero comprobar si sigue haciendo gracia."
+  ]
+ },
+ {
+  "id": 1191,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Volvéis de una noche genial y os quedan treinta segundos en el ascensor. ¿Qué haces?",
+  "options": [
+   "Retomo el estribillo que cantábamos de vuelta. Aunque no me sepa la letra.",
+   "Doy un beso antes de que los bolsos y los zapatos reclamen su turno.",
+   "Propongo un selfi. La luz del ascensor es nuestro filtro particular."
+  ]
+ },
+ {
+  "id": 1192,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Habláis de vuestra primera cita y recuerdas un detalle que nunca confesaste. ¿Cuál?",
+  "options": [
+   "Ensayé varias veces mi «hola» de camino a la cita.",
+   "Me cambié de ropa para acabar con lo mismo que llevaba al principio.",
+   "Ya tenía elegido el sitio que propondría para la segunda cita."
+  ]
+ },
+ {
+  "id": 1193,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja te pregunta qué cumplido te gustaría oír más a menudo. ¿Qué respondes?",
+  "options": [
+   "Elijo «Me haces reír». Aunque el chiste ya tenga cuatro años.",
+   "Elijo «Qué a gusto estoy contigo». Hasta en el pasillo del detergente.",
+   "Elijo «Me gustas». Sobre todo si ya llevo el pijama a las seis."
+  ]
+ },
+ {
+  "id": 1194,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja descubre por casualidad el apodo secreto que le pusiste. ¿Cómo reaccionas?",
+  "options": [
+   "Cuento de dónde viene. Empiezo con «¿Te acuerdas de aquel cruasán?».",
+   "Pregunto si yo también tengo un apodo secreto. Ahora me toca enterarme.",
+   "Lo asumo y empiezo a usarlo en voz alta. Ya que estamos, lo disfruto."
+  ]
+ },
+ {
+  "id": 1195,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu pareja te pregunta cuándo quisiste un beso sin atreverte a decirlo. ¿Qué momento eliges?",
+  "options": [
+   "Elijo aquella noche que seguimos hablando veinte minutos en la puerta.",
+   "Elijo el ataque de risa en la cocina, justo cuando se quemaba la cena.",
+   "Elijo aquel trayecto en que te dormiste en mi hombro antes de la última parada."
+  ]
  }
 ]

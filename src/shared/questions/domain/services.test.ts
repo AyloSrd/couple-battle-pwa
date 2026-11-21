@@ -75,7 +75,7 @@ describe('drawDeck', () => {
 describe('drawDeck — ultime', () => {
   const rng0 = () => 0;
   const DIFFICULTIES: TQuestionDifficulty[] = ['easy', 'medium', 'hard'];
-  const TYPES: TQuestionType[] = ['open', 'this_or_that', 'yes_no', 'who_of_two'];
+  const TYPES: Exclude<TQuestionType, 'choice'>[] = ['open', 'this_or_that', 'yes_no', 'who_of_two'];
   // 10 questions of every type × difficulty → 120, ids 1..120.
   const POOL: TQuestion[] = TYPES.flatMap((type, t) =>
     DIFFICULTIES.flatMap((difficulty, d) =>

@@ -287,3 +287,106 @@
     font-size: clamp(26px, min(9vw, 5.2dvh), 34px);
   }
 }
+/* ---------- choice question (Secret, Guess): the question on the card, three answers under it ---------- */
+.cb-v-flash .cb-flash-card--choice {
+  /* never shrinks below its own content (no overlap with the actor tab); a tall page scrolls instead */
+  flex-shrink: 0;
+  min-height: min-content;
+}
+.cb-v-flash .cb-flash-card--choice .cb-question {
+  font-size: 23px;
+  line-height: 1.16;
+}
+.cb-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-s3);
+}
+.cb-choice {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cb-s3);
+  padding: var(--cb-s3);
+  border-radius: var(--cb-r-md);
+  border: var(--cb-outline-w) solid var(--cb-outline);
+  background: var(--cb-surface);
+  color: var(--cb-eggplant);
+  text-align: left;
+  box-shadow: 0 var(--cb-lip) 0 var(--cb-outline);
+}
+button.cb-choice:active {
+  transform: translateY(calc(var(--cb-lip) - 1px));
+  box-shadow: 0 1px 0 var(--cb-outline);
+}
+.cb-choice__letter {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--cb-violet-600);
+  color: var(--cb-on-stage);
+  font: 800 14px / 1 var(--cb-font-display);
+}
+.cb-choice__text {
+  flex: 1;
+  min-width: 0;
+  font: 600 17px / 1.3 var(--cb-font-ui);
+  overflow-wrap: anywhere;
+}
+.cb-choice__tags {
+  /* name pills hang on the card's top-right border, so they take no width from the answer text */
+  position: absolute;
+  top: calc(var(--cb-s3) * -1);
+  right: var(--cb-s3);
+  display: flex;
+  gap: var(--cb-s1);
+  pointer-events: none;
+}
+.cb-choice__tag {
+  white-space: nowrap;
+  padding: 2px var(--cb-s2);
+  border-radius: var(--cb-r-pill);
+  border: 2px solid var(--cb-outline);
+  background: var(--cb-gold);
+  color: var(--cb-eggplant);
+  font: 700 11px / 14px var(--cb-font-ui);
+}
+.cb-choice.is-truth {
+  border-color: var(--cb-gold-lo);
+  box-shadow: 0 0 0 3px var(--cb-gold), 0 var(--cb-lip) 0 var(--cb-outline);
+}
+.cb-choice.is-match {
+  background: linear-gradient(var(--cb-mint-hi), var(--cb-mint));
+}
+.cb-choice.is-miss {
+  background: linear-gradient(var(--cb-rose-hi), var(--cb-rose));
+}
+/* shorter phones: the SE's longest question and three answers, and the verdict + Next, still fit */
+@media (max-height: 700px) {
+  .cb-v-flash .cb-flash-card--choice .cb-question {
+    font-size: 17px;
+    line-height: 1.18;
+  }
+  /* as in the iPhone app: on a short phone the choice card's actor is the small disc beside the name (one row), so the question,
+     the three answers, the verdict and Next fit without scrolling */
+  .cb-v-flash .cb-flash-card--choice {
+    --flash-disc: 36px;
+    padding: calc(var(--flash-disc) + var(--cb-s1) + var(--cb-s3)) var(--cb-s4) var(--cb-s3);
+  }
+  .cb-v-flash .cb-flash-card--choice > .cb-actor--card {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--cb-s2);
+  }
+  .cb-choice {
+    padding: 9px var(--cb-s3);
+  }
+  .cb-choice__text {
+    font-size: 15px;
+    line-height: 1.27;
+  }
+}

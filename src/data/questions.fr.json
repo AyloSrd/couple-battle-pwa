@@ -9078,5 +9078,725 @@
   "type": "who_of_two",
   "you": "Qui de vous deux ferait le plus de bêtises à la soirée de Noël de la boîte ?",
   "name": "Qui de vous deux ferait le plus de bêtises à la soirée de Noël de la boîte ?"
+ },
+ {
+  "id": 1136,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "La porte claque et vos clés sont à l’intérieur. C’est quoi, ton premier réflexe ?",
+  "options": [
+   "Je refais toutes mes poches, même celles que j’ai fermées ce matin.",
+   "J’appelle tout de suite pour savoir où on en est avec le double.",
+   "Je sonne chez les voisins. Trois ans de « bonjour », ça crée des liens."
+  ]
+ },
+ {
+  "id": 1137,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vous venez de finir de monter le meuble. Il reste trois vis sur le tapis. Tu fais quoi ?",
+  "options": [
+   "Je les range avec les vis en trop du meuble précédent. Elles se tiendront compagnie.",
+   "Je rouvre la notice à la page qu’on avait trouvée « assez intuitive ».",
+   "Je teste le meuble avec un verre vide. Le contrôle technique commence doucement."
+  ]
+ },
+ {
+  "id": 1138,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Il est presque minuit et votre drap-housse est toujours trempé dans la machine. Tu fais quoi ?",
+  "options": [
+   "Je sors le drap des invités. Ce soir, les invités, c’est nous.",
+   "Je lance le sèche-linge et je compte vaguement tenir le coup sur le canapé.",
+   "Je mets la housse de couette sur le matelas. Ce soir, elle est promue."
+  ]
+ },
+ {
+  "id": 1139,
+  "theme": "homeDaily",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vos invités arrivent dans dix minutes et le salon a vécu sa meilleure vie. Tu ranges comment ?",
+  "options": [
+   "Je dégage le canapé et la table. Le reste fait partie de la visite.",
+   "Je mets tout dans la chambre, puis je ferme avec beaucoup de délicatesse.",
+   "Je lance un chrono et je donne une zone à chaque personne, comme dans un jeu télé."
+  ]
+ },
+ {
+  "id": 1140,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Il te reste trente minutes avant le coucher et ton partenaire est encore dehors. Quelle lumière tu laisses ?",
+  "options": [
+   "Je garde seulement la petite lampe. Quand je rentre tard, ça me fait plaisir.",
+   "Je laisse le couloir allumé pour éviter le fameux concert de clés dans le noir.",
+   "J’éteins tout et j’écris « Appelle-moi, la sonnette réveille tout l’immeuble. »"
+  ]
+ },
+ {
+  "id": 1141,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Il vous reste un seul tiroir vide pour deux. Tu veux en faire quoi avant que les premiers objets s’y installent ?",
+  "options": [
+   "Je réserve un coin aux papiers qu’on doit traiter avant qu’ils ne fassent des petits.",
+   "J’y range les chargeurs. Si on en trouve un du premier coup, je fête ça.",
+   "Je propose un tiroir fourre-tout officiel. Au moins, il a un nom et une adresse."
+  ]
+ },
+ {
+  "id": 1142,
+  "theme": "homeDaily",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Dimanche matin, vous avez prévu de faire du tri. Sur quoi est-ce que tu freines au dernier moment ?",
+  "options": [
+   "Je garde les tasses dépareillées. Chacune a un usage parfaitement défendable.",
+   "Je garde le câble inconnu. Son appareil va réapparaître juste après le tri.",
+   "Je garde les cartons bien solides. On mettra sûrement quelque chose dedans un jour."
+  ]
+ },
+ {
+  "id": 1143,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu as rayé le meuble préféré de ton partenaire. À quel moment tu racontes comment c’est arrivé ?",
+  "options": [
+   "Je le dis tout de suite, avec les dimensions exactes que je viens de prendre.",
+   "J’essaie d’atténuer la rayure, puis je raconte l’incident et mes travaux.",
+   "J’attends qu’on la voie et j’avoue. J’ai déjà répété « oui, c’est moi »."
+  ]
+ },
+ {
+  "id": 1144,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire rentre un jour plus tôt que prévu. Qu’est-ce que tu remets en place en vitesse ?",
+  "options": [
+   "Je range les serviettes des invités que j’ai sorties pour me faire un week-end spa.",
+   "Je replie toute la couette du côté que j’avais officiellement annexé.",
+   "Je remets le fauteuil à sa place. Face à la télé, il m’allait très bien."
+  ]
+ },
+ {
+  "id": 1145,
+  "theme": "homeDaily",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Votre nouveau robot aspirateur va passer sous le lit. Qu’est-ce que tu récupères avant son baptême ?",
+  "options": [
+   "Je sors mon vieux doudou. Il a déjà vécu assez de choses comme ça.",
+   "Je vide mon stock de chaussettes orphelines. Je croyais encore aux retrouvailles.",
+   "Je récupère la pile de livres que j’emporte au lit et que je ne lis jamais."
+  ]
+ },
+ {
+  "id": 1146,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Ton partenaire annonce « Je n’ai pas faim », puis pique une frite dans ton assiette. Tu fais quoi ?",
+  "options": [
+   "Je rapproche l’assiette. On sait tous les deux comment ça finit.",
+   "Je fais pivoter l’assiette pour mettre les frites de mon côté. Tout en douceur.",
+   "Je commande une deuxième portion. On va gagner du temps sur la négociation."
+  ]
+ },
+ {
+  "id": 1147,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Le livreur vous a donné la mauvaise pizza. Elle sent quand même très bon. Tu fais quoi ?",
+  "options": [
+   "J’appelle pour avoir la bonne. J’avais déjà choisi ma première part.",
+   "Je propose qu’on goûte une bouchée. Histoire de vérifier qu’on veut l’échanger.",
+   "Je vérifie les ingrédients et je sors les assiettes. Ce soir, on improvise."
+  ]
+ },
+ {
+  "id": 1148,
+  "theme": "foodDrinks",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vous avez préparé un pique-nique et la pluie commence pile quand vous dépliez la nappe. Tu proposes quoi ?",
+  "options": [
+   "Je propose de manger dans la voiture. Les sièges avant font de très bons bancs.",
+   "Je propose de chercher un coin abrité. Une nappe pareille mérite une sortie.",
+   "Je propose de rentrer et de tout étaler par terre. Même menu, meilleur toit."
+  ]
+ },
+ {
+  "id": 1149,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Votre plat maison habituel est proposé au resto. Par curiosité, tu passes quelle commande ?",
+  "options": [
+   "Je commande le plat, et je compare chaque bouchée à notre version.",
+   "Je demande comment c’est préparé, puis je commande autre chose. J’ai l’info.",
+   "Je prends un plat qui a la même sauce. C’est quand même elle qui m’intéresse."
+  ]
+ },
+ {
+  "id": 1150,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Ton partenaire veut que vous tentiez une sauce annoncée « très, très forte ». Comment tu la testes ?",
+  "options": [
+   "Je mets une goutte sur un coin de pain. C’est un essai, pas un engagement.",
+   "Je goûte la même dose que mon partenaire. Il faut un protocole équitable.",
+   "Je prépare un verre de lait et je verse la sauce sans compter les gouttes."
+  ]
+ },
+ {
+  "id": 1151,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Au marché, vous n’avez droit qu’à un produit inconnu à cuisiner ce soir. Comment tu le choisis ?",
+  "options": [
+   "Je prends celui dont le nom me fait rire. Je veux pouvoir dire ce qu’on mange.",
+   "Je demande quel ingrédient finit le plus souvent dans la cuisine du stand.",
+   "Je choisis le plus bizarre à regarder. Il aura droit à sa photo avant cuisson."
+  ]
+ },
+ {
+  "id": 1152,
+  "theme": "foodDrinks",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vous lancez un concours de tartines avec uniquement ce qu’il reste au frigo. Comment tu t’y prends pour gagner ?",
+  "options": [
+   "Je grille le pain à la perfection. Tout le monde sous-estime le croustillant.",
+   "Je mise sur la sauce qui fait tout passer, même le légume qui nous regarde depuis lundi.",
+   "Je soigne la présentation. Deux brins de ciboulette et j’annonce une dégustation."
+  ]
+ },
+ {
+  "id": 1153,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu dois avouer ton petit rituel avec la gourmandise que vous achetez à deux. Qu’est-ce que tu dis ?",
+  "options": [
+   "Je prends toujours le plus gros morceau quand je fais les parts. Je les ai comparées.",
+   "Je planque ma moitié derrière les légumes. J’aime savoir qu’il m’en reste.",
+   "Je la mange debout devant le frigo. Même pas le temps de sortir une assiette."
+  ]
+ },
+ {
+  "id": 1154,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire te demande la vérité sur le restaurant chic de votre premier rendez-vous. Tu avoues quoi ?",
+  "options": [
+   "J’ai mangé en rentrant. La présentation était magnifique, mais j’avais encore faim.",
+   "J’ai choisi le seul plat dont j’arrivais à prononcer le nom sans préparation.",
+   "J’avais regardé les prix avant. Mon « on prend ce qu’on veut » était très calculé."
+  ]
+ },
+ {
+  "id": 1155,
+  "theme": "foodDrinks",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire sait que tu triches sur la recette « de famille » que tu réussis à tous les coups. Tu révèles quoi ?",
+  "options": [
+   "Je prends la sauce en bocal. Je transvase avant que quelqu’un entre en cuisine.",
+   "Je remplace l’ingrédient le plus cher. La famille ne l’a jamais remarqué.",
+   "Je laisse le robot hacher les légumes « finement coupés à la main »."
+  ]
+ },
+ {
+  "id": 1156,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "En soirée, on te salue par ton prénom. Tu as complètement oublié celui de la personne. Tu fais quoi ?",
+  "options": [
+   "Je demande le prénom pour faire les présentations. Tant qu’à faire.",
+   "Je me présente à nouveau en espérant que ça marche dans les deux sens.",
+   "Je lance « Salut, ça fait longtemps ! » et je mise tout sur l’enthousiasme."
+  ]
+ },
+ {
+  "id": 1157,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vous arrivez vingt minutes en avance chez vos amis. Tu proposes quoi à ton partenaire ?",
+  "options": [
+   "J’envoie « On est dans le quartier », alors qu’on est devant la porte.",
+   "Je propose un tour du pâté de maisons. Ou trois, selon notre allure.",
+   "Je sonne et je propose un coup de main. On peut même couper les citrons."
+  ]
+ },
+ {
+  "id": 1158,
+  "theme": "goingOut",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "À une fête, tu ne connais que ton partenaire et on vous sépare pour un quiz. Tu fais quoi ?",
+  "options": [
+   "Je propose un nom d’équipe. C’est plus facile que de me présenter.",
+   "Je me porte volontaire pour noter les points. J’aurai une mission.",
+   "Je repère une autre tête qui cherche ses repères et je propose un duo."
+  ]
+ },
+ {
+  "id": 1159,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vos amis veulent poster une photo de vous deux prise en soirée. Qu’est-ce que tu vérifies d’abord ?",
+  "options": [
+   "Je zoome sur nos têtes. Mes yeux étaient ouverts au moins une fois, non ?",
+   "Je lis la légende. J’aimerais savoir quelle version de la soirée va sortir.",
+   "Je vérifie les identifications. Ma famille a déjà assez de dossiers."
+  ]
+ },
+ {
+  "id": 1160,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vous aviez prévu de partir tôt, et on vient de lancer un nouveau jeu. Comment tu donnes le signal ?",
+  "options": [
+   "Je dis « On y va après cette manche », après avoir vérifié sa durée.",
+   "J’envoie « On s’éclipse ? » les yeux rivés sur les règles du jeu.",
+   "Je pose discrètement nos manteaux sur le dossier de nos chaises."
+  ]
+ },
+ {
+  "id": 1161,
+  "theme": "goingOut",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Tu invites des amis à dîner et deux groupes qui ne se connaissent pas arrivent. Comment tu brises la glace ?",
+  "options": [
+   "Je présente les gens par leur avis le plus tranché sur un sujet inoffensif.",
+   "Je lance « Qui veut m’aider en cuisine ? » et je répartis les équipes.",
+   "Je demande qui a fait le trajet le plus bizarre pour venir jusqu’ici."
+  ]
+ },
+ {
+  "id": 1162,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "À table, ton partenaire raconte la fois où vous avez gardé le chien de vos amis. Un détail devait rester entre vous. Tu fais quoi ?",
+  "options": [
+   "Je reprends le récit juste à temps pour faire une petite ellipse.",
+   "Je fais notre signe sous la table. On a répété ce genre de situation.",
+   "Je révèle le détail moi-même. Au moins, ma version entrera dans la légende."
+  ]
+ },
+ {
+  "id": 1163,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "En soirée, tu croises un ex dont tu n’as jamais parlé à ton partenaire. Comment tu fais les présentations ?",
+  "options": [
+   "Je donne les prénoms et je garde le contexte pour le retour.",
+   "Je précise tout de suite qu’on a été en couple. En une phrase.",
+   "Je laisse la conversation démarrer. L’info entrera si elle trouve sa place."
+  ]
+ },
+ {
+  "id": 1164,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire propose une soirée avec le groupe devant lequel tu te sens toujours un peu de trop. Tu dis quoi ?",
+  "options": [
+   "Je dis oui et je réserve une place à côté de mon partenaire. Par écrit, si besoin.",
+   "Je propose la version mini du groupe. Une ou deux personnes pour commencer.",
+   "J’avoue que je me sens en trop. Ce soir, j’ai envie d’une table pour deux."
+  ]
+ },
+ {
+  "id": 1165,
+  "theme": "goingOut",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "À un anniversaire, tout le monde félicite ton partenaire pour le mot dans la carte. C’est toi qui l’as écrit. Tu fais quoi ?",
+  "options": [
+   "Je réclame mon crédit. Avec la voix des gens qui reçoivent un prix.",
+   "Je laisse couler et je glisse à mon partenaire « Tu écris la prochaine. »",
+   "Je réclame une deuxième part de gâteau. Ce sont mes droits d’auteur."
+  ]
+ },
+ {
+  "id": 1166,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vous descendez du train un arrêt trop tôt. Le suivant est dans une heure. Tu proposes quoi ?",
+  "options": [
+   "Je propose un café. On dira que c’était une escale gastronomique.",
+   "Je regarde si on peut finir à pied. Oui, même avec les valises.",
+   "Je cherche un bus. J’aimerais qu’on se trompe de mode de transport, pour varier."
+  ]
+ },
+ {
+  "id": 1167,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "La chambre d’hôtel annonce « vue dégagée ». Tu ouvres les rideaux et tu vois un mur. Tu fais quoi ?",
+  "options": [
+   "Je descends à la réception avec la photo de l’annonce déjà ouverte.",
+   "J’envoie une photo du mur à nos amis avec « Franchement, ça ressource. »",
+   "Je referme les rideaux et je teste ce qui compte maintenant. La pression de la douche."
+  ]
+ },
+ {
+  "id": 1168,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vous aviez prévu la plage, et il pleut déjà à 9 h. Quel plan de vacances tu proposes en premier ?",
+  "options": [
+   "Je réserve le premier musée qui a l’air bien. Même celui de la sardine.",
+   "Je propose un petit-déj qui s’étire jusqu’à l’heure du déjeuner.",
+   "Je cherche une plage à l’abri. Quitte à admirer la mer depuis la voiture."
+  ]
+ },
+ {
+  "id": 1169,
+  "theme": "travel",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Dernier jour de vacances. Il reste un tout petit coin dans la valise. Tu le gardes pour quoi ?",
+  "options": [
+   "Je rapporte un truc à manger. Le souvenir sera bref et délicieux.",
+   "Je prends un aimant un peu moche. Il aura sa place au frigo.",
+   "Je garde la place libre. Je me connais, j’ai encore un aéroport à traverser."
+  ]
+ },
+ {
+  "id": 1170,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vous avez six heures pour découvrir une ville que vous ne connaissez pas. Tu veux commencer par quoi ?",
+  "options": [
+   "Je flâne. Si je passe deux fois devant la même boulangerie, tant mieux.",
+   "Je réserve la grande visite. Après, tout le reste est du bonus.",
+   "Je demande un bon plan à quelqu’un du coin et j’en fais notre itinéraire."
+  ]
+ },
+ {
+  "id": 1171,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Votre hôtel a deux lits simples bien séparés. Ton partenaire te demande s’il faut les rapprocher. Tu réponds quoi ?",
+  "options": [
+   "Je propose de coller les lits. On pourra quand même négocier deux couettes.",
+   "Je garde mon lit. Je veux dormir en étoile au moins une nuit.",
+   "Je propose de se blottir dans un lit avant de retourner dans nos lits respectifs."
+  ]
+ },
+ {
+  "id": 1172,
+  "theme": "travel",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Pour un week-end à deux, tu dois mettre une seule paire de chaussures dans le sac. Laquelle tu prends ?",
+  "options": [
+   "Je prends mes vieilles baskets. Mes pieds ne sont pas en vacances.",
+   "Je prends ma jolie paire. Sinon, je vais la regretter au resto.",
+   "Je prends des chaussures de marche. Une balade peut vite devenir une rando."
+  ]
+ },
+ {
+  "id": 1173,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Après trois jours de vacances où vous faites tout ensemble, tu rêves d’une heure en solo. Comment tu le dis ?",
+  "options": [
+   "Je dis en toutes lettres que j’ai besoin d’une heure dans ma bulle.",
+   "Je propose qu’on se retrouve en terrasse après une balade en solo.",
+   "Je demande où mon partenaire irait en solo. J’ai déjà repéré mon coin."
+  ]
+ },
+ {
+  "id": 1174,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Vous préparez un nouveau voyage. Quel petit mensonge sur vos dernières vacances tu serais capable d’avouer ?",
+  "options": [
+   "J’avoue que j’avais vraiment le vertige sur la passerelle. Je regardais mes lacets.",
+   "J’avoue que j’ai oublié le nom du village que je dis avoir adoré.",
+   "J’avoue que j’ai relu le guide en cachette après mon « Fais-moi confiance »."
+  ]
+ },
+ {
+  "id": 1175,
+  "theme": "travel",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire rêve d’une rando de trois jours en refuge. Tu n’as jamais osé dire que ça t’angoisse. Tu proposes quoi ?",
+  "options": [
+   "Je propose une seule nuit pour commencer. En refuge, mais avec de vrais lits.",
+   "Je propose une rando test près de chez nous. Si je survis au sac à dos, on en reparle.",
+   "Je dis ce qui m’angoisse et je propose de dormir au même endroit. Avec une douche."
+  ]
+ },
+ {
+  "id": 1176,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vous commencez une série ensemble, mais ton partenaire s’endort au bout de dix minutes. Tu fais quoi ?",
+  "options": [
+   "Je mets sur pause. On reprendra au premier ronflement.",
+   "Je finis l’épisode et je fais un résumé avec des bruitages.",
+   "Je rembobine de deux minutes et je tente un « T’as vu ça ? »"
+  ]
+ },
+ {
+  "id": 1177,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vous arrivez au cinéma ensemble. Il ne reste que le tout premier rang. Tu proposes quoi ?",
+  "options": [
+   "Je prends les places. Depuis le temps que je voulais voir les pores de cet acteur.",
+   "Je propose la séance suivante. On aura le temps de finir le popcorn avant.",
+   "Je choisis un autre film. Pour une fois, on décide selon la vue."
+  ]
+ },
+ {
+  "id": 1178,
+  "theme": "hobbies",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Vous lancez un jeu vidéo à deux. Le tuto vous demande de sauter et vous ratez tous les deux. Tu fais quoi ?",
+  "options": [
+   "Je lis les commandes à voix haute. Le bouton a une réputation à défendre.",
+   "Je propose de sauter à trois. On rate peut-être juste le départ.",
+   "Je change de perso. Celui-là et moi, on n’a pas la même détente."
+  ]
+ },
+ {
+  "id": 1179,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Ton partenaire met dans votre playlist commune une chanson que tu zappes à chaque fois. Tu fais quoi ?",
+  "options": [
+   "Je la laisse. Elle sert de pause pipi quand on roule longtemps.",
+   "Je la descends tout en bas, là où l’aléatoire ne va jamais.",
+   "Je propose un échange. Une chanson que tu détestes contre celle-là."
+  ]
+ },
+ {
+  "id": 1180,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vous avez fait le cadre d’un puzzle de 1 000 pièces. Au milieu, il n’y a que du ciel bleu. Tu fais quoi ?",
+  "options": [
+   "Je trie le bleu en nuances. On en est à « piscine » et « piscine triste ».",
+   "Je tourne autour de la table. J’ai peut-être juste le mauvais angle.",
+   "Je propose de le laisser une semaine. Les pièces doivent mariner."
+  ]
+ },
+ {
+  "id": 1181,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Ton partenaire propose de t’apprendre son loisir préféré. Au bout de dix minutes, tu bloques. Tu demandes quoi ?",
+  "options": [
+   "Je demande une démo au ralenti, façon finale olympique.",
+   "Je demande à passer à l’étape drôle. On reviendra aux bases après.",
+   "Je demande cinq minutes en solo. Il me faut rater en paix."
+  ]
+ },
+ {
+  "id": 1182,
+  "theme": "hobbies",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Ton partenaire t’offre deux places pour voir ton groupe préféré, mais ne connaît aucun titre. Tu fais quoi ?",
+  "options": [
+   "Je fais une mini-playlist. Trois titres, aucun devoir maison.",
+   "Je garde la surprise. Je veux voir ce que donne le premier refrain en direct.",
+   "Je donne un seul conseil. Quand tout le monde lève les bras, tu suis."
+  ]
+ },
+ {
+  "id": 1183,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Après une défaite à votre jeu préféré, tu as pris le temps de t’entraîner en secret. Quand vient l’aveu ?",
+  "options": [
+   "Je le dis au moment de réclamer ma revanche. J’annonce la couleur.",
+   "Je l’avoue après ma première victoire. Il fallait bien que ça serve.",
+   "J’attends que tu remarques que je connais les règles par cœur."
+  ]
+ },
+ {
+  "id": 1184,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Tu as détesté le film que ton partenaire cite depuis le début de votre histoire. Comment tu le révèles ?",
+  "options": [
+   "Je le glisse à la prochaine citation. « Ah, c’est de CE film. »",
+   "Je propose de le revoir et je donne enfin mon vrai avis au générique.",
+   "Je négocie un échange. Tu me cites un film que tu as fait semblant d’aimer pour moi."
+  ]
+ },
+ {
+  "id": 1185,
+  "theme": "hobbies",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire veut reprendre un loisir que vous avez arrêté ensemble. Tu avais fêté la dernière séance. Tu dis quoi ?",
+  "options": [
+   "Je propose une séance d’essai. Le dernier cours m’a déjà servi de pot de départ.",
+   "Je propose d’y aller chacun à notre rythme. Le mien, pour l’instant, c’est zéro.",
+   "Je propose un nouveau loisir à deux. Je suis pour l’idée, juste pas pour le retour."
+  ]
+ },
+ {
+  "id": 1186,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Ton partenaire rentre après une journée pourrie, pose son sac et pousse un gros soupir. Tu fais quoi ?",
+  "options": [
+   "Je mets la bouilloire en route. Le débrief sera servi dans une tasse.",
+   "J’ouvre les bras. Le sac peut rester en plein milieu de l’entrée.",
+   "Je libère le canapé et je demande si on parle ou si on regarde des bêtises."
+  ]
+ },
+ {
+  "id": 1187,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Ton partenaire se colle à toi au lit avec les pieds glacés. Ta première réaction ?",
+  "options": [
+   "Je laisse faire. Je facture le chauffage en câlins.",
+   "Je remonte les genoux. Je t’aime très fort des chevilles vers le haut.",
+   "Je tends une paire de chaussettes. J’ai anticipé la saison froide."
+  ]
+ },
+ {
+  "id": 1188,
+  "theme": "loveIntimacy",
+  "difficulty": "easy",
+  "type": "choice",
+  "question": "Ton partenaire t’a laissé un petit mot doux avant de partir. Tu veux répondre à ta façon. Tu fais quoi ?",
+  "options": [
+   "Je glisse un mot dans ta chaussure. Le courrier se livre à domicile.",
+   "J’envoie une photo du mot à côté de mon café. Tu prends le petit-déj avec moi.",
+   "Je laisse un cœur sur le miroir. Tu le verras en te brossant les dents."
+  ]
+ },
+ {
+  "id": 1189,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vous êtes sur le point de vous embrasser et vous vous cognez le nez. Tu fais quoi juste après ?",
+  "options": [
+   "Je recule et j’annonce « prise deux ». On garde le bêtisier pour nous.",
+   "Je donne un bisou sur le nez. Première étape de la réparation.",
+   "Je fais une pause fou rire. Le bisou reprendra après l’entracte."
+  ]
+ },
+ {
+  "id": 1190,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vous retrouvez vos tout premiers messages en cherchant une ancienne photo. Tu veux relire quoi ?",
+  "options": [
+   "Je cherche le premier compliment. Je veux savoir si je l’avais vu venir.",
+   "Je retrouve le premier plan pour se voir. On a mis combien de jours, déjà ?",
+   "Je remonte à la première blague. Je veux voir si elle tient toujours debout."
+  ]
+ },
+ {
+  "id": 1191,
+  "theme": "loveIntimacy",
+  "difficulty": "medium",
+  "type": "choice",
+  "question": "Vous rentrez d’une super soirée à deux. Dans l’ascenseur, il reste trente secondes avant d’arriver. Tu fais quoi ?",
+  "options": [
+   "Je relance le refrain qu’on chantait en rentrant. Même sans les paroles.",
+   "Je fais un bisou avant que les sacs et les chaussures reprennent le dessus.",
+   "Je propose un selfie. La lumière d’ascenseur, c’est notre filtre à nous."
+  ]
+ },
+ {
+  "id": 1192,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Vous parlez de votre premier rendez-vous. Tu réalises qu’il y a un détail que tu n’as jamais avoué. Lequel ?",
+  "options": [
+   "J’avais répété mon « salut » plusieurs fois sur le chemin.",
+   "J’ai changé de tenue pour remettre exactement la première.",
+   "J’avais déjà repéré l’endroit où je proposerais un deuxième rendez-vous."
+  ]
+ },
+ {
+  "id": 1193,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire veut savoir quel compliment tu aimerais entendre plus souvent. Tu réponds quoi ?",
+  "options": [
+   "Je choisis « Tu me fais rire ». Même quand la blague a déjà quatre ans.",
+   "Je choisis « Je me sens bien avec toi ». Même au rayon lessive.",
+   "Je choisis « Tu me plais ». Surtout quand je suis en pyjama à 18 h."
+  ]
+ },
+ {
+  "id": 1194,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire découvre par hasard le petit surnom secret que tu as inventé. Tu réagis comment ?",
+  "options": [
+   "Je raconte l’origine. Ça commence par « Tu te souviens de ce croissant ? »",
+   "Je demande si j’ai aussi un surnom secret. À mon tour d’être au courant.",
+   "Je l’assume et je commence à l’utiliser à voix haute. Autant en profiter."
+  ]
+ },
+ {
+  "id": 1195,
+  "theme": "loveIntimacy",
+  "difficulty": "hard",
+  "type": "choice",
+  "question": "Ton partenaire te demande quand tu as eu envie d’un bisou sans oser le dire. Quel moment tu cites ?",
+  "options": [
+   "Je cite ce soir où on a parlé vingt minutes de plus sur le pas de la porte.",
+   "Je cite un fou rire en cuisine, quand le dîner a commencé à brûler.",
+   "Je cite un trajet où tu as dormi contre mon épaule avant le dernier arrêt."
+  ]
  }
 ]

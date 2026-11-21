@@ -3,9 +3,10 @@ import { useT } from '@/shared/i18n';
 import { PixelPanel, PixelButton, Chip, ProgressDots, Field } from '@/shared/Chrome';
 import { normalizeText, SECRET_MAX } from '@/shared/game';
 import type { TScreenProps } from '../application/game';
-import { questionText, segmentLength } from '../domain/machine';
+import { cardOf, questionText, segmentLength } from '../domain/machine';
 import { ActorBadge } from './ActorBadge';
 import { closedChoices } from './answerLabel';
+import { ChoiceList } from './ChoiceList';
 import { ClosedAnswers } from './ClosedAnswers';
 import '../flash.css';
 
@@ -13,7 +14,8 @@ import '../flash.css';
 export const SecretAnswers: FC<TScreenProps<'secret'>> = ({ game, question, dispatch }) => {
   const t = useT();
   const [text, setText] = useState('');
-  const choices = closedChoices(game, t);
+  const choices = closedChoices(game, t, question);
+  const isChoice = cardOf(game)?.type === 'choice';
   // What the machine will store (it normalises again): blank or invisible-only text can't lock.
   const typed = normalizeText(text, SECRET_MAX);
   const handleLock = (value: string) => dispatch({ type: 'answer', value });
@@ -29,11 +31,13 @@ export const SecretAnswers: FC<TScreenProps<'secret'>> = ({ game, question, disp
         <Chip>{t('flash.side.chip.answerers')}</Chip>
         <ProgressDots total={segmentLength(game.ctx)} current={game.step.q} />
       </div>
-      <PixelPanel className="cb-flash-card cb-flash-card--player">
+      <PixelPanel className={`cb-flash-card cb-flash-card--player${isChoice ? ' cb-flash-card--choice' : ''}`}>
         <ActorBadge game={game} variant="card" />
         <p className="cb-question">{questionText(question, 'you') || '—'}</p>
       </PixelPanel>
-      {choices ? (
+      {choices && isChoice ? (
+        <ChoiceList mode="pick" choices={choices} sfx="sfx.lock" onPick={handleLock} />
+      ) : choices ? (
         <ClosedAnswers choices={choices} sfx="sfx.lock" onPick={handleLock} />
       ) : (
         <>
