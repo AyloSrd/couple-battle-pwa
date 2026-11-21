@@ -55,9 +55,13 @@ export const ChoiceList: FC<TPick | TResult> = (props) => {
           <div key={token} className={classes} data-token={token} role="listitem" aria-label={said.join(', ')}>
             <span className="cb-choice__letter">{choiceLetter(index)}</span>
             <span className="cb-choice__text">{label}</span>
-            {names.map((name) => (
-              <span key={name} className="cb-choice__tag">{name}</span>
-            ))}
+            {names.length > 0 && (
+              <span className="cb-choice__tags">
+                {names.map((name) => (
+                  <span key={name} className="cb-choice__tag">{name}</span>
+                ))}
+              </span>
+            )}
           </div>
         );
       })}
