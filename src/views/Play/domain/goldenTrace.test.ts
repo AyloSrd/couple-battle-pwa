@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ZGameSchema, isGameConsistent, newGame, type TGame } from '@/shared/game/domain/game';
-import { GOLDEN_CASES, goldenRoster, runTrace, type TAction, type TNormStep } from '@/test/goldenTrace';
+import { CHOICE_CASES, GOLDEN_CASES, goldenRoster, runTrace, type TAction, type TNormStep } from '@/test/goldenTrace';
 import golden from './goldenTraces.json';
 import { cardOf, reduce } from './machine';
 
@@ -8,7 +8,9 @@ import { cardOf, reduce } from './machine';
  * Regression net for the machine redesign: `goldenTraces.json` was recorded from the
  * pre-refactor machine (17 states, 10 events) with the scripted policy in `@/test/goldenTrace`.
  * The new reducer must show the same screens, cursors, cards, secrets, scores and history.
- * The recording is data: never re-record it from the new machine.
+ * The recording is data: never re-record it from the new machine. (The three `CHOICE_CASES` entries are new in P14: no legacy machine
+ * had a choice card; their lines were generated once by the iPhone app's machine, which this reducer is identical to, checked line by
+ * line against the policy and the scoring rule, then pinned.)
  */
 
 function observe(game: TGame): TNormStep {
@@ -38,13 +40,14 @@ function act(game: TGame, action: TAction): TGame {
 }
 
 const recorded = golden as Record<string, string[]>;
+const ALL_CASES = [...GOLDEN_CASES, ...CHOICE_CASES];
 
 describe('golden traces — the new machine replays the legacy recording', () => {
   it('covers every recorded case', () => {
-    expect(Object.keys(recorded).sort()).toEqual(GOLDEN_CASES.map((c) => c.name).sort());
+    expect(Object.keys(recorded).sort()).toEqual(ALL_CASES.map((c) => c.name).sort());
   });
 
-  it.each(GOLDEN_CASES.map((c) => [c.name, c] as const))('%s', (name, c) => {
+  it.each(ALL_CASES.map((c) => [c.name, c] as const))('%s', (name, c) => {
     const start = newGame({ roster: goldenRoster(c.couples), mode: c.mode, difficulty: 'mix', themes: [], deck: c.deck });
     expect(runTrace(start, observe, act)).toEqual(recorded[name]);
   });
