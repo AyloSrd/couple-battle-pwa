@@ -362,6 +362,12 @@ export function stackInto(inventory: TInventory, itemId: string, qty: number): T
 }
 ```
 
+The question bank is a discriminated union on `type` (`z.discriminatedUnion`, zod 4): the four classic types carry `you` + `name`;
+`choice` carries one `question` and a 3-tuple `options` (answers stored as the tokens `c0` | `c1` | `c2`). Narrow by `type` before
+reading `you` / `name` / `options`. Deck rule: Flash, and Ultime's Flash block, draw exactly `CHOICE_PER_FLASH_BLOCK` (1) choice
+card among the block's four (`drawFlashBlock`, random slot); no choice left means all classic, a short classic pool still means a
+short deck. Dilemma and rapid-fire never draw `choice`.
+
 Would this make sense without a screen (combat sim, CLI)? → domain. Exists only because of a widget? → `components/<Name>/useX.ts`.
 
 ### `api/` — port + local adapters (no server)

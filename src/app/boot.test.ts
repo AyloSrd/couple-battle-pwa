@@ -4,6 +4,7 @@ import { createMemoryStorage, createSaveMemoryApi } from '@/shared/save/api/memo
 import { createSaveLocalStorageApi } from '@/shared/save/api/localStorage';
 import { defaultProfile } from '@/shared/save';
 import { createQuestionsMemoryApi } from '@/shared/questions/api/memory';
+import { createQuestionsJsonApi } from '@/shared/questions/api/json';
 import { seedStorage, expectSynced } from '@/test/expectSynced';
 import { fakeIdb } from '@/test/fakeIdb';
 import { boot } from './boot';
@@ -23,7 +24,9 @@ describe('createContainer', () => {
 
   it('serves the real JSON catalog (the catalog is always JSON)', () => {
     const c = createContainer('memory');
-    expect(c.questionsApi.list({ lang: 'fr' })).toHaveLength(1135);
+    const bundled = createQuestionsJsonApi().list({ lang: 'fr' }); // the FR file itself: no count written here
+    expect(bundled.length).toBeGreaterThan(0);
+    expect(c.questionsApi.list({ lang: 'fr' })).toEqual(bundled);
     const whoOfTwo = c.questionsApi.list({ lang: 'fr', types: ['who_of_two'] });
     expect(whoOfTwo.length).toBeGreaterThan(0);
     expect(whoOfTwo.every((q) => q.type === 'who_of_two')).toBe(true);

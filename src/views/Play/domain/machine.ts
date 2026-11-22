@@ -121,6 +121,7 @@ export type TAddressee = 'you' | 'name';
 /** Render a question for a screen role (same interpolation as the string templates). */
 export function questionText(question: TQuestion | undefined, addressee: TAddressee, answererName = ''): string {
   if (!question) return '';
+  if (question.type === 'choice') return question.question;
   if (addressee === 'you') return question.you;
   return interpolate(question.name, { name: answererName });
 }

@@ -10,7 +10,7 @@ import { expectSynced } from '@/test/expectSynced';
 import { PlayView } from './index';
 
 const solo: TRoster = [{ teamId: 't1', avatarId: 'otters', players: ['Ana', 'Bo'] }];
-const q = (id: number, type: TQuestion['type'], you: string): TQuestion => ({ id, theme: 'childhood', difficulty: 'easy', type, you, name: `${you} {name}` });
+const q = (id: number, type: Exclude<TQuestion['type'], 'choice'>, you: string): TQuestion => ({ id, theme: 'childhood', difficulty: 'easy', type, you, name: `${you} {name}` });
 
 function mountPlay(mode: TMode, deck: TQuestion[], app: TTestApp = createTestApp({ questions: deck })) {
   if (!app.store.get().game) app.store.startGame(newGame({ roster: solo, mode, difficulty: 'mix', themes: [], deck }));

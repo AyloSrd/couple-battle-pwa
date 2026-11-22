@@ -1,5 +1,5 @@
 import type { TRoster } from '@/shared/game/domain/types';
-import { newGame, type TStep, type TStepKind } from '@/shared/game/domain/game';
+import { answerKey, newGame, type TStep, type TStepKind } from '@/shared/game/domain/game';
 import type { TQuestion } from '@/shared/questions/domain/types';
 import { cardOf, type TGameAt } from '@/views/Play/domain/machine';
 
@@ -48,4 +48,37 @@ export function gameAt<K extends TStepKind>(kind: K, at: TAt = {}): TGameAt<K> {
 export function questionFor(game: Parameters<typeof cardOf>[0], bank: readonly TQuestion[] = testQuestions): TQuestion | undefined {
   const card = cardOf(game);
   return card ? bank.find((q) => q.id === card.id) : undefined;
+}
+
+/** A choice question (P14): one `question`, three `options`; the same words for the answerer and the guesser. */
+export const choiceQuestion = (id = 1): Extract<TQuestion, { type: 'choice' }> => ({
+  id,
+  theme: 'homeDaily',
+  difficulty: 'easy',
+  type: 'choice',
+  question: `Card ${id} question`,
+  options: [`Card ${id} option zero`, `Card ${id} option one is long enough that it has to wrap over several lines`, `Card ${id} option two`],
+});
+
+/** A classic question of `type` with id 1 (`you` / `name` as the other screen tests write them). */
+export const classicQuestion = (type: 'open' | 'this_or_that' | 'yes_no' | 'who_of_two'): TQuestion => ({
+  id: 1,
+  theme: 'childhood',
+  difficulty: 'easy',
+  type,
+  you: 'Q?',
+  name: 'Q de {name}?',
+});
+
+/**
+ * The game at a `secret` or `guess` step (Flash round 0, couple 0: Ana answers, Bo guesses) whose shown card, id 1, has the given
+ * `type`. For a guess, `truth` is the answerer's locked answer (a token, or text).
+ */
+export function gameWithCard<K extends 'secret' | 'guess'>(kind: K, type: TQuestion['type'], truth?: string): TGameAt<K> {
+  const base = gameAt(kind);
+  const secrets = truth === undefined ? {} : { [answerKey('t1', 1)]: truth };
+  return {
+    ctx: { ...base.ctx, deck: [{ id: 1, type }] },
+    step: kind === 'guess' ? { ...base.step, secrets } : base.step,
+  } as TGameAt<K>;
 }
