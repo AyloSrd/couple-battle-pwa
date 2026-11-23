@@ -105,7 +105,7 @@ export const en = {
   "judge.exact": "NAILED IT! +2",
   "judge.miss": "Missed! 0",
   "judge.title": "Crowd verdict?",
-  "legal.body": "Couple Battle™ is a game under development. Trademark and concept belong to its creators. Contact: aylo.srd@gmail.com. This site collects no personal data: everything stays in your browser.",
+  "legal.body": "Couple Battle™ is a game under development. Trademark and concept belong to its creators. Contact: support.couple.battle@gmail.com. This site collects no personal data: everything stays in your browser.",
   "legal.title": "Legal notice",
   "mode.dilemma.desc": "3, 2, 1… point! Same answer = point.",
   "mode.dilemma.dur": "~15 min",
