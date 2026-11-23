@@ -2,7 +2,7 @@
 
 You are building **Couple Battle**: a mobile-first, offline-capable **PWA party game** where 1–4
 couples pass ONE phone around and compete to prove who knows their partner best. French is the
-primary language, English and Spanish secondary. It ships as a static site on **GitHub Pages**. Frontend only —
+primary language, English, Spanish and Italian secondary. It ships as a static site on **GitHub Pages**. Frontend only —
 no server, no accounts, no analytics. It is a gift project: quality bar is "feels like a real game",
 not "enterprise product".
 
@@ -124,5 +124,5 @@ Home, P2 sounds and charm animations (`anim.peek`, confetti), reduced-motion pas
 - Every domain rule and machine transition gets a co-located test, per ARCHITECTURE.md.
 - If the spec and reality conflict (an API changed, a rule is ambiguous), say so and propose —
   do not silently improvise.
-- Definition of done for any UI work: works one-handed on a 360-px-wide phone, in FR, EN and ES,
+- Definition of done for any UI work: works one-handed on a 360-px-wide phone, in FR, EN, ES and IT,
   with sound on and off.

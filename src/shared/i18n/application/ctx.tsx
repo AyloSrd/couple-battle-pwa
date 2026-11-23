@@ -2,10 +2,11 @@ import { createContext, useContext, useEffect, type FC, type PropsWithChildren }
 import { fr } from '@/data/strings.fr';
 import { en } from '@/data/strings.en';
 import { es } from '@/data/strings.es';
+import { it } from '@/data/strings.it';
 import { interpolate } from '../domain/services';
 import { Lang, type TLang, type TStringKey, type TStringVars } from '../domain/types';
 
-const DICTS: Record<TLang, Record<TStringKey, string>> = { fr, en, es };
+const DICTS: Record<TLang, Record<TStringKey, string>> = { fr, en, es, it };
 
 type TLangContext = { lang: TLang };
 

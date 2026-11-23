@@ -1,8 +1,9 @@
 import { fr } from '@/data/strings.fr';
 import { en } from '@/data/strings.en';
 import { es } from '@/data/strings.es';
+import { it } from '@/data/strings.it';
 
-const DICTS = { fr, en, es } as const;
+const DICTS = { fr, en, es, it } as const;
 
 /** Crash copy from the browser languages (FR fallback): no provider, no settings — it must work
  *  when nothing else does. */
