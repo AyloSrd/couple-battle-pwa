@@ -7,7 +7,7 @@ import { it as italian } from './strings.it';
  * P15 (web): the Italian UI strings (`strings.it.ts`, exported as `it` like `fr` / `en` / `es`). The text is the iPhone app's
  * `strings.it.ts` (main, 7f0955a) with exactly two differences, both pinned here:
  *  - the app has a key the web does not (`common.step`): the web file has the key set of the web FR file, so it is left out;
- *  - `legal.body` follows the web's own legal rules (a "sito" in a "browser", the owner's own address; see `strings.legal.test.ts`).
+ *  - `legal.body` follows the web's own legal rules (a "sito" in a "browser", the public support address; see `strings.legal.test.ts`).
  * Every other value is pinned by one hash (`SHARED_SHA256`), so a hand edit of the translation fails here and the file stays a copy.
  */
 
@@ -18,8 +18,8 @@ const slots = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort().join();
 /** sha-256 of `JSON.stringify` of the [key, value] entries, keys sorted, WITHOUT `common.step` and `legal.body` (250 entries): the app's text. */
 const SHARED_SHA256 = '18fc688235f4fc2f352107b91a7b087c1d0ee2e46ff723846ffeb789e268b898';
 const SHARED_COUNT = 250;
-const CONTACT = 'aylo.srd' + '@gmail.com';
-/** The app's legal text with its three differences applied, the same ones as in fr / en / es: the owner's address, "sito" for "app", "browser" for "iPhone". */
+const CONTACT = 'support.couple.battle' + '@gmail.com';
+/** The app's legal text with its three differences applied, the same ones as in fr / en / es: the support address, "sito" for "app", "browser" for "iPhone". */
 const LEGAL_BODY =
   'Couple Battle™ è un gioco in fase di sviluppo. Marchio e concept depositati dai suoi creatori. Contatto: ' + CONTACT + '. Questo sito non raccoglie nessun dato personale: tutto resta nel tuo browser.';
 
@@ -105,7 +105,7 @@ describe('strings.it.ts: not French', () => {
 });
 
 describe('strings.it.ts: legal.body (the web\'s own rules)', () => {
-  it('is exactly the app text with the web differences: the owner\'s address, "sito", "browser"', () => {
+  it('is exactly the app text with the web differences: the support address, "sito", "browser"', () => {
     expect(dict['legal.body']).toBe(LEGAL_BODY);
   });
 
@@ -121,7 +121,6 @@ describe('strings.it.ts: legal.body (the web\'s own rules)', () => {
     expect(body).toMatch(/nessun dato/i);
     expect(body).not.toMatch(/iphone/i);
     expect(body).not.toMatch(/\bapp\b|applicazione/i);
-    expect(body).not.toContain('support.couple.battle');
   });
 
   it('is not the French text', () => {

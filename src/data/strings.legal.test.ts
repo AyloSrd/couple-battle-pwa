@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { fr } from './strings.fr';
 import { en } from './strings.en';
@@ -5,12 +7,10 @@ import { es } from './strings.es';
 import { it as italian } from './strings.it';
 
 /**
- * The web's legal screen copy, in every language (P15 adds Italian). The web is a SITE that keeps its data in the player's BROWSER and gives the
- * owner's own address; the iPhone app says "app", "iPhone" and a dedicated support address instead. The rules are the same in each language.
+ * The web's legal screen copy, in every language (P15 adds Italian). The web is a SITE that keeps its data in the player's BROWSER; the iPhone app says "app", "iPhone". Both give the same public support address. The rules are the same in each language.
  */
 
-const CONTACT = 'aylo.srd' + '@gmail.com';
-const APP_CONTACT = 'support.couple.battle' + '@gmail.com';
+const CONTACT = 'support.couple.battle' + '@gmail.com';
 const EMAIL_LIKE = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
 
 const dicts = { fr, en, es, it: italian } as const;
@@ -32,9 +32,8 @@ describe('legal.body, on the web', () => {
     expect(codes).toEqual(['fr', 'en', 'es', 'it']);
   });
 
-  it.each(codes)('%s: gives the owner\'s own address, and no other', (code) => {
+  it.each(codes)('%s: gives the public support address, and no other', (code) => {
     expect(body(code).match(EMAIL_LIKE)).toEqual([CONTACT]);
-    expect(body(code)).not.toContain(APP_CONTACT);
   });
 
   it.each(codes)('%s: speaks of a site and a browser', (code) => {
@@ -48,5 +47,22 @@ describe('legal.body, on the web', () => {
   it.each(codes)('%s: never speaks of an app or an iPhone, and keeps the trademark sentence', (code) => {
     expect(body(code)).not.toMatch(NOT_THE_APP);
     expect(body(code)).toContain('Couple Battle™');
+  });
+});
+
+describe('no personal address in src/', () => {
+  const files = (dir: string): string[] =>
+    readdirSync(dir).flatMap((name) => {
+      const path = join(dir, name);
+      return statSync(path).isDirectory() ? files(path) : [path];
+    });
+  const GMAIL = /[\w.+-]+@gmail\.com/gi;
+
+  it('no file under src/ holds a gmail address other than the support address', () => {
+    const offenders = files('src').flatMap((path) => {
+      const found = (readFileSync(path, 'utf8').match(GMAIL) ?? []).filter((a) => a.toLowerCase() !== CONTACT);
+      return found.length ? [path] : [];
+    });
+    expect(offenders).toEqual([]);
   });
 });
