@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Lang } from '@/shared/i18n/domain/types';
+import { Lang, LANGS, type TLang } from '@/shared/i18n/domain/types';
 import type { TGame } from '@/shared/game/domain/game';
 
 /**
@@ -13,7 +13,7 @@ const lenient = <S extends z.ZodRawShape>(shape: S) => z.object(shape).catch(() 
 
 /** `vibration` (haptics on the countdown) was added after launch: a save without it reads as on. */
 export const ZSettingsSchema = lenient({
-  lang: z.enum([Lang.Fr, Lang.En, Lang.Es]).catch(Lang.Fr),
+  lang: z.enum(LANGS as [TLang, ...TLang[]]).catch(Lang.Fr),
   sound: z.boolean().catch(true),
   vibration: z.boolean().catch(true),
 });

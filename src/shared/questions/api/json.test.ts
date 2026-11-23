@@ -2,27 +2,37 @@ import { describe, expect, it } from 'vitest';
 import questionsFr from '@/data/questions.fr.json';
 import questionsEn from '@/data/questions.en.json';
 import questionsEs from '@/data/questions.es.json';
+import questionsIt from '@/data/questions.it.json';
 import { bankProblems, CHOICE_OPTION_MAX, CHOICE_QUESTION_MAX } from '@/test/bankRules';
 import type { TQuestion } from '../domain/types';
 import { createQuestionsJsonApi } from './json';
 
 const fr = questionsFr as TQuestion[];
-const others = { en: questionsEn as TQuestion[], es: questionsEs as TQuestion[] };
+const others = { en: questionsEn as TQuestion[], es: questionsEs as TQuestion[], it: questionsIt as TQuestion[] };
 const all = { fr, ...others };
 
 describe('bundled question catalogs', () => {
   it('parse through the adapter for every language', () => {
     const api = createQuestionsJsonApi();
-    for (const lang of ['fr', 'en', 'es'] as const) {
+    for (const lang of ['fr', 'en', 'es', 'it'] as const) {
       expect(api.list({ lang })).toHaveLength(fr.length);
     }
   });
 
   it('parses a language on first use only: an unused language is never read', () => {
-    const api = createQuestionsJsonApi({ fr, en: 'not a bank', es: null });
+    const api = createQuestionsJsonApi({ fr, en: 'not a bank', es: null, it: 7 });
     expect(api.list({ lang: 'fr' })).toHaveLength(fr.length);
     expect(api.list({ lang: 'fr' })).toEqual(api.list({ lang: 'fr' }));
     expect(() => api.list({ lang: 'en' })).toThrow(); // read, and rejected, only when asked for
+    expect(() => api.list({ lang: 'it' })).toThrow(); // Italian is a language of the loader like the others
+  });
+
+  it('serve the Italian bank as its own file: 1195 rows, the ids of FR, Italian text', () => {
+    const italian = createQuestionsJsonApi().list({ lang: 'it' });
+    expect(italian).toHaveLength(1195);
+    expect(italian.map((q) => q.id)).toEqual(fr.map((q) => q.id));
+    expect(italian).toEqual(questionsIt);
+    expect(italian).not.toEqual(createQuestionsJsonApi().list({ lang: 'fr' }));
   });
 
   it('have unique ids', () => {
@@ -63,12 +73,12 @@ describe('the bank rules, proven on a fixture with choice rows', () => {
 
   it('a sound bank, the same in every language, has no problem (limits included: 140 and 100 pass)', () => {
     const edge = [...classic, choice(3, { question: 'q'.repeat(140), options: ['o'.repeat(100), 'B', 'C'] })];
-    expect(bankProblems({ fr: edge, en: edge, es: edge })).toEqual([]);
-    expect(bankProblems({ fr: good, en: good, es: good })).toEqual([]);
+    expect(bankProblems({ fr: edge, en: edge, es: edge, it: edge })).toEqual([]);
+    expect(bankProblems({ fr: good, en: good, es: good, it: good })).toEqual([]);
   });
 
   it('the schema accepts the good rows and serves them through the JSON adapter', () => {
-    const api = createQuestionsJsonApi({ fr: good, en: good, es: good });
+    const api = createQuestionsJsonApi({ fr: good, en: good, es: good, it: good });
     expect(api.list({ lang: 'fr', types: ['choice'] }).map((q) => q.id)).toEqual([3, 4]);
   });
 
@@ -84,7 +94,7 @@ describe('the bank rules, proven on a fixture with choice rows', () => {
   it('flags an option count that is not 3 (the schema refuses such a row too)', () => {
     const two = choice(3, { options: ['A', 'B'] as unknown as [string, string, string] });
     expect(bankProblems({ fr: [...classic, two] })).toEqual(['fr #3: not 3 options']);
-    expect(() => createQuestionsJsonApi({ fr: [two], en: [], es: [] }).list({ lang: 'fr' })).toThrow();
+    expect(() => createQuestionsJsonApi({ fr: [two], en: [], es: [], it: [] }).list({ lang: 'fr' })).toThrow();
   });
 
   it('flags a language whose ids, order, theme, difficulty, type or option count differ from FR', () => {

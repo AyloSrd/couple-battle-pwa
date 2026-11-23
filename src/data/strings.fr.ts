@@ -105,7 +105,7 @@ export const fr = {
   "judge.exact": "EXACT ! +2",
   "judge.miss": "Raté ! 0",
   "judge.title": "Verdict du public ?",
-  "legal.body": "Couple Battle™ est un jeu en cours de développement. Marque et concept déposés par ses créateurs. Contact : aylo.srd@gmail.com. Ce site ne collecte aucune donnée personnelle : tout reste dans ton navigateur.",
+  "legal.body": "Couple Battle™ est un jeu en cours de développement. Marque et concept déposés par ses créateurs. Contact : support.couple.battle@gmail.com. Ce site ne collecte aucune donnée personnelle : tout reste dans ton navigateur.",
   "legal.title": "Mentions légales",
   "mode.dilemma.desc": "3, 2, 1… pointez ! Même réponse = point.",
   "mode.dilemma.dur": "~15 min",

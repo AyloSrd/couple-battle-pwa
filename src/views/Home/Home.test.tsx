@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { en } from '@/data/strings.en';
+import { it as italian } from '@/data/strings.it';
 import { newGame } from '@/shared/game';
 import { createSaveStore } from '@/shared/save';
 import { createSaveMemoryApi } from '@/shared/save/api/memory';
@@ -97,5 +98,27 @@ describe('HomeView — saved game', () => {
     });
     expect(screen.queryByRole('status')).toBeNull();
     expect(store.get().issues).toEqual([]);
+  });
+});
+
+describe('HomeView — language menu', () => {
+  beforeEach(() => {
+    vi.stubGlobal('matchMedia', (query: string) => ({ matches: false, media: query }));
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('lists four languages in LANGS order (Français, English, Español, Italiano); picking Italiano turns Home Italian and saves it', () => {
+    const app = mount();
+    fireEvent.click(screen.getByRole('button', { name: en['settings.language'] }));
+    expect(screen.getAllByRole('button').filter((b) => b.closest('.cb-lang-menu')).map((b) => b.textContent)).toEqual(['Français', 'English', 'Español', 'Italiano']);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Italiano' }));
+    expect(screen.getByRole('button', { name: italian['settings.language'] })).toHaveTextContent('IT');
+    expect(screen.getByRole('button', { name: italian['home.play'] })).toBeInTheDocument();
+    expect(document.documentElement.lang).toBe('it');
+    expect(app.store.get().profile.settings.lang).toBe('it');
+    expectSynced(app.store, app.api);
   });
 });

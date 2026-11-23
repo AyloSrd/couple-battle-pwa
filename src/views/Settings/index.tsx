@@ -8,7 +8,7 @@ import './view.css';
 
 /** `toggle` makes the row a `<label>` so a tap anywhere on it reaches the one switch inside
  *  (a label forwards its click to its button; a tap on the switch itself is not forwarded twice). */
-const Row: FC<{ label: string; hint?: string; toggle?: boolean; children: ReactNode }> = ({ label, hint, toggle = false, children }) => {
+const Row: FC<{ label: string; hint?: string; toggle?: boolean; stack?: boolean; children: ReactNode }> = ({ label, hint, toggle = false, stack = false, children }) => {
   const body = (
     <>
       <div className="cb-v-row-text">
@@ -21,7 +21,7 @@ const Row: FC<{ label: string; hint?: string; toggle?: boolean; children: ReactN
   return toggle ? (
     <label className="cb-card cb-v-row cb-v-row--toggle">{body}</label>
   ) : (
-    <PixelPanel className="cb-v-row">{body}</PixelPanel>
+    <PixelPanel className={stack ? 'cb-v-row cb-v-row--stack' : 'cb-v-row'}>{body}</PixelPanel>
   );
 };
 
@@ -88,7 +88,7 @@ export const SettingsView: FC = () => {
       <h1 className="cb-title">{t('settings.title')}</h1>
 
       <div className="cb-v-list">
-        <Row label={t('settings.language')}>
+        <Row stack label={t('settings.language')}>
           <LanguagePicker variant="row" />
         </Row>
 

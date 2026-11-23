@@ -12,7 +12,7 @@
 /* ---------- setting row card ---------- */
 .cb-v-settings .cb-v-row {
   display: flex;
-  flex-wrap: wrap; /* three language pills drop under the label on a narrow phone */
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--cb-s3);
@@ -34,6 +34,17 @@
   gap: var(--cb-s2);
   flex: none;
   margin-left: auto;
+}
+
+/* language row: label on top, the four pills share one full-width line below */
+.cb-v-settings .cb-v-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+.cb-v-settings .cb-v-row--stack .cb-v-row-ctl {
+  flex: 1 1 auto;
+  margin-left: 0;
+  gap: var(--cb-s2);
 }
 
 /* ---------- big switch ---------- */
