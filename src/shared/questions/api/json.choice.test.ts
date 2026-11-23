@@ -16,20 +16,22 @@ import { createQuestionsJsonApi } from './json';
  *   - the loader serves them (schema), and the bank rules of round 1 (`bankProblems`) report nothing.
  */
 
-const LANGS = ['fr', 'en', 'es'] as const;
+const LANGS = ['fr', 'en', 'es', 'it'] as const;
 const BASE_ROWS = 1135;
 
-/** sha-256 of the canonical JSON of the first 1135 rows, at HEAD of round 1 (f889981). */
+/** sha-256 of the canonical JSON of the first 1135 rows, at HEAD of round 1 (f889981); `it`: the iPhone app's Italian file (7f0955a). */
 const BASE: Record<(typeof LANGS)[number], string> = {
   fr: 'c207bedd227fc0d9dccca5f6fd67de0ba64d206d6e79dd7e20dc578ebb25d380',
   en: '2c96deaab3fb7bdc21213719ed4c8416b72422a85fba8c799a4bb4d33543c086',
   es: '0afce96e51bb1e783448d136c7d4ff19007d7b030b6bb1db732033ee4678aec7',
+  it: '75d71994bb4792ee461318777fb15cb2e984457f927de1e07a5dbd707adf8f31',
 };
 /** sha-256 of the canonical JSON of the 60 delivered choice rows. */
 const CHOICE: Record<(typeof LANGS)[number], string> = {
   fr: '88a1a93bcfd5c199a13919dcc8ea62cd16234960526a9926c9e45327714742f8',
   en: '8a6544367f74af207b1435e178d031bf9e51d26be177e50380490e1b5ae7ba7b',
   es: 'f91f3edeadbce148c768662b218eb5a7846d8844062d9b810ea52bdc893bbb89',
+  it: '1c86ab739e7c3c78f28743e7c07834f1fc04d5259e5729a194731909c7700d18',
 };
 
 /** sha-256 of the BYTES of each file after the merge: the web's files are byte-identical to the iPhone app's (branch p14-choice-questions):
@@ -38,6 +40,7 @@ const FILE: Record<(typeof LANGS)[number], string> = {
   fr: 'e135bb2d7db6312089a4f9cb2be80fc12ae29462af4a36dd6b8066b442f25bbd',
   en: 'f33f1a8a0c403e3d1172629af9aa501002d5f7c4b5721f473f369b48e9694352',
   es: '82f3fb5ac8e03b8f816e67314ed5b883cc5114202e582ad34cbb41ef1374035e',
+  it: '252fbdf744ebb94ab64963a006aa037e95093ca79e4bf4afa1a9d384155f0a45',
 };
 /** `handoff/` holds the ORIGINAL 1,035-row FR and EN inputs (no ES) and is never edited (CLAUDE.md, BRIEF.md: `src/data` is the source of
  *  truth and has moved past it). These are the hashes they have today: the merge must leave them alone. */

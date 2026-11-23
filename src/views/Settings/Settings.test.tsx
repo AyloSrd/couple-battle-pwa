@@ -54,9 +54,10 @@ describe('SettingsView', () => {
     expectSynced(app.store, app.api);
   });
 
-  it('offers every language and switches the screen to the one picked (saved)', () => {
+  it('offers every language (four pills) and switches the screen to the one picked (saved)', () => {
     const app = mount();
     const spanish = screen.getByRole('button', { name: 'Español' });
+    expect(screen.getByRole('button', { name: 'Italiano' })).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Français' })).toHaveAttribute('aria-pressed', 'false');
 

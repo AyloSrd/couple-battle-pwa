@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { fr } from './strings.fr';
 import { en } from './strings.en';
 import { es } from './strings.es';
+import { it as italian } from './strings.it';
 
-const others = { en, es };
+const others = { en, es, it: italian };
 const slots = (s: string) => (s.match(/\{\w+\}/g) ?? []).sort().join();
 
 describe('UI string dictionaries', () => {

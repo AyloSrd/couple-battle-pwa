@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { FC } from 'react';
+import { it as italian } from '@/data/strings.it';
 import { LangProvider, useLang, useT } from './ctx';
 import type { TLang } from '../domain/types';
 
@@ -36,6 +37,12 @@ describe('useT / LangProvider', () => {
     expect(screen.getByTestId('lang')).toHaveTextContent('es');
     expect(screen.getByTestId('value')).toHaveTextContent('Sí');
     expect(document.documentElement.lang).toBe('es');
+
+    rerender(tree('it'));
+    expect(screen.getByTestId('lang')).toHaveTextContent('it');
+    expect(screen.getByTestId('value')).toHaveTextContent(italian['common.yes']);
+    expect(screen.getByTestId('interp')).toHaveTextContent('Domanda 2/5');
+    expect(document.documentElement.lang).toBe('it');
 
     rerender(tree('fr'));
     expect(screen.getByTestId('value')).toHaveTextContent('Oui');

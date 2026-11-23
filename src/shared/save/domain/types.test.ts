@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { LANGS } from '@/shared/i18n';
 import { SEEN_IDS_MAX, ZProfileSchema, ZSettingsSchema, defaultProfile } from './types';
 
 describe('ZSettingsSchema — per-field defaults', () => {
@@ -20,7 +21,18 @@ describe('ZSettingsSchema — per-field defaults', () => {
   });
 
   it('accepts every shipped language', () => {
-    for (const lang of ['fr', 'en', 'es']) expect(ZSettingsSchema.parse({ lang, sound: true }).lang).toBe(lang);
+    for (const lang of ['fr', 'en', 'es', 'it']) expect(ZSettingsSchema.parse({ lang, sound: true }).lang).toBe(lang);
+  });
+
+  it('accepts exactly the languages of LANGS (the schema is built from the list: fr, en, es, it), and an unknown one falls back to FR', () => {
+    expect([...LANGS]).toEqual(['fr', 'en', 'es', 'it']);
+    for (const lang of LANGS) expect(ZSettingsSchema.parse({ lang }).lang).toBe(lang);
+    for (const lang of ['de', 'IT', 'it-IT', '', null, 3, undefined]) expect(ZSettingsSchema.parse({ lang, sound: false }).lang).toBe('fr');
+  });
+
+  it('an Italian save keeps Italian and the other fields as they are', () => {
+    expect(ZSettingsSchema.parse({ lang: 'it', sound: false, vibration: false })).toEqual({ lang: 'it', sound: false, vibration: false });
+    expect(ZProfileSchema.parse({ settings: { lang: 'it' } }).settings.lang).toBe('it');
   });
 
   it('a corrupt lang or sound resets only that field (one bad field never costs the others)', () => {
