@@ -7,4 +7,9 @@ allowBuilds:
 
 minimumReleaseAge: 1440
 trustPolicy: no-downgrade
+# Trust downgrades only block versions published in the last 30 days (the usual
+# takeover window); older versions pass unchecked. Needed because semver@6.3.1 (Babel)
+# and workbox-build's off-main-thread fork lack attestations their newer lines have.
+# Owner's choice, 2026-11-23.
+trustPolicyIgnoreAfter: 43200
 blockExoticSubdeps: true
