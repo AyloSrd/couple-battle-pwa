@@ -2,6 +2,7 @@ export { PixelButton } from './PixelButton';
 export { PixelPanel } from './PixelPanel';
 export { ProgressDots } from './ProgressDots';
 export { Screen } from './Screen';
+export { Chevron } from './Chevron';
 export { Chip, ChipButton } from './Chip';
 export { AnswerButton } from './AnswerButton';
 export { Field } from './Field';

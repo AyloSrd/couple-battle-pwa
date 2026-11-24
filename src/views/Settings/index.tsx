@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useT } from '@/shared/i18n';
 import { selectSettings, useSave, useSaveStore } from '@/shared/save';
 import { useSound } from '@/shared/sound';
-import { Screen, PixelPanel, PixelButton, Sheet, TopBar, LanguagePicker } from '@/shared/Chrome';
+import { Screen, PixelPanel, PixelButton, Chevron, Sheet, TopBar, LanguagePicker } from '@/shared/Chrome';
 import './view.css';
 
 /** `toggle` makes the row a `<label>` so a tap anywhere on it reaches the one switch inside
@@ -30,12 +30,6 @@ const Switch: FC<{ label: string; checked: boolean; onToggle: () => void }> = ({
   <button type="button" role="switch" aria-checked={checked} aria-label={label} className="cb-v-switch" onClick={onToggle}>
     <span className="cb-v-switch-thumb" aria-hidden="true" />
   </button>
-);
-
-const Chevron: FC = () => (
-  <svg className="cb-v-chevron" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-    <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
 );
 
 export const SettingsView: FC = () => {

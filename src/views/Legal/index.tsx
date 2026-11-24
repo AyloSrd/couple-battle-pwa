@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { useT } from '@/shared/i18n';
-import { Screen, PixelPanel, Logo, TopBar } from '@/shared/Chrome';
+import { PRIVACY_URL } from '@/shared/legal';
+import { Screen, PixelPanel, Chevron, Logo, TopBar } from '@/shared/Chrome';
 import './view.css';
 
 export const LegalView: FC = () => {
@@ -14,6 +15,10 @@ export const LegalView: FC = () => {
       <PixelPanel className="cb-v-body">
         <p className="cb-body-lg">{t('legal.body')}</p>
       </PixelPanel>
+      <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" className="cb-mode cb-v-nav">
+        <span className="cb-label">{t('legal.privacy')}</span>
+        <Chevron />
+      </a>
     </Screen>
   );
 };
