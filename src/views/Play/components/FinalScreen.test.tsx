@@ -43,7 +43,7 @@ const noop = () => {};
 describe('FinalScreen — headline', () => {
   it('crowns a single winner', () => {
     mount(<FinalScreen game={finalState({ t1: 5, t2: 3, t3: 1 })} onRematch={noop} onNewGame={noop} />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Les Lions remportent la bataille');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Victoire pour Les Lions');
     expect(screen.queryByText(/Ex æquo/)).toBeNull();
   });
 
@@ -55,7 +55,7 @@ describe('FinalScreen — headline', () => {
     expect(h1).toHaveTextContent('Les Ours');
     expect(h1).not.toHaveTextContent('Les Chouettes');
     expect(screen.getByText(/4 pts/)).toBeInTheDocument();
-    expect(screen.queryByText(/remportent la bataille/)).toBeNull();
+    expect(screen.queryByText(/Victoire pour/)).toBeNull();
   });
 
   it('names all three teams on a 3-way tie (EN)', () => {

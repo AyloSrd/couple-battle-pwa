@@ -152,7 +152,7 @@ export const fr = {
   "results.stats.sync": "Synchro",
   "results.tie": "🤝 Ex æquo : {teams} !",
   "results.tie.sub": "Égalité parfaite à {score} pts — personne ne lâche.",
-  "results.winner": "👑 {team} remportent la bataille !",
+  "results.winner": "👑 Victoire pour {team} !",
   "results.winner.sub": "{name1} & {name2}, duo légendaire.",
   "save.failing": "Sauvegarde impossible, on réessaie…",
   "save.gameDiscarded": "Votre dernière partie n'a pas pu être restaurée.",

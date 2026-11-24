@@ -13,7 +13,7 @@ const teamNames = (lang: string) => Object.entries(dicts[lang] ?? {}).filter(([k
 
 describe('plural verbs after a team name', () => {
   it('pins the six sentences', () => {
-    expect(fr['results.winner']).toBe('👑 {team} remportent la bataille !');
+    expect(fr['results.winner']).toBe('👑 Victoire pour {team} !');
     expect(fr['score.leader']).toBe('{team} mènent la danse !');
     expect(en['results.winner']).toBe('👑 {team} win the battle!');
     expect(en['score.leader']).toBe('{team} lead the pack!');
