@@ -50,6 +50,43 @@ describe('legal.body, on the web', () => {
   });
 });
 
+const EXACT_BODY: Record<TCode, string> = {
+  fr: 'Couple Battle™ : marque et concept déposés par ses créateurs. Contact : ' + CONTACT + '. Ce site ne collecte aucune donnée personnelle : tout reste dans ton navigateur.',
+  en: 'Couple Battle™: trademark and concept belong to its creators. Contact: ' + CONTACT + '. This site collects no personal data: everything stays in your browser.',
+  es: 'Couple Battle™: marca y concepto registrados por sus creadores. Contacto: ' + CONTACT + '. Este sitio no recopila ningún dato personal: todo se queda en tu navegador.',
+  it: 'Couple Battle™: marchio e concept depositati dai suoi creatori. Contatto: ' + CONTACT + '. Questo sito non raccoglie nessun dato personale: tutto resta nel tuo browser.',
+};
+const IN_DEVELOPMENT: Record<TCode, RegExp> = { fr: /développement/i, en: /development/i, es: /desarrollo/i, it: /sviluppo/i };
+const PRIVACY_LABEL: Record<TCode, string> = {
+  fr: 'Politique de confidentialité',
+  en: 'Privacy policy',
+  es: 'Política de privacidad',
+  it: 'Informativa sulla privacy',
+};
+const privacy = (code: TCode) => (dicts[code] as Record<string, string>)['legal.privacy'];
+
+describe('legal.body, no longer "in development"', () => {
+  it.each(codes)('%s: does not say the game is in development', (code) => {
+    expect(body(code)).not.toMatch(IN_DEVELOPMENT[code]);
+  });
+
+  it.each(codes)('%s: is exactly the pinned text', (code) => {
+    expect(body(code)).toBe(EXACT_BODY[code]);
+  });
+});
+
+describe('legal.privacy (the link label)', () => {
+  it.each(codes)('%s: is exactly the pinned label', (code) => {
+    expect(privacy(code)).toBe(PRIVACY_LABEL[code]);
+  });
+
+  it('exists with the same key set in all four languages', () => {
+    const sets = codes.map((code) => Object.keys(dicts[code]).sort());
+    for (const keys of sets) expect(keys).toEqual(sets[0]);
+    expect(codes.filter((code) => !('legal.privacy' in dicts[code]))).toEqual([]);
+  });
+});
+
 describe('no personal address in src/', () => {
   const files = (dir: string): string[] =>
     readdirSync(dir).flatMap((name) => {

@@ -7,3 +7,21 @@
   font-weight: 500;
   overflow-wrap: anywhere;
 }
+
+/* ---------- Privacy policy row ---------- */
+/* Same look as the Settings list rows (Settings/view.css): that file only loads with the Settings route. */
+.cb-v-legal .cb-v-nav {
+  justify-content: space-between;
+  min-height: 62px;
+  padding: var(--cb-s3) var(--cb-s5);
+  box-shadow: var(--cb-e1);
+  text-decoration: none; /* the row is an <a> */
+}
+.cb-v-legal .cb-label {
+  font-size: 22px;
+  line-height: 26px;
+}
+.cb-v-legal .cb-v-chevron {
+  flex: none;
+  color: var(--cb-violet-600);
+}

@@ -15,13 +15,13 @@ const dict = italian as Record<string, string>;
 const frDict = fr as Record<string, string>;
 const slots = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort().join();
 
-/** sha-256 of `JSON.stringify` of the [key, value] entries, keys sorted, WITHOUT `common.step` and `legal.body` (250 entries): the app's text. */
-const SHARED_SHA256 = '18fc688235f4fc2f352107b91a7b087c1d0ee2e46ff723846ffeb789e268b898';
-const SHARED_COUNT = 250;
+/** sha-256 of `JSON.stringify` of the [key, value] entries, keys sorted, WITHOUT `common.step` and `legal.body` (251 entries, the new `legal.privacy` link label included): the app's text. */
+const SHARED_SHA256 = '66fe805865cc4e29e7988622607543b24ae456ef301804248651fec57c87f7b2';
+const SHARED_COUNT = 251;
 const CONTACT = 'support.couple.battle' + '@gmail.com';
 /** The app's legal text with its three differences applied, the same ones as in fr / en / es: the support address, "sito" for "app", "browser" for "iPhone". */
 const LEGAL_BODY =
-  'Couple Battle™ è un gioco in fase di sviluppo. Marchio e concept depositati dai suoi creatori. Contatto: ' + CONTACT + '. Questo sito non raccoglie nessun dato personale: tutto resta nel tuo browser.';
+  'Couple Battle™: marchio e concept depositati dai suoi creatori. Contatto: ' + CONTACT + '. Questo sito non raccoglie nessun dato personale: tutto resta nel tuo browser.';
 
 /**
  * Keys whose Italian value may equal the French one: the brand, mode and difficulty names (identical by design in fr / en / es),
@@ -84,7 +84,7 @@ describe('strings.it.ts: shape', () => {
 });
 
 describe('strings.it.ts: the iPhone app\'s text, copied', () => {
-  it('every value but `legal.body` is the app\'s (one hash over the 250 shared entries)', () => {
+  it('every value but `legal.body` is the app\'s (one hash over the 251 shared entries)', () => {
     const entries = Object.entries(dict).filter(([key]) => key !== 'common.step' && key !== 'legal.body').sort(([a], [b]) => (a < b ? -1 : 1));
     expect(entries).toHaveLength(SHARED_COUNT);
     expect(createHash('sha256').update(JSON.stringify(entries)).digest('hex')).toBe(SHARED_SHA256);
