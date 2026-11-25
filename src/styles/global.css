@@ -55,6 +55,34 @@ img {
   outline-offset: 3px;
 }
 
+/* Screen transition Home <-> How to play: the rules read as a page below Home. Only navigations that
+   pass the type (router `viewTransition: { types: [...] }`) animate; the pseudo-elements live on the
+   document, so the rules sit here, loaded before the lazy route chunk. */
+@keyframes cb-rules-out-up {
+  to { transform: translateY(-100%); }
+}
+@keyframes cb-rules-in-up {
+  from { transform: translateY(100%); }
+}
+@keyframes cb-rules-out-down {
+  to { transform: translateY(100%); }
+}
+@keyframes cb-rules-in-down {
+  from { transform: translateY(-100%); }
+}
+html:active-view-transition-type(rules-down)::view-transition-old(root) {
+  animation: cb-rules-out-up 320ms var(--cb-ease-out) both;
+}
+html:active-view-transition-type(rules-down)::view-transition-new(root) {
+  animation: cb-rules-in-up 320ms var(--cb-ease-out) both;
+}
+html:active-view-transition-type(rules-up)::view-transition-old(root) {
+  animation: cb-rules-out-down 320ms var(--cb-ease-out) both;
+}
+html:active-view-transition-type(rules-up)::view-transition-new(root) {
+  animation: cb-rules-in-down 320ms var(--cb-ease-out) both;
+}
+
 /* Reduced motion: no slams/overshoots/loops — content (numerals included) stays. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -64,5 +92,15 @@ img {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* No slide at all under reduced motion: the page changes at once. */
+@media (prefers-reduced-motion: reduce) {
+  html:active-view-transition-type(rules-down)::view-transition-old(root),
+  html:active-view-transition-type(rules-down)::view-transition-new(root),
+  html:active-view-transition-type(rules-up)::view-transition-old(root),
+  html:active-view-transition-type(rules-up)::view-transition-new(root) {
+    animation: none;
   }
 }

@@ -49,9 +49,11 @@ export const HomeView: FC = () => {
     store.leaveGame();
     navigate({ to: '/setup' });
   };
-  const makeOpen = (to: '/how-to-play' | '/settings') => () => {
+  // The rules open as a page sliding up from below (the kit button plays its own tap).
+  const handleHowTo = () => navigate({ to: '/how-to-play', viewTransition: { types: ['rules-down'] } });
+  const handleSettings = () => {
     sound.play('sfx.tap');
-    navigate({ to });
+    navigate({ to: '/settings' });
   };
   const handleResume = () => navigate({ to: '/play' });
   // S13: throwing a saved game away asks first.
@@ -91,12 +93,10 @@ export const HomeView: FC = () => {
       </PixelButton>
 
       <div className="cb-v-home-links">
-        <button type="button" className="cb-v-home-howto" onClick={makeOpen('/how-to-play')}>
-          <span className="cb-v-home-round" aria-hidden="true">?</span>
-          <span className="cb-v-home-howto-label">{t('home.howto')}</span>
-        </button>
-        <span className="cb-v-home-divider" aria-hidden="true" />
-        <button type="button" className="cb-v-home-round" aria-label={t('home.settings')} onClick={makeOpen('/settings')}>
+        <PixelButton variant="secondary" onClick={handleHowTo}>
+          {t('home.howto')}
+        </PixelButton>
+        <button type="button" className="cb-v-home-round" aria-label={t('home.settings')} onClick={handleSettings}>
           <GearIcon />
         </button>
       </div>
