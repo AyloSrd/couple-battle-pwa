@@ -15,9 +15,9 @@ const dict = italian as Record<string, string>;
 const frDict = fr as Record<string, string>;
 const slots = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort().join();
 
-/** sha-256 of `JSON.stringify` of the [key, value] entries, keys sorted, WITHOUT `common.step` and `legal.body` (251 entries, the new `legal.privacy` link label included): the app's text. */
-const SHARED_SHA256 = '66fe805865cc4e29e7988622607543b24ae456ef301804248651fec57c87f7b2';
-const SHARED_COUNT = 251;
+/** sha-256 of `JSON.stringify` of the [key, value] entries, keys sorted, WITHOUT `common.step` and `legal.body` (264 entries: the `legal.privacy` link label and the 13 new `howto.*` keys of the principles page included): the app's text. */
+const SHARED_SHA256 = '9f1df559942bda42e25a488d35832adaf0a2d10446dc661d75dd1c5d0fd2503e';
+const SHARED_COUNT = 264;
 const CONTACT = 'support.couple.battle' + '@gmail.com';
 /** The app's legal text with its three differences applied, the same ones as in fr / en / es: the support address, "sito" for "app", "browser" for "iPhone". */
 const LEGAL_BODY =
@@ -84,7 +84,7 @@ describe('strings.it.ts: shape', () => {
 });
 
 describe('strings.it.ts: the iPhone app\'s text, copied', () => {
-  it('every value but `legal.body` is the app\'s (one hash over the 251 shared entries)', () => {
+  it('every value but `legal.body` is the app\'s (one hash over the 264 shared entries)', () => {
     const entries = Object.entries(dict).filter(([key]) => key !== 'common.step' && key !== 'legal.body').sort(([a], [b]) => (a < b ? -1 : 1));
     expect(entries).toHaveLength(SHARED_COUNT);
     expect(createHash('sha256').update(JSON.stringify(entries)).digest('hex')).toBe(SHARED_SHA256);

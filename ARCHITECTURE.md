@@ -542,6 +542,8 @@ export const Route = createFileRoute('/inventory')({
 
 A guard reads the store synchronously (it is hydrated before the router exists); nothing loads per navigation.
 
+Screen transitions use the router's `viewTransition` option with a named type (`navigate({ to, viewTransition: { types: ['rules-down'] } })`); the keyframes live in `styles/global.css` (the transition's pseudo-elements belong to the document), are off under `prefers-reduced-motion`, and no transition library is used. Today only Home to How to play (`rules-down`) and back (`rules-up`) carry a type; every other navigation is untouched.
+
 New game / tests / Storybook: `boot(createContainer('memory'))`. `InventoryView` does not change.
 
 ---

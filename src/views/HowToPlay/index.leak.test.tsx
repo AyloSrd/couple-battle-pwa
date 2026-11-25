@@ -55,7 +55,7 @@ describe('HowToPlayView — leaks', () => {
     vi.restoreAllMocks();
   });
 
-  it('leaves no timer and no listener behind after keyboard + scroll + dot interaction and unmount', async () => {
+  it('leaves no timer and no listener behind after keyboard + scroll + dot interaction and unmount (and never listens for keydown on window)', async () => {
     const winAdd = vi.spyOn(window, 'addEventListener');
     const winRemove = vi.spyOn(window, 'removeEventListener');
     const docAdd = vi.spyOn(document, 'addEventListener');
@@ -63,12 +63,13 @@ describe('HowToPlayView — leaks', () => {
 
     const view = await mountView();
 
-    // Drive it: arrow keys / Home / End, a scroll event, a dot tap.
+    // Drive it: arrow keys / Home / End on the focused carousel, a scroll event, a dot tap.
+    const track = screen.getByRole('region', { name: 'How to play' });
     await act(async () => {
-      fireEvent.keyDown(window, { key: 'ArrowRight' });
-      fireEvent.keyDown(window, { key: 'End' });
-      fireEvent.keyDown(window, { key: 'Home' });
-      fireEvent.scroll(screen.getByRole('region', { name: 'How to play' }));
+      fireEvent.keyDown(track, { key: 'ArrowRight' });
+      fireEvent.keyDown(track, { key: 'End' });
+      fireEvent.keyDown(track, { key: 'Home' });
+      fireEvent.scroll(track);
       fireEvent.click(screen.getByRole('button', { name: 'Dilemma' }));
       await vi.advanceTimersByTimeAsync(2000);
     });
@@ -83,7 +84,8 @@ describe('HowToPlayView — leaks', () => {
       winRemove.mock.calls.filter(([t]) => t === 'keydown') as TCall[],
     );
     expect(keydownNet.keydown ?? 0).toBe(0);
-    expect(winAdd.mock.calls.some(([t]) => t === 'keydown')).toBe(true); // the listener did mount
+    // The arrow keys belong to the focused carousel (`onKeyDown` on the track): nothing listens on `window` any more.
+    expect(winAdd.mock.calls.some(([t]) => t === 'keydown')).toBe(false);
 
     // Every window/document listener the tree added (router included) is removed again.
     expect(balance(winAdd.mock.calls as TCall[], winRemove.mock.calls as TCall[])).toEqual(

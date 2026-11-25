@@ -57,14 +57,40 @@ describe('HomeView — saved game', () => {
     expectSynced(app.store, app.api);
   });
 
-  it('the "?" is not a control of its own: one "How to play" button carries the name, every button has one', () => {
+  it('the rules entry is one kit button named "How to play": no separate "?" control, every button has a name', () => {
     mount();
     const howto = screen.getByRole('button', { name: en['home.howto'] });
-    expect(howto.querySelector('[aria-hidden="true"]')).toHaveTextContent('?');
+    expect(howto).toHaveClass('cb-btn');
+    expect(howto.querySelector('.cb-v-home-howto-label')).toBeNull();
+    expect(howto.querySelector('[aria-hidden="true"]')).toBeNull();
+    expect(document.querySelector('.cb-v-home-howto-label')).toBeNull();
     expect(screen.queryByRole('button', { name: '?' })).toBeNull();
     for (const button of screen.getAllByRole('button')) expect(button, button.outerHTML).toHaveAccessibleName();
-    fireEvent.click(howto);
-    expect(navigate).toHaveBeenLastCalledWith({ to: '/how-to-play' });
+  });
+
+  it('the rules entry navigates to /how-to-play with the rules-down view transition, once per tap', () => {
+    mount();
+    fireEvent.click(screen.getByRole('button', { name: en['home.howto'] }));
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenLastCalledWith({ to: '/how-to-play', viewTransition: { types: ['rules-down'] } });
+  });
+
+  it('the settings gear navigates to /settings with no view transition', () => {
+    mount();
+    fireEvent.click(screen.getByRole('button', { name: en['home.settings'] }));
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenLastCalledWith({ to: '/settings' });
+    expect(navigate.mock.lastCall?.[0]).not.toHaveProperty('viewTransition');
+  });
+
+  it('no other Home navigation passes a view transition (PLAY, Resume)', () => {
+    const app = createTestApp();
+    app.store.startGame(running);
+    mount(app);
+    fireEvent.click(screen.getByRole('button', { name: en['common.resume.yes'] }));
+    fireEvent.click(screen.getByRole('button', { name: en['home.play'] }));
+    expect(navigate).toHaveBeenCalledTimes(2);
+    for (const [options] of navigate.mock.calls) expect(options).not.toHaveProperty('viewTransition');
   });
 
   it('a finished game (kept for its Final screen) is not something to resume', () => {
